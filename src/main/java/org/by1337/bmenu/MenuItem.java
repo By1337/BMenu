@@ -1,10 +1,10 @@
 package org.by1337.bmenu;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.BiPlaceholder;
-import org.by1337.blib.chat.placeholder.MultiPlaceholder;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
 import org.jetbrains.annotations.Nullable;

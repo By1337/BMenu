@@ -3,6 +3,7 @@ package org.by1337.bmenu;
 import org.bukkit.event.inventory.InventoryType;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.SpacedNameKey;
+import org.by1337.bmenu.animation.Animator;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class MenuConfig {
+public class MenuConfig implements MenuItemLookup {
     private final List<SpacedNameKey> supersId;
     private final List<MenuConfig> supers;
     private final @Nullable SpacedNameKey id;
@@ -24,8 +25,9 @@ public class MenuConfig {
     private final MenuLoader loader;
     private final String title;
     private final List<MenuItemBuilder> items;
+    private @Nullable Animator.AnimatorContext animation;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, YamlContext context, MenuLoader loader, String title) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, YamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
@@ -37,21 +39,41 @@ public class MenuConfig {
         this.context = context;
         this.loader = loader;
         this.title = title;
+        this.animation = animation;
         supersId = new ArrayList<>();
         items = idToItems.values().stream().sorted().toList();
-        for (MenuConfig aSuper : supers) {
-            if (aSuper.id != null){
-                supersId.add(aSuper.id);
+        for (MenuConfig superMenu : supers) {
+            if (superMenu.id != null) {
+                supersId.add(superMenu.id);
+            }
+            if (superMenu.animation != null) {
+                if (this.animation == null) {
+                    this.animation = superMenu.animation;
+                } else {
+                    this.animation.join(superMenu.animation);
+                }
             }
         }
     }
 
-    public void generate(Menu menu){
-        for (MenuConfig aSuper : supers) {
-            aSuper.generate(menu);
+    public void generate(Menu menu) {
+        for (MenuConfig superMenu : supers) {
+            superMenu.generate(menu);
         }
         var currentItems = items.stream().map(m -> m.build(menu)).filter(Objects::nonNull).toList();
         menu.setItems(currentItems);
+    }
+
+    @Override
+    public @Nullable MenuItemBuilder findMenuItem(String name, Menu menu) {
+        MenuItemBuilder item = idToItems.get(name);
+        if (item != null) return item;
+        for (MenuConfig superMenu : supers) {
+            if ((item = superMenu.findMenuItem(name, menu)) != null) {
+                return item;
+            }
+        }
+        return null;
     }
 
     public YamlContext getContext() {
@@ -104,5 +126,9 @@ public class MenuConfig {
 
     public List<MenuItemBuilder> getItems() {
         return items;
+    }
+
+    public @Nullable Animator.AnimatorContext getAnimation() {
+        return animation;
     }
 }

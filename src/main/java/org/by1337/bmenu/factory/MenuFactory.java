@@ -2,7 +2,6 @@ package org.by1337.bmenu.factory;
 
 
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.by1337.blib.configuration.YamlConfig;
 import org.by1337.blib.configuration.YamlContext;
@@ -11,6 +10,7 @@ import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.MenuConfig;
 import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.MenuLoader;
+import org.by1337.bmenu.animation.Animator;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -52,6 +52,13 @@ public class MenuFactory {
 
         Map<String, MenuItemBuilder> items = ItemFactory.readItems(ctx.get("items").getAsMap(YamlValue::getAsYamlContext, Collections.emptyMap()), loader);
 
+        Animator.AnimatorContext animator;
+        if (ctx.getHandle().contains("animation")) {
+            animator = AnimatorFactory.read(ctx.get("animation").getAsList(YamlValue::getAsYamlContext, Collections.emptyList()), loader);
+        } else {
+            animator = null;
+        }
+
         return new MenuConfig(
                 supers,
                 id,
@@ -63,7 +70,8 @@ public class MenuFactory {
                 items,
                 ctx,
                 loader,
-                title
+                title,
+                animator
         );
     }
 

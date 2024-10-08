@@ -131,10 +131,10 @@ public class ItemFactory {
             }
         } catch (Exception e) {
             LOGGER.error("Failed to parse slots", e);
-            return new int[]{0};
+            return new int[]{-1};
         }
         if (slots.isEmpty()) {
-            return new int[]{0};
+            return new int[]{-1};
         }
         int[] slot = new int[slots.size()];
         for (int x = 0; x < slots.size(); x++) {
