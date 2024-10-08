@@ -2,6 +2,7 @@ package org.by1337.bmenu.requirement;
 
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
+import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.math.MathParser;
 import org.by1337.blib.nbt.impl.CompoundTag;
@@ -12,8 +13,8 @@ public class MathRequirement implements Requirement {
     private final String expression;
     private final boolean not;
 
-    public MathRequirement(YamlContext context) {
-        expression = context.getAsString("expression");
+    public MathRequirement(YamlContext context, Placeholder argsReplacer) {
+        expression = argsReplacer.replace(context.getAsString("expression"));
         not = context.getAsString("type").startsWith("!");
     }
 

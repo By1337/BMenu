@@ -6,8 +6,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.by1337.blib.configuration.YamlConfig;
 import org.by1337.blib.configuration.YamlContext;
+import org.by1337.blib.configuration.YamlValue;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.MenuConfig;
+import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.MenuLoader;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +39,7 @@ public class MenuFactory {
     public MenuConfig load0(File file, MenuLoader loader) throws InvalidMenuConfigException, IOException, InvalidConfigurationException {
         YamlContext ctx = new YamlConfig(file);
         List<MenuConfig> supers = load(findFiles(file, loader, ctx.getList("extends", String.class, Collections.emptyList())), loader);
-
+        String title = ctx.getAsString("title", "title is not set!");
         @Nullable SpacedNameKey id = getId(ctx.getAsString("id", null), loader);
         @Nullable SpacedNameKey provider = getId(ctx.getAsString("provider", null), loader);
 
@@ -48,9 +50,21 @@ public class MenuFactory {
 
         Map<String, String> args = ctx.getMap("args", String.class, Collections.emptyMap());
 
+        Map<String, MenuItemBuilder> items = ItemFactory.readItems(ctx.get("items").getAsMap(YamlValue::getAsYamlContext, Collections.emptyMap()), loader);
 
-        Player pl;
-        pl.getWorld()
+        return new MenuConfig(
+                supers,
+                id,
+                provider,
+                type,
+                size,
+                onlyOpenFrom,
+                args,
+                items,
+                ctx,
+                loader,
+                title
+        );
     }
 
     private SpacedNameKey getId(@Nullable String id, MenuLoader loader) {

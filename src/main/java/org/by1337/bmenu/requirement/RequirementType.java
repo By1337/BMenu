@@ -1,5 +1,6 @@
 package org.by1337.bmenu.requirement;
 
+import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,16 +17,16 @@ public enum RequirementType {
     HAS_PERMISSION("has permission", HasPermisionRequirement::new, List.of("hp")),
     ;
     public final String id;
-    public final Function<YamlContext, Requirement> fromYaml;
+    public final RequirementCreator fromYaml;
     public final List<String> aliases;
 
-    RequirementType(String id, Function<YamlContext, Requirement> fromYaml) {
+    RequirementType(String id, RequirementCreator fromYaml) {
         this.id = id;
         this.fromYaml = fromYaml;
         aliases = Collections.emptyList();
     }
 
-    RequirementType(String id, Function<YamlContext, Requirement> fromYaml, List<String> aliases) {
+    RequirementType(String id, RequirementCreator fromYaml, List<String> aliases) {
         this.id = id;
         this.fromYaml = fromYaml;
         this.aliases = Collections.unmodifiableList(aliases);
@@ -45,5 +46,9 @@ public enum RequirementType {
             }
         }
         return null;
+    }
+    @FunctionalInterface
+    public interface RequirementCreator {
+        Requirement createRequirement(YamlContext context , Placeholder argsReplacer);
     }
 }
