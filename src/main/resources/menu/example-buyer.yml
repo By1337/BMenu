@@ -11,7 +11,15 @@ only-open-from: [ ]
 args: { }
 
 defaults:
-  buyer-item: &click_logic
+  buyer-item: &item
+    material: ${MATERIAL}
+    amount: ${AMOUNT}
+    display_name: '&7${NAME} x${AMOUNT}'
+    lore:
+      - '&r '
+      - '&r &7Нажмите лкм'
+      - '&r &7чтобы купить ${NAME} в количестве ${AMOUNT}'
+      - '&r '
     on_left_click:
       requirements:
         check:
@@ -31,13 +39,5 @@ items:
       PRICE: 10
       AMOUNT: 64
       NAME: 'камень'
-    material: ${MATERIAL}
     slot: 10
-    amount: ${AMOUNT}
-    display_name: '&7${NAME} x${AMOUNT}'
-    lore:
-      - '&r '
-      - '&r &7Нажмите лкм'
-      - '&r &7чтобы купить ${NAME} в количестве ${AMOUNT}'
-      - '&r '
-    <<: *click_logic
+    <<: *item

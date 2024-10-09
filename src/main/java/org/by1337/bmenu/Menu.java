@@ -2,6 +2,7 @@ package org.by1337.bmenu;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -15,15 +16,25 @@ import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandException;
 import org.by1337.blib.command.StringReader;
+import org.by1337.blib.command.argument.ArgumentEnumValue;
+import org.by1337.blib.command.argument.ArgumentFloat;
+import org.by1337.blib.command.argument.ArgumentString;
+import org.by1337.blib.command.argument.ArgumentStrings;
+import org.by1337.blib.nbt.NBT;
+import org.by1337.blib.nbt.NBTParser;
+import org.by1337.blib.nbt.impl.ListNBT;
+import org.by1337.blib.nbt.impl.StringNBT;
+import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.click.MenuClickType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.ref.WeakReference;
 import java.util.*;
 
 public abstract class Menu extends Placeholder implements InventoryHolder {
-    private static final Command<Menu> COMMANDS;
+    private static final Command<Menu> commands;
     protected final MenuConfig config;
     protected final MenuLoader loader;
     protected final Player viewer;
@@ -62,6 +73,8 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventory)) {
                 viewer.openInventory(inventory);
             }
+            Arrays.fill(matrix, null);
+            Arrays.fill(animationMask, null);
             generate0();
             /*if (openRequirements != null && !openRequirements.check(Menu.this, viewer)) {
                 List<String> list = new ArrayList<>(openRequirements.getDenyCommands());
@@ -161,7 +174,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         for (String command : commands) {
             try {
                 if (!runCommand(command)) {
-                    COMMANDS.process(this, new StringReader(command));
+                    Menu.commands.process(this, new StringReader(command));
                 }
             } catch (CommandException e) {
                 loader.getLogger().error("Failed to run command: {}", command, e);
@@ -232,8 +245,135 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         return previousMenu;
     }
 
+    private static void runIn(String rawNBT, Menu menu, MenuLoader loader) {
+        if (rawNBT != null) {
+            try {
+                ListNBT listNBT = (ListNBT) NBTParser.parseList(rawNBT);
+                List<String> list = new ArrayList<>();
+                for (NBT nbt : listNBT) {
+                    if (nbt instanceof StringNBT stringNBT) {
+                        list.add(stringNBT.getValue());
+                    } else {
+                        throw new IllegalArgumentException(String.format("Input: '%s' expected StringNBT", nbt));
+                    }
+                }
+                menu.runCommands(list);
+            } catch (Throwable t) {
+                loader.getLogger().error("Failed to parse commands {}", rawNBT, t);
+            }
+        }
+    }
 
     static {
-        COMMANDS = new Command<>("root");
+        commands = new Command<>("root");
+        commands.addSubCommand(new Command<Menu>("[CONSOLE]")
+                .argument(new ArgumentStrings<>("cmd"))
+                .executor((v, args) -> {
+                            String cmd = (String) args.getOrThrow("cmd");
+                            v.sync(() -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), cmd));
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[PLAYER]")
+                .argument(new ArgumentStrings<>("cmd"))
+                .executor((v, args) -> {
+                            String cmd = (String) args.getOrThrow("cmd");
+                            v.sync(() -> v.viewer.performCommand(cmd));
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[SOUND]")
+                .argument(new ArgumentEnumValue<>("sound", Sound.class))
+                .argument(new ArgumentFloat<>("volume"))
+                .argument(new ArgumentFloat<>("pitch"))
+                .executor((v, args) -> {
+                            float volume = (float) args.getOrDefault("volume", 1F);
+                            float pitch = (float) args.getOrDefault("pitch", 1F);
+                            Sound sound = (Sound) args.getOrThrow("sound");
+                            v.loader.getMessage().sendSound(v.viewer, sound, volume, pitch);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[CLOSE]")
+                .executor((v, args) -> v.sync(v.viewer::closeInventory))
+        );
+        commands.addSubCommand(new Command<Menu>("[BACK_OR_CLOSE]")
+                .argument(new ArgumentStrings<>("commands"))
+                .executor((v, args) -> v.sync(() -> {
+                    if (v.previousMenu != null) {
+                        if (args.containsKey("commands"))
+                            runIn((String) args.get("commands"), v.previousMenu, v.loader);
+                        v.previousMenu.reopen();
+                    } else {
+                        v.viewer.closeInventory();
+                    }
+                }))
+        );
+        commands.addSubCommand(new Command<Menu>("[BACK_TO_OR_CLOSE]")
+                .argument(new ArgumentString<>("id"))
+                .argument(new ArgumentStrings<>("commands"))
+                .executor((v, args) -> {
+                    String id = (String) args.getOrThrow("id", "Use: [BACK_TO_OR_CLOSE] <id>");
+                    v.sync(() -> {
+                        Menu m = v.previousMenu;
+                        while (m != null) {
+                            if (id.contains(":")) {
+                                if (Objects.equals(m.config.getId(), new SpacedNameKey(id))) break;
+                            } else if (m.config.getId() != null) {
+                                if (Objects.equals(m.config.getId().getName().getName(), id)) break;
+                            }
+                            m = m.previousMenu;
+                        }
+                        if (m != null) {
+                            if (args.containsKey("commands"))
+                                runIn((String) args.get("commands"), m, v.loader);
+                            m.reopen();
+                        } else {
+                            v.viewer.closeInventory();
+                        }
+                    });
+                })
+        );
+        commands.addSubCommand(new Command<Menu>("[BACK]")
+                .argument(new ArgumentStrings<>("commands"))
+                .executor((v, args) -> {
+                    var m = Objects.requireNonNull(v.previousMenu, "does not have a previous menu!");
+                    if (args.containsKey("commands"))
+                        runIn((String) args.get("commands"), m, v.loader);
+                    m.reopen();
+                })
+        );
+        commands.addSubCommand(new Command<Menu>("[REFRESH]")
+                .executor((v, args) -> v.refresh())
+        );
+        commands.addSubCommand(new Command<Menu>("[MESSAGE]")
+                .argument(new ArgumentStrings<>("msg"))
+                .executor((v, args) -> {
+                            String cmd = (String) args.getOrThrow("msg");
+                            v.loader.getMessage().sendMsg(v.viewer, cmd);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[OPEN]")
+                .argument(new ArgumentString<>("menu"))
+                .argument(new ArgumentStrings<>("commands"))
+                .executor((v, args) -> {
+                            String menu = (String) args.getOrThrow("menu", "PluginUser [OPEN_MENU] <menu id>");
+                            MenuConfig settings;
+                            if (menu.contains(":")) {
+                                settings = v.loader.findMenu(new SpacedNameKey(menu));
+                            } else {
+                                settings = v.loader.findMenuByName(menu);
+                            }
+                            if (settings == null) {
+                                throw new CommandException("Unknown menu %s", menu);
+                            }
+                            Menu m = v.loader.findAndCreate(settings, v.viewer, v);
+                            if (args.containsKey("commands"))
+                                runIn((String) args.get("commands"), m, v.loader);
+                            m.open();
+                        }
+                )
+        );
     }
 }
