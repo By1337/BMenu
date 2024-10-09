@@ -24,8 +24,9 @@ public class Animator {
             }
         }
     }
-    public boolean isEnd(){
-        return pos >= context.maxTick;
+
+    public boolean isEnd() {
+        return pos - 1 >= context.maxTick;
     }
 
     public void setPos(int pos) {
@@ -36,6 +37,7 @@ public class Animator {
         private final List<Frame> frames;
         private final Map<Integer, List<Frame>> framePosToFrames;
         private int maxTick;
+
         public AnimatorContext(List<Frame> frames) {
             this.frames = frames;
             framePosToFrames = new HashMap<>();
@@ -44,6 +46,7 @@ public class Animator {
                 maxTick = Math.max(maxTick, frame.frame);
             }
         }
+
         public void join(AnimatorContext other) {
             frames.addAll(other.frames);
             maxTick = Math.max(maxTick, other.maxTick);
@@ -53,6 +56,7 @@ public class Animator {
                 maxTick = Math.max(maxTick, frame.frame);
             }
         }
+
         public Animator createAnimator() {
             return new Animator(this);
         }

@@ -33,7 +33,9 @@ public class ItemFactory {
             YamlContext ctx = items.get(itemID);
             MenuItemBuilder builder = new MenuItemBuilder();
             Placeholder argsReplacer = new Placeholder();
-            ctx.get("args").getAsMap(String.class, Collections.emptyMap()).forEach((key, value) -> argsReplacer.registerPlaceholder(key, () -> value));
+            ctx.get("args").getAsMap(String.class, Collections.emptyMap()).forEach((key, value) ->
+                    argsReplacer.registerPlaceholder("${" + key + "}", () -> value)
+            );
 
             builder.setMaterial(argsReplacer.replace(ctx.get("material").getAsString("STONE")));
             builder.setName(mapIfNotNull(ctx.get("display_name").getAsString(null), argsReplacer::replace));
@@ -74,7 +76,11 @@ public class ItemFactory {
             builder.setPriority(ctx.getAsInteger("priority", 0));
             builder.setSlots(getSlots(ctx));
             builder.setViewRequirement(
-                    RequirementsFactory.read(ctx.get("view_requirement.requirements").getAsYamlContext(), loader, argsReplacer),
+                    mapIfNotNullOrDefault(
+                            ctx.get("view_requirement.requirements"),
+                            v -> RequirementsFactory.read(v, loader, argsReplacer),
+                            Requirements.EMPTY
+                    ),
                     ctx.getList("view_requirement.deny_commands", String.class, Collections.emptyList())
             );
 
@@ -87,7 +93,7 @@ public class ItemFactory {
                                     ctx.get(key + ".deny_commands").getAsList(YamlValue::getAsString, Collections.emptyList()),
                                     ctx.get(key + ".commands").getAsList(YamlValue::getAsString, Collections.emptyList()),
                                     mapIfNotNullOrDefault(
-                                            ctx.get(key + ".requirements").getAsYamlContext(null),
+                                            ctx.get(key + ".requirements"),
                                             v -> RequirementsFactory.read(v, loader, argsReplacer),
                                             Requirements.EMPTY
                                     )

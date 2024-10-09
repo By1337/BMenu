@@ -1,6 +1,7 @@
 package org.by1337.bmenu.click;
 
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -25,7 +26,7 @@ public enum MenuClickType {
     NUMBER_KEY_8(null, "on_number_key_8_click"),
     SWAP_OFFHAND(ClickType.SWAP_OFFHAND, "on_swap_offhand_click"),
     CONTROL_DROP(ClickType.CONTROL_DROP, "on_control_drop_click");
-    private static final Map<ClickType, MenuClickType> BUKKIT_CLICK_TO_MENU_CLICK;
+
 
     private final ClickType clickType;
     private final String configKeyClick;
@@ -34,9 +35,18 @@ public enum MenuClickType {
         this.clickType = clickType;
         this.configKeyClick = configKeyClick;
     }
-    @Nullable
-    public static MenuClickType getClickType(ClickType clickType) {
-        return BUKKIT_CLICK_TO_MENU_CLICK.get(clickType);
+
+
+    public static MenuClickType getClickType(InventoryClickEvent e) {
+        if (e.getClick() == org.bukkit.event.inventory.ClickType.NUMBER_KEY){
+            return MenuClickType.valueOf("NUMBER_KEY_" + e.getHotbarButton());
+        }
+        for (MenuClickType clickType1 : MenuClickType.values()){
+            if (clickType1.clickType == e.getClick()){
+                return clickType1;
+            }
+        }
+        return ANY_CLICK;
     }
 
     public ClickType getClickType() {
@@ -47,10 +57,5 @@ public enum MenuClickType {
         return configKeyClick;
     }
 
-    static {
-        BUKKIT_CLICK_TO_MENU_CLICK = new EnumMap<>(ClickType.class);
-        for (MenuClickType value : values()) {
-            BUKKIT_CLICK_TO_MENU_CLICK.put(value.clickType, value);
-        }
-    }
+
 }

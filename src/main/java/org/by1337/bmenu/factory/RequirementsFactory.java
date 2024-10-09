@@ -12,9 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RequirementsFactory {
-    public static Requirement read(YamlContext ctx, MenuLoader loader, Placeholder argsReplacer) {
+    public static Requirement read(YamlValue ctx, MenuLoader loader, Placeholder argsReplacer) {
+        if (ctx.getValue() == null) return Requirements.EMPTY;
         List<Requirement> requirements = new ArrayList<>();
-        for (YamlContext context : ctx.get().getAsMap(YamlValue::getAsYamlContext).values()) {
+        for (YamlContext context : ctx.getAsMap(YamlValue::getAsYamlContext).values()) {
             String type = context.getAsString("type");
             RequirementType requirementType = RequirementType.byName(type);
             if (requirementType == null) {

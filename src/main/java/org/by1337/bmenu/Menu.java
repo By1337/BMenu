@@ -8,20 +8,21 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.scheduler.BukkitTask;
 import org.by1337.blib.BLib;
-import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandException;
 import org.by1337.blib.command.StringReader;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.click.MenuClickType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class Menu extends Placeholder {
+public abstract class Menu extends Placeholder implements InventoryHolder {
     private static final Command<Menu> COMMANDS;
     protected final MenuConfig config;
     protected final MenuLoader loader;
@@ -43,7 +44,7 @@ public abstract class Menu extends Placeholder {
         animationMask = new MenuItem[config.getSize()];
         args = new HashMap<>(config.getArgs());
         this.previousMenu = previousMenu;
-        args.keySet().forEach(k -> registerPlaceholder(k, () -> args.get(k)));
+        args.keySet().forEach(k -> registerPlaceholder("${" + k + "}", () -> args.get(k)));
         registerPlaceholder("{has-back-menu}", () -> String.valueOf(previousMenu != null));
         if (config.getAnimation() != null) {
             animator = config.getAnimation().createAnimator();
@@ -143,9 +144,9 @@ public abstract class Menu extends Placeholder {
 
     protected void createInventory(int size, Component title, InventoryType type) {
         if (type == InventoryType.CHEST) {
-            inventory = Bukkit.createInventory(null, size, title);
+            inventory = Bukkit.createInventory(this, size, title);
         } else {
-            inventory = Bukkit.createInventory(null, type, title);
+            inventory = Bukkit.createInventory(this, type, title);
         }
     }
 
@@ -184,9 +185,8 @@ public abstract class Menu extends Placeholder {
         if (e.getSlot() >= matrix.length) return;
         MenuItem item = matrix[e.getSlot()];
         if (item == null) return;
-        MenuClickType type = MenuClickType.getClickType(e.getClick());
-        if (type != null)
-            item.doClick(this, viewer, type);
+        MenuClickType type = MenuClickType.getClickType(e);
+        item.doClick(this, viewer, type);
     }
 
     public void onClick(InventoryDragEvent e) {
@@ -211,7 +211,8 @@ public abstract class Menu extends Placeholder {
         return viewer;
     }
 
-    public Inventory getInventory() {
+    @Override
+    public @NotNull Inventory getInventory() {
         return inventory;
     }
 
@@ -230,6 +231,7 @@ public abstract class Menu extends Placeholder {
     public @Nullable Menu getPreviousMenu() {
         return previousMenu;
     }
+
 
     static {
         COMMANDS = new Command<>("root");

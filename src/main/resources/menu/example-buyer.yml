@@ -1,0 +1,43 @@
+extends:
+  - './animation-54.yml'
+
+id: example:buyer
+provider: default
+type: CHEST
+size: 54
+title: '&7Скупщик'
+only-open-from: [ ]
+
+args: { }
+
+defaults:
+  buyer-item: &click_logic
+    on_left_click:
+      requirements:
+        check:
+          type: math
+          expression: '%balance% >= ${PRICE}'
+      deny_commands:
+        - '[MESSAGE] &cУ Вас не достаточно баланса!'
+      commands:
+        - '[CONSOLE] eco take %player_name% ${PRICE}'
+        - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
+        - '[MESSAGE] &aВы успешно купили ${NAME} в количестве ${AMOUNT}'
+
+items:
+  example:
+    args:
+      MATERIAL: STONE
+      PRICE: 10
+      AMOUNT: 64
+      NAME: 'камень'
+    material: ${MATERIAL}
+    slot: 10
+    amount: ${AMOUNT}
+    display_name: '&7${NAME} x${AMOUNT}'
+    lore:
+      - '&r '
+      - '&r &7Нажмите лкм'
+      - '&r &7чтобы купить ${NAME} в количестве ${AMOUNT}'
+      - '&r '
+    <<: *click_logic

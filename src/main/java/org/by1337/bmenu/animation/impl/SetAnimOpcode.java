@@ -2,7 +2,6 @@ package org.by1337.bmenu.animation.impl;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
@@ -27,7 +26,7 @@ public class SetAnimOpcode implements FrameOpcode {
         MenuItem menuItem1;
         if (builder == null) {
             menuItem1 = new MenuItem(slots, new ItemStack(Material.valueOf(item.toUpperCase()), 1));
-        }else {
+        } else {
             menuItem1 = builder.build(menu);
         }
         AnimationUtil.set(menuItem1, matrix, slots);

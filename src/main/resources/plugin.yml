@@ -1,0 +1,15 @@
+name: BMenu
+version: '${project.version}'
+main: org.by1337.bmenu.BMenu
+api-version: '1.16'
+depend: [ BLib, PlaceholderAPI ]
+authors: [ By1337 ]
+
+commands:
+  bmenu:
+    aliases:
+      - 'menu'
+      - 'bm'
+permissions:
+  bmenu.*:
+    default: op

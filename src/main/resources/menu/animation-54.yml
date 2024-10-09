@@ -1,0 +1,79 @@
+extends: [ ]
+id: ~
+provider: ~
+type: CHEST
+size: 54
+title: ~
+only-open-from: [ ]
+args: { }
+
+items:
+  gui-green:
+    material: green_stained_glass_pane
+    display_name: ''
+    slots:
+      - '0-8'
+      - '9'
+      - '18'
+      - '27'
+      - '36'
+      - '45-53'
+      - '44'
+      - '35'
+      - '26'
+      - '17'
+  gui-lime:
+    material: lime_stained_glass_pane
+    display_name: ''
+
+animation:
+  - tick: 0
+    opcodes:
+      - set: gui-lime 4
+  - tick: 1
+    opcodes:
+      - set: gui-lime 3-5
+  - tick: 2
+    opcodes:
+      - set: gui-lime 2-6
+  - tick: 3
+    opcodes:
+      - set: gui-lime 1-7
+  - tick: 4
+    opcodes:
+      - set: gui-lime 0-8
+  - tick: 5
+    opcodes:
+      - set: gui-lime 9
+      - set: gui-lime 17
+  - tick: 6
+    opcodes:
+      - set: gui-lime 18
+      - set: gui-lime 26
+  - tick: 7
+    opcodes:
+      - set: gui-lime 27
+      - set: gui-lime 35
+  - tick: 8
+    opcodes:
+      - set: gui-lime 36
+      - set: gui-lime 44
+  - tick: 9
+    opcodes:
+      - set: gui-lime 45
+      - set: gui-lime 53
+  - tick: 9
+    opcodes:
+      - set: gui-lime 46
+      - set: gui-lime 52
+  - tick: 10
+    opcodes:
+      - set: gui-lime 47
+      - set: gui-lime 51
+  - tick: 11
+    opcodes:
+      - set: gui-lime 48
+      - set: gui-lime 50
+  - tick: 12
+    opcodes:
+      - set: gui-lime 49
