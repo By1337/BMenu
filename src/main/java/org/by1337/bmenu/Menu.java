@@ -24,6 +24,7 @@ import org.by1337.blib.nbt.NBT;
 import org.by1337.blib.nbt.NBTParser;
 import org.by1337.blib.nbt.impl.ListNBT;
 import org.by1337.blib.nbt.impl.StringNBT;
+import org.by1337.blib.text.MessageFormatter;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.click.MenuClickType;
@@ -63,6 +64,16 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     public void open() {
+        if (!config.canOpenFrom(previousMenu)) {
+            throw new IllegalStateException(
+                    MessageFormatter.apply(
+                            "It is not possible to open menu {} from menu {}, only-open-from: {}",
+                            config.getId(),
+                            previousMenu == null ? "NONE" : previousMenu.config.getId(),
+                            config.getOnlyOpenFrom()
+                    )
+            );
+        }
         if (!viewer.isOnline()) {
             throw new IllegalStateException("Player is not online");
         }
@@ -351,6 +362,18 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 .executor((v, args) -> {
                             String cmd = (String) args.getOrThrow("msg");
                             v.loader.getMessage().sendMsg(v.viewer, cmd);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[SET_PARAM]")
+                .argument(new ArgumentString<>("param"))
+                .argument(new ArgumentStrings<>("value"))
+                .executor((v, args) -> {
+                            String param = (String) args.getOrThrow("param", "Use [SET_PARAM] <param> <value>");
+                            String value = (String) args.getOrThrow("value", "Use [SET_PARAM] <param> <value>");
+                            if (v.args.put(param, value) == null){
+                                v.registerPlaceholder("${" + param + "}", () -> v.args.get(param));
+                            }
                         }
                 )
         );

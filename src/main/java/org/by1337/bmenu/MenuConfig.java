@@ -6,13 +6,10 @@ import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class MenuConfig implements MenuItemLookup {
-    private final List<SpacedNameKey> supersId;
+    private final Set<SpacedNameKey> supersId;
     private final List<MenuConfig> supers;
     private final @Nullable SpacedNameKey id;
     private final @Nullable SpacedNameKey provider;
@@ -40,12 +37,13 @@ public class MenuConfig implements MenuItemLookup {
         this.loader = loader;
         this.title = title;
         this.animation = animation;
-        supersId = new ArrayList<>();
+        supersId = new HashSet<>();
         items = idToItems.values().stream().sorted().toList();
         for (MenuConfig superMenu : supers) {
             if (superMenu.id != null) {
                 supersId.add(superMenu.id);
             }
+            this.onlyOpenFrom.addAll(superMenu.onlyOpenFrom);
             if (superMenu.animation != null) {
                 if (this.animation == null) {
                     this.animation = superMenu.animation;
@@ -54,6 +52,16 @@ public class MenuConfig implements MenuItemLookup {
                 }
             }
         }
+    }
+
+    public boolean canOpenFrom(@Nullable Menu menu) {
+        if (onlyOpenFrom.isEmpty()) return true;
+        if (menu == null || menu.getConfig().id == null) return false;
+        if (onlyOpenFrom.contains(menu.getConfig().id)) return true;
+        for (SpacedNameKey spacedNameKey : menu.getConfig().supersId) {
+            if (supersId.contains(spacedNameKey)) return true;
+        }
+        return false;
     }
 
     public void generate(Menu menu) {
@@ -80,7 +88,7 @@ public class MenuConfig implements MenuItemLookup {
         return context;
     }
 
-    public List<SpacedNameKey> getSupersId() {
+    public Set<SpacedNameKey> getSupersId() {
         return supersId;
     }
 

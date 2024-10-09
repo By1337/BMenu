@@ -27,7 +27,8 @@ public class MenuLoader implements Listener {
     private final Logger logger;
     private final Message message;
     private final Map<SpacedNameKey, MenuConfig> menuConfigs;
-    private final Map<String, MenuConfig> menuConfigsLookupByname;
+    private final Map<String, MenuConfig> menuConfigsLookupByName;
+    private final Map<String, Integer> menuNameToMenuCount = new HashMap<>();
 
     public MenuLoader(File homeDir, Plugin plugin) {
         this.homeDir = homeDir;
@@ -38,7 +39,7 @@ public class MenuLoader implements Listener {
         registry = new MenuRegistry();
         registry.merge(MenuRegistry.DEFAULT_REGISTRY);
         menuConfigs = new HashMap<>();
-        menuConfigsLookupByname = new HashMap<>();
+        menuConfigsLookupByName = new HashMap<>();
     }
 
     public void registerListeners() {
@@ -60,8 +61,7 @@ public class MenuLoader implements Listener {
                 try {
                     MenuConfig config = MenuFactory.load(file, this);
                     if (config.getId() != null) {
-                        menuConfigs.put(config.getId(), config);
-                        menuConfigsLookupByname.put(config.getId().getName().getName(), config);
+                        registerMenu(config);
                     }
                 } catch (Throwable t) {
                     logger.warn("Failed to load menu config", t);
@@ -74,6 +74,9 @@ public class MenuLoader implements Listener {
         MenuConfig menuConfig = findMenu(menuId);
         if (menuConfig == null) {
             menuConfig = findMenuByName(menuId.getName().getName());
+            if (menuNameToMenuCount.getOrDefault(menuId.getName().getName(), 0) > 1) {
+                throw new IllegalStateException("Unambiguous menu call " + menuId.getName().getName() + " Use the full menu name <namespace>:<id>");
+            }
         }
         if (menuConfig == null) {
             throw new IllegalArgumentException("Menu not found: " + menuId);
@@ -97,7 +100,7 @@ public class MenuLoader implements Listener {
 
     @Nullable
     public MenuConfig findMenuByName(String name) {
-        return menuConfigsLookupByname.get(name);
+        return menuConfigsLookupByName.get(name);
     }
 
     @Nullable
@@ -111,7 +114,9 @@ public class MenuLoader implements Listener {
         }
         if (!menuConfigs.containsKey(config.getId())) {
             menuConfigs.put(config.getId(), config);
-            menuConfigsLookupByname.put(config.getId().getName().getName(), config);
+            menuConfigsLookupByName.put(config.getId().getName().getName(), config);
+            int x = menuNameToMenuCount.getOrDefault(config.getId().getName().getName(), 0);
+            menuNameToMenuCount.put(config.getId().getName().getName(), ++x);
         } else {
             throw new IllegalArgumentException("Menu config already exists");
         }

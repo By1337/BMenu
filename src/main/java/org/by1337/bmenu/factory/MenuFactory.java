@@ -15,10 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MenuFactory {
     private static final MenuFactory INSTANCE = new MenuFactory();
@@ -28,7 +25,7 @@ public class MenuFactory {
 
     public static MenuConfig load(File file, MenuLoader loader) throws InvalidMenuConfigException {
         try {
-            return INSTANCE.load0(file, loader);
+            return INSTANCE.load0(file, loader, new MenuLoadContext());
         } catch (InvalidMenuConfigException e) {
             throw e;
         } catch (Exception e) {
@@ -36,9 +33,10 @@ public class MenuFactory {
         }
     }
 
-    public MenuConfig load0(File file, MenuLoader loader) throws InvalidMenuConfigException, IOException, InvalidConfigurationException {
+    private MenuConfig load0(File file, MenuLoader loader, MenuLoadContext loadContext) throws InvalidMenuConfigException, IOException, InvalidConfigurationException {
+        loadContext.loadedFiles.add(file);
         YamlContext ctx = new YamlConfig(file);
-        List<MenuConfig> supers = load(findFiles(file, loader, ctx.getList("extends", String.class, Collections.emptyList())), loader);
+        List<MenuConfig> supers = load(findFiles(file, loader, ctx.getList("extends", String.class, Collections.emptyList())), loader, loadContext);
         String title = ctx.getAsString("title", "title is not set!");
         @Nullable SpacedNameKey id = getId(ctx.getAsString("id", null), loader);
         @Nullable SpacedNameKey provider = getId(ctx.getAsString("provider", null), loader);
@@ -112,12 +110,16 @@ public class MenuFactory {
         return result;
     }
 
-    private List<MenuConfig> load(List<File> files, MenuLoader loader) throws InvalidMenuConfigException {
+    private List<MenuConfig> load(List<File> files, MenuLoader loader, MenuLoadContext ctx) throws InvalidMenuConfigException, IOException, InvalidConfigurationException {
         if (files.isEmpty()) return Collections.emptyList();
         List<MenuConfig> result = new ArrayList<>();
         for (File file : files) {
-            result.add(load(file, loader));
+            if (ctx.loadedFiles.contains(file)) continue;
+            result.add(load0(file, loader, ctx));
         }
         return result;
+    }
+    private static class MenuLoadContext{
+        private final Set<File> loadedFiles = new HashSet<>();
     }
 }
