@@ -74,9 +74,11 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         }
         ItemMeta im = result.getItemMeta();
         if (im == null) {
-            LOGGER.error("ItemMeta is null! {}", result.getType());
-            result = new ItemStack(Material.JIGSAW);
-            im = result.getItemMeta();
+            return new MenuItem(
+                    slots,
+                    result,
+                    clicks
+            );
         }
         Message message = menu.loader.getMessage();
         List<Component> lore = new ArrayList<>(Objects.requireNonNullElseGet(im.lore(), ArrayList::new));
