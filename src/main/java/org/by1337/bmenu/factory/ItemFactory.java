@@ -43,7 +43,7 @@ public class ItemFactory {
             builder.setLore(ctx.get("lore").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(argsReplacer::replace).toList());
             builder.setItemFlags(ctx.get("item_flags").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(s -> ItemFlag.valueOf(argsReplacer.replace(s))).toList());
             builder.setPotionEffects(
-                    ctx.get("potion_effects").getAsList(YamlValue::getAsString, Collections.emptyList())
+                    ctx.get("potion_effects").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(argsReplacer::replace).toList()
                             .stream().map(s -> {
                                 String[] args = argsReplacer.replace(s).split(";");
                                 if (args.length != 3) {
@@ -59,7 +59,7 @@ public class ItemFactory {
             );
             builder.setColor(ctx.getAs("color", Color.class, null));
             builder.setEnchantments(
-                    ctx.get("enchantments").getAsList(YamlValue::getAsString, Collections.emptyList())
+                    ctx.get("enchantments").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(argsReplacer::replace).toList()
                             .stream().map(s -> {
                                 String[] args = argsReplacer.replace(s).split(";");
                                 if (args.length != 2) {
@@ -90,8 +90,13 @@ public class ItemFactory {
                     builder.addClickListener(
                             value,
                             new ClickHandlerImpl(
-                                    ctx.get(key + ".deny_commands").getAsList(YamlValue::getAsString, Collections.emptyList()),
-                                    ctx.get(key + ".commands").getAsList(YamlValue::getAsString, Collections.emptyList()),
+                                    ctx.get(key + ".deny_commands")
+                                            .getAsList(YamlValue::getAsString, Collections.emptyList())
+                                            .stream().map(argsReplacer::replace).toList()
+                                    ,
+                                    ctx.get(key + ".commands").getAsList(YamlValue::getAsString, Collections.emptyList())
+                                            .stream().map(argsReplacer::replace).toList()
+                                    ,
                                     mapIfNotNullOrDefault(
                                             ctx.get(key + ".requirements"),
                                             v -> RequirementsFactory.read(v, loader, argsReplacer),

@@ -168,7 +168,34 @@ items:
       <<: *on_left_click_logic
 
 
-# Вы можете здесь использовать предметы объявленные в родительских меню.
+# Все виды кликов
+# on_left_click
+# on_right_click
+# on_shift_left_click
+# on_shift_right_click
+# on_middle_click
+# on_drop_click
+# on_click - любой не назначенный клик
+# on_number_key_0_click
+# on_number_key_1_click
+# on_number_key_2_click
+# on_number_key_3_click
+# on_number_key_4_click
+# on_number_key_5_click
+# on_number_key_6_click
+# on_number_key_7_click
+# on_number_key_8_click
+# on_swap_offhand_click
+# on_control_drop_click
+
+
+# Вы можете использовать предметы, добавленные в родительские меню.
+# Однако взаимодействовать с предметами, уже находящимися в меню, нельзя.
+# Меню состоит из двух слоёв:
+# - **Первый слой**: включает предметы, добавленные при открытии меню (те, что указаны в параметре `items` и привязаны к определённым слотам), а также предметы, установленные плагином.
+# - **Второй слой**: это слой анимации, где находятся предметы, добавленные анимацией.
+#
+# Анимация может взаимодействовать только с элементами своего слоя, однако она может перекрывать предметы первого слоя.
 animation:
   - tick: 0 # на каком тике анимации следует применить этот фрейм, если не указать, то будет на один больше, чем предыдущий
     opcodes:
@@ -194,3 +221,32 @@ animation:
           - '[MESSAGE] msg'
 
 
+# Все команды
+# [CONSOLE] <cmd>
+# [PLAYER] <cmd>
+# [SOUND] <sound> <?volume> <?pitch>
+# [CLOSE]
+# здесь команды открытия меню
+# В commands вы можете передать список команд которые необходимо выполнить в открывающейся
+# [BACK_OR_CLOSE] <?commands>
+# [BACK_TO_OR_CLOSE] <id> <?commands>
+# [BACK] <?commands>
+# [OPEN] <id> <?commands>
+#
+# [REFRESH]
+# [MESSAGE] <msg>
+# [SET_PARAM] <param> <value>
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#

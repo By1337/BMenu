@@ -1,0 +1,355 @@
+extends:
+  - './animation-54.yml'
+
+id: example:seller
+provider: default
+type: CHEST
+size: 54
+title: '&7Скупщик'
+only-open-from: [ ]
+
+args: { }
+
+defaults:
+  buyer-item: &item
+    material: ${MATERIAL}
+    amount: ${AMOUNT}
+    display_name: '&7${NAME} x${AMOUNT}'
+    lore:
+      - '&r '
+      - '&r &7Нажмите лкм'
+      - '&r &7чтобы купить ${NAME}&7 в количестве ${AMOUNT} за ${PRICE} монет'
+      - '&r &7Нажмите пкм'
+      - '&r &7чтобы купить ${NAME}&7 в количестве ${AMOUNT_32} за ${PRICE_32} монет'
+      - '&r '
+    on_left_click:
+      requirements:
+        check:
+          type: math
+          expression: '%vault_eco_balance% >= ${PRICE}'
+      deny_commands:
+        - '[MESSAGE] &cУ Вас не достаточно баланса!'
+      commands:
+        - '[CONSOLE] eco take %player_name% ${PRICE}'
+        - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
+        - '[MESSAGE] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'
+    on_right_click:
+      requirements:
+        check:
+          type: math
+          expression: '%vault_eco_balance% >= ${PRICE_32}'
+      deny_commands:
+        - '[MESSAGE] &cУ Вас не достаточно баланса!'
+      commands:
+        - '[CONSOLE] eco take %player_name% ${PRICE_32}'
+        - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT_32}'
+        - '[MESSAGE] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT_32}'
+
+items:
+  item-lapis_lazuli:
+    args:
+      MATERIAL: lapis_lazuli
+      PRICE: 192
+      AMOUNT: 64
+      NAME: '&#FF7000Лазурит'
+      PRICE_32: 96
+      AMOUNT_32: 32
+    slot: 10
+    <<: *item
+
+  item-chorus_fruit:
+    args:
+      MATERIAL: chorus_fruit
+      PRICE: 1600
+      AMOUNT: 64
+      NAME: '&#FF7000Плод хоруса'
+      PRICE_32: 800
+      AMOUNT_32: 32
+    slot: 11
+    <<: *item
+
+  item-iron_ingot:
+    args:
+      MATERIAL: iron_ingot
+      PRICE: 2560
+      AMOUNT: 64
+      NAME: '&#FF7000Железо'
+      PRICE_32: 1280
+      AMOUNT_32: 32
+    slot: 12
+    <<: *item
+
+  item-magma_cream:
+    args:
+      MATERIAL: magma_cream
+      PRICE: 384
+      AMOUNT: 64
+      NAME: '&#FF7000Сгусток магмы'
+      PRICE_32: 192
+      AMOUNT_32: 32
+    slot: 13
+    <<: *item
+
+  item-gunpowder:
+    args:
+      MATERIAL: gunpowder
+      PRICE: 9600
+      AMOUNT: 64
+      NAME: '&#FF7000Порох'
+      PRICE_32: 4800
+      AMOUNT_32: 32
+    slot: 14
+    <<: *item
+
+  item-wheat:
+    args:
+      MATERIAL: wheat
+      PRICE: 1024
+      AMOUNT: 64
+      NAME: '&#FF7000Пшеница'
+      PRICE_32: 512
+      AMOUNT_32: 32
+    slot: 15
+    <<: *item
+
+  item-carrot:
+    args:
+      MATERIAL: carrot
+      PRICE: 512
+      AMOUNT: 64
+      NAME: '&#FF7000Морковь'
+      PRICE_32: 256
+      AMOUNT_32: 32
+    slot: 16
+    <<: *item
+
+  item-diamond:
+    args:
+      MATERIAL: diamond
+      PRICE: 12800
+      AMOUNT: 64
+      NAME: '&#FF7000Алмаз'
+      PRICE_32: 6400
+      AMOUNT_32: 32
+    slot: 19
+    <<: *item
+
+  item-netherite_scrap:
+    args:
+      MATERIAL: netherite_scrap
+      PRICE: 163840
+      AMOUNT: 64
+      NAME: '&#FF7000Незеритовый лом'
+      PRICE_32: 81920
+      AMOUNT_32: 32
+    slot: 20
+    <<: *item
+
+  item-glowstone_dust:
+    args:
+      MATERIAL: glowstone_dust
+      PRICE: 1600
+      AMOUNT: 64
+      NAME: '&#FF7000Светокаменная пыль'
+      PRICE_32: 800
+      AMOUNT_32: 32
+    slot: 21
+    <<: *item
+
+  item-netherite_ingot:
+    args:
+      MATERIAL: netherite_ingot
+      PRICE: 655360
+      AMOUNT: 64
+      NAME: '&#FF7000Незеритовый слиток'
+      PRICE_32: 327680
+      AMOUNT_32: 32
+    slot: 22
+    <<: *item
+
+  item-bone:
+    args:
+      MATERIAL: bone
+      PRICE: 128
+      AMOUNT: 64
+      NAME: '&#FF7000Кости'
+      PRICE_32: 64
+      AMOUNT_32: 32
+    slot: 23
+    <<: *item
+
+  item-slime_ball:
+    args:
+      MATERIAL: slime_ball
+      PRICE: 384
+      AMOUNT: 64
+      NAME: '&#FF7000Слизь'
+      PRICE_32: 192
+      AMOUNT_32: 32
+    slot: 24
+    <<: *item
+
+  item-crimson_stem:
+    args:
+      MATERIAL: crimson_stem
+      PRICE: 5120
+      AMOUNT: 64
+      NAME: '&#FF7000Багровый стебель'
+      PRICE_32: 2560
+      AMOUNT_32: 32
+    slot: 25
+    <<: *item
+
+  item-bamboo:
+    args:
+      MATERIAL: bamboo
+      PRICE: 512
+      AMOUNT: 64
+      NAME: '&#FF7000Бамбук'
+      PRICE_32: 256
+      AMOUNT_32: 32
+    slot: 28
+    <<: *item
+
+  item-gold_ingot:
+    args:
+      MATERIAL: gold_ingot
+      PRICE: 3200
+      AMOUNT: 64
+      NAME: '&#FF7000Золото'
+      PRICE_32: 1600
+      AMOUNT_32: 32
+    slot: 29
+    <<: *item
+
+  item-birch_log:
+    args:
+      MATERIAL: birch_log
+      PRICE: 3200
+      AMOUNT: 64
+      NAME: '&#FF7000Берёза'
+      PRICE_32: 1600
+      AMOUNT_32: 32
+    slot: 30
+    <<: *item
+
+  item-oak_log:
+    args:
+      MATERIAL: oak_log
+      PRICE: 3200
+      AMOUNT: 64
+      NAME: '&#FF7000Дуб'
+      PRICE_32: 1600
+      AMOUNT_32: 32
+    slot: 31
+    <<: *item
+
+  item-sugar_cane:
+    args:
+      MATERIAL: sugar_cane
+      PRICE: 1024
+      AMOUNT: 64
+      NAME: '&#FF7000Тростник'
+      PRICE_32: 512
+      AMOUNT_32: 32
+    slot: 32
+    <<: *item
+
+  item-cactus:
+    args:
+      MATERIAL: cactus
+      PRICE: 1280
+      AMOUNT: 64
+      NAME: '&#FF7000Кактус'
+      PRICE_32: 640
+      AMOUNT_32: 32
+    slot: 33
+    <<: *item
+
+  item-ender_pearl:
+    args:
+      MATERIAL: ender_pearl
+      PRICE: 6400
+      AMOUNT: 64
+      NAME: '&#FF7000Эндер-жемчуг'
+      PRICE_32: 3200
+      AMOUNT_32: 32
+    slot: 34
+    <<: *item
+
+  item-end_stone:
+    args:
+      MATERIAL: end_stone
+      PRICE: 768
+      AMOUNT: 64
+      NAME: '&#FF7000Эндерняк'
+      PRICE_32: 384
+      AMOUNT_32: 32
+    slot: 37
+    <<: *item
+
+  item-coal:
+    args:
+      MATERIAL: coal
+      PRICE: 192
+      AMOUNT: 64
+      NAME: '&#FF7000Уголь'
+      PRICE_32: 96
+      AMOUNT_32: 32
+    slot: 38
+    <<: *item
+
+  item-spider_eye:
+    args:
+      MATERIAL: spider_eye
+      PRICE: 128
+      AMOUNT: 64
+      NAME: '&#FF7000Паучий глаз'
+      PRICE_32: 64
+      AMOUNT_32: 32
+    slot: 39
+    <<: *item
+
+  item-beetroot:
+    args:
+      MATERIAL: beetroot
+      PRICE: 1024
+      AMOUNT: 64
+      NAME: '&#FF7000Свекла'
+      PRICE_32: 512
+      AMOUNT_32: 32
+    slot: 40
+    <<: *item
+
+  item-melon_slice:
+    args:
+      MATERIAL: melon_slice
+      PRICE: 768
+      AMOUNT: 64
+      NAME: '&#FF7000Ломтик арбуза'
+      PRICE_32: 384
+      AMOUNT_32: 32
+    slot: 41
+    <<: *item
+
+  item-fermented_spider_eye:
+    args:
+      MATERIAL: fermented_spider_eye
+      PRICE: 960
+      AMOUNT: 64
+      NAME: '&#FF7000Маринованный паучий глаз'
+      PRICE_32: 480
+      AMOUNT_32: 32
+    slot: 42
+    <<: *item
+
+  item-cooked_mutton:
+    args:
+      MATERIAL: cooked_mutton
+      PRICE: 1920
+      AMOUNT: 64
+      NAME: '&#FF7000Жаренная баранина'
+      PRICE_32: 960
+      AMOUNT_32: 32
+    slot: 43
+    <<: *item

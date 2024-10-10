@@ -16,9 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class MenuLoader implements Listener {
     private final MenuRegistry registry;
@@ -106,6 +104,13 @@ public class MenuLoader implements Listener {
     @Nullable
     public MenuConfig findMenu(SpacedNameKey key) {
         return menuConfigs.get(key);
+    }
+
+    public int getMenuCount(){
+        return menuConfigs.size();
+    }
+    public Collection<SpacedNameKey> getMenus(){
+        return menuConfigs.keySet();
     }
 
     public void registerMenu(MenuConfig config) {

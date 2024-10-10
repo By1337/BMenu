@@ -2,10 +2,6 @@ package org.by1337.bmenu.click;
 
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.EnumMap;
-import java.util.Map;
 
 public enum MenuClickType {
     LEFT(ClickType.LEFT, "on_left_click"),
@@ -38,11 +34,11 @@ public enum MenuClickType {
 
 
     public static MenuClickType getClickType(InventoryClickEvent e) {
-        if (e.getClick() == org.bukkit.event.inventory.ClickType.NUMBER_KEY){
+        if (e.getClick() == org.bukkit.event.inventory.ClickType.NUMBER_KEY) {
             return MenuClickType.valueOf("NUMBER_KEY_" + e.getHotbarButton());
         }
-        for (MenuClickType clickType1 : MenuClickType.values()){
-            if (clickType1.clickType == e.getClick()){
+        for (MenuClickType clickType1 : MenuClickType.values()) {
+            if (clickType1.clickType == e.getClick()) {
                 return clickType1;
             }
         }
