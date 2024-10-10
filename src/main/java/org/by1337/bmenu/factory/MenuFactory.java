@@ -119,7 +119,8 @@ public class MenuFactory {
         }
         return result;
     }
-    private static class MenuLoadContext{
+
+    private static class MenuLoadContext {
         private final Set<File> loadedFiles = new HashSet<>();
     }
 }

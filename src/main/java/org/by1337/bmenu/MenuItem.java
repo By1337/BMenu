@@ -1,6 +1,5 @@
 package org.by1337.bmenu;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.by1337.blib.chat.Placeholderable;

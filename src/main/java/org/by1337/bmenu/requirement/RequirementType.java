@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 public enum RequirementType {
     MATH("math", MathRequirement::new, List.of("m")),
@@ -47,8 +46,9 @@ public enum RequirementType {
         }
         return null;
     }
+
     @FunctionalInterface
     public interface RequirementCreator {
-        Requirement createRequirement(YamlContext context , Placeholder argsReplacer);
+        Requirement createRequirement(YamlContext context, Placeholder argsReplacer);
     }
 }

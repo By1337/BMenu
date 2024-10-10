@@ -33,9 +33,11 @@ public enum FrameOpcodes {
     public String getId() {
         return id;
     }
+
     public static FrameOpcodes byId(String id) {
         return LOOKUP.get(id);
     }
+
     static {
         LOOKUP = new HashMap<>();
         for (FrameOpcodes value : values()) {

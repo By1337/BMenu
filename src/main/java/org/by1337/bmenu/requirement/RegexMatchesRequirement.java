@@ -4,14 +4,12 @@ import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
-import org.by1337.blib.nbt.impl.CompoundTag;
 import org.by1337.bmenu.Menu;
-import org.by1337.bmenu.MenuLoader;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class RegexMatchesRequirement  implements Requirement {
+public class RegexMatchesRequirement implements Requirement {
     private final String input;
     private final String regex;
     private final boolean not;
@@ -26,7 +24,7 @@ public class RegexMatchesRequirement  implements Requirement {
 
     @Override
     public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
-        Matcher m =pattern.matcher(placeholderable.replace(input));
+        Matcher m = pattern.matcher(placeholderable.replace(input));
         return not ? !m.find() : m.find();
     }
 }

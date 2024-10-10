@@ -31,7 +31,6 @@ import org.by1337.bmenu.click.MenuClickType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.ref.WeakReference;
 import java.util.*;
 
 public abstract class Menu extends Placeholder implements InventoryHolder {
@@ -371,7 +370,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 .executor((v, args) -> {
                             String param = (String) args.getOrThrow("param", "Use [SET_PARAM] <param> <value>");
                             String value = (String) args.getOrThrow("value", "Use [SET_PARAM] <param> <value>");
-                            if (v.args.put(param, value) == null){
+                            if (v.args.put(param, value) == null) {
                                 v.registerPlaceholder("${" + param + "}", () -> v.args.get(param));
                             }
                         }

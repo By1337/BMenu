@@ -3,7 +3,6 @@ package org.by1337.bmenu.requirement;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.bmenu.Menu;
-import org.by1337.bmenu.MenuLoader;
 
 import java.util.Collections;
 import java.util.List;

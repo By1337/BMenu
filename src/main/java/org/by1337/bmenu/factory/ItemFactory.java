@@ -15,7 +15,6 @@ import org.by1337.bmenu.MenuLoader;
 import org.by1337.bmenu.click.ClickHandlerImpl;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.requirement.Requirements;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

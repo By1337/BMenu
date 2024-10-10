@@ -3,6 +3,5 @@ open_commands:
   bmenu_seller:
     aliases:
       - bseller
-      - скупщик
     menu: example:seller
     permission: ~ # не обязательный параметр

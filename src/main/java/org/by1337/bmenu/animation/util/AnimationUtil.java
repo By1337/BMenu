@@ -26,7 +26,8 @@ public class AnimationUtil {
             return new int[]{Integer.parseInt(str)};
         }
     }
-    public static void set(@Nullable MenuItem who, MenuItem[] to, int[] inSlots){
+
+    public static void set(@Nullable MenuItem who, MenuItem[] to, int[] inSlots) {
         for (int inSlot : inSlots) {
             to[inSlot] = who;
         }

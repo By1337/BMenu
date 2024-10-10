@@ -16,7 +16,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class MenuLoader implements Listener {
     private final MenuRegistry registry;
@@ -106,10 +109,11 @@ public class MenuLoader implements Listener {
         return menuConfigs.get(key);
     }
 
-    public int getMenuCount(){
+    public int getMenuCount() {
         return menuConfigs.size();
     }
-    public Collection<SpacedNameKey> getMenus(){
+
+    public Collection<SpacedNameKey> getMenus() {
         return menuConfigs.keySet();
     }
 

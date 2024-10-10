@@ -3,7 +3,6 @@ package org.by1337.bmenu;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandSyntaxError;
@@ -12,7 +11,6 @@ import org.by1337.blib.command.argument.ArgumentPlayer;
 import org.by1337.blib.command.argument.ArgumentSetList;
 import org.by1337.blib.command.requires.RequiresPermission;
 import org.by1337.blib.util.SpacedNameKey;
-import org.by1337.bmenu.requirement.HasPermisionRequirement;
 import org.by1337.bmenu.util.ConfigUtil;
 
 import java.io.File;
@@ -30,6 +28,7 @@ public class BMenu extends JavaPlugin {
         );
         ConfigUtil.trySave("menu/animation-54.yml");
         ConfigUtil.trySave("menu/example-seller.yml");
+        ConfigUtil.trySave("menu-shem.yml");
     }
 
     @Override

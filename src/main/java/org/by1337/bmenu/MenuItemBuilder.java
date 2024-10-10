@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
@@ -117,7 +116,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         if (unbreakable) {
             im.setUnbreakable(true);
         }
-        if (im instanceof Damageable damageable){
+        if (im instanceof Damageable damageable) {
             damageable.setDamage(damage);
         }
         result.setItemMeta(im);

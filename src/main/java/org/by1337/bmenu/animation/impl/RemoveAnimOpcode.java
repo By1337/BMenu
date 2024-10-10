@@ -1,6 +1,5 @@
 package org.by1337.bmenu.animation.impl;
 
-import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;

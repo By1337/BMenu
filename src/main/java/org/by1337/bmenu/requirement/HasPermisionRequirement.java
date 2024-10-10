@@ -4,9 +4,7 @@ import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
-import org.by1337.blib.nbt.impl.CompoundTag;
 import org.by1337.bmenu.Menu;
-import org.by1337.bmenu.MenuLoader;
 
 public class HasPermisionRequirement implements Requirement {
     private final String permission;
