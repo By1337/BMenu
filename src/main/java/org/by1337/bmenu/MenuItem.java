@@ -43,7 +43,8 @@ public class MenuItem {
             handler.onClick(menu, placeholderable, player);
         } else {
             handler = clicks.get(MenuClickType.ANY_CLICK);
-            handler.onClick(menu, placeholderable, player);
+            if (handler != null)
+                handler.onClick(menu, placeholderable, player);
         }
     }
 

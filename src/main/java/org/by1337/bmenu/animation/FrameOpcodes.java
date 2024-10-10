@@ -13,8 +13,8 @@ public enum FrameOpcodes {
     MOVE(MoveAnimOpcode::new, "move"),
     SWAP(SwapAnimOpcode::new, "swap"),
     COPY(CopyAnimOpcode::new, "copy"),
-    GOTO(CopyAnimOpcode::new, "goto"),
-    SOUND(CopyAnimOpcode::new, "sound"),
+    GOTO(GotoAnimOpcode::new, "goto"),
+    SOUND(SoundAnimOpcode::new, "sound"),
     COMMANDS(CommandsAnimOpcode::new, "commands"),
     ;
     private static final Map<String, FrameOpcodes> LOOKUP;

@@ -97,6 +97,7 @@ items:
       - protection;1 # enchantmentid;level
     unbreakable: true
     model_data: 0
+    damage: 10
     priority: 0
     # слоты могут быть не указаны
     # если указать слоты то этот предмет установится при инициализации меню
@@ -227,7 +228,8 @@ animation:
 # [SOUND] <sound> <?volume> <?pitch>
 # [CLOSE]
 # здесь команды открытия меню
-# В commands вы можете передать список команд которые необходимо выполнить в открывающейся
+# В commands вы можете передать список команд которые необходимо выполнить в открывающейся менюшке
+# Синтаксис [OPEN] menu ["[MESSAGE] сообщение из открытого меню", "[что-то] некст команда"]
 # [BACK_OR_CLOSE] <?commands>
 # [BACK_TO_OR_CLOSE] <id> <?commands>
 # [BACK] <?commands>
@@ -236,17 +238,4 @@ animation:
 # [REFRESH]
 # [MESSAGE] <msg>
 # [SET_PARAM] <param> <value>
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
 #

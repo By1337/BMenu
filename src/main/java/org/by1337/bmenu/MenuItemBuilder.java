@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -46,6 +47,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private int priority = 0;
     private List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     private boolean unbreakable;
+    private int damage;
 
     @Nullable
     public MenuItem build(Menu menu) {
@@ -115,6 +117,9 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         if (unbreakable) {
             im.setUnbreakable(true);
         }
+        if (im instanceof Damageable damageable){
+            damageable.setDamage(damage);
+        }
         result.setItemMeta(im);
         result.setAmount(Integer.parseInt(placeholder.replace(amount)));
         return new MenuItem(
@@ -124,6 +129,10 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         );
     }
 
+
+    public void setDamage(int damage) {
+        this.damage = damage;
+    }
 
     @Override
     public int compareTo(@NotNull MenuItemBuilder o) {

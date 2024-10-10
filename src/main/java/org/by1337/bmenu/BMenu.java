@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.by1337.blib.command.Command;
+import org.by1337.blib.command.CommandSyntaxError;
 import org.by1337.blib.command.CommandWrapper;
 import org.by1337.blib.command.argument.ArgumentPlayer;
 import org.by1337.blib.command.argument.ArgumentSetList;
@@ -19,6 +20,7 @@ import java.io.File;
 public class BMenu extends JavaPlugin {
     private MenuLoader loader;
     private CommandWrapper commandWrapper;
+    private OpenCommands openCommands;
 
     @Override
     public void onLoad() {
@@ -32,18 +34,22 @@ public class BMenu extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        openCommands = new OpenCommands(loader, ConfigUtil.load("config.yml"));
         loader.loadMenus();
         loader.registerListeners();
         commandWrapper = new CommandWrapper(createCommand(), this);
         commandWrapper.setPermission("bmenu.use");
         commandWrapper.register();
+        openCommands.register();
     }
 
     @Override
     public void onDisable() {
         loader.close();
         commandWrapper.close();
+        openCommands.unregister();
     }
+
 
     private Command<CommandSender> createCommand() {
         Command<CommandSender> cmd = new Command<CommandSender>("bmenu")
@@ -59,6 +65,9 @@ public class BMenu extends JavaPlugin {
                             );
                             loader.loadMenus();
                             loader.registerListeners();
+                            openCommands.unregister();
+                            openCommands = new OpenCommands(loader, ConfigUtil.load("config.yml"));
+                            openCommands.register();
                             loader.getMessage().sendMsg(sender, "&aReloaded {} menus!", loader.getMenuCount());
                         })
                 )
@@ -68,7 +77,14 @@ public class BMenu extends JavaPlugin {
                         .argument(new ArgumentPlayer<>("player"))
                         .executor((sender, args) -> {
                             String menu = (String) args.getOrThrow("menu", "Use /bmenu open <menu> <player>");
-                            Player player = (Player) args.getOrThrow("player", "Use /bmenu open <menu> <player>");
+                            Player player = (Player) args.get("player");
+                            if (player == null) {
+                                if (sender instanceof Player) {
+                                    player = (Player) sender;
+                                } else {
+                                    throw new CommandSyntaxError("Use /bmenu open <menu> <player>");
+                                }
+                            }
                             Menu m = loader.findAndCreate(new SpacedNameKey(menu), player, null);
                             m.open();
                         })
