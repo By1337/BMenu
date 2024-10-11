@@ -2,20 +2,27 @@ package org.by1337.bmenu.factory;
 
 
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryType;
 import org.by1337.blib.configuration.YamlConfig;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
+import org.by1337.blib.nbt.NBT;
+import org.by1337.blib.nbt.NBTParser;
+import org.by1337.blib.nbt.impl.ListNBT;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.MenuConfig;
 import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.MenuLoader;
 import org.by1337.bmenu.animation.Animator;
+import org.by1337.bmenu.command.CommandList;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class MenuFactory {
     private static final MenuFactory INSTANCE = new MenuFactory();
@@ -35,7 +42,8 @@ public class MenuFactory {
 
     private MenuConfig load0(File file, MenuLoader loader, MenuLoadContext loadContext) throws InvalidMenuConfigException, IOException, InvalidConfigurationException {
         loadContext.loadedFiles.add(file);
-        YamlContext ctx = new YamlConfig(file);
+
+        YamlContext ctx = loadFile(file, loader);
         List<MenuConfig> supers = load(findFiles(file, loader, ctx.getList("extends", String.class, Collections.emptyList())), loader, loadContext);
         String title = ctx.getAsString("title", "title is not set!");
         @Nullable SpacedNameKey id = getId(ctx.getAsString("id", null), loader);
@@ -56,7 +64,7 @@ public class MenuFactory {
         } else {
             animator = null;
         }
-
+        CommandList commandList = new CommandList(ctx.get("commands-list"));
         return new MenuConfig(
                 supers,
                 id,
@@ -69,8 +77,69 @@ public class MenuFactory {
                 ctx,
                 loader,
                 title,
-                animator
+                animator,
+                commandList
         );
+    }
+
+    private YamlContext loadFile(File file, MenuLoader loader) throws InvalidMenuConfigException {
+        String str = readYamlAndApplyPreprocessor(file, loader);
+        YamlConfiguration configuration = new YamlConfiguration();
+        try {
+            configuration.loadFromString(str);
+        } catch (InvalidConfigurationException e) {
+            throw new InvalidMenuConfigException("Не удалось прочитать файл так как в синтаксисе yaml ошибка! https://codebeautify.org/yaml-validator - здесь можно проверить конфиг на наличие ошибок в yaml", e);
+        }
+        return new YamlContext(configuration);
+    }
+
+    private String readYamlAndApplyPreprocessor(File file, MenuLoader loader) throws InvalidMenuConfigException {
+        try (Stream<String> lines = Files.lines(file.toPath())) {
+            StringBuilder sb = new StringBuilder();
+            var iterator = lines.iterator();
+            while (iterator.hasNext()) {
+                String line = iterator.next();
+                if (line.startsWith("#")) continue;
+                if (line.trim().startsWith("include:")) {
+                    StringBuilder include = new StringBuilder(line.replace("include:", ""));
+                    boolean closed = false;
+                    while (iterator.hasNext()) {
+                        line = iterator.next();
+                        include.append(line);
+                        if (line.contains("]")) {
+                            closed = true;
+                            break;
+                        }
+                    }
+                    if (!closed) {
+                        throw new InvalidMenuConfigException(
+                                "в файле обнаружено include: но он не был закрыт. то что я прочитал '{}'",
+                                include.toString().replace("\n", "\\n")
+                        );
+                    } else {
+                        try {
+                            ListNBT listNBT = (ListNBT) NBTParser.parseList(include.toString());
+                            List<String> filesList = listNBT.stream().map(n -> String.valueOf(n.getAsObject())).toList();
+                            List<File> includes = findFiles(file, loader, filesList);
+                            for (File includeFile : includes) {
+                                sb.append(readYamlAndApplyPreprocessor(includeFile, loader));
+                            }
+                        } catch (Throwable t) {
+                            throw new InvalidMenuConfigException(
+                                    "в файле обнаружено include: я его прочитал но не получилось его проанализировать. Вы точно используете формат include: []?. то что я прочитал {}",
+                                    include.toString().replace("\n", "\\n"),
+                                    t
+                            );
+                        }
+                    }
+                } else {
+                    sb.append(line).append('\n');
+                }
+            }
+            return sb.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private SpacedNameKey getId(@Nullable String id, MenuLoader loader) {

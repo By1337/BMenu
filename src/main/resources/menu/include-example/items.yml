@@ -1,0 +1,22 @@
+# Этот файл содержит предметы для селлера
+
+# здесь используется случайное имя, чтобы избежать конфликтов так как этот файл будет использоваться в include
+items-892138827564874687348:
+  item-totem: &seller-item-totem
+    args:
+      MATERIAL: totem_of_undying
+      PRICE: 10000
+      PRICE_FORMAT: '10,000'
+      AMOUNT: 1
+      NAME: '&6Тотем'
+    display_name: ${NAME}
+    material: totem_of_undying
+  item-elytra: &seller-elytra
+    args:
+      MATERIAL: elytra
+      PRICE_FORMAT: '20,000'
+      PRICE: 20000
+      AMOUNT: 1
+      NAME: '&6Элитры'
+    display_name: ${NAME}
+    material: elytra

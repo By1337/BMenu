@@ -18,7 +18,7 @@ import org.by1337.blib.chat.util.Message;
 import org.by1337.blib.util.Pair;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
-import org.by1337.bmenu.hook.BaseHeadHook;
+import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.requirement.Requirement;
 import org.by1337.bmenu.requirement.Requirements;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +47,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     private boolean unbreakable;
     private int damage;
+    private Map<String, String> args;
 
     @Nullable
     public MenuItem build(Menu menu) {
@@ -65,7 +66,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         if (itemStack == null) {
             String tmpMaterial = placeholder.replace(material);
             if (tmpMaterial.startsWith("basehead-")) {
-                result = BaseHeadHook.getItem(tmpMaterial);
+                result = ItemStackCreator.getItem(tmpMaterial);
             } else {
                 result = new ItemStack(Material.valueOf(menu.replace(tmpMaterial).toUpperCase(Locale.ENGLISH)));
             }
@@ -134,6 +135,14 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public void setDamage(int damage) {
         this.damage = damage;
+    }
+
+    public Map<String, String> getArgs() {
+        return args;
+    }
+
+    public void setArgs(Map<String, String> args) {
+        this.args = args;
     }
 
     @Override

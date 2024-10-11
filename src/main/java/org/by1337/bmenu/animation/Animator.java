@@ -47,7 +47,7 @@ public class Animator {
             }
         }
 
-        public void join(AnimatorContext other) {
+        public void merge(AnimatorContext other) {
             frames.addAll(other.frames);
             maxTick = Math.max(maxTick, other.maxTick);
             framePosToFrames.clear();

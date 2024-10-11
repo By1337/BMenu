@@ -120,7 +120,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     public void reopen() {
-        if (animator != null){
+        if (animator != null) {
             animator.setPos(0);
         }
         open();
@@ -185,12 +185,13 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     public void runCommands(List<String> commands) {
         for (String command : commands) {
+            String replaced = replace(command);
             try {
-                if (!runCommand(command)) {
-                    Menu.commands.process(this, new StringReader(command));
+                if (!runCommand(replaced)) {
+                    Menu.commands.process(this, new StringReader(replaced));
                 }
             } catch (CommandException e) {
-                loader.getLogger().error("Failed to run command: {}", command, e);
+                loader.getLogger().error("Failed to run command: {}", replaced, e);
             }
         }
     }
@@ -208,11 +209,21 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             return;
         }
         if (!Objects.equals(inventory, e.getClickedInventory())) return;
-        if (e.getSlot() >= matrix.length) return;
-        MenuItem item = matrix[e.getSlot()];
+        MenuItem item = findItemInSlot(e.getSlot());
         if (item == null) return;
         MenuClickType type = MenuClickType.getClickType(e);
         item.doClick(this, viewer, type);
+    }
+
+    @Nullable
+    protected MenuItem findItemInSlot(int slot) {
+        MenuItem item = findItemInSlot(slot, animationMask);
+        return item == null ? findItemInSlot(slot, matrix) : item;
+    }
+
+    private MenuItem findItemInSlot(int slot, MenuItem[] matrix) {
+        if (slot >= matrix.length) return null;
+        return matrix[slot];
     }
 
     public void onClick(InventoryDragEvent e) {
@@ -259,7 +270,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     private static void runIn(String rawNBT, Menu menu, MenuLoader loader) {
-        if (rawNBT != null) {
+        if (rawNBT != null && !rawNBT.isBlank()) {
             try {
                 ListNBT listNBT = (ListNBT) NBTParser.parseList(rawNBT);
                 List<String> list = new ArrayList<>();
@@ -379,11 +390,24 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                         }
                 )
         );
+        commands.addSubCommand(new Command<Menu>("[IMPORT_PARAMS]")
+                .argument(new ArgumentString<>("item"))
+                .executor((v, args) -> {
+                            String param = (String) args.getOrThrow("item", "Use [IMPORT_PARAMS] <item>");
+                            MenuItemBuilder builder = v.config.findMenuItem(param, v);
+                            if (builder == null) {
+                                throw new CommandException("No such item: '{}'. Command [IMPORT_PARAMS]", param);
+                            }
+                            v.args.putAll(builder.getArgs());
+                            v.args.keySet().forEach(k -> v.registerPlaceholder("${" + k + "}", () -> v.args.get(k)));
+                        }
+                )
+        );
         commands.addSubCommand(new Command<Menu>("[OPEN]")
                 .argument(new ArgumentString<>("menu"))
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
-                            String menu = (String) args.getOrThrow("menu", "PluginUser [OPEN_MENU] <menu id>");
+                            String menu = (String) args.getOrThrow("menu", "Use [OPEN_MENU] <menu id>");
                             MenuConfig settings;
                             if (menu.contains(":")) {
                                 settings = v.loader.findMenu(new SpacedNameKey(menu));
@@ -397,6 +421,28 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                             if (args.containsKey("commands"))
                                 runIn((String) args.get("commands"), m, v.loader);
                             m.open();
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[RUN_RAND]")
+                .executor((v, args) -> {
+                            List<String> commands = v.config.getCommandList().getRandom();
+                            if (commands == null) {
+                                throw new CommandException("commands-list не определён в конфиге!");
+                            }
+                            v.runCommands(commands);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[RUN]")
+                .argument(new ArgumentString<>("name"))
+                .executor((v, args) -> {
+                            String name = (String) args.getOrThrow("name", "Use [RUN] <name>");
+                            List<String> commands = v.config.getCommandList().getByName(name);
+                            if (commands == null) {
+                                throw new CommandException("В commands-list не пределён набор команд {}", name);
+                            }
+                            v.runCommands(commands);
                         }
                 )
         );

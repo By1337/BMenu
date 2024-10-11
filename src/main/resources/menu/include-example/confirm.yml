@@ -1,0 +1,66 @@
+# импортируем весь файл items.yml
+include: [
+  "./items.yml"
+]
+
+id: example:prem-seller-confirm
+provider: default
+type: CHEST
+size: 27
+title: '&7Подтверждение покупки'
+
+# Разрешаем открывать это меню только из меню example:prem-seller
+only-open-from:
+  - example:prem-seller
+
+args:
+  SELECTED_ITEM: none
+
+items:
+  confirm:
+    material: lime_stained_glass_pane
+    display_name: '&aПодтвердить'
+    slots:
+      - '0-3'
+      - '9-12'
+      - '18-21'
+    on_left_click:
+      requirements:
+        check:
+          type: math
+          expression: '%vault_eco_balance% >= ${PRICE}' # Мы использовали [IMPORT_PARAMS] при открытии этого меню поэтому плейс ${PRICE} доступен
+      deny_commands:
+        - '[MESSAGE] &cУ Вас не достаточно баланса!'
+      commands:
+        - '[CONSOLE] eco take %player_name% ${PRICE}'
+        - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
+        - '[MESSAGE] &aВы успешно купили ${NAME}'
+        - '[BACK]'
+  reject:
+    material: red_stained_glass_pane
+    display_name: '&cОтменить'
+    slots:
+      - '5-8'
+      - '14-17'
+      - '23-26'
+    on_click:
+      commands:
+        - '[BACK]'
+  gui:
+    material: black_stained_glass_pane
+    display_name: ''
+    slots:
+      - 4
+      - 22
+  none:
+    material: jigsaw
+    display_name: '&cПроизошла ошибка!'
+  totem:
+    <<: *seller-item-totem # это указатель на предмет который находится в файле items.yml
+  elytra:
+    <<: *seller-elytra # это указатель на предмет который находится в файле items.yml
+
+animation:
+  - tick: 0
+    opcodes:
+      - set: ${SELECTED_ITEM} 13

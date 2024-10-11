@@ -32,10 +32,11 @@ public class ItemFactory {
             YamlContext ctx = items.get(itemID);
             MenuItemBuilder builder = new MenuItemBuilder();
             Placeholder argsReplacer = new Placeholder();
-            ctx.get("args").getAsMap(String.class, Collections.emptyMap()).forEach((key, value) ->
+            Map<String, String> args = ctx.get("args").getAsMap(String.class, Collections.emptyMap());
+            builder.setArgs(args);
+            args.forEach((key, value) ->
                     argsReplacer.registerPlaceholder("${" + key + "}", () -> value)
             );
-
             builder.setMaterial(argsReplacer.replace(ctx.get("material").getAsString("STONE")));
             builder.setName(mapIfNotNull(ctx.get("display_name").getAsString(null), argsReplacer::replace));
             builder.setAmount(argsReplacer.replace(ctx.get("amount").getAsString("1")));
@@ -44,14 +45,14 @@ public class ItemFactory {
             builder.setPotionEffects(
                     ctx.get("potion_effects").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(argsReplacer::replace).toList()
                             .stream().map(s -> {
-                                String[] args = argsReplacer.replace(s).split(";");
-                                if (args.length != 3) {
+                                String[] args0 = argsReplacer.replace(s).split(";");
+                                if (args0.length != 3) {
                                     LOGGER.error("expected <PotionEffectType>;<duration>;<amplifier>, not {}", argsReplacer.replace(s));
                                     return null;
                                 }
-                                PotionEffectType type = Objects.requireNonNull(PotionEffectType.getByName(args[0].toLowerCase(Locale.ENGLISH)), "PotionEffectType is null");
-                                int duration = Integer.parseInt(args[1]);
-                                int amplifier = Integer.parseInt(args[2]);
+                                PotionEffectType type = Objects.requireNonNull(PotionEffectType.getByName(args0[0].toLowerCase(Locale.ENGLISH)), "PotionEffectType is null");
+                                int duration = Integer.parseInt(args0[1]);
+                                int amplifier = Integer.parseInt(args0[2]);
                                 return new PotionEffect(type, duration, amplifier);
                             }).filter(Objects::nonNull).toList()
 
@@ -60,13 +61,13 @@ public class ItemFactory {
             builder.setEnchantments(
                     ctx.get("enchantments").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(argsReplacer::replace).toList()
                             .stream().map(s -> {
-                                String[] args = argsReplacer.replace(s).split(";");
-                                if (args.length != 2) {
+                                String[] args0 = argsReplacer.replace(s).split(";");
+                                if (args0.length != 2) {
                                     LOGGER.error("was expected to be enchantmentid;level, not {}", argsReplacer.replace(s));
                                     return null;
                                 }
-                                Enchantment type = Objects.requireNonNull(Enchantment.getByKey(NamespacedKey.minecraft(args[0].toLowerCase(Locale.ENGLISH))), "Enchantment is null");
-                                int level = Integer.parseInt(args[1]);
+                                Enchantment type = Objects.requireNonNull(Enchantment.getByKey(NamespacedKey.minecraft(args0[0].toLowerCase(Locale.ENGLISH))), "Enchantment is null");
+                                int level = Integer.parseInt(args0[1]);
                                 return Pair.of(type, level);
                             }).filter(Objects::nonNull).toList()
             );

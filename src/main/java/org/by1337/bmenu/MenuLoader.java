@@ -16,10 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class MenuLoader implements Listener {
     private final MenuRegistry registry;
@@ -57,18 +54,24 @@ public class MenuLoader implements Listener {
     }
 
     public void loadMenus() {
-        for (File file : Objects.requireNonNull(homeDir.listFiles(), "Menu folder isn't exists")) {
+        loadMenus0(homeDir).stream().filter(config -> config.getId() != null).forEach(this::registerMenu);
+    }
+
+    private List<MenuConfig> loadMenus0(File dir) {
+        List<MenuConfig> result = new ArrayList<>();
+        for (File file : Objects.requireNonNull(dir.listFiles(), "Menu folder isn't exists")) {
+            if (file.isDirectory()) {
+                result.addAll(loadMenus0(file));
+            }
             if (file.getName().endsWith(".yml") || file.getName().endsWith(".yaml")) {
                 try {
-                    MenuConfig config = MenuFactory.load(file, this);
-                    if (config.getId() != null) {
-                        registerMenu(config);
-                    }
+                    result.add(MenuFactory.load(file, this));
                 } catch (Throwable t) {
                     logger.warn("Failed to load menu config", t);
                 }
             }
         }
+        return result;
     }
 
     public Menu findAndCreate(SpacedNameKey menuId, Player viewer, @Nullable Menu previousMenu) {
