@@ -84,6 +84,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         List<Component> lore = new ArrayList<>(Objects.requireNonNullElseGet(im.lore(), ArrayList::new));
         for (String s : this.lore) {
             String s1 = placeholder.replace(s);
+            s1 = s1.replace("\\n", "\n"); // \n
             if (s1.contains("\n")) {
                 for (String string : s1.split("\n")) {
                     lore.add(message.componentBuilder(string).decoration(TextDecoration.ITALIC, false));
