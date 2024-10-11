@@ -136,8 +136,7 @@ public class MenuLoader implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (event.getClickedInventory() == null) return;
-        if (event.getClickedInventory().getHolder() instanceof Menu menu) {
+        if (event.getInventory().getHolder() instanceof Menu menu) {
             menu.onClick(event);
         }
     }

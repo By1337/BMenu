@@ -222,7 +222,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     private MenuItem findItemInSlot(int slot, MenuItem[] matrix) {
-        if (slot >= matrix.length) return null;
+        if (slot >= matrix.length || slot < 0) return null;
         return matrix[slot];
     }
 
