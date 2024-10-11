@@ -33,7 +33,7 @@ public class AnimationUtil {
             List<Integer> result = new ArrayList<>();
             String[] slots = str.split(",");
             for (String slot : slots) {
-                int[] arr = readSlots(slot);
+                int[] arr = readSlots0(slot);
                 for (int i : arr) {
                     result.add(i);
                 }
@@ -44,7 +44,7 @@ public class AnimationUtil {
             }
             return resultArray;
         }
-        return readSlots(str);
+        return readSlots0(str);
     }
 
     private static int[] readSlots0(String str) {
