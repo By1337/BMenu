@@ -9,6 +9,22 @@ type: CHEST
 size: 45
 title: '&7Премиальный Скупщик'
 
+defaults:
+  item: &item
+    lore:
+      - '&r '
+      - '&r &7Нажмите лкм'
+      - '&r &7чтобы купить ${NAME}&7 за ${PRICE_FORMAT} монет'
+      - '&r '
+    on_click:
+      requirements:
+        check:
+          type: math
+          expression: '%vault_eco_balance% >= ${PRICE}'
+      deny_commands:
+        - '[MESSAGE] &cУ Вас не достаточно баланса!'
+      commands: # используем [IMPORT_PARAMS] чтобы в меню example:prem-seller-confirm стали доступны плейсы текущего предмета
+        - '[OPEN] example:prem-seller-confirm ["[SET_PARAM] SELECTED_ITEM ${CURRENT_ITEM}", "[IMPORT_PARAMS] ${CURRENT_ITEM}"]'
 items:
   gui-lime:
     material: lime_stained_glass_pane
@@ -24,36 +40,19 @@ items:
       - '26'
       - '17'
   totem:
-    <<: *seller-item-totem # это указатель на предмет который находится в файле items.yml
+    args:
+      CURRENT_ITEM: totem
+    <<+: [ *item, *seller-item-totem ] # *seller-item-totem - это указатель на предмет который находится в файле items.yml
     slot: 21
-    lore:
-      - '&r '
-      - '&r &7Нажмите лкм'
-      - '&r &7чтобы купить ${NAME}&7 за ${PRICE_FORMAT} монет'
-      - '&r '
-    on_click:
-      requirements:
-        check:
-          type: math
-          expression: '%vault_eco_balance% >= ${PRICE}'
-      deny_commands:
-        - '[MESSAGE] &cУ Вас не достаточно баланса!'
-      commands: # используем [IMPORT_PARAMS] чтобы в меню example:prem-seller-confirm стали доступны плейсы текущего предмета
-        - '[OPEN] example:prem-seller-confirm ["[SET_PARAM] SELECTED_ITEM totem", "[IMPORT_PARAMS] totem"]'
+
   elytra:
-    <<: *seller-elytra # это указатель на предмет который находится в файле items.yml
+    args:
+      CURRENT_ITEM: elytra
+    <<+: [ *item, *seller-elytra ] # *seller-elytra - это указатель на предмет который находится в файле items.yml
     slot: 23
-    lore:
-      - '&r '
-      - '&r &7Нажмите лкм'
-      - '&r &7чтобы купить ${NAME}&7 за ${PRICE_FORMAT} монет'
-      - '&r '
-    on_click:
-      requirements:
-        check:
-          type: math
-          expression: '%vault_eco_balance% >= ${PRICE}'
-      deny_commands: # используем [IMPORT_PARAMS] чтобы в меню example:prem-seller-confirm стали доступны плейсы текущего предмета
-        - '[MESSAGE] &cУ Вас не достаточно баланса!'
-      commands:
-        - '[OPEN] example:prem-seller-confirm ["[SET_PARAM] SELECTED_ITEM elytra", "[IMPORT_PARAMS] elytra"]'
+
+  creeper:
+    args:
+      CURRENT_ITEM: creeper
+    <<+: [ *item, *seller-creeper ] # *seller-creeper - это указатель на предмет который находится в файле items.yml
+    slot: 22

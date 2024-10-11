@@ -20,3 +20,12 @@ items-892138827564874687348:
       NAME: '&6Элитры'
     display_name: ${NAME}
     material: elytra
+  item-creeper: &seller-creeper
+    args:
+      MATERIAL: creeper_spawn_egg
+      PRICE_FORMAT: '15,000'
+      PRICE: 15000
+      AMOUNT: 1
+      NAME: '&6Яйцо призыва крипера'
+    display_name: ${NAME}
+    material: creeper_spawn_egg

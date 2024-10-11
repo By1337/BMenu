@@ -59,6 +59,8 @@ items:
     <<: *seller-item-totem # это указатель на предмет который находится в файле items.yml
   elytra:
     <<: *seller-elytra # это указатель на предмет который находится в файле items.yml
+  creeper:
+    <<: *seller-creeper # это указатель на предмет который находится в файле items.yml
 
 animation:
   - tick: 0

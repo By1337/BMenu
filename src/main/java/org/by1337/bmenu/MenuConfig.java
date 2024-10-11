@@ -5,6 +5,7 @@ import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.command.CommandList;
+import org.by1337.bmenu.yaml.RawYamlContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -19,14 +20,14 @@ public class MenuConfig implements MenuItemLookup {
     private final List<SpacedNameKey> onlyOpenFrom;
     private final Map<String, String> args;
     private final Map<String, MenuItemBuilder> idToItems;
-    private final YamlContext context;
+    private final RawYamlContext context;
     private final MenuLoader loader;
     private final String title;
     private final List<MenuItemBuilder> items;
     private @Nullable Animator.AnimatorContext animation;
     private final CommandList commandList;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, YamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, RawYamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
@@ -88,7 +89,7 @@ public class MenuConfig implements MenuItemLookup {
         return null;
     }
 
-    public YamlContext getContext() {
+    public RawYamlContext getContext() {
         return context;
     }
 
