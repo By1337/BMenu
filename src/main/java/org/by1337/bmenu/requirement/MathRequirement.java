@@ -18,7 +18,16 @@ public class MathRequirement implements Requirement {
 
     @Override
     public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
-        var b = MathParser.mathSave("math[" + placeholderable.replace(expression) + "]").equals("1");
-        return not ? !b : b;
+        try {
+            var b = MathParser.math("math[" + placeholderable.replace(expression) + "]").equals("1");
+            return not ? !b : b;
+        } catch (Throwable t) {
+            menu.getLoader().getLogger().error(
+                    "Failed to parse math requirement. expression: '{}' replaced expression: '{}'",
+                    expression, placeholderable.replace(expression),
+                    t
+            );
+            return false;
+        }
     }
 }
