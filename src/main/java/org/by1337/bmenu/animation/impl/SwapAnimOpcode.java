@@ -1,6 +1,7 @@
 package org.by1337.bmenu.animation.impl;
 
 import org.by1337.blib.configuration.YamlValue;
+import org.by1337.blib.util.Pair;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
@@ -14,21 +15,9 @@ public class SwapAnimOpcode implements FrameOpcode {
     public SwapAnimOpcode(YamlValue ctx) {
         String[] args = ctx.getAsString().split(" ");
 
-        if (args[0].contains("-")) {
-            this.from = AnimationUtil.readSlots(args[0]);
-            this.to = AnimationUtil.readSlots(args[1]);
-        } else if (args[0].endsWith("++")) {
-            int start = Integer.parseInt(args[0].substring(0, args[0].length() - 2));
-            this.from = new int[]{start};
-            this.to = new int[]{start + 1};
-        } else if (args[0].endsWith("--")) {
-            int start = Integer.parseInt(args[0].substring(0, args[0].length() - 2));
-            this.from = new int[]{start};
-            this.to = new int[]{start - 1};
-        } else {
-            this.from = new int[]{Integer.parseInt(args[0])};
-            this.to = new int[]{Integer.parseInt(args[1])};
-        }
+        Pair<int[], int[]> pair = AnimationUtil.parsePairSlots(ctx.getAsString().substring(args[0].length()));
+        from = pair.getLeft();
+        to = pair.getRight();
     }
 
     @Override
