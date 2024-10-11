@@ -120,6 +120,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     public void reopen() {
+        if (animator != null){
+            animator.setPos(0);
+        }
         open();
     }
 
