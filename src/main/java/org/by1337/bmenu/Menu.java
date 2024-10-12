@@ -44,7 +44,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     protected final Map<String, String> args;
     @Nullable
     protected final Menu previousMenu;
-    protected BukkitTask animationTask;
+    protected BukkitTask ticker;
     protected Animator animator;
 
     public Menu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
@@ -96,26 +96,36 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 generate0();
             }*/
         });
-        if (animator != null) {
-            if (animationTask != null) {
-                animationTask.cancel();
-            }
-            animationTask = Bukkit.getScheduler().runTaskTimer(
-                    loader.getPlugin(),
-                    this::animationTick,
-                    0,
-                    1
-            );
+        if (ticker != null && !ticker.isCancelled()) {
+            ticker.cancel();
         }
+        ticker = Bukkit.getScheduler().runTaskTimer(
+                loader.getPlugin(),
+                this::tick,
+                0,
+                1
+        );
     }
 
-    private void animationTick() {
-        animator.tick(animationMask, this);
-        inventory.clear();
-        flush();
-        if (animator.isEnd()) {
-            animationTask.cancel();
-            animationTask = null;
+    protected void tick() {
+        if (!animator.isEnd()) {
+            animator.tick(animationMask, this);
+            inventory.clear();
+            flush();
+        }
+        doItemTick(matrix);
+        doItemTick(animationMask);
+    }
+
+    private void doItemTick(MenuItem[] matrix) {
+        for (int i = 0; i < matrix.length; i++) {
+            MenuItem item = matrix[i];
+            if (item != null && item.isTicking() && item.getBuilder() != null) {
+                matrix[i] = item = item.getBuilder().get();
+                if (item != null) {
+                    setItem(item);
+                }
+            }
         }
     }
 
@@ -197,9 +207,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     public void onClose(InventoryCloseEvent event) {
-        if (animationTask != null) {
-            animationTask.cancel();
-            animationTask = null;
+        if (ticker != null) {
+            ticker.cancel();
+            ticker = null;
         }
     }
 

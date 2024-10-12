@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class MenuItem {
     private int[] slots;
@@ -17,6 +18,16 @@ public class MenuItem {
     private Map<MenuClickType, ClickHandler> clicks = new HashMap<>();
     private @Nullable Placeholderable customPlaceholderable;
     private @Nullable Object data;
+    private boolean ticking;
+    private @Nullable Supplier<@Nullable MenuItem> builder;
+
+    public MenuItem(int[] slots, ItemStack itemStack, Map<MenuClickType, ClickHandler> clicks, boolean ticking, @Nullable Supplier<@Nullable MenuItem> builder) {
+        this.slots = slots;
+        this.itemStack = itemStack;
+        this.clicks = clicks;
+        this.ticking = ticking;
+        this.builder = builder;
+    }
 
     public MenuItem(int[] slots, ItemStack itemStack, Map<MenuClickType, ClickHandler> clicks) {
         this.slots = slots;
@@ -45,6 +56,22 @@ public class MenuItem {
             if (handler != null)
                 handler.onClick(menu, placeholderable, player);
         }
+    }
+
+    public @Nullable Supplier<@Nullable MenuItem> getBuilder() {
+        return builder;
+    }
+
+    public void setBuilder(@Nullable Supplier<@Nullable MenuItem> builder) {
+        this.builder = builder;
+    }
+
+    public boolean isTicking() {
+        return ticking;
+    }
+
+    public void setTicking(boolean ticking) {
+        this.ticking = ticking;
     }
 
     public int[] getSlots() {

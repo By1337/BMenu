@@ -106,6 +106,7 @@ public class ItemFactory {
                     );
                 }
             }
+            builder.setTicking(ctx.getAsBoolean("ticking", false));
             itemMap.put(itemID, builder);
         }
         return itemMap;

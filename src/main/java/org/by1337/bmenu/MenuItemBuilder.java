@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
@@ -48,6 +49,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private boolean unbreakable;
     private int damage;
     private Map<String, String> args;
+    private boolean ticking;
 
     @Nullable
     public MenuItem build(Menu menu) {
@@ -125,10 +127,18 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         }
         result.setItemMeta(im);
         result.setAmount(Integer.parseInt(placeholder.replace(amount)));
+        @Nullable Supplier<@Nullable MenuItem> builder;
+        if (ticking) {
+            builder = () -> build(menu, itemStack, placeholderables);
+        } else {
+            builder = null;
+        }
         return new MenuItem(
                 slots,
                 result,
-                clicks
+                clicks,
+                ticking,
+                builder
         );
     }
 
@@ -234,11 +244,75 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         this.slots = slots;
     }
 
+    public void setTicking(boolean ticking) {
+        this.ticking = ticking;
+    }
+
     public void addSlot(final int slot) {
         int[] newSlots = new int[slots.length + 1];
         System.arraycopy(slots, 0, newSlots, 0, slots.length);
         newSlots[slots.length] = slot;
         slots = newSlots;
+    }
+
+    public int[] getSlots() {
+        return slots;
+    }
+
+    public List<String> getLore() {
+        return lore;
+    }
+
+    public Map<MenuClickType, ClickHandler> getClicks() {
+        return clicks;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public ViewRequirement getViewRequirement() {
+        return viewRequirement;
+    }
+
+    public int getModelData() {
+        return modelData;
+    }
+
+    public List<ItemFlag> getItemFlags() {
+        return itemFlags;
+    }
+
+    public List<PotionEffect> getPotionEffects() {
+        return potionEffects;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public List<Pair<Enchantment, Integer>> getEnchantments() {
+        return enchantments;
+    }
+
+    public boolean isUnbreakable() {
+        return unbreakable;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+
+    public boolean isTicking() {
+        return ticking;
     }
 
     public static class ViewRequirement {
