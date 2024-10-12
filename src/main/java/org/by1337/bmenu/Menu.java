@@ -58,6 +58,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         animationMask = new MenuItem[config.getSize()];
         args = new HashMap<>(config.getArgs());
         this.previousMenu = previousMenu;
+        registerPlaceholders(RandomPlaceholders.getInstance());
         args.keySet().forEach(k -> registerPlaceholder("${" + k + "}", () -> args.get(k)));
         registerPlaceholder("{has-back-menu}", () -> String.valueOf(previousMenu != null));
         if (config.getAnimation() != null) {
@@ -87,6 +88,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             createInventory(config.getSize(), loader.getMessage().componentBuilder(replace(config.getTitle())), config.getInvType());
         }
         sync(() -> {
+            inventory.clear();
             if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventory)) {
                 viewer.openInventory(inventory);
             }
@@ -134,6 +136,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     public void reopen() {
+        if (ticker != null && !ticker.isCancelled()) {
+            ticker.cancel();
+        }
         if (animator != null) {
             animator.setPos(0);
         }
@@ -481,6 +486,12 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                                 throw new CommandException("В commands-list не пределён набор команд {}", name);
                             }
                             v.runCommands(commands);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[REOPEN]")
+                .executor((v, args) -> {
+                           v.reopen();
                         }
                 )
         );

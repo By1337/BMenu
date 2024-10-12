@@ -1,0 +1,196 @@
+id: example:rand-colors
+provider: default
+type: CHEST
+size: 54
+title: '&7Случайные цвета'
+only-open-from: [ ]
+
+commands-list:
+  lime:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR lime'
+  cyan:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR cyan'
+  light_blue:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR light_blue'
+  brown:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR brown'
+  yellow:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR yellow'
+  pink:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR pink'
+  orange:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR orange'
+  red:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR red'
+  blue:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR blue'
+  green:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR green'
+  white:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR white'
+  magenta:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR magenta'
+  purple:
+    weight: 1.0
+    commands:
+      - '[SET_PARAM] COLOR purple'
+
+
+menu-events:
+  on_open:
+    commands:
+      - '[RUN_RAND]'
+  on_reopen:
+    commands:
+      - '[RUN_RAND]'
+
+args:
+  COLOR: gray
+
+items:
+  reload:
+    material: barrier
+    slot: 49
+    display_name: '&aОбновить'
+    on_click:
+      commands:
+        - '[REOPEN]'
+  lime:
+    material: lime_stained_glass_pane
+    display_name: ''
+  cyan:
+    material: cyan_stained_glass_pane
+    display_name: ''
+  light_blue:
+    material: light_blue_stained_glass_pane
+    display_name: ''
+  brown:
+    material: brown_stained_glass_pane
+    display_name: ''
+  yellow:
+    material: yellow_stained_glass_pane
+    display_name: ''
+  pink:
+    material: pink_stained_glass_pane
+    display_name: ''
+  orange:
+    material: orange_stained_glass_pane
+    display_name: ''
+  red:
+    material: red_stained_glass_pane
+    display_name: ''
+  blue:
+    material: blue_stained_glass_pane
+    display_name: ''
+  green:
+    material: green_stained_glass_pane
+    display_name: ''
+  white:
+    material: white_stained_glass_pane
+    display_name: ''
+  magenta:
+    material: magenta_stained_glass_pane
+    display_name: ''
+  purple:
+    material: purple_stained_glass_pane
+    display_name: ''
+
+animation:
+  - tick: 0
+    opcodes:
+      - set: ${COLOR} 4
+  - tick: 1
+    opcodes:
+      - copy: 4 3-5
+  - tick: 2
+    opcodes:
+      - copy: 4 2-6
+  - tick: 3
+    opcodes:
+      - copy: 4 1-7
+  - tick: 4
+    opcodes:
+      - copy: 4 0-8
+  - tick: 5
+    opcodes:
+      - copy: 4 9,17
+  - tick: 6
+    opcodes:
+      - copy: 4 18,26
+  - tick: 7
+    opcodes:
+      - copy: 4 27,35
+  - tick: 8
+    opcodes:
+      - copy: 4 36,44
+  - tick: 9
+    opcodes:
+      - copy: 4 45,53
+  - tick: 10
+    opcodes:
+      - copy: 4 46,52
+  - tick: 11
+    opcodes:
+      - copy: 4 47,51
+  - tick: 12
+    opcodes:
+      - copy: 4 48,50
+  - tick: 13
+    opcodes:
+      - copy: 4 39,41
+  - opcodes:
+      - copy: 4 38,42
+  - opcodes:
+      - copy: 4 37,43
+  - opcodes:
+      - copy: 4 28,34
+  - opcodes:
+      - copy: 4 19,25
+  - opcodes:
+      - copy: 4 10,16
+  - opcodes:
+      - copy: 4 11,15
+  - opcodes:
+      - copy: 4 20,24
+  - opcodes:
+      - copy: 4 29,33
+  - opcodes:
+      - copy: 4 30,32
+  - opcodes:
+      - copy: 4 21,23
+  - opcodes:
+      - copy: 4 12,14
+  - opcodes:
+      - copy: 4 13
+  - opcodes:
+      - copy: 4 13
+  - opcodes:
+      - copy: 4 22
+  - opcodes:
+      - copy: 4 31
+  - opcodes:
+      - copy: 4 40

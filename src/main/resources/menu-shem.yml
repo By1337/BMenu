@@ -113,7 +113,7 @@ menu-events:
         input: 'str'
         output: 'str'
         deny_commands: [ ] # во всех проверках тоже можно указывать команды
-        commands: []
+        commands: [ ]
     deny_commands: [ ]
     commands:
       - '[MESSAGE] Меню открыто!'
@@ -344,6 +344,7 @@ animation:
 # [BACK] <?commands>
 # [OPEN] <id> <?commands>
 #
+# [REOPEN] - полностью заново открывает текущее меню
 # [REFRESH]
 # [MESSAGE] <msg>
 # [SET_PARAM] <param> <value>

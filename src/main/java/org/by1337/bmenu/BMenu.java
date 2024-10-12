@@ -30,6 +30,7 @@ public class BMenu extends JavaPlugin {
             ConfigUtil.trySave("menu/include-example/items.yml");
             ConfigUtil.trySave("menu/include-example/readme.txt");
             ConfigUtil.trySave("menu/include-example/seller.yml");
+            ConfigUtil.trySave("menu/random-colors/rand-colors-menu.yml");
         }
         loader = new MenuLoader(
                 new File(getDataFolder(), "menu"),

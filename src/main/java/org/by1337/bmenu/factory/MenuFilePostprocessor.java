@@ -88,6 +88,8 @@ public class MenuFilePostprocessor {
                 if (val instanceof Map<?, ?> map) {
                     Map<String, Object> to2 = (Map<String, Object>) to.computeIfAbsent(key, k -> new LinkedHashMap<>());
                     merge((Map<String, Object>) map, to2, false);
+                } else if (val instanceof Collection<?> collection) {
+                    ((List<Object>) to.computeIfAbsent(key, k -> new ArrayList<>())).addAll(collection);
                 }
             }
         }
