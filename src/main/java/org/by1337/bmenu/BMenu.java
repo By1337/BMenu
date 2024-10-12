@@ -22,17 +22,19 @@ public class BMenu extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        if (!new File(getDataFolder(), "menu").exists()){
+            ConfigUtil.trySave("menu/animation-54.yml");
+            ConfigUtil.trySave("menu/example-seller.yml");
+            ConfigUtil.trySave("menu-shem.yml");
+            ConfigUtil.trySave("menu/include-example/confirm.yml");
+            ConfigUtil.trySave("menu/include-example/items.yml");
+            ConfigUtil.trySave("menu/include-example/readme.txt");
+            ConfigUtil.trySave("menu/include-example/seller.yml");
+        }
         loader = new MenuLoader(
                 new File(getDataFolder(), "menu"),
                 this
         );
-        ConfigUtil.trySave("menu/animation-54.yml");
-        ConfigUtil.trySave("menu/example-seller.yml");
-        ConfigUtil.trySave("menu-shem.yml");
-        ConfigUtil.trySave("menu/include-example/confirm.yml");
-        ConfigUtil.trySave("menu/include-example/items.yml");
-        ConfigUtil.trySave("menu/include-example/readme.txt");
-        ConfigUtil.trySave("menu/include-example/seller.yml");
     }
 
     @Override
