@@ -13,27 +13,29 @@ public class CopyAnimOpcode implements FrameOpcode {
     private final int[] dest;
 
     public CopyAnimOpcode(YamlValue ctx) {
-        String[] args = ctx.getAsString().split(" ");
+        String args = ctx.getAsString();
 
-        Pair<int[], int[]> pair = AnimationUtil.parsePairSlots(ctx.getAsString().substring(args[0].length()));
+        Pair<int[], int[]> pair = AnimationUtil.parsePairSlots(args);
         src = pair.getLeft();
         dest = pair.getRight();
     }
 
     @Override
     public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
-        if (src.length != dest.length) {
-            throw new IllegalArgumentException("Количество слотов 'from' и 'to' должно совпадать.");
+        if (src.length == 0) {
+            throw new IllegalArgumentException("src array is empty");
         }
-
-        for (int i = 0; i < src.length; i++) {
-            int fromIndex = src[i];
-            int toIndex = dest[i];
+        int srcIndex = 0;
+        for (int toIndex : dest) {
+            int fromIndex = src[srcIndex];
 
             if (fromIndex < 0 || fromIndex >= matrix.length || toIndex < 0 || toIndex >= matrix.length) {
-                throw new IndexOutOfBoundsException("Индексы 'from' или 'to' выходят за пределы массива.");
+                throw new IndexOutOfBoundsException("Индексы 'from' или 'to' выходят за пределы меню.");
             }
             matrix[toIndex] = matrix[fromIndex];
+            if (srcIndex < src.length - 1) {
+                srcIndex++;
+            }
         }
     }
 }

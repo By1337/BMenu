@@ -29,7 +29,7 @@ public class AnimatorFactory {
                     try {
                         opcodes.add(type.getCreator().apply(map.get(string)));
                     } catch (Throwable e) {
-                        loader.getMessage().error("Failed to load opcode {}: {}", string, map.get(string).getAsObject(), e);
+                        loader.getLogger().error("Failed to load opcode {}: {}", string, map.get(string).getAsObject(), e);
                     }
                 }
             }
