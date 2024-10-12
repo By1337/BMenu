@@ -22,12 +22,13 @@ public class SetAnimOpcode implements FrameOpcode {
     @Override
     public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
         MenuItemBuilder builder = menu.getConfig().findMenuItem(menu.replace(item), menu);
-        MenuItem menuItem1;
         if (builder == null) {
-            menuItem1 = new MenuItem(slots, ItemStackCreator.getItem(menu.replace(item)));
+            AnimationUtil.set(new MenuItem(slots, ItemStackCreator.getItem(menu.replace(item))), matrix, slots);
         } else {
-            menuItem1 = builder.build(menu);
+            MenuItem menuItem1 = builder.build(menu);
+            if (menuItem1 != null) {
+                AnimationUtil.set(menuItem1, matrix, slots);
+            }
         }
-        AnimationUtil.set(menuItem1, matrix, slots);
     }
 }

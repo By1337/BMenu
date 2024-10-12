@@ -14,5 +14,9 @@ class CopyAnimOpcodeTest {
         assertArrayEquals(new int[]{10, 11, 12, 17, 18, 19}, new CopyAnimOpcode(new YamlValue("10 10-12,17-19")).getDest());
         assertArrayEquals(new int[]{10, 11, 12, 17}, new CopyAnimOpcode(new YamlValue("10-12,17 10-12,17")).getSrc());
         assertArrayEquals(new int[]{10, 11, 12, 17}, new CopyAnimOpcode(new YamlValue("10-12,17 10-12,17")).getDest());
+        assertArrayEquals(new int[]{10}, new CopyAnimOpcode(new YamlValue("10++")).getSrc());
+        assertArrayEquals(new int[]{11}, new CopyAnimOpcode(new YamlValue("10++")).getDest());
+        assertArrayEquals(new int[]{10}, new CopyAnimOpcode(new YamlValue("10--")).getSrc());
+        assertArrayEquals(new int[]{9}, new CopyAnimOpcode(new YamlValue("10--")).getDest());
     }
 }
