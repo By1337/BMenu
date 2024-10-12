@@ -13,9 +13,9 @@ public class MoveAnimOpcode implements FrameOpcode {
     private final int[] to;
 
     public MoveAnimOpcode(YamlValue ctx) {
-        String[] args = ctx.getAsString().split(" ");
+        String args = ctx.getAsString();
 
-        Pair<int[], int[]> pair = AnimationUtil.parsePairSlots(ctx.getAsString().substring(args[0].length()));
+        Pair<int[], int[]> pair = AnimationUtil.parsePairSlots(args);
         from = pair.getLeft();
         to = pair.getRight();
     }
@@ -36,5 +36,13 @@ public class MoveAnimOpcode implements FrameOpcode {
             matrix[toIndex] = matrix[fromIndex];
             matrix[fromIndex] = null;
         }
+    }
+
+    public int[] getFrom() {
+        return from;
+    }
+
+    public int[] getTo() {
+        return to;
     }
 }

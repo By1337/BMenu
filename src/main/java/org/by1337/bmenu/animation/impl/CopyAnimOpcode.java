@@ -38,4 +38,12 @@ public class CopyAnimOpcode implements FrameOpcode {
             }
         }
     }
+
+    public int[] getSrc() {
+        return src;
+    }
+
+    public int[] getDest() {
+        return dest;
+    }
 }
