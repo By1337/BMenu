@@ -136,7 +136,7 @@ public class MenuLoader implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (event.getInventory().getHolder() instanceof Menu menu) {
+        if (event.getInventory().getHolder() instanceof Menu menu && menu.getLoader() == this) {
             if (System.currentTimeMillis() - menu.getLastClickTime() < 100) return;
             menu.onClick(event);
         }
@@ -144,7 +144,7 @@ public class MenuLoader implements Listener {
 
     @EventHandler
     public void onClick(InventoryDragEvent event) {
-        if (event.getInventory().getHolder() instanceof Menu menu) {
+        if (event.getInventory().getHolder() instanceof Menu menu && menu.getLoader() == this) {
             if (System.currentTimeMillis() - menu.getLastClickTime() < 100) return;
             menu.onClick(event);
         }
@@ -152,7 +152,7 @@ public class MenuLoader implements Listener {
 
     @EventHandler
     public void onClose(InventoryCloseEvent event) {
-        if (event.getInventory().getHolder() instanceof Menu menu) {
+        if (event.getInventory().getHolder() instanceof Menu menu && menu.getLoader() == this) {
             menu.onClose(event);
         }
     }
