@@ -151,6 +151,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         flush();
     }
 
+
     protected void flush() {
         setMatrix(matrix);
         setMatrix(animationMask);
@@ -248,6 +249,10 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     protected void sendFakeTitle(String title) {
         BLib.getApi().getFakeTitleFactory().get().send(inventory, loader.getMessage().componentBuilder(replace(title)));
+    }
+
+    public void setTitle(String title){
+        sendFakeTitle(title);
     }
 
     public MenuLoader getLoader() {

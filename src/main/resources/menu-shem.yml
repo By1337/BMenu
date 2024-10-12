@@ -299,6 +299,7 @@ animation:
       - sound: ENTITY_EXPERIENCE_ORB_PICKUP 1.0 1.0 # воспроизводит звук для игрока
       - commands: # выполняет команды
           - '[MESSAGE] msg'
+      - title: title # устанавливает title меню
 
 
 # Все команды

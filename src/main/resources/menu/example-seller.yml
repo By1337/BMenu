@@ -353,3 +353,27 @@ items:
       AMOUNT_32: 32
     slot: 43
     <<: *item
+
+
+animation:
+  - tick: 0
+    opcodes:
+      - title: '&7С'
+  - tick: 1
+    opcodes:
+      - title: '&7Ск'
+  - tick: 2
+    opcodes:
+      - title: '&7Ску'
+  - tick: 3
+    opcodes:
+      - title: '&7Скуп'
+  - tick: 4
+    opcodes:
+      - title: '&7Скупщ'
+  - tick: 5
+    opcodes:
+      - title: '&7Скупщи'
+  - tick: 6
+    opcodes:
+      - title: '&7Скупщик'
