@@ -46,6 +46,8 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     protected final Menu previousMenu;
     protected BukkitTask ticker;
     protected Animator animator;
+    protected @Nullable MenuItem lastClickedItem;
+    private long lastClickTime;
 
     public Menu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
         this.config = config;
@@ -214,7 +216,12 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         }
     }
 
+    public void onClick(InventoryDragEvent e) {
+        lastClickTime = System.currentTimeMillis();
+        e.setCancelled(true);
+    }
     public void onClick(InventoryClickEvent e) {
+        lastClickTime = System.currentTimeMillis();
         e.setCancelled(true);
         if (e.getCurrentItem() == null) {
             return;
@@ -222,6 +229,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         if (!Objects.equals(inventory, e.getClickedInventory())) return;
         MenuItem item = findItemInSlot(e.getSlot());
         if (item == null) return;
+        lastClickedItem = item;
         MenuClickType type = MenuClickType.getClickType(e);
         item.doClick(this, viewer, type);
     }
@@ -237,10 +245,6 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         return matrix[slot];
     }
 
-    public void onClick(InventoryDragEvent e) {
-        e.setCancelled(true);
-    }
-
     protected void sync(Runnable runnable) {
         if (!Bukkit.isPrimaryThread())
             Bukkit.getScheduler().runTaskLater(loader.getPlugin(), runnable, 0);
@@ -251,7 +255,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         BLib.getApi().getFakeTitleFactory().get().send(inventory, loader.getMessage().componentBuilder(replace(title)));
     }
 
-    public void setTitle(String title){
+    public void setTitle(String title) {
         sendFakeTitle(title);
     }
 
@@ -282,6 +286,14 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     public @Nullable Menu getPreviousMenu() {
         return previousMenu;
+    }
+
+    public @Nullable MenuItem getLastClickedItem() {
+        return lastClickedItem;
+    }
+
+    public long getLastClickTime() {
+        return lastClickTime;
     }
 
     private static void runIn(String rawNBT, Menu menu, MenuLoader loader) {

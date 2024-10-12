@@ -137,6 +137,7 @@ public class MenuLoader implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         if (event.getInventory().getHolder() instanceof Menu menu) {
+            if (System.currentTimeMillis() - menu.getLastClickTime() < 100) return;
             menu.onClick(event);
         }
     }
@@ -144,6 +145,7 @@ public class MenuLoader implements Listener {
     @EventHandler
     public void onClick(InventoryDragEvent event) {
         if (event.getInventory().getHolder() instanceof Menu menu) {
+            if (System.currentTimeMillis() - menu.getLastClickTime() < 100) return;
             menu.onClick(event);
         }
     }
