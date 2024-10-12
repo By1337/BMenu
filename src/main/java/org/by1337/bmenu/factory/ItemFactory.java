@@ -15,6 +15,7 @@ import org.by1337.bmenu.MenuLoader;
 import org.by1337.bmenu.click.ClickHandlerImpl;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.requirement.Requirements;
+import org.by1337.bmenu.util.ObjectUtil;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class ItemFactory {
                     argsReplacer.registerPlaceholder("${" + key + "}", () -> value)
             );
             builder.setMaterial(argsReplacer.replace(ctx.get("material").getAsString("STONE")));
-            builder.setName(mapIfNotNull(ctx.get("display_name").getAsString(null), argsReplacer::replace));
+            builder.setName(ObjectUtil.mapIfNotNull(ctx.get("display_name").getAsString(null), argsReplacer::replace));
             builder.setAmount(argsReplacer.replace(ctx.get("amount").getAsString("1")));
             builder.setLore(ctx.get("lore").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(argsReplacer::replace).toList());
             builder.setItemFlags(ctx.get("item_flags").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(s -> ItemFlag.valueOf(argsReplacer.replace(s))).toList());
@@ -76,7 +77,7 @@ public class ItemFactory {
             builder.setPriority(ctx.getAsInteger("priority", 0));
             builder.setSlots(getSlots(ctx));
             builder.setViewRequirement(
-                    mapIfNotNullOrDefault(
+                    ObjectUtil.mapIfNotNullOrDefault(
                             ctx.get("view_requirement.requirements"),
                             v -> RequirementsFactory.read(v, loader, argsReplacer),
                             Requirements.EMPTY
@@ -97,7 +98,7 @@ public class ItemFactory {
                                     ctx.get(key + ".commands").getAsList(YamlValue::getAsString, Collections.emptyList())
                                             .stream().map(argsReplacer::replace).toList()
                                     ,
-                                    mapIfNotNullOrDefault(
+                                    ObjectUtil.mapIfNotNullOrDefault(
                                             ctx.get(key + ".requirements"),
                                             v -> RequirementsFactory.read(v, loader, argsReplacer),
                                             Requirements.EMPTY
@@ -112,13 +113,7 @@ public class ItemFactory {
         return itemMap;
     }
 
-    private static <T, E> E mapIfNotNullOrDefault(@Nullable T t, Function<? super T, E> mapper, E def) {
-        return t != null ? mapper.apply(t) : def;
-    }
 
-    private static <T> T mapIfNotNull(@Nullable T t, Function<? super T, ? extends T> mapper) {
-        return t != null ? mapper.apply(t) : null;
-    }
 
     public static int[] getSlots(YamlContext context) {
         List<Integer> slots = new ArrayList<>();

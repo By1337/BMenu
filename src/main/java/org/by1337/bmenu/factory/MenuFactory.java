@@ -4,6 +4,7 @@ package org.by1337.bmenu.factory;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryType;
+import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlConfig;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
@@ -16,6 +17,9 @@ import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.MenuLoader;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.command.CommandList;
+import org.by1337.bmenu.requirement.CommandRequirements;
+import org.by1337.bmenu.requirement.Requirements;
+import org.by1337.bmenu.util.ObjectUtil;
 import org.by1337.bmenu.yaml.RawYamlContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,6 +70,21 @@ public class MenuFactory {
             animator = null;
         }
         CommandList commandList = new CommandList(ctx.get("commands-list"));
+        Map<String, CommandRequirements> menuEventListeners =
+                ctx.get("menu-events").getAsMap(YamlValue::getAsString, v -> {
+                    YamlContext context = v.getAsYamlContext();
+                    Requirements requirements = ObjectUtil.mapIfNotNullOrDefault(
+                            context.get("requirements"),
+                            v1 -> RequirementsFactory.read(v1, loader, new Placeholder()),
+                            Requirements.EMPTY
+                    );
+
+                    return new CommandRequirements(
+                            requirements,
+                            context.get("deny_commands").getAsList(YamlValue::getAsString, Collections.emptyList()),
+                            context.get("commands").getAsList(YamlValue::getAsString, Collections.emptyList())
+                    );
+                }, Collections.emptyMap());
         return new MenuConfig(
                 supers,
                 id,
@@ -79,7 +98,8 @@ public class MenuFactory {
                 loader,
                 title,
                 animator,
-                commandList
+                commandList,
+                menuEventListeners
         );
     }
 

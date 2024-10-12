@@ -1,10 +1,10 @@
 package org.by1337.bmenu;
 
 import org.bukkit.event.inventory.InventoryType;
-import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.command.CommandList;
+import org.by1337.bmenu.requirement.CommandRequirements;
 import org.by1337.bmenu.yaml.RawYamlContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,8 +26,9 @@ public class MenuConfig implements MenuItemLookup {
     private final List<MenuItemBuilder> items;
     private @Nullable Animator.AnimatorContext animation;
     private final CommandList commandList;
+    private final Map<String, CommandRequirements> menuEventListeners;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, RawYamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, RawYamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
@@ -41,6 +42,7 @@ public class MenuConfig implements MenuItemLookup {
         this.title = title;
         this.animation = animation;
         this.commandList = commandList;
+        this.menuEventListeners = menuEventListeners;
         supersId = new HashSet<>();
         items = idToItems.values().stream().sorted().toList();
         for (MenuConfig superMenu : supers) {
@@ -87,6 +89,10 @@ public class MenuConfig implements MenuItemLookup {
             }
         }
         return null;
+    }
+
+    public Map<String, CommandRequirements> getMenuEventListeners() {
+        return menuEventListeners;
     }
 
     public RawYamlContext getContext() {

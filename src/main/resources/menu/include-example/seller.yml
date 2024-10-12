@@ -9,6 +9,21 @@ type: CHEST
 size: 45
 title: '&7Премиальный Скупщик'
 
+
+menu-events:
+  on_open: # когда меню открывается
+    deny_commands: [ ]
+    commands:
+      - '[MESSAGE] ON OPEN'
+  on_reopen: # когда меню пере-открывается, когда используется команда [BACK]
+    deny_commands: [ ]
+    commands:
+      - '[MESSAGE] ON REOPEN'
+  on_close: # когда меню закрывается
+    deny_commands: [ ]
+    commands:
+      - '[MESSAGE] ON CLOSE'
+
 defaults:
   item: &item
     lore:

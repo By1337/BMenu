@@ -208,7 +208,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         this.modelData = modelData;
     }
 
-    public void setViewRequirement(Requirement requirement, List<String> denyCommands) {
+    public void setViewRequirement(Requirements requirement, List<String> denyCommands) {
         this.viewRequirement = new ViewRequirement(requirement, denyCommands);
     }
 
@@ -317,15 +317,15 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public static class ViewRequirement {
         private static final ViewRequirement EMPTY = new ViewRequirement(Requirements.EMPTY, Collections.emptyList());
-        private final Requirement requirement;
+        private final Requirements requirement;
         private final List<String> denyCommands;
 
-        public ViewRequirement(Requirement requirement, List<String> denyCommands) {
+        public ViewRequirement(Requirements requirement, List<String> denyCommands) {
             this.requirement = requirement;
             this.denyCommands = denyCommands;
         }
 
-        public Requirement getRequirement() {
+        public Requirements getRequirement() {
             return requirement;
         }
 

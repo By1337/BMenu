@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RequirementsFactory {
-    public static Requirement read(YamlValue ctx, MenuLoader loader, Placeholder argsReplacer) {
+    public static Requirements read(YamlValue ctx, MenuLoader loader, Placeholder argsReplacer) {
         if (ctx.getValue() == null) return Requirements.EMPTY;
         List<Requirement> requirements = new ArrayList<>();
         for (YamlContext context : ctx.getAsMap(YamlValue::getAsYamlContext).values()) {

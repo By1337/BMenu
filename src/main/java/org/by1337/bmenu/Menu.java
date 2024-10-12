@@ -28,6 +28,7 @@ import org.by1337.blib.text.MessageFormatter;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.click.MenuClickType;
+import org.by1337.bmenu.requirement.CommandRequirements;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +48,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     protected BukkitTask ticker;
     protected Animator animator;
     protected @Nullable MenuItem lastClickedItem;
-    private long lastClickTime;
+    protected long lastClickTime;
 
     public Menu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
         this.config = config;
@@ -65,6 +66,10 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     public void open() {
+        open(false);
+    }
+
+    public void open(boolean isReopen) {
         if (!config.canOpenFrom(previousMenu)) {
             throw new IllegalStateException(
                     MessageFormatter.apply(
@@ -85,32 +90,29 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventory)) {
                 viewer.openInventory(inventory);
             }
+            onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
+            if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventory)) {
+                return;
+            }
             Arrays.fill(matrix, null);
             Arrays.fill(animationMask, null);
             generate0();
-            /*if (openRequirements != null && !openRequirements.check(Menu.this, viewer)) {
-                List<String> list = new ArrayList<>(openRequirements.getDenyCommands());
-                list.replaceAll(this::replace);
-                runCommands(list);
-            } else {
-                if (!openCommands.isEmpty()) runCommands(openCommands);
-                viewer.openInventory(inventory);
-                generate0();
-            }*/
+
+            if (ticker != null && !ticker.isCancelled()) {
+                ticker.cancel();
+            }
+            ticker = Bukkit.getScheduler().runTaskTimer(
+                    loader.getPlugin(),
+                    this::tick,
+                    0,
+                    1
+            );
         });
-        if (ticker != null && !ticker.isCancelled()) {
-            ticker.cancel();
-        }
-        ticker = Bukkit.getScheduler().runTaskTimer(
-                loader.getPlugin(),
-                this::tick,
-                0,
-                1
-        );
+
     }
 
     protected void tick() {
-        if (!animator.isEnd()) {
+        if (animator != null && !animator.isEnd()) {
             animator.tick(animationMask, this);
             inventory.clear();
             flush();
@@ -135,7 +137,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         if (animator != null) {
             animator.setPos(0);
         }
-        open();
+        open(true);
     }
 
     public void refresh() {
@@ -214,12 +216,14 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             ticker.cancel();
             ticker = null;
         }
+        onEvent(MenuEvents.ON_CLOSE);
     }
 
     public void onClick(InventoryDragEvent e) {
         lastClickTime = System.currentTimeMillis();
         e.setCancelled(true);
     }
+
     public void onClick(InventoryClickEvent e) {
         lastClickTime = System.currentTimeMillis();
         e.setCancelled(true);
@@ -257,6 +261,13 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     public void setTitle(String title) {
         sendFakeTitle(title);
+    }
+
+    public void onEvent(String event) {
+        CommandRequirements commandRequirements = config.getMenuEventListeners().get(event);
+        if (commandRequirements != null) {
+            commandRequirements.run(this, this, viewer);
+        }
     }
 
     public MenuLoader getLoader() {

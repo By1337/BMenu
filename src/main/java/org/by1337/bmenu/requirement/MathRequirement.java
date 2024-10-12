@@ -4,16 +4,33 @@ import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
+import org.by1337.blib.configuration.YamlValue;
 import org.by1337.blib.math.MathParser;
 import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.util.ObjectUtil;
+
+import java.util.Collections;
+import java.util.List;
 
 public class MathRequirement implements Requirement {
     private final String expression;
     private final boolean not;
+    private final List<String> commands;
+    private final List<String> denyCommands;
 
     public MathRequirement(YamlContext context, Placeholder argsReplacer) {
         expression = argsReplacer.replace(context.getAsString("expression"));
         not = context.getAsString("type").startsWith("!");
+        commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
+                value -> ((List<?>) value).stream()
+                        .map(v -> argsReplacer.replace(new YamlValue(v).getAsString())).toList(),
+                Collections.emptyList()
+        );
+        denyCommands = ObjectUtil.mapIfNotNullOrDefault(context.get("deny_commands").getValue(),
+                value -> ((List<?>) value).stream()
+                        .map(v -> argsReplacer.replace(new YamlValue(v).getAsString())).toList(),
+                Collections.emptyList()
+        );
     }
 
     @Override
@@ -29,5 +46,15 @@ public class MathRequirement implements Requirement {
             );
             return false;
         }
+    }
+
+    @Override
+    public List<String> getCommands() {
+        return commands;
+    }
+
+    @Override
+    public List<String> getDenyCommands() {
+        return denyCommands;
     }
 }

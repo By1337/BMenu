@@ -104,6 +104,29 @@ commands-list:
     commands:
       - '[MESSAGE] &7Это команда из example-1'
 
+# Меню ивенты
+menu-events:
+  on_open: # когда меню открывается
+    requirements: # здесь можно указать условия
+      check-1:
+        type: string equals
+        input: 'str'
+        output: 'str'
+        deny_commands: [ ] # во всех проверках тоже можно указывать команды
+        commands: []
+    deny_commands: [ ]
+    commands:
+      - '[MESSAGE] Меню открыто!'
+  on_reopen: # когда меню пере-открывается, когда используется команда [BACK]
+    deny_commands: [ ]
+    commands:
+      - '[MESSAGE] Меню открыто заново!'
+  on_close: # когда меню закрывается
+    deny_commands: [ ]
+    commands:
+      - '[MESSAGE] Меню закрыто!'
+
+
 # Если namespace не указан, должно использоваться имя плагина, который загрузил это меню
 # При использовании команд [OPEN] или аналогичных без указания конкретного namespace,
 # menu loader должен сначала искать меню в своём окружении
@@ -198,10 +221,16 @@ items:
         check: # если условие окажется ложным, то проверка остальных условий прервётся
           type: math
           expression: '100 + 100 == 10 * (5 * 4)'
+          deny_commands: [ ] # во всех проверках тоже можно указывать команды
+          commands: [ ]
         check-1:
           type: string equals
           input: 'str'
           output: 'str'
+          commands:
+            - '[MESSAGE] str == str'
+            - '[BREAK]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
+            - '[CLOSE]' # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена
         check-2:
           type: string equals ignorecase
           input: 'str'

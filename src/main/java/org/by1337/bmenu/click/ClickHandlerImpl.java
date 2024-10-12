@@ -3,16 +3,16 @@ package org.by1337.bmenu.click;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.bmenu.Menu;
-import org.by1337.bmenu.requirement.Requirement;
+import org.by1337.bmenu.requirement.Requirements;
 
 import java.util.List;
 
 public class ClickHandlerImpl implements ClickHandler {
     private final List<String> denyCommands;
     private final List<String> commands;
-    private final Requirement requirement;
+    private final Requirements requirement;
 
-    public ClickHandlerImpl(List<String> denyCommands, List<String> commands, Requirement requirement) {
+    public ClickHandlerImpl(List<String> denyCommands, List<String> commands, Requirements requirement) {
         this.denyCommands = denyCommands;
         this.commands = commands;
         this.requirement = requirement;
