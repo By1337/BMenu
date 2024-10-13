@@ -28,6 +28,7 @@ import org.by1337.blib.text.MessageFormatter;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.click.MenuClickType;
+import org.by1337.bmenu.network.BungeeCordMessageSender;
 import org.by1337.bmenu.requirement.CommandRequirements;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -226,12 +227,10 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     public void onClick(InventoryDragEvent e) {
         lastClickTime = System.currentTimeMillis();
-        e.setCancelled(true);
     }
 
     public void onClick(InventoryClickEvent e) {
         lastClickTime = System.currentTimeMillis();
-        e.setCancelled(true);
         if (e.getCurrentItem() == null) {
             return;
         }
@@ -491,7 +490,15 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         );
         commands.addSubCommand(new Command<Menu>("[REOPEN]")
                 .executor((v, args) -> {
-                           v.reopen();
+                            v.reopen();
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[CONNECT]")
+                .argument(new ArgumentString<>("server"))
+                .executor((v, args) -> {
+                            String server = (String) args.getOrThrow("server", "Use [CONNECT] <server>");
+                            BungeeCordMessageSender.connectPlayerToServer(v.viewer, server, v.loader.getPlugin());
                         }
                 )
         );
