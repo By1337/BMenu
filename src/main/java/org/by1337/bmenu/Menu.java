@@ -61,7 +61,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         this.previousMenu = previousMenu;
         registerPlaceholders(RandomPlaceholders.getInstance());
         args.keySet().forEach(k -> registerPlaceholder("${" + k + "}", () -> args.get(k)));
-        registerPlaceholder("{has-back-menu}", () -> String.valueOf(previousMenu != null));
+        registerPlaceholder("{has_back_menu}", () -> String.valueOf(previousMenu != null));
         if (config.getAnimation() != null) {
             animator = config.getAnimation().createAnimator();
         }

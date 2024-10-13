@@ -10,7 +10,6 @@ import org.by1337.bmenu.util.ObjectUtil;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public class HasPermisionRequirement implements Requirement {
     private final String permission;

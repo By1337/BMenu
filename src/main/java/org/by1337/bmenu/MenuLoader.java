@@ -46,7 +46,7 @@ public class MenuLoader implements Listener {
 
     public void close() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu) {
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu m && m.getLoader() == this) {
                 player.closeInventory();
             }
         }
@@ -137,6 +137,7 @@ public class MenuLoader implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         if (event.getInventory().getHolder() instanceof Menu menu && menu.getLoader() == this) {
+            event.setCancelled(true);
             if (System.currentTimeMillis() - menu.getLastClickTime() < 100) return;
             menu.onClick(event);
         }
@@ -145,6 +146,7 @@ public class MenuLoader implements Listener {
     @EventHandler
     public void onClick(InventoryDragEvent event) {
         if (event.getInventory().getHolder() instanceof Menu menu && menu.getLoader() == this) {
+            event.setCancelled(true);
             if (System.currentTimeMillis() - menu.getLastClickTime() < 100) return;
             menu.onClick(event);
         }
