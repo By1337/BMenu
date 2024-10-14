@@ -1,6 +1,8 @@
 package org.by1337.bmenu;
 
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryType;
+import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.command.CommandList;
@@ -8,6 +10,10 @@ import org.by1337.bmenu.requirement.CommandRequirements;
 import org.by1337.bmenu.yaml.RawYamlContext;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class MenuConfig implements MenuItemLookup {
@@ -89,6 +95,30 @@ public class MenuConfig implements MenuItemLookup {
             }
         }
         return null;
+    }
+
+    public void dump(Path toFolder) {
+        dump(toFolder, getSaveName());
+    }
+
+    public void dump(Path toFolder, String name) {
+        try {
+            if (!toFolder.toFile().exists()) {
+                toFolder.toFile().mkdirs();
+            }
+            Files.writeString(toFolder.resolve(name + ".yml"), context.saveToString());
+
+            int x = 0;
+            for (MenuConfig superMenu : supers) {
+                superMenu.dump(toFolder, name + "$" + superMenu.getSaveName() + "$" + x++);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getSaveName() {
+        return id == null ? "anonymous" : id.getSpace().getName() + "_" + id.getName().getName();
     }
 
     public Map<String, CommandRequirements> getMenuEventListeners() {

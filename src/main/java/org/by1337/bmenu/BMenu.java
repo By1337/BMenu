@@ -100,6 +100,21 @@ public class BMenu extends JavaPlugin {
                             m.open();
                         })
                 )
+                .addSubCommand(new Command<CommandSender>("dump")
+                        .requires(new RequiresPermission<>("bmenu.dump"))
+                        .addSubCommand(new Command<CommandSender>("menu")
+                                .requires(new RequiresPermission<>("bmenu.dump.menu"))
+                                .argument(new ArgumentSetList<>("menu", () -> loader.getMenus().stream().map(SpacedNameKey::toString).toList()))
+                                .executor((sender, args) -> {
+                                    String menu = (String) args.getOrThrow("menu", "Use /bmenu dump menu <menu>");
+                                    MenuConfig config = loader.findMenu(new SpacedNameKey(menu));
+                                    File file = new File(getDataFolder(), "dump-" + System.currentTimeMillis());
+                                    file.mkdirs();
+                                    config.dump(file.toPath());
+                                    loader.getMessage().sendMsg(sender, "&aSaved to {}", file.getPath());
+                                })
+                        )
+                )
 /*                .addSubCommand(new Command<CommandSender>("item")
                         .requires(new RequiresPermission<>("bmenu.item"))
                         .addSubCommand(new Command<CommandSender>("dump")

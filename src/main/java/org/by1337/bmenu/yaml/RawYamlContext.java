@@ -1,5 +1,7 @@
 package org.by1337.bmenu.yaml;
 
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +45,12 @@ public class RawYamlContext {
             }
         }
         return new YamlValue(last);
+    }
+
+    public String saveToString() {
+        YamlConfiguration root = new YamlConfiguration();
+        YamlContext.convertMapsToSections(raw, root);
+        return root.saveToString();
     }
 
     public Map<String, Object> getRaw() {

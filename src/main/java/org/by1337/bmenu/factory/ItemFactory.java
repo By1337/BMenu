@@ -35,9 +35,9 @@ public class ItemFactory {
             Placeholder argsReplacer = new Placeholder();
             Map<String, String> args = ctx.get("args").getAsMap(String.class, Collections.emptyMap());
             builder.setArgs(args);
-            args.forEach((key, value) ->
-                    argsReplacer.registerPlaceholder("${" + key + "}", () -> value)
-            );
+//            args.forEach((key, value) -> // NOP
+//                    argsReplacer.registerPlaceholder("${" + key + "}", () -> value)
+//            );
             builder.setMaterial(argsReplacer.replace(ctx.get("material").getAsString("STONE")));
             builder.setName(ObjectUtil.mapIfNotNull(ctx.get("display_name").getAsString(null), argsReplacer::replace));
             builder.setAmount(argsReplacer.replace(ctx.get("amount").getAsString("1")));

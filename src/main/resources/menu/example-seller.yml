@@ -5,7 +5,7 @@ id: example:seller
 provider: default
 type: CHEST
 size: 54
-title: '&7Скупщик'
+title: '&7Селлер'
 only-open-from: [ ]
 
 args: { }
@@ -359,21 +359,13 @@ animation:
   - tick: 0
     opcodes:
       - title: '&7С'
-  - tick: 1
-    opcodes:
-      - title: '&7Ск'
-  - tick: 2
-    opcodes:
-      - title: '&7Ску'
-  - tick: 3
-    opcodes:
-      - title: '&7Скуп'
-  - tick: 4
-    opcodes:
-      - title: '&7Скупщ'
-  - tick: 5
-    opcodes:
-      - title: '&7Скупщи'
-  - tick: 6
-    opcodes:
-      - title: '&7Скупщик'
+  - opcodes:
+      - title: '&7Се'
+  - opcodes:
+      - title: '&7Сел'
+  - opcodes:
+      - title: '&7Селл'
+  - opcodes:
+      - title: '&7Селле'
+  - opcodes:
+      - title: '&7Селлер'

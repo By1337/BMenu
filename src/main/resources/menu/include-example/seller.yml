@@ -7,7 +7,7 @@ id: example:prem-seller
 provider: default
 type: CHEST
 size: 45
-title: '&7Премиальный Скупщик'
+title: '&7Премиальный селлер'
 
 defaults:
   item: &item
