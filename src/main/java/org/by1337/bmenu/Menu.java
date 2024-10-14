@@ -147,6 +147,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     public void refresh() {
+        for (int i = 0; i < animationMask.length; i++) {
+            MenuItem item = animationMask[i];
+            if (item == null || item.getBuilder() == null) continue;
+            animationMask[i] = item.getBuilder().get();
+        }
         generate0();
     }
 
