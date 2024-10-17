@@ -118,19 +118,22 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         if (animator != null && !animator.isEnd()) {
             animator.tick(animationMask, this);
             inventory.clear();
-            flush();
         }
         doItemTick(matrix);
         doItemTick(animationMask);
+        flush();
     }
 
     private void doItemTick(MenuItem[] matrix) {
         for (int i = 0; i < matrix.length; i++) {
             MenuItem item = matrix[i];
             if (item != null && item.isTicking() && item.getBuilder() != null) {
-                matrix[i] = item = item.getBuilder().get();
-                if (item != null) {
-                    setItem(item);
+                item.doTick();
+                if (item.shouldBeRebuild()){
+                    matrix[i] = item = item.getBuilder().get();
+                    if (item != null) {
+                        setItem(item);
+                    }
                 }
             }
         }

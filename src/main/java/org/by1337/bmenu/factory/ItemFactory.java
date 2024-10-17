@@ -114,6 +114,7 @@ public class ItemFactory {
             }
         }
         builder.setTicking(ctx.getAsBoolean("ticking", false));
+        builder.setTickSpeed(ctx.getAsInteger("tick-speed", 1));
         return builder;
     }
 

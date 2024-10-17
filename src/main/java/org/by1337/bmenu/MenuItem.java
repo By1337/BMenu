@@ -20,6 +20,8 @@ public class MenuItem {
     private @Nullable Object data;
     private boolean ticking;
     private @Nullable Supplier<@Nullable MenuItem> builder;
+    private int tickSpeed;
+    private int tickCount;
 
     public MenuItem(int[] slots, ItemStack itemStack, Map<MenuClickType, ClickHandler> clicks, boolean ticking, @Nullable Supplier<@Nullable MenuItem> builder) {
         this.slots = slots;
@@ -112,5 +114,19 @@ public class MenuItem {
 
     public void setCustomPlaceholderable(@Nullable Placeholderable customPlaceholderable) {
         this.customPlaceholderable = customPlaceholderable;
+    }
+    public void doTick(){
+        tickCount++;
+    }
+    public boolean shouldBeRebuild(){
+        return tickCount > tickSpeed;
+    }
+
+    public int getTickSpeed() {
+        return tickSpeed;
+    }
+
+    public void setTickSpeed(int tickSpeed) {
+        this.tickSpeed = tickSpeed;
     }
 }

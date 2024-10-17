@@ -52,6 +52,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private int damage;
     private Map<String, String> args;
     private boolean ticking;
+    private int tickSpeed;
 
     public MenuItemBuilder() {
     }
@@ -143,13 +144,15 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         } else {
             builder = null;
         }
-        return new MenuItem(
+        MenuItem item = new MenuItem(
                 slots,
                 result,
                 clicks,
                 ticking,
                 builder
         );
+        item.setTickSpeed(tickSpeed);
+        return item;
     }
 
 
@@ -258,6 +261,10 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         this.ticking = ticking;
     }
 
+    public void setTickSpeed(int tickSpeed) {
+        this.tickSpeed = tickSpeed;
+    }
+
     public void addSlot(final int slot) {
         int[] newSlots = new int[slots.length + 1];
         System.arraycopy(slots, 0, newSlots, 0, slots.length);
@@ -324,6 +331,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     public boolean isTicking() {
         return ticking;
     }
+
 
     public static class ViewRequirement {
         private static final ViewRequirement EMPTY = new ViewRequirement(Requirements.EMPTY, Collections.emptyList());
