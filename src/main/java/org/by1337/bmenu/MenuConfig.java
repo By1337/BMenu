@@ -7,6 +7,7 @@ import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.command.CommandList;
 import org.by1337.bmenu.requirement.CommandRequirements;
+import org.by1337.bmenu.yaml.CashedYamlContext;
 import org.by1337.bmenu.yaml.RawYamlContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,6 +34,8 @@ public class MenuConfig implements MenuItemLookup {
     private @Nullable Animator.AnimatorContext animation;
     private final CommandList commandList;
     private final Map<String, CommandRequirements> menuEventListeners;
+    private Object data;
+    private final CashedYamlContext cashedContext;
 
     public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, RawYamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners) {
         this.supers = supers;
@@ -44,6 +47,7 @@ public class MenuConfig implements MenuItemLookup {
         this.args = args;
         this.idToItems = idToItems;
         this.context = context;
+        cashedContext = new CashedYamlContext(this.context);
         this.loader = loader;
         this.title = title;
         this.animation = animation;
@@ -183,5 +187,21 @@ public class MenuConfig implements MenuItemLookup {
 
     public CommandList getCommandList() {
         return commandList;
+    }
+
+    public void setAnimation(@Nullable Animator.AnimatorContext animation) {
+        this.animation = animation;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
+    }
+
+    public CashedYamlContext getCashedContext() {
+        return cashedContext;
     }
 }

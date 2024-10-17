@@ -15,9 +15,11 @@ import org.bukkit.potion.PotionEffect;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.MultiPlaceholder;
 import org.by1337.blib.chat.util.Message;
+import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.Pair;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
+import org.by1337.bmenu.factory.ItemFactory;
 import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.requirement.Requirement;
 import org.by1337.bmenu.requirement.Requirements;
@@ -50,6 +52,14 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private int damage;
     private Map<String, String> args;
     private boolean ticking;
+
+    public MenuItemBuilder() {
+    }
+
+    public static MenuItemBuilder read(YamlContext context, MenuLoader loader){
+        return ItemFactory.readItem(context, loader);
+    }
+
 
     @Nullable
     public MenuItem build(Menu menu) {
