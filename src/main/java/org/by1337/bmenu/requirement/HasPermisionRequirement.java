@@ -17,17 +17,24 @@ public class HasPermisionRequirement implements Requirement {
     private final List<String> commands;
     private final List<String> denyCommands;
 
-    public HasPermisionRequirement(YamlContext context, Placeholder argsReplacer) {
-        permission = argsReplacer.replace(context.getAsString("permission"));
+    public HasPermisionRequirement(String permission, boolean not, List<String> commands, List<String> denyCommands) {
+        this.permission = permission;
+        this.not = not;
+        this.commands = commands;
+        this.denyCommands = denyCommands;
+    }
+
+    public HasPermisionRequirement(YamlContext context) {
+        permission = context.getAsString("permission");
         not = context.getAsString("type").startsWith("!");
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> argsReplacer.replace(new YamlValue(v).getAsString())).toList(),
+                        .map(v -> new YamlValue(v).getAsString()).toList(),
                 Collections.emptyList()
         );
         denyCommands = ObjectUtil.mapIfNotNullOrDefault(context.get("deny_commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> argsReplacer.replace(new YamlValue(v).getAsString())).toList(),
+                        .map(v -> new YamlValue(v).getAsString()).toList(),
                 Collections.emptyList()
         );
     }

@@ -49,6 +49,6 @@ public enum RequirementType {
 
     @FunctionalInterface
     public interface RequirementCreator {
-        Requirement createRequirement(YamlContext context, Placeholder argsReplacer);
+        Requirement createRequirement(YamlContext context);
     }
 }

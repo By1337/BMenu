@@ -24,9 +24,7 @@ defaults:
       - '&r '
     on_left_click:
       requirements:
-        check:
-          type: math
-          expression: '%vault_eco_balance% >= ${PRICE}'
+        - check: '%vault_eco_balance_fixed% >= ${PRICE}'
       deny_commands:
         - '[MESSAGE] &cУ Вас не достаточно баланса!'
       commands:
@@ -35,9 +33,7 @@ defaults:
         - '[MESSAGE] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'
     on_right_click:
       requirements:
-        check:
-          type: math
-          expression: '%vault_eco_balance% >= ${PRICE_32}'
+        - check: '%vault_eco_balance_fixed% >= ${PRICE_32}'
       deny_commands:
         - '[MESSAGE] &cУ Вас не достаточно баланса!'
       commands:

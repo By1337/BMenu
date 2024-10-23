@@ -19,18 +19,26 @@ public class StringContainsRequirement implements Requirement {
     private final List<String> denyCommands;
 
 
-    public StringContainsRequirement(YamlContext context, Placeholder argsReplacer) {
-        input = argsReplacer.replace(context.getAsString("input"));
-        output = argsReplacer.replace(context.getAsString("output"));
+    public StringContainsRequirement(String input, String output, boolean not, List<String> commands, List<String> denyCommands) {
+        this.input = input;
+        this.output = output;
+        this.not = not;
+        this.commands = commands;
+        this.denyCommands = denyCommands;
+    }
+
+    public StringContainsRequirement(YamlContext context) {
+        input = context.getAsString("input");
+        output = context.getAsString("output");
         not = context.getAsString("type").startsWith("!");
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> argsReplacer.replace(new YamlValue(v).getAsString())).toList(),
+                        .map(v -> new YamlValue(v).getAsString()).toList(),
                 Collections.emptyList()
         );
         denyCommands = ObjectUtil.mapIfNotNullOrDefault(context.get("deny_commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> argsReplacer.replace(new YamlValue(v).getAsString())).toList(),
+                        .map(v -> new YamlValue(v).getAsString()).toList(),
                 Collections.emptyList()
         );
     }

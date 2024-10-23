@@ -108,12 +108,8 @@ commands-list:
 menu-events:
   on_open: # когда меню открывается
     requirements: # здесь можно указать условия
-      check-1:
-        type: string equals
-        input: 'str'
-        output: 'str'
+      - check: 'str == str'
         deny_commands: [ ] # во всех проверках тоже можно указывать команды
-        commands: [ ]
     deny_commands: [ ]
     commands:
       - '[MESSAGE] Меню открыто!'
@@ -172,8 +168,7 @@ args:
 defaults:
   on_left_click_logic: &on_left_click_logic
     requirements:
-      type: math
-      expression: '%balance% >= ${PRICE}'
+      - check: '%vault_eco_balance_fixed% >= ${PRICE}'
     deny_commands:
       - '[MESSAGE] &cУ Вас не достаточно баланса!'
     commands:
@@ -219,42 +214,54 @@ items:
       # если в type перед проверкой поставить ! то проверка будет работать на оборот
       # например type: '!has permission' такая проверка сработает если игрок не имеет пермишена
       requirements: # алиас req
-        check: # если условие окажется ложным, то проверка остальных условий прервётся
-          type: math
-          expression: '100 + 100 == 10 * (5 * 4)'
-          deny_commands: [ ] # во всех проверках тоже можно указывать команды
+        - check: '100 + 100 * 100 == 15'
           commands: [ ]
-        check-1:
-          type: string equals
-          input: 'str'
-          output: 'str'
+          deny_commands: [ ]
+        - check: '100.5 + 100.5 == 201'
+        - check: 'has super.permission' # если у игрока есть пермишен
+        - check: '!has super.permission' # если у игрока нет пермишена
+        - check: 'string has str' # строка содержит
+        - check: 'string !has str' # строка не содержит
+        - check: 'string HAS str' # строка содержит без учёта регистра
+        - check: 'string !HAS str' # строка не содержит без учёта регистра
+        - check: 'string == string' # строка равна
+        - check: 'string != string' # строка не равна
           commands:
-            - '[MESSAGE] str == str'
+            - '[MESSAGE] string != string'
             - '[BREAK]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
             - '[CLOSE]' # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена
-        check-2:
-          type: string equals ignorecase
-          input: 'str'
-          output: 'STR'
-        check-3:
-          type: string contains
-          input: 'str_str_str'
-          output: 'str'
-        check-4:
-          type: regex matches
-          regex: '^(str)\d+'
-          input: 'str88ing'
-        check-5:
-          type: has permission
-          permission: 'admin.use'
+####### НИЖЕ СТАРЫЙ ФОРМАТ ЕГО ТАКЖЕ МОЖНО ИСПОЛЬЗОВАТЬ #######
+#      requirements: # алиас req
+#        check: # если условие окажется ложным, то проверка остальных условий прервётся
+#          type: math
+#          expression: '100 + 100 == 10 * (5 * 4)'
+#          deny_commands: [ ] # во всех проверках тоже можно указывать команды
+#          commands: [ ]
+#        check-1:
+#          type: string equals
+#          input: 'str'
+#          output: 'str'
+#          commands:
+#        check-2:
+#          type: string equals ignorecase
+#          input: 'str'
+#          output: 'STR'
+#        check-3:
+#          type: string contains
+#          input: 'str_str_str'
+#          output: 'str'
+#        check-4:
+#          type: regex matches
+#          regex: '^(str)\d+'
+#          input: 'str88ing'
+#        check-5:
+#          type: has permission
+#          permission: 'admin.use'
       # Здесь можно выполнить команды в зависимости от результатов условий
       deny_commands: [ ] # если хотя бы одно из условий окажется ложным
     on_left_click: # обработка клика
       requirements: # здесь можно указать условия
-        check-1:
-          type: string equals
-          input: 'str'
-          output: 'str'
+        - check: 'str == str'
       # Здесь можно указываются команды в зависимости от результатов проверки
       deny_commands: [ ]
       commands: [ ]
@@ -334,10 +341,10 @@ animation:
 animations:
   default:
     - tick: 0
-      opcodes: []
+      opcodes: [ ]
   other:
     - tick: 0
-      opcodes: []
+      opcodes: [ ]
 
 # Все команды
 # [CONSOLE] <cmd>

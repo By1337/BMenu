@@ -21,19 +21,19 @@ public class RegexMatchesRequirement implements Requirement {
     private final List<String> commands;
     private final List<String> denyCommands;
 
-    public RegexMatchesRequirement(YamlContext context, Placeholder argsReplacer) {
-        input = argsReplacer.replace(context.getAsString("input"));
-        regex = argsReplacer.replace(context.getAsString("regex"));
+    public RegexMatchesRequirement(YamlContext context) {
+        input = context.getAsString("input");
+        regex = context.getAsString("regex");
         not = context.getAsString("type").startsWith("!");
         pattern = Pattern.compile(regex);
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> argsReplacer.replace(new YamlValue(v).getAsString())).toList(),
+                        .map(v -> new YamlValue(v).getAsString()).toList(),
                 Collections.emptyList()
         );
         denyCommands = ObjectUtil.mapIfNotNullOrDefault(context.get("deny_commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> argsReplacer.replace(new YamlValue(v).getAsString())).toList(),
+                        .map(v -> new YamlValue(v).getAsString()).toList(),
                 Collections.emptyList()
         );
     }
