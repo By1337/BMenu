@@ -349,6 +349,7 @@ animations:
 # Все команды
 # [CONSOLE] <cmd>
 # [PLAYER] <cmd>
+# [CHAT] <msg> - отправит сообщение от имени игрока, также можно выполнить команду
 # [SOUND] <sound> <?volume> <?pitch>
 # [CLOSE]
 # здесь команды открытия меню
@@ -369,3 +370,7 @@ animations:
 # [RUN_RAND]
 # [CONNECT] <server> - подключает игрока к серверу
 # [SET_ANIMATION] <animation> - устанавливает анимацию из блока animations
+#
+# [GIVEMONEY] <count> - выдать деньги
+# [TAKEMONEY] <count> - забрать деньги
+# [DELAY] <delay> <cmd> - выполнить команду с задержкой например [DELAY] 20 [MESSAGE] &aЭто сообщение отправилось спустя 1 секунду!

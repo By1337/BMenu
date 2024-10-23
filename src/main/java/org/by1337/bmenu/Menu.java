@@ -16,10 +16,7 @@ import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandException;
 import org.by1337.blib.command.StringReader;
-import org.by1337.blib.command.argument.ArgumentEnumValue;
-import org.by1337.blib.command.argument.ArgumentFloat;
-import org.by1337.blib.command.argument.ArgumentString;
-import org.by1337.blib.command.argument.ArgumentStrings;
+import org.by1337.blib.command.argument.*;
 import org.by1337.blib.nbt.NBT;
 import org.by1337.blib.nbt.NBTParser;
 import org.by1337.blib.nbt.impl.ListNBT;
@@ -28,6 +25,7 @@ import org.by1337.blib.text.MessageFormatter;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.click.MenuClickType;
+import org.by1337.bmenu.hook.VaultHook;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
 import org.by1337.bmenu.requirement.CommandRequirements;
 import org.jetbrains.annotations.NotNull;
@@ -262,8 +260,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     protected void sync(Runnable runnable) {
-        if (!Bukkit.isPrimaryThread())
-            Bukkit.getScheduler().runTaskLater(loader.getPlugin(), runnable, 0);
+        sync(runnable, 0);
+    }
+    protected void sync(Runnable runnable, int delay) {
+        if (!Bukkit.isPrimaryThread() || delay != 0)
+            Bukkit.getScheduler().runTaskLater(loader.getPlugin(), runnable, delay);
         else runnable.run();
     }
 
@@ -353,6 +354,14 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 .executor((v, args) -> {
                             String cmd = (String) args.getOrThrow("cmd");
                             v.sync(() -> v.viewer.performCommand(cmd));
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[CHAT]")
+                .argument(new ArgumentStrings<>("cmd"))
+                .executor((v, args) -> {
+                            String cmd = (String) args.getOrThrow("cmd");
+                            v.sync(() -> v.viewer.chat(cmd));
                         }
                 )
         );
@@ -519,6 +528,38 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                                 throw new CommandException("Неизвестная анимация {}", animation);
                             }
                             v.animator = ctx.createAnimator();
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[GIVEMONEY]")
+                .argument(new ArgumentFormattedDouble<>("count"))
+                .executor((v, args) -> {
+                            Double count = (Double) args.getOrThrow("count", "Use: [GIVEMONEY] <count>");
+                            if (!VaultHook.get().isAvailable()) {
+                                throw new CommandException("Economy not defined");
+                            }
+                            VaultHook.get().depositPlayer(v.viewer, count);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[TAKEMONEY]")
+                .argument(new ArgumentFormattedDouble<>("count"))
+                .executor((v, args) -> {
+                            Double count = (Double) args.getOrThrow("count", "Use: [GIVEMONEY] <count>");
+                            if (!VaultHook.get().isAvailable()) {
+                                throw new CommandException("Economy not defined");
+                            }
+                            VaultHook.get().withdrawPlayer(v.viewer, count);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[DELAY]")
+                .argument(new ArgumentInteger<>("delay"))
+                .argument(new ArgumentStrings<>("cmd"))
+                .executor((v, args) -> {
+                           int delay = (int) args.getOrThrow("delay", "Use: [DELAY] <delay> <command>");
+                           String cmd = (String) args.getOrThrow("cmd", "Use: [DELAY] <delay> <command>");
+                           v.sync(() -> v.runCommands(List.of(cmd)), delay);
                         }
                 )
         );
