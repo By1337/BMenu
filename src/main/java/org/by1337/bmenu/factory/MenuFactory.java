@@ -2,15 +2,10 @@ package org.by1337.bmenu.factory;
 
 
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryType;
 import org.by1337.blib.chat.placeholder.Placeholder;
-import org.by1337.blib.configuration.YamlConfig;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
-import org.by1337.blib.nbt.NBT;
-import org.by1337.blib.nbt.NBTParser;
-import org.by1337.blib.nbt.impl.ListNBT;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.MenuConfig;
 import org.by1337.bmenu.MenuItemBuilder;
@@ -25,9 +20,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
 public class MenuFactory {
     private static final MenuFactory INSTANCE = new MenuFactory();
@@ -69,6 +63,13 @@ public class MenuFactory {
         } else {
             animator = null;
         }
+        Map<String, Animator.AnimatorContext> animations  = new HashMap<>();
+        if (ctx.has("animations")) {
+            Map<String, YamlValue> animationsRaw = ctx.get("animations").getAsMap(YamlValue::getAsString, Function.identity(), Collections.emptyMap());
+            for (Map.Entry<String, YamlValue> entry : animationsRaw.entrySet()) {
+                animations.put(entry.getKey(), AnimatorFactory.read(entry.getValue().getAsList(YamlValue::getAsYamlContext, Collections.emptyList()), loader));
+            }
+        }
         CommandList commandList = new CommandList(ctx.get("commands-list"));
         Map<String, CommandRequirements> menuEventListeners =
                 ctx.get("menu-events").getAsMap(YamlValue::getAsString, v -> {
@@ -99,7 +100,8 @@ public class MenuFactory {
                 title,
                 animator,
                 commandList,
-                menuEventListeners
+                menuEventListeners,
+                animations
         );
     }
 

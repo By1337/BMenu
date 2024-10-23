@@ -331,6 +331,13 @@ animation:
           - '[MESSAGE] msg'
       - title: title # устанавливает title меню
 
+animations:
+  default:
+    - tick: 0
+      opcodes: []
+  other:
+    - tick: 0
+      opcodes: []
 
 # Все команды
 # [CONSOLE] <cmd>
@@ -354,3 +361,4 @@ animation:
 # [RUN] <имя набора>
 # [RUN_RAND]
 # [CONNECT] <server> - подключает игрока к серверу
+# [SET_ANIMATION] <animation> - устанавливает анимацию из блока animations

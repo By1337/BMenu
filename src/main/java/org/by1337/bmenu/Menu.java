@@ -62,9 +62,6 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         registerPlaceholders(RandomPlaceholders.getInstance());
         args.keySet().forEach(k -> registerPlaceholder("${" + k + "}", () -> args.get(k)));
         registerPlaceholder("{has_back_menu}", () -> String.valueOf(previousMenu != null));
-        if (config.getAnimation() != null) {
-            animator = config.getAnimation().createAnimator();
-        }
     }
 
     public void open() {
@@ -94,6 +91,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 viewer.openInventory(inventory);
             }
             onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
+            if (animator == null && config.getAnimation() != null) {
+                animator = config.getAnimation().createAnimator();
+            }
             if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventory)) {
                 return;
             }
@@ -129,7 +129,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             MenuItem item = matrix[i];
             if (item != null && item.isTicking() && item.getBuilder() != null) {
                 item.doTick();
-                if (item.shouldBeRebuild()){
+                if (item.shouldBeRebuild()) {
                     matrix[i] = item = item.getBuilder().get();
                     if (item != null) {
                         setItem(item);
@@ -507,6 +507,18 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 .executor((v, args) -> {
                             String server = (String) args.getOrThrow("server", "Use [CONNECT] <server>");
                             BungeeCordMessageSender.connectPlayerToServer(v.viewer, server, v.loader.getPlugin());
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[SET_ANIMATION]")
+                .argument(new ArgumentString<>("animation"))
+                .executor((v, args) -> {
+                            String animation = (String) args.getOrThrow("animation", "Use: [SET_ANIMATION] <animation>");
+                            Animator.AnimatorContext ctx = v.config.getAnimations().get(animation);
+                            if (ctx == null) {
+                                throw new CommandException("Неизвестная анимация {}", animation);
+                            }
+                            v.animator = ctx.createAnimator();
                         }
                 )
         );

@@ -1,8 +1,6 @@
 package org.by1337.bmenu;
 
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryType;
-import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.command.CommandList;
@@ -12,7 +10,6 @@ import org.by1337.bmenu.yaml.RawYamlContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -36,8 +33,9 @@ public class MenuConfig implements MenuItemLookup {
     private final Map<String, CommandRequirements> menuEventListeners;
     private Object data;
     private final CashedYamlContext cashedContext;
+    private final Map<String, Animator.AnimatorContext> animations;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, RawYamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, RawYamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, Map<String, Animator.AnimatorContext> animations) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
@@ -47,6 +45,7 @@ public class MenuConfig implements MenuItemLookup {
         this.args = args;
         this.idToItems = idToItems;
         this.context = context;
+        this.animations = animations;
         cashedContext = new CashedYamlContext(this.context);
         this.loader = loader;
         this.title = title;
@@ -66,6 +65,13 @@ public class MenuConfig implements MenuItemLookup {
                     this.animation = superMenu.animation;
                 } else {
                     this.animation.merge(superMenu.animation);
+                }
+            }
+            for (String s : superMenu.animations.keySet()) {
+                if (this.animations.containsKey(s)) {
+                    this.animations.get(s).merge(superMenu.animations.get(s));
+                } else {
+                    this.animations.put(s, superMenu.animations.get(s));
                 }
             }
         }
@@ -203,5 +209,9 @@ public class MenuConfig implements MenuItemLookup {
 
     public CashedYamlContext getCashedContext() {
         return cashedContext;
+    }
+
+    public Map<String, Animator.AnimatorContext> getAnimations() {
+        return animations;
     }
 }
