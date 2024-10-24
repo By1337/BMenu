@@ -21,7 +21,6 @@ import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.ItemFactory;
 import org.by1337.bmenu.hook.ItemStackCreator;
-import org.by1337.bmenu.requirement.Requirement;
 import org.by1337.bmenu.requirement.Requirements;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +56,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     public MenuItemBuilder() {
     }
 
-    public static MenuItemBuilder read(YamlContext context, MenuLoader loader){
+    public static MenuItemBuilder read(YamlContext context, MenuLoader loader) {
         return ItemFactory.readItem(context, loader);
     }
 
@@ -138,12 +137,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         }
         result.setItemMeta(im);
         result.setAmount(Integer.parseInt(placeholder.replace(amount)));
-        @Nullable Supplier<@Nullable MenuItem> builder;
-        if (ticking) {
-            builder = () -> build(menu, itemStack, placeholderables);
-        } else {
-            builder = null;
-        }
+        Supplier<@Nullable MenuItem> builder = () -> build(menu, itemStack, placeholderables);
         MenuItem item = new MenuItem(
                 slots,
                 result,
