@@ -11,7 +11,7 @@
     <dependency>
         <groupId>org.by1337.bmenu</groupId>
         <artifactId>BMenu</artifactId>
-        <version>1.2</version>
+        <version>1.3</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
