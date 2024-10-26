@@ -3,14 +3,12 @@ package org.by1337.bmenu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionEffect;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.MultiPlaceholder;
@@ -121,6 +119,10 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 potionMeta.setColor(color);
             } else if (im instanceof LeatherArmorMeta armorMeta) {
                 armorMeta.setColor(color);
+            } else if (im instanceof MapMeta mapMeta) {
+                mapMeta.setColor(color);
+            } else if (im instanceof FireworkEffectMeta effectMeta) {
+                effectMeta.setEffect(FireworkEffect.builder().withColor(color).build());
             }
         }
         for (var pair : enchantments) {
