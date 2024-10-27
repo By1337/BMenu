@@ -6,6 +6,7 @@ import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Arrow;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
@@ -112,7 +113,11 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
             im.addItemFlags(itemFlag);
 
         for (PotionEffect potionEffect : potionEffects) {
-            ((PotionMeta) im).addCustomEffect(potionEffect, true);
+            if (im instanceof PotionMeta potionMeta) {
+                potionMeta.addCustomEffect(potionEffect, true);
+            } else if (im instanceof Arrow arrow) {
+                arrow.addCustomEffect(potionEffect, true);
+            }
         }
         if (color != null) {
             if (im instanceof PotionMeta potionMeta) {
@@ -123,6 +128,8 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 mapMeta.setColor(color);
             } else if (im instanceof FireworkEffectMeta effectMeta) {
                 effectMeta.setEffect(FireworkEffect.builder().withColor(color).build());
+            } else if (im instanceof Arrow arrow) {
+                arrow.setColor(color);
             }
         }
         for (var pair : enchantments) {
