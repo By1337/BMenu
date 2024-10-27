@@ -6,7 +6,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
 import org.by1337.blib.util.Pair;
@@ -16,12 +15,10 @@ import org.by1337.bmenu.click.ClickHandlerImpl;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.requirement.Requirements;
 import org.by1337.bmenu.util.ObjectUtil;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class ItemFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger("BMenu#ItemFactory");
@@ -36,25 +33,22 @@ public class ItemFactory {
         return itemMap;
     }
 
-    public static MenuItemBuilder readItem(YamlContext ctx, MenuLoader loader){
+    public static MenuItemBuilder readItem(YamlContext ctx, MenuLoader loader) {
         MenuItemBuilder builder = new MenuItemBuilder();
-        Placeholder argsReplacer = new Placeholder();
         Map<String, String> args = ctx.get("args").getAsMap(String.class, Collections.emptyMap());
         builder.setArgs(args);
-//            args.forEach((key, value) -> // NOP
-//                    argsReplacer.registerPlaceholder("${" + key + "}", () -> value)
-//            );
-        builder.setMaterial(argsReplacer.replace(ctx.get("material").getAsString("STONE")));
-        builder.setName(ObjectUtil.mapIfNotNull(ctx.get("display_name").getAsString(null), argsReplacer::replace));
-        builder.setAmount(argsReplacer.replace(ctx.get("amount").getAsString("1")));
-        builder.setLore(ctx.get("lore").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(argsReplacer::replace).toList());
-        builder.setItemFlags(ctx.get("item_flags").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(s -> ItemFlag.valueOf(argsReplacer.replace(s))).toList());
+
+        builder.setMaterial(ctx.get("material").getAsString("STONE"));
+        builder.setName(ctx.get("display_name").getAsString(null));
+        builder.setAmount(ctx.get("amount").getAsString("1"));
+        builder.setLore(ctx.get("lore").getAsList(YamlValue::getAsString, Collections.emptyList()));
+        builder.setItemFlags(ctx.get("item_flags").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(s -> ItemFlag.valueOf(s.toUpperCase(Locale.ENGLISH))).toList());
         builder.setPotionEffects(
-                ctx.get("potion_effects").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(argsReplacer::replace).toList()
-                        .stream().map(s -> {
-                            String[] args0 = argsReplacer.replace(s).split(";");
+                ctx.get("potion_effects").getAsList(YamlValue::getAsString, Collections.emptyList()).stream()
+                        .map(s -> {
+                            String[] args0 = s.split(";");
                             if (args0.length != 3) {
-                                LOGGER.error("expected <PotionEffectType>;<duration>;<amplifier>, not {}", argsReplacer.replace(s));
+                                LOGGER.error("expected <PotionEffectType>;<duration>;<amplifier>, not {}", s);
                                 return null;
                             }
                             PotionEffectType type = Objects.requireNonNull(PotionEffectType.getByName(args0[0].toLowerCase(Locale.ENGLISH)), "PotionEffectType is null");
@@ -66,11 +60,11 @@ public class ItemFactory {
         );
         builder.setColor(ctx.getAs("color", Color.class, null));
         builder.setEnchantments(
-                ctx.get("enchantments").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(argsReplacer::replace).toList()
-                        .stream().map(s -> {
-                            String[] args0 = argsReplacer.replace(s).split(";");
+                ctx.get("enchantments").getAsList(YamlValue::getAsString, Collections.emptyList()).stream()
+                        .map(s -> {
+                            String[] args0 = s.split(";");
                             if (args0.length != 2) {
-                                LOGGER.error("was expected to be enchantmentid;level, not {}", argsReplacer.replace(s));
+                                LOGGER.error("was expected to be enchantmentid;level, not {}", s);
                                 return null;
                             }
                             Enchantment type = Objects.requireNonNull(Enchantment.getByKey(NamespacedKey.minecraft(args0[0].toLowerCase(Locale.ENGLISH))), "Enchantment is null");
@@ -85,7 +79,7 @@ public class ItemFactory {
         builder.setViewRequirement(
                 ObjectUtil.mapIfNotNullOrDefault(
                         ctx.get("view_requirement.requirements"),
-                        v -> RequirementsFactory.read(v, loader, argsReplacer),
+                        v -> RequirementsFactory.read(v, loader),
                         Requirements.EMPTY
                 ),
                 ctx.getList("view_requirement.deny_commands", String.class, Collections.emptyList())
@@ -99,14 +93,12 @@ public class ItemFactory {
                         new ClickHandlerImpl(
                                 ctx.get(key + ".deny_commands")
                                         .getAsList(YamlValue::getAsString, Collections.emptyList())
-                                        .stream().map(argsReplacer::replace).toList()
                                 ,
                                 ctx.get(key + ".commands").getAsList(YamlValue::getAsString, Collections.emptyList())
-                                        .stream().map(argsReplacer::replace).toList()
                                 ,
                                 ObjectUtil.mapIfNotNullOrDefault(
                                         ctx.get(key + ".requirements"),
-                                        v -> RequirementsFactory.read(v, loader, argsReplacer),
+                                        v -> RequirementsFactory.read(v, loader),
                                         Requirements.EMPTY
                                 )
                         )
@@ -115,9 +107,7 @@ public class ItemFactory {
         }
         builder.setTicking(ctx.getAsBoolean("ticking", false));
         builder.setTickSpeed(ctx.getAsInteger("tick-speed", 1));
-
-        if (ctx.getAsInteger("damage") != null)
-            builder.setDamage(ctx.getAsInteger("damage"));
+        builder.setDamage(ctx.getAsInteger("damage", 0));
 
 
         return builder;
