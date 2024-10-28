@@ -1,14 +1,9 @@
 package org.by1337.bmenu;
 
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.by1337.blib.BLib;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandSyntaxError;
 import org.by1337.blib.command.CommandWrapper;
@@ -16,6 +11,7 @@ import org.by1337.blib.command.argument.ArgumentPlayer;
 import org.by1337.blib.command.argument.ArgumentSetList;
 import org.by1337.blib.command.requires.RequiresPermission;
 import org.by1337.blib.util.SpacedNameKey;
+import org.by1337.bmenu.metrics.Metrics;
 import org.by1337.bmenu.util.ConfigUtil;
 
 import java.io.File;
@@ -24,10 +20,11 @@ public class BMenu extends JavaPlugin {
     private MenuLoader loader;
     private CommandWrapper commandWrapper;
     private OpenCommands openCommands;
+    private Metrics metrics;
 
     @Override
     public void onLoad() {
-        if (!new File(getDataFolder(), "menu").exists()){
+        if (!new File(getDataFolder(), "menu").exists()) {
             ConfigUtil.trySave("menu/animation-54.yml");
             ConfigUtil.trySave("menu/example-seller.yml");
             ConfigUtil.trySave("menu-shem.yml");
@@ -52,6 +49,7 @@ public class BMenu extends JavaPlugin {
         commandWrapper.setPermission("bmenu.use");
         commandWrapper.register();
         openCommands.register();
+        metrics = new Metrics(this, 23745);
     }
 
     @Override
@@ -59,6 +57,7 @@ public class BMenu extends JavaPlugin {
         loader.close();
         commandWrapper.close();
         openCommands.unregister();
+        metrics.shutdown();
     }
 
 
@@ -135,8 +134,7 @@ public class BMenu extends JavaPlugin {
                                     );
                                 })
                         )
-                )*/
-                ;
+                )*/;
 
         return cmd;
     }
