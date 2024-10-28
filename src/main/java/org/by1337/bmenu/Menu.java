@@ -123,15 +123,13 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     private void doItemTick(MenuItem[] matrix) {
+        Map<MenuItem, MenuItem> cache = new IdentityHashMap<>();
         for (int i = 0; i < matrix.length; i++) {
             MenuItem item = matrix[i];
             if (item != null && item.isTicking() && item.getBuilder() != null) {
                 item.doTick();
                 if (item.shouldBeRebuild()) {
-                    matrix[i] = item = item.getBuilder().get();
-                    if (item != null) {
-                        setItem(item);
-                    }
+                    matrix[i] = cache.computeIfAbsent(item, k -> k.getBuilder().get());
                 }
             }
         }
@@ -148,10 +146,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     public void refresh() {
+        Map<MenuItem, MenuItem> cache = new IdentityHashMap<>();
         for (int i = 0; i < animationMask.length; i++) {
             MenuItem item = animationMask[i];
             if (item == null || item.getBuilder() == null) continue;
-            animationMask[i] = item.getBuilder().get();
+            animationMask[i] = cache.computeIfAbsent(item, k -> k.getBuilder().get());
         }
         generate0();
     }
