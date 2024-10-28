@@ -30,13 +30,14 @@ items:
       deny_commands:
         - '[MESSAGE] &cУ Вас не достаточно баланса!'
       commands:
-        - '[CONSOLE] eco take %player_name% ${PRICE}'
+        - '[TAKEMONEY] ${PRICE}'
         - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
         - '[MESSAGE] &aВы успешно купили ${NAME}'
         - '[BACK]'
   reject:
     material: red_stained_glass_pane
     display_name: '&cОтменить'
+    static: true
     slots:
       - '5-8'
       - '14-17'
@@ -47,12 +48,14 @@ items:
   gui:
     material: black_stained_glass_pane
     display_name: ''
+    static: true
     slots:
       - 4
       - 22
   none:
     material: jigsaw
     display_name: '&cПроизошла ошибка!'
+    static: true
   totem:
     <<: *seller-item-totem # это указатель на предмет который находится в файле items.yml
   elytra:

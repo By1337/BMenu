@@ -27,6 +27,7 @@ items:
   gui-lime:
     material: lime_stained_glass_pane
     display_name: ''
+    static: true
     slots:
       - '0-8'
       - '9'

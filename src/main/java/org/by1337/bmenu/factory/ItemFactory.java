@@ -108,6 +108,7 @@ public class ItemFactory {
         builder.setTicking(ctx.getAsBoolean("ticking", false));
         builder.setTickSpeed(ctx.getAsInteger("tick-speed", 1));
         builder.setDamage(ctx.getAsInteger("damage", 0));
+        builder.setStaticItem(ctx.getAsBoolean("static", false));
 
 
         return builder;

@@ -23,15 +23,11 @@ import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.requirement.Requirements;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("BMenu#ItemBuilder");
 
     private int[] slots = new int[]{0};
     private List<String> lore = new ArrayList<>();
@@ -51,6 +47,8 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private Map<String, String> args;
     private boolean ticking;
     private int tickSpeed;
+    private boolean staticItem;
+    private MenuItem staticInstance;
 
     public MenuItemBuilder() {
     }
@@ -67,6 +65,8 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     @Nullable
     public MenuItem build(Menu menu, @Nullable final ItemStack itemStack, Placeholderable... placeholderables) {
+        if (staticItem && staticInstance != null) return staticInstance;
+
         MultiPlaceholder placeholder = new MultiPlaceholder(placeholderables);
         placeholder.add(menu);
         if (!viewRequirement.requirement.test(menu, placeholder, menu.viewer)) {
@@ -155,10 +155,12 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 builder
         );
         item.setTickSpeed(tickSpeed);
+        if (staticItem) {
+            staticInstance = item;
+            staticInstance.setBuilder(() -> staticInstance);
+        }
         return item;
     }
-
-
     public void setDamage(int damage) {
         this.damage = damage;
     }
@@ -335,6 +337,13 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return ticking;
     }
 
+    public boolean isStaticItem() {
+        return staticItem;
+    }
+
+    public void setStaticItem(boolean staticItem) {
+        this.staticItem = staticItem;
+    }
 
     public static class ViewRequirement {
         private static final ViewRequirement EMPTY = new ViewRequirement(Requirements.EMPTY, Collections.emptyList());

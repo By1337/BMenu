@@ -12,6 +12,7 @@ args: { }
 
 defaults:
   buyer-item: &item
+    # static: true сюда можно добавить этот параметр так как здесь не используются плейсхолдеры
     material: ${MATERIAL}
     amount: ${AMOUNT}
     display_name: '&7${NAME} x${AMOUNT}'
@@ -28,7 +29,7 @@ defaults:
       deny_commands:
         - '[MESSAGE] &cУ Вас не достаточно баланса!'
       commands:
-        - '[CONSOLE] eco take %player_name% ${PRICE}'
+        - '[TAKEMONEY] ${PRICE}'
         - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
         - '[MESSAGE] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'
     on_right_click:
