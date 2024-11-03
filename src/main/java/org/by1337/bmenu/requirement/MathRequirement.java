@@ -47,7 +47,7 @@ public class MathRequirement implements Requirement {
         try {
             String s = placeholderable.replace(expression);
             MathParserType parserType = s.contains(".") ? MathParserType.DOUBLE : MathParserType.DEFAULT;
-            var b = parserType.processor.apply(s).equals("1");
+            var b = parserType.processor.apply(s).replace(".0", "").equals("1");
             return not ? !b : b;
         } catch (Throwable t) {
             menu.getLoader().getLogger().error(
