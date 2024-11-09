@@ -11,8 +11,15 @@ import java.io.IOException;
 
 public class BungeeCordMessageSender {
     private static final Logger LOGGER = LoggerFactory.getLogger("[BMenu#BungeeCord]");
+    private static final String CHANNEL_NAME = "BungeeCord";
 
-    private static final String channelName = "BungeeCord";
+    public static void registerChannel(Plugin plugin) {
+        plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, CHANNEL_NAME);
+    }
+
+    public static void unregisterChannel(Plugin plugin) {
+        plugin.getServer().getMessenger().unregisterOutgoingPluginChannel(plugin, CHANNEL_NAME);
+    }
 
     public static void connectPlayerToServer(Player player, String toServer, Plugin plugin) {
         try (ByteArrayOutputStream byteBuff = new ByteArrayOutputStream();
@@ -20,7 +27,7 @@ public class BungeeCordMessageSender {
             out.writeUTF("Connect");
             out.writeUTF(toServer);
             out.flush();
-            player.sendPluginMessage(plugin, channelName, byteBuff.toByteArray());
+            player.sendPluginMessage(plugin, CHANNEL_NAME, byteBuff.toByteArray());
         } catch (IOException e) {
             LOGGER.error("Failed to send packet", e);
         }

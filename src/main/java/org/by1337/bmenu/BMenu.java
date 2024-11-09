@@ -12,6 +12,7 @@ import org.by1337.blib.command.argument.ArgumentSetList;
 import org.by1337.blib.command.requires.RequiresPermission;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.metrics.Metrics;
+import org.by1337.bmenu.network.BungeeCordMessageSender;
 import org.by1337.bmenu.util.ConfigUtil;
 
 import java.io.File;
@@ -42,6 +43,7 @@ public class BMenu extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        BungeeCordMessageSender.registerChannel(this);
         openCommands = new OpenCommands(loader, ConfigUtil.load("config.yml"));
         loader.loadMenus();
         loader.registerListeners();
@@ -54,6 +56,7 @@ public class BMenu extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        BungeeCordMessageSender.unregisterChannel(this);
         loader.close();
         commandWrapper.close();
         openCommands.unregister();
