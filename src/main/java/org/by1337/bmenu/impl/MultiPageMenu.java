@@ -17,14 +17,19 @@ public abstract class MultiPageMenu<T> extends Menu {
     protected int currentPage = 0;
     protected int maxPage = 0;
     protected int lastPage = -1;
-    protected int[] itemSlots;
-    protected final MenuItem[] buffer;
+    private int[] itemSlots;
+    private MenuItem[] buffer;
 
     public MultiPageMenu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
         super(config, viewer, previousMenu);
         itemSlots = AnimationUtil.readSlots("0-9");
         registerPlaceholder("{max_page}", () -> maxPage == 0 ? 1 : maxPage);
         registerPlaceholder("{current_page}", () -> currentPage + 1);
+        buffer = new MenuItem[matrix.length];
+    }
+
+    protected void setItemSlots(int[] slots) {
+        itemSlots = slots;
         buffer = new MenuItem[matrix.length];
     }
 

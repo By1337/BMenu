@@ -1,9 +1,13 @@
 package org.by1337.bmenu;
 
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.by1337.blib.chat.ChatColor;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandSyntaxError;
 import org.by1337.blib.command.CommandWrapper;
@@ -98,8 +102,17 @@ public class BMenu extends JavaPlugin {
                                     throw new CommandSyntaxError("Use /bmenu open <menu> <player>");
                                 }
                             }
-                            Menu m = loader.findAndCreate(new SpacedNameKey(menu), player, null);
-                            m.open();
+                            try {
+                                Menu m = loader.findAndCreate(new SpacedNameKey(menu), player, null);
+                                m.open();
+                            } catch (Throwable t) {
+                                player.sendMessage(
+                                        Component.text("Меню не удалось открыть с ошибкой: ")
+                                                .append(Component.text(t.getMessage()))
+                                                .color(TextColor.color(0xFF, 0x55, 0x55))
+                                );
+                                getSLF4JLogger().error("Failed to open menu {}", menu, t);
+                            }
                         })
                 )
                 .addSubCommand(new Command<CommandSender>("dump")

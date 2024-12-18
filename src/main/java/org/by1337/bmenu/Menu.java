@@ -190,7 +190,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     public void setItem(MenuItem item) {
         for (int slot : item.getSlots()) {
             if (slot == -1) continue;
-            matrix[slot] = item;
+            if (slot < 0 || matrix.length < slot){
+                loader.getLogger().error("Slot {} is out of bounds! Menu: {}", slot, config.getId());
+            }else {
+                matrix[slot] = item;
+            }
         }
     }
 
@@ -466,12 +470,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
                             String menu = (String) args.getOrThrow("menu", "Use [OPEN_MENU] <menu id>");
-                            MenuConfig settings;
-                            if (menu.contains(":")) {
-                                settings = v.loader.findMenu(new SpacedNameKey(menu));
-                            } else {
-                                settings = v.loader.findMenuByName(menu);
-                            }
+                            MenuConfig settings = v.loader.findMenu(menu);
                             if (settings == null) {
                                 throw new CommandException("Unknown menu %s", menu);
                             }

@@ -11,12 +11,16 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.plugin.Plugin;
 import org.by1337.blib.chat.util.Message;
 import org.by1337.blib.util.SpacedNameKey;
+import org.by1337.blib.util.collection.SpacedNameRegistry;
 import org.by1337.bmenu.factory.MenuFactory;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 public class MenuLoader implements Listener {
     private final MenuRegistry registry;
@@ -24,20 +28,19 @@ public class MenuLoader implements Listener {
     private final Plugin plugin;
     private final Logger logger;
     private final Message message;
-    private final Map<SpacedNameKey, MenuConfig> menuConfigs;
-    private final Map<String, MenuConfig> menuConfigsLookupByName;
-    private final Map<String, Integer> menuNameToMenuCount = new HashMap<>();
+    private final SpacedNameRegistry<MenuConfig> menuRegistry;
+    private final String defaultSpace;
 
     public MenuLoader(File homeDir, Plugin plugin) {
         this.homeDir = homeDir;
         homeDir.mkdirs();
         this.plugin = plugin;
+        defaultSpace = plugin.getName().toLowerCase();
         logger = plugin.getSLF4JLogger();
         message = new Message(plugin.getLogger());
         registry = new MenuRegistry();
         registry.merge(MenuRegistry.DEFAULT_REGISTRY);
-        menuConfigs = new HashMap<>();
-        menuConfigsLookupByName = new HashMap<>();
+        menuRegistry = new SpacedNameRegistry<>();
     }
 
     public void registerListeners() {
@@ -67,7 +70,7 @@ public class MenuLoader implements Listener {
                 try {
                     result.add(MenuFactory.load(file, this));
                 } catch (Throwable t) {
-                    logger.warn("Failed to load menu config", t);
+                    logger.warn("Failed to load menu config File: {}", file.getPath(), t);
                 }
             }
         }
@@ -75,13 +78,7 @@ public class MenuLoader implements Listener {
     }
 
     public Menu findAndCreate(SpacedNameKey menuId, Player viewer, @Nullable Menu previousMenu) {
-        MenuConfig menuConfig = findMenu(menuId);
-        if (menuConfig == null) {
-            menuConfig = findMenuByName(menuId.getName().getName());
-            if (menuNameToMenuCount.getOrDefault(menuId.getName().getName(), 0) > 1) {
-                throw new IllegalStateException("Unambiguous menu call " + menuId.getName().getName() + " Use the full menu name <namespace>:<id>");
-            }
-        }
+        MenuConfig menuConfig = menuRegistry.find(menuId);
         if (menuConfig == null) {
             throw new IllegalArgumentException("Menu not found: " + menuId);
         }
@@ -104,33 +101,35 @@ public class MenuLoader implements Listener {
 
     @Nullable
     public MenuConfig findMenuByName(String name) {
-        return menuConfigsLookupByName.get(name);
+        return menuRegistry.find(SpacedNameKey.fromString(name, defaultSpace));
+    }
+
+    @Nullable
+    public MenuConfig findMenu(String name) {
+        return menuRegistry.find(SpacedNameKey.fromString(name, defaultSpace));
     }
 
     @Nullable
     public MenuConfig findMenu(SpacedNameKey key) {
-        return menuConfigs.get(key);
+        return menuRegistry.find(key);
     }
 
     public int getMenuCount() {
-        return menuConfigs.size();
+        return menuRegistry.size();
     }
 
     public Collection<SpacedNameKey> getMenus() {
-        return menuConfigs.keySet();
+        return menuRegistry.keySet();
     }
 
     public void registerMenu(MenuConfig config) {
         if (config.getId() == null) {
             throw new IllegalArgumentException("Can't register anonymous menu config");
         }
-        if (!menuConfigs.containsKey(config.getId())) {
-            menuConfigs.put(config.getId(), config);
-            menuConfigsLookupByName.put(config.getId().getName().getName(), config);
-            int x = menuNameToMenuCount.getOrDefault(config.getId().getName().getName(), 0);
-            menuNameToMenuCount.put(config.getId().getName().getName(), ++x);
-        } else {
+        if (menuRegistry.has(config.getId())) {
             throw new IllegalArgumentException("Menu config already exists");
+        } else {
+            menuRegistry.put(config.getId(), config);
         }
     }
 
