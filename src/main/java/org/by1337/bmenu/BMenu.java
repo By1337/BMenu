@@ -14,6 +14,7 @@ import org.by1337.blib.command.argument.ArgumentSetList;
 import org.by1337.blib.command.requires.RequiresPermission;
 import org.by1337.blib.util.ResourceUtil;
 import org.by1337.blib.util.SpacedNameKey;
+import org.by1337.bmenu.command.menu.OpenCommands;
 import org.by1337.bmenu.metrics.Metrics;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
 
@@ -36,6 +37,7 @@ public class BMenu extends JavaPlugin {
             ResourceUtil.saveIfNotExist("menu/include-example/readme.txt", this);
             ResourceUtil.saveIfNotExist("menu/include-example/seller.yml", this);
             ResourceUtil.saveIfNotExist("menu/random-colors/rand-colors-menu.yml", this);
+            ResourceUtil.saveIfNotExist("menu/admin/kick.yml", this);
         }
         loader = new MenuLoader(
                 new File(getDataFolder(), "menu"),

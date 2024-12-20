@@ -5,3 +5,57 @@ open_commands:
       - bseller
     menu: example:seller
     permission: ~ # не обязательный параметр
+  bmenu_kick:
+    menu: example:kick
+    tab-completer:
+      PLAYER:
+        type: player
+        exx: [ ]
+
+# все виды аргуметов
+tab-completer:
+  PLAYER:
+    type: player # ник игрока
+    exx: [ ]
+  INT:
+    type: int # число
+    min: 0 # можно указать минимум и максимум
+    max: 100
+    exx: [ ]
+  BOOL:
+    type: bool # true/false
+    exx: [ ]
+  CHOICE:
+    type: choice # список на выбор
+    items: # при вводе команды будет выведен этот список
+      - 'hub'
+      - 'shop'
+      - 'что-то'
+    exx: [ ]
+  DOUBLE:
+    type: double # число с плавающей точкой
+    min: 1.5 # можно указать минимум и максимум
+    max: 50.5
+    exx: [ ]
+  FORMATTED_DOUBLE:
+    type: formatted_double # число которое можно указать в формате 1.25kk
+    exx: [ ]
+  LONG:
+    type: long # большое число
+    min: 4294967296
+    max: 8589934592
+    exx: [ ]
+  LONG_MATH:
+    type: long_math # большое число при вводе которое можно юзать математические операции '100*55+(10*77-(55-8))'
+    exx: [ ]
+  INT_MATH:
+    type: int_math # число при вводе которое можно юзать математические операции '100*55+(10*77-(55-8))'
+    min: 0
+    max: 10000
+    exx: [ ]
+  STRING:
+    type: string # любая строка
+    exx: [ ]
+  WORLD:
+    type: world # мир на выбор
+    exx: [ ]

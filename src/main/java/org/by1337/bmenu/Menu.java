@@ -335,6 +335,13 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         return lastClickTime;
     }
 
+    public void addArgument(String key, String value) {
+        args.put(key, value);
+        String name = "${" + key + "}";
+        placeholders.remove(name);
+        registerPlaceholder(name, () -> args.get(key));
+    }
+
     private static void runIn(String rawNBT, Menu menu, MenuLoader loader) {
         if (rawNBT != null && !rawNBT.isBlank()) {
             try {

@@ -1,0 +1,75 @@
+id: example:kick
+provider: default
+type: CHEST
+size: 27
+title: '&7Кикнуть игрока ${PLAYER}'
+
+args:
+  PLAYER: 'null'
+
+on_open: &on_open
+  requirements:
+    - check: '${PLAYER} != null'
+      deny_commands:
+        - '[MESSAGE] &cВы должны указать игрока!'
+        - '[CLOSE]'
+
+menu-events:
+  on_open: *on_open
+  on_reopen: *on_open
+
+items:
+  gui-lime:
+    material: lime_stained_glass_pane
+    display_name: ''
+    static: true
+
+  kick-1:
+    material: barrier
+    display_name: '&cКикнуть игрока ${PLAYER} по причине 1.1'
+    slot: 11
+    on_click:
+      commands:
+        - '[CONSOLE] kick ${PLAYER} 1.1'
+        - '[MESSAGE] &aИгрок ${PLAYER} был кикнут по причине 1.1'
+        - '[CLOSE]'
+  kick-2:
+    material: barrier
+    display_name: '&cКикнуть игрока ${PLAYER} по причине 1.2'
+    slot: 13
+    on_click:
+      commands:
+        - '[CONSOLE] kick ${PLAYER} 1.2'
+        - '[MESSAGE] &aИгрок ${PLAYER} был кикнут по причине 1.2'
+        - '[CLOSE]'
+  kick-3:
+    material: barrier
+    display_name: '&cКикнуть игрока ${PLAYER} по причине 1.3'
+    slot: 15
+    on_click:
+      commands:
+        - '[CONSOLE] kick ${PLAYER} 1.3'
+        - '[MESSAGE] &aИгрок ${PLAYER} был кикнут по причине 1.3'
+        - '[CLOSE]'
+
+animation:
+  - opcodes:
+      - set: gui-lime 0,1
+  - opcodes:
+      - copy: 0 2,3
+  - opcodes:
+      - copy: 0 4,5
+  - opcodes:
+      - copy: 0 6,7
+  - opcodes:
+      - copy: 0 8,17
+  - opcodes:
+      - copy: 0 26,25
+  - opcodes:
+      - copy: 0 24,23
+  - opcodes:
+      - copy: 0 22,21
+  - opcodes:
+      - copy: 0 20,19
+  - opcodes:
+      - copy: 0 18,9

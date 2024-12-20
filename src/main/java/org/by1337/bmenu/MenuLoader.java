@@ -77,6 +77,14 @@ public class MenuLoader implements Listener {
         return result;
     }
 
+    public Menu findAndCreate(String menuId, Player viewer, @Nullable Menu previousMenu) {
+        MenuConfig menuConfig = findMenu(menuId);
+        if (menuConfig == null) {
+            throw new IllegalArgumentException("Menu not found: " + menuId);
+        }
+        return findAndCreate(menuConfig, viewer, previousMenu);
+    }
+
     public Menu findAndCreate(SpacedNameKey menuId, Player viewer, @Nullable Menu previousMenu) {
         MenuConfig menuConfig = menuRegistry.find(menuId);
         if (menuConfig == null) {
