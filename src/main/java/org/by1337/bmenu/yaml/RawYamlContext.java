@@ -9,11 +9,12 @@ import java.util.Map;
 import java.util.Objects;
 
 public class RawYamlContext {
-    private Map<String, Object> raw;
+    private final Map<String, Object> raw;
 
     public RawYamlContext(Map<String, Object> raw) {
         this.raw = raw;
     }
+
     public boolean has(String key) {
         return raw.containsKey(key);
     }
@@ -21,7 +22,7 @@ public class RawYamlContext {
     @NotNull
     public YamlValue get(@NotNull String path, Object def) {
         var obj = get(path);
-        return obj.getValue() == null ? new YamlValue(def) : obj;
+        return obj.getValue() == null ? YamlValue.wrap(def) : obj;
     }
 
     @NotNull
@@ -34,17 +35,17 @@ public class RawYamlContext {
         for (String s : path0) {
             if (last == null) {
                 Object o = raw.get(s);
-                if (o == null) new YamlValue(null);
+                if (o == null) return YamlValue.EMPTY;
                 last = o;
             } else if (last instanceof Map<?, ?> sub) {
                 Object o = sub.get(s);
-                if (o == null) return new YamlValue(null);
+                if (o == null) return YamlValue.EMPTY;
                 last = o;
             } else {
                 throw new ClassCastException(last.getClass().getName() + " to Map<String, Object>");
             }
         }
-        return new YamlValue(last);
+        return YamlValue.wrap(last);
     }
 
     public String saveToString() {

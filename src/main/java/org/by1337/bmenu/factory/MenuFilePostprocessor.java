@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import java.util.*;
 
 public class MenuFilePostprocessor {
-    //private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final String SOFT_MERGE_TAG = "<<+";
     private static final String HARD_MERGE_TAG = "<<*";
 

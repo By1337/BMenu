@@ -3,7 +3,6 @@ package org.by1337.bmenu.factory;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.event.inventory.InventoryType;
-import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
 import org.by1337.blib.util.SpacedNameKey;
@@ -63,7 +62,7 @@ public class MenuFactory {
         } else {
             animator = null;
         }
-        Map<String, Animator.AnimatorContext> animations  = new HashMap<>();
+        Map<String, Animator.AnimatorContext> animations = new HashMap<>();
         if (ctx.has("animations")) {
             Map<String, YamlValue> animationsRaw = ctx.get("animations").getAsMap(YamlValue::getAsString, Function.identity(), Collections.emptyMap());
             for (Map.Entry<String, YamlValue> entry : animationsRaw.entrySet()) {
@@ -111,7 +110,7 @@ public class MenuFactory {
         if (id.contains(":")) {
             return new SpacedNameKey(id);
         } else {
-            return new SpacedNameKey(loader.getPlugin().getName(), id);
+            return new SpacedNameKey(loader.getPlugin().getName().toLowerCase(Locale.ROOT), id);
         }
     }
 

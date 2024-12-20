@@ -1,6 +1,5 @@
 package org.by1337.bmenu.factory;
 
-import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
 import org.by1337.bmenu.MenuLoader;
@@ -11,10 +10,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class RequirementsFactory {
-    @Deprecated(forRemoval = true)
-    public static Requirements read(YamlValue ctx, MenuLoader loader, Placeholder argsReplacer) {
-        return read(ctx, loader);
-    }
     public static Requirements read(YamlValue ctx, MenuLoader loader) {
         if (ctx.getValue() == null) return Requirements.EMPTY;
         List<Requirement> requirements = new ArrayList<>();
@@ -72,7 +67,7 @@ public class RequirementsFactory {
                                     denyCommands
                             ));
                         }
-                    }else {
+                    } else {
                         requirements.add(new MathRequirement(
                                 check,
                                 commands,

@@ -43,6 +43,9 @@ public class ItemFactory {
         builder.setAmount(ctx.get("amount").getAsString("1"));
         builder.setLore(ctx.get("lore").getAsList(YamlValue::getAsString, Collections.emptyList()));
         builder.setItemFlags(ctx.get("item_flags").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(s -> ItemFlag.valueOf(s.toUpperCase(Locale.ENGLISH))).toList());
+        if (ctx.getAsBoolean("all_flags", false)){
+            builder.setItemFlags(Arrays.stream(ItemFlag.values()).toList());
+        }
         builder.setPotionEffects(
                 ctx.get("potion_effects").getAsList(YamlValue::getAsString, Collections.emptyList()).stream()
                         .map(s -> {
@@ -109,7 +112,6 @@ public class ItemFactory {
         builder.setTickSpeed(ctx.getAsInteger("tick-speed", 1));
         builder.setDamage(ctx.getAsInteger("damage", 0));
         builder.setStaticItem(ctx.getAsBoolean("static", false));
-
 
         return builder;
     }

@@ -3,21 +3,19 @@ package org.by1337.bmenu;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.by1337.blib.chat.ChatColor;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandSyntaxError;
 import org.by1337.blib.command.CommandWrapper;
 import org.by1337.blib.command.argument.ArgumentPlayer;
 import org.by1337.blib.command.argument.ArgumentSetList;
 import org.by1337.blib.command.requires.RequiresPermission;
+import org.by1337.blib.util.ResourceUtil;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.metrics.Metrics;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
-import org.by1337.bmenu.util.ConfigUtil;
 
 import java.io.File;
 
@@ -30,14 +28,14 @@ public class BMenu extends JavaPlugin {
     @Override
     public void onLoad() {
         if (!new File(getDataFolder(), "menu").exists()) {
-            ConfigUtil.trySave("menu/animation-54.yml");
-            ConfigUtil.trySave("menu/example-seller.yml");
-            ConfigUtil.trySave("menu-shem.yml");
-            ConfigUtil.trySave("menu/include-example/confirm.yml");
-            ConfigUtil.trySave("menu/include-example/items.yml");
-            ConfigUtil.trySave("menu/include-example/readme.txt");
-            ConfigUtil.trySave("menu/include-example/seller.yml");
-            ConfigUtil.trySave("menu/random-colors/rand-colors-menu.yml");
+            ResourceUtil.saveIfNotExist("menu/animation-54.yml", this);
+            ResourceUtil.saveIfNotExist("menu/example-seller.yml", this);
+            ResourceUtil.saveIfNotExist("menu-shem.yml", this);
+            ResourceUtil.saveIfNotExist("menu/include-example/confirm.yml", this);
+            ResourceUtil.saveIfNotExist("menu/include-example/items.yml", this);
+            ResourceUtil.saveIfNotExist("menu/include-example/readme.txt", this);
+            ResourceUtil.saveIfNotExist("menu/include-example/seller.yml", this);
+            ResourceUtil.saveIfNotExist("menu/random-colors/rand-colors-menu.yml", this);
         }
         loader = new MenuLoader(
                 new File(getDataFolder(), "menu"),
@@ -48,7 +46,7 @@ public class BMenu extends JavaPlugin {
     @Override
     public void onEnable() {
         BungeeCordMessageSender.registerChannel(this);
-        openCommands = new OpenCommands(loader, ConfigUtil.load("config.yml"));
+        openCommands = new OpenCommands(loader, ResourceUtil.load("config.yml", this));
         loader.loadMenus();
         loader.registerListeners();
         commandWrapper = new CommandWrapper(createCommand(), this);
@@ -83,7 +81,7 @@ public class BMenu extends JavaPlugin {
                             loader.loadMenus();
                             loader.registerListeners();
                             openCommands.unregister();
-                            openCommands = new OpenCommands(loader, ConfigUtil.load("config.yml"));
+                            openCommands = new OpenCommands(loader, ResourceUtil.load("config.yml", this));
                             openCommands.register();
                             loader.getMessage().sendMsg(sender, "&aReloaded {} menus!", loader.getMenuCount());
                         })

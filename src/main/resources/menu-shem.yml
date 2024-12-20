@@ -185,6 +185,7 @@ items:
     amount: 1 # или плейсхолдер
     lore: [ ] # описание
     item_flags: [ ] # все флаги https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/inventory/ItemFlag.html
+    all_flags: true # включает существующие флаги
     potion_effects:
       - "speed;20;0" # <PotionEffectType>;<duration>;<amplifier>
     color: '#aabbcc' # для зелий и кожаной брони

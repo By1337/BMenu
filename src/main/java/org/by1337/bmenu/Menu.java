@@ -88,6 +88,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventory)) {
                 viewer.openInventory(inventory);
             }
+            // Отключаем автоматическую синхронизацию инвентаря с клиентом,
+            // так как сервер может периодически отправлять обновления,
+            // что может нарушить отображение анимаций.
+            BLib.getApi().getInventoryUtil().disableAutoFlush(viewer);
+
             onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
             if (animator == null && config.getAnimation() != null) {
                 animator = config.getAnimation().createAnimator();
@@ -170,6 +175,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     protected void flush() {
         setMatrix(matrix);
         setMatrix(animationMask);
+        BLib.getApi().getInventoryUtil().flushInv(viewer);
     }
 
     protected void setMatrix(MenuItem[] mask) {
@@ -190,9 +196,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     public void setItem(MenuItem item) {
         for (int slot : item.getSlots()) {
             if (slot == -1) continue;
-            if (slot < 0 || matrix.length < slot){
+            if (slot < 0 || matrix.length < slot) {
                 loader.getLogger().error("Slot {} is out of bounds! Menu: {}", slot, config.getId());
-            }else {
+            } else {
                 matrix[slot] = item;
             }
         }
@@ -231,6 +237,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             ticker.cancel();
             ticker = null;
         }
+        // Восстанавливаем автоматическую синхронизацию инвентаря с клиентом,
+        // так как пользователь закрыл кастомное меню, и ответственность за обновление
+        // инвентаря теперь возвращается серверу.
+        BLib.getApi().getInventoryUtil().enableAutoFlush(viewer);
+
         onEvent(MenuEvents.ON_CLOSE);
     }
 
@@ -265,6 +276,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     protected void sync(Runnable runnable) {
         sync(runnable, 0);
     }
+
     protected void sync(Runnable runnable, int delay) {
         if (!Bukkit.isPrimaryThread() || delay != 0)
             Bukkit.getScheduler().runTaskLater(loader.getPlugin(), runnable, delay);
@@ -272,7 +284,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     protected void sendFakeTitle(String title) {
-        BLib.getApi().getFakeTitleFactory().get().send(inventory, loader.getMessage().componentBuilder(replace(title)));
+        BLib.getApi().getInventoryUtil().sendFakeTitle(inventory, loader.getMessage().componentBuilder(replace(title)));
     }
 
     public void setTitle(String title) {
@@ -369,7 +381,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[SOUND]")
-                .argument(new ArgumentEnumValue<>("sound", Sound.class))
+                .argument(new ArgumentSound<>("sound"))
                 .argument(new ArgumentFloat<>("volume"))
                 .argument(new ArgumentFloat<>("pitch"))
                 .executor((v, args) -> {
@@ -555,9 +567,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 .argument(new ArgumentInteger<>("delay"))
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
-                           int delay = (int) args.getOrThrow("delay", "Use: [DELAY] <delay> <command>");
-                           String cmd = (String) args.getOrThrow("cmd", "Use: [DELAY] <delay> <command>");
-                           v.sync(() -> v.runCommands(List.of(cmd)), delay);
+                            int delay = (int) args.getOrThrow("delay", "Use: [DELAY] <delay> <command>");
+                            String cmd = (String) args.getOrThrow("cmd", "Use: [DELAY] <delay> <command>");
+                            v.sync(() -> v.runCommands(List.of(cmd)), delay);
                         }
                 )
         );
