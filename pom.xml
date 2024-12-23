@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.by1337.bmenu</groupId>
     <artifactId>BMenu</artifactId>
-    <version>1.4-b0</version>
+    <version>1.4</version>
 
     <properties>
         <java.version>16</java.version>
@@ -117,7 +117,7 @@
         <dependency>
             <groupId>org.by1337.blib</groupId>
             <artifactId>Blib-api</artifactId>
-            <version>1.4.1</version>
+            <version>1.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

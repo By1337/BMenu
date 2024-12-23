@@ -102,6 +102,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             }
             Arrays.fill(matrix, null);
             Arrays.fill(animationMask, null);
+            if (animator != null && !animator.isEnd()) {
+                animator.tick(animationMask, this);
+            }
             generate0();
 
             if (ticker != null && !ticker.isCancelled()) {
@@ -110,7 +113,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             ticker = Bukkit.getScheduler().runTaskTimer(
                     loader.getPlugin(),
                     this::tick,
-                    0,
+                    1,
                     1
             );
         });
