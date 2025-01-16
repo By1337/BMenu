@@ -8,25 +8,33 @@ import java.util.Map;
 import java.util.function.Function;
 
 public enum FrameOpcodes {
-    SET(SetAnimOpcode::new, "set"),
-    REMOVE(RemoveAnimOpcode::new, "remove"),
-    MOVE(MoveAnimOpcode::new, "move"),
-    SWAP(SwapAnimOpcode::new, "swap"),
-    COPY(CopyAnimOpcode::new, "copy"),
-    GOTO(GotoAnimOpcode::new, "goto"),
-    SOUND(SoundAnimOpcode::new, "sound"),
-    COMMANDS(CommandsAnimOpcode::new, "commands"),
-    TITLE(SetTitleOpcode::new, "title"),
-    FILL(FillAnimOpcode::new, "fill"),
-    REMOVE_IF_NOT_EMPTY(RemoveIfNotEmptyAnimOpcode::new, "remove-if-not-empty"),
+    SET(SetAnimOpcode::new, "set", "st"),
+    REMOVE(RemoveAnimOpcode::new, "remove", "rm"),
+    MOVE(MoveAnimOpcode::new, "move", "mv"),
+    SWAP(SwapAnimOpcode::new, "swap", "sw"),
+    COPY(CopyAnimOpcode::new, "copy", "cp"),
+    GOTO(GotoAnimOpcode::new, "goto", "gt"),
+    SOUND(SoundAnimOpcode::new, "sound", "snd"),
+    COMMANDS(CommandsAnimOpcode::new, "commands", "cmd"),
+    TITLE(SetTitleOpcode::new, "title", "ttl"),
+    FILL(FillAnimOpcode::new, "fill", "fl"),
+    REMOVE_IF_NOT_EMPTY(RemoveIfNotEmptyAnimOpcode::new, "remove-if-not-empty", "rne"),
     ;
     private static final Map<String, FrameOpcodes> LOOKUP;
     private final Function<YamlValue, FrameOpcode> creator;
     private final String id;
+    private final String[] aliases;
 
     FrameOpcodes(Function<YamlValue, FrameOpcode> creator, String id) {
         this.creator = creator;
         this.id = id;
+        aliases = new String[]{};
+    }
+
+    FrameOpcodes(Function<YamlValue, FrameOpcode> creator, String id, String... aliases) {
+        this.creator = creator;
+        this.id = id;
+        this.aliases = aliases;
     }
 
     public Function<YamlValue, FrameOpcode> getCreator() {
@@ -37,6 +45,10 @@ public enum FrameOpcodes {
         return id;
     }
 
+    public String[] aliases() {
+        return aliases;
+    }
+
     public static FrameOpcodes byId(String id) {
         return LOOKUP.get(id);
     }
@@ -44,7 +56,10 @@ public enum FrameOpcodes {
     static {
         LOOKUP = new HashMap<>();
         for (FrameOpcodes value : values()) {
-            LOOKUP.put(value.getId(), value);
+            LOOKUP.put(value.id, value);
+            for (String alias : value.aliases) {
+                LOOKUP.put(alias, value);
+            }
         }
     }
 }
