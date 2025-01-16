@@ -35,6 +35,21 @@ public class RequirementsFactory {
                             commands,
                             denyCommands
                     ));
+                } else if (check.startsWith("nearby") || check.startsWith("!nearby")) {
+                    String[] args = check.split(" ");
+                    if (args.length != 6) {
+                        throw new IllegalArgumentException("The condition expected 'nearby <world> <x> <y> <z> <radius>' but got '" + check + "'.");
+                    }
+                    requirements.add(new NearbyRequirement(
+                            args[1],
+                            Integer.parseInt(args[2]),
+                            Integer.parseInt(args[3]),
+                            Integer.parseInt(args[4]),
+                            Integer.parseInt(args[5]),
+                            check.startsWith("!"),
+                            commands,
+                            denyCommands
+                    ));
                 } else {
                     String[] args = check.split(" ");
                     if (args.length == 3) {
