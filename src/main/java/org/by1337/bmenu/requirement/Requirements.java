@@ -19,22 +19,24 @@ public class Requirements {
 
 
     public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
+        boolean result = true;
         for (Requirement requirement : requirements) {
             try {
                 if (!requirement.test(menu, placeholderable, clicker)) {
-                    runCommands(requirement.getDenyCommands(), menu, placeholderable);
-                    return false;
+                    if (runCommands(requirement.getDenyCommands(), menu, placeholderable)){
+                        return false;
+                    }
+                    result = false;
                 } else {
                     if (runCommands(requirement.getCommands(), menu, placeholderable)) {
                         return true;
                     }
                 }
-                menu.runCommands(requirement.getCommands());
             } catch (Exception e) {
                 menu.getLoader().getLogger().error("Failed to check requirement: {}", requirement, e);
             }
         }
-        return true;
+        return result;
     }
 
     private boolean runCommands(List<String> commands, Menu menu, Placeholderable placeholderable) {
