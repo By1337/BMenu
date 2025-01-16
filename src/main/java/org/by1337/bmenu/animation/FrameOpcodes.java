@@ -18,6 +18,7 @@ public enum FrameOpcodes {
     COMMANDS(CommandsAnimOpcode::new, "commands"),
     TITLE(SetTitleOpcode::new, "title"),
     FILL(FillAnimOpcode::new, "fill"),
+    REMOVE_IF_NOT_EMPTY(RemoveIfNotEmptyAnimOpcode::new, "remove-if-not-empty"),
     ;
     private static final Map<String, FrameOpcodes> LOOKUP;
     private final Function<YamlValue, FrameOpcode> creator;
