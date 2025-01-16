@@ -217,7 +217,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     @Override
     public String replace(String string) {
-        return super.replace(loader.getMessage().setPlaceholders(viewer, string));
+        return loader.getMessage().setPlaceholders(viewer, super.replace(string));
     }
 
     protected abstract boolean runCommand(String cmd) throws CommandException;
