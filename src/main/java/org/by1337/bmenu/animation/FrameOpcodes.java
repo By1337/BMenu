@@ -17,6 +17,7 @@ public enum FrameOpcodes {
     SOUND(SoundAnimOpcode::new, "sound"),
     COMMANDS(CommandsAnimOpcode::new, "commands"),
     TITLE(SetTitleOpcode::new, "title"),
+    FILL(FillAnimOpcode::new, "fill"),
     ;
     private static final Map<String, FrameOpcodes> LOOKUP;
     private final Function<YamlValue, FrameOpcode> creator;
