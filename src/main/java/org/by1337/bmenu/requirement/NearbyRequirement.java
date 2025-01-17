@@ -2,7 +2,6 @@ package org.by1337.bmenu.requirement;
 
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
-import org.by1337.blib.geom.Sphere;
 import org.by1337.blib.geom.Vec3d;
 import org.by1337.bmenu.Menu;
 

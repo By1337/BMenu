@@ -363,4 +363,76 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
             return denyCommands;
         }
     }
+
+    public int[] slots() {
+        return slots;
+    }
+
+    public List<String> lore() {
+        return lore;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public Map<MenuClickType, ClickHandler> clicks() {
+        return clicks;
+    }
+
+    public String amount() {
+        return amount;
+    }
+
+    public String material() {
+        return material;
+    }
+
+    public ViewRequirement viewRequirement() {
+        return viewRequirement;
+    }
+
+    public int modelData() {
+        return modelData;
+    }
+
+    public List<ItemFlag> itemFlags() {
+        return itemFlags;
+    }
+
+    public List<PotionEffect> potionEffects() {
+        return potionEffects;
+    }
+
+    public Color color() {
+        return color;
+    }
+
+    public int priority() {
+        return priority;
+    }
+
+    public List<Pair<Enchantment, Integer>> enchantments() {
+        return enchantments;
+    }
+
+    public boolean unbreakable() {
+        return unbreakable;
+    }
+
+    public int damage() {
+        return damage;
+    }
+
+    public Map<String, String> args() {
+        return args;
+    }
+
+    public boolean ticking() {
+        return ticking;
+    }
+
+    public int tickSpeed() {
+        return tickSpeed;
+    }
 }
