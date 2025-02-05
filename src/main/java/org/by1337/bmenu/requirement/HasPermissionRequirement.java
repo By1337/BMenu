@@ -2,7 +2,6 @@ package org.by1337.bmenu.requirement;
 
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
-import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
 import org.by1337.bmenu.Menu;
@@ -11,20 +10,21 @@ import org.by1337.bmenu.util.ObjectUtil;
 import java.util.Collections;
 import java.util.List;
 
-public class HasPermisionRequirement implements Requirement {
+public class HasPermissionRequirement implements Requirement {
+
     private final String permission;
     private final boolean not;
     private final List<String> commands;
     private final List<String> denyCommands;
 
-    public HasPermisionRequirement(String permission, boolean not, List<String> commands, List<String> denyCommands) {
+    public HasPermissionRequirement(String permission, boolean not, List<String> commands, List<String> denyCommands) {
         this.permission = permission;
         this.not = not;
         this.commands = commands;
         this.denyCommands = denyCommands;
     }
 
-    public HasPermisionRequirement(YamlContext context) {
+    public HasPermissionRequirement(YamlContext context) {
         permission = context.getAsString("permission");
         not = context.getAsString("type").startsWith("!");
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),

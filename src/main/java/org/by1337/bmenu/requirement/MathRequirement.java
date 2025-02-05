@@ -2,19 +2,17 @@ package org.by1337.bmenu.requirement;
 
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
-import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
-import org.by1337.blib.math.DoubleMathParser;
-import org.by1337.blib.math.MathParser;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.util.ObjectUtil;
+import org.by1337.bmenu.util.math.MathParserType;
 
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
 public class MathRequirement implements Requirement {
+
     private final String expression;
     private final boolean not;
     private final List<String> commands;
@@ -69,17 +67,4 @@ public class MathRequirement implements Requirement {
         return denyCommands;
     }
 
-    private enum MathParserType {
-        DEFAULT(s -> MathParser.math("math[" + s + "]")),
-        DOUBLE(s -> DoubleMathParser.math(s, true));
-        private final MathFunction<String, String> processor;
-
-        MathParserType(MathFunction<String, String> processor) {
-            this.processor = processor;
-        }
-    }
-
-    private interface MathFunction<T, R> {
-        R apply(T t) throws ParseException;
-    }
 }

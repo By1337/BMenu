@@ -28,9 +28,11 @@ import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.hook.VaultHook;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
 import org.by1337.bmenu.requirement.CommandRequirements;
+import org.by1337.bmenu.util.math.MathReplacer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.ParseException;
 import java.util.*;
 
 public abstract class Menu extends Placeholder implements InventoryHolder {
@@ -217,7 +219,12 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     @Override
     public String replace(String string) {
-        return loader.getMessage().setPlaceholders(viewer, super.replace(string));
+        try {
+            return MathReplacer.replace(loader.getMessage().setPlaceholders(viewer, super.replace(string)));
+        } catch (ParseException e) {
+            loader.getLogger().error("Failed to parse math", e);
+            return string;
+        }
     }
 
     protected abstract boolean runCommand(String cmd) throws CommandException;

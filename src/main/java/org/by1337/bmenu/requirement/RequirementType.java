@@ -1,6 +1,5 @@
 package org.by1337.bmenu.requirement;
 
-import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +12,7 @@ public enum RequirementType {
     STRING_EQUALS_IGNORE_CASE("string equals ignorecase", StringEqualsIgnoreCaseRequirement::new, List.of("sei")),
     STRING_CONTAINS("string contains", StringContainsRequirement::new, List.of("sc")),
     REGEX_MATCHES_REQUIREMENT("regex matches", RegexMatchesRequirement::new, List.of("rm")),
-    HAS_PERMISSION("has permission", HasPermisionRequirement::new, List.of("hp")),
+    HAS_PERMISSION("has permission", HasPermissionRequirement::new, List.of("hp")),
     ;
     public final String id;
     public final RequirementCreator fromYaml;

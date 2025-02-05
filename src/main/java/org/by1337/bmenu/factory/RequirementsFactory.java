@@ -29,7 +29,7 @@ public class RequirementsFactory {
                 List<String> commands = context.getList("commands", String.class, Collections.emptyList());
                 List<String> denyCommands = context.getList("deny_commands", String.class, Collections.emptyList());
                 if (check.startsWith("has") || check.startsWith("!has")) {
-                    requirements.add(new HasPermisionRequirement(
+                    requirements.add(new HasPermissionRequirement(
                             check.split(" ")[1],
                             check.startsWith("!"),
                             commands,
