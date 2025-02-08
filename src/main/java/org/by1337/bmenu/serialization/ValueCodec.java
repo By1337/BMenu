@@ -4,7 +4,6 @@ import blib.com.mojang.datafixers.util.Pair;
 import blib.com.mojang.serialization.Codec;
 import blib.com.mojang.serialization.DataResult;
 import blib.com.mojang.serialization.DynamicOps;
-import blib.com.mojang.serialization.codecs.PrimitiveCodec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;

@@ -62,39 +62,6 @@ public class ItemFactory {
         }
         MenuItemBuilder builder = result.resultOrPartial().get().getFirst();
 
-//        builder.setItemFlags(ctx.get("item_flags").getAsList(YamlValue::getAsString, Collections.emptyList()).stream().map(s -> ItemFlag.valueOf(s.toUpperCase(Locale.ENGLISH))).toList());
-//        if (ctx.getAsBoolean("all_flags", false)){
-//            builder.setItemFlags(Arrays.stream(ItemFlag.values()).toList());
-//        }
-//        builder.setPotionEffects(
-//                ctx.get("potion_effects").getAsList(YamlValue::getAsString, Collections.emptyList()).stream()
-//                        .map(s -> {
-//                            String[] args0 = s.split(";");
-//                            if (args0.length != 3) {
-//                                LOGGER.error("expected <PotionEffectType>;<duration>;<amplifier>, not {}", s);
-//                                return null;
-//                            }
-//                            PotionEffectType type = Objects.requireNonNull(PotionEffectType.getByName(args0[0].toLowerCase(Locale.ENGLISH)), "PotionEffectType is null");
-//                            int duration = Integer.parseInt(args0[1]);
-//                            int amplifier = Integer.parseInt(args0[2]);
-//                            return new PotionEffect(type, duration, amplifier);
-//                        }).filter(Objects::nonNull).toList()
-//
-//        );
-       // builder.setColor(ctx.getAs("color", Color.class, null));
-//        builder.setEnchantments(
-//                ctx.get("enchantments").getAsList(YamlValue::getAsString, Collections.emptyList()).stream()
-//                        .map(s -> {
-//                            String[] args0 = s.split(";");
-//                            if (args0.length != 2) {
-//                                LOGGER.error("was expected to be enchantmentid;level, not {}", s);
-//                                return null;
-//                            }
-//                            Enchantment type = Objects.requireNonNull(Enchantment.getByKey(NamespacedKey.minecraft(args0[0].toLowerCase(Locale.ENGLISH))), "Enchantment is null");
-//                            int level = Integer.parseInt(args0[1]);
-//                            return Pair.of(type, level);
-//                        }).filter(Objects::nonNull).toList()
-//        );
         builder.setSlots(getSlots(ctx));
         builder.setViewRequirement(
                 ObjectUtil.mapIfNotNullOrDefault(

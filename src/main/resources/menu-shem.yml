@@ -367,6 +367,7 @@ animations:
 # [BACK_TO_OR_CLOSE] <id> <?commands>
 # [BACK] <?commands>
 # [OPEN] <id> <?commands>
+# [BACK_OR_OPEN] <id> <?commands>
 #
 # [REOPEN] - полностью заново открывает текущее меню
 # [REFRESH]

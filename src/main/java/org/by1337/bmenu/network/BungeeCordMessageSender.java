@@ -2,6 +2,7 @@ package org.by1337.bmenu.network;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+@ApiStatus.Internal
 public class BungeeCordMessageSender {
     private static final Logger LOGGER = LoggerFactory.getLogger("[BMenu#BungeeCord]");
     private static final String CHANNEL_NAME = "BungeeCord";
