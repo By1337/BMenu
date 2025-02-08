@@ -510,6 +510,29 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                         }
                 )
         );
+        commands.addSubCommand(new Command<Menu>("[BACK_OR_OPEN]")
+                .argument(new ArgumentString<>("menu"))
+                .argument(new ArgumentStrings<>("commands"))
+                .executor((v, args) -> {
+                    String menu = (String) args.getOrThrow("menu", "Use [BACK_OR_OPEN] <menu id>");
+                    MenuConfig settings = v.loader.findMenu(menu);
+                    if (settings == null) {
+                        throw new CommandException("Unknown menu %s", menu);
+                    }
+                    v.sync(() -> {
+                        if (v.previousMenu != null) {
+                            if (args.containsKey("commands"))
+                                runIn((String) args.get("commands"), v.previousMenu, v.loader);
+                            v.previousMenu.reopen();
+                        } else {
+                            Menu m = v.loader.findAndCreate(settings, v.viewer, v);
+                            if (args.containsKey("commands"))
+                                runIn((String) args.get("commands"), m, v.loader);
+                            m.open();
+                        }
+                    });
+                })
+        );
         commands.addSubCommand(new Command<Menu>("[RUN_RAND]")
                 .executor((v, args) -> {
                             List<String> commands = v.config.getCommandList().getRandom();

@@ -12,7 +12,7 @@ public enum FrameOpcodes {
     REMOVE(RemoveAnimOpcode::new, "remove", "rm"),
     MOVE(MoveAnimOpcode::new, "move", "mv"),
     SWAP(SwapAnimOpcode::new, "swap", "sw"),
-    COPY(CopyAnimOpcode::new, "copy", "cp"),
+    COPY(CopyAnimOpcode::new, "copy", "cl"),
     GOTO(GotoAnimOpcode::new, "goto", "gt"),
     SOUND(SoundAnimOpcode::new, "sound", "snd"),
     COMMANDS(CommandsAnimOpcode::new, "commands", "cmd"),
