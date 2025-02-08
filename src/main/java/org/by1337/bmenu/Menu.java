@@ -469,6 +469,22 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                         }
                 )
         );
+        commands.addSubCommand(new Command<Menu>("[ACTION_BAR]")
+                .argument(new ArgumentStrings<>("msg"))
+                .executor((v, args) -> {
+                            String msg = (String) args.getOrThrow("msg");
+                            v.loader.getMessage().sendActionBar(v.viewer, msg);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[ACTION_BAR_ALL]")
+                .argument(new ArgumentStrings<>("msg"))
+                .executor((v, args) -> {
+                            String msg = (String) args.getOrThrow("msg");
+                            v.loader.getMessage().sendAllActionBar(msg);
+                        }
+                )
+        );
         commands.addSubCommand(new Command<Menu>("[BROADCAST]")
                 .argument(new ArgumentStrings<>("msg"))
                 .executor((v, args) -> {
