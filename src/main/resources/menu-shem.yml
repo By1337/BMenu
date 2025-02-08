@@ -382,3 +382,9 @@ animations:
 # [GIVEMONEY] <count> - выдать деньги
 # [TAKEMONEY] <count> - забрать деньги
 # [DELAY] <delay> <cmd> - выполнить команду с задержкой например [DELAY] 20 [MESSAGE] &aЭто сообщение отправилось спустя 1 секунду!
+#
+# [TITLE_ALL] <"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>
+# [TITLE] <"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>
+# [ACTION_BAR_ALL] <msg>
+# [ACTION_BAR] <msg>
+# [BROADCAST] <msg>

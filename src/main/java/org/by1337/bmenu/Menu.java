@@ -464,7 +464,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         commands.addSubCommand(new Command<Menu>("[MESSAGE]")
                 .argument(new ArgumentStrings<>("msg"))
                 .executor((v, args) -> {
-                            String msg = (String) args.getOrThrow("msg");
+                            String msg = (String) args.getOrThrow("msg", "Use [MESSAGE] <msg>");
                             v.loader.getMessage().sendMsg(v.viewer, msg);
                         }
                 )
@@ -472,7 +472,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         commands.addSubCommand(new Command<Menu>("[ACTION_BAR]")
                 .argument(new ArgumentStrings<>("msg"))
                 .executor((v, args) -> {
-                            String msg = (String) args.getOrThrow("msg");
+                            String msg = (String) args.getOrThrow("msg", "Use [ACTION_BAR] <msg>");
                             v.loader.getMessage().sendActionBar(v.viewer, msg);
                         }
                 )
@@ -480,15 +480,48 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         commands.addSubCommand(new Command<Menu>("[ACTION_BAR_ALL]")
                 .argument(new ArgumentStrings<>("msg"))
                 .executor((v, args) -> {
-                            String msg = (String) args.getOrThrow("msg");
+                            String msg = (String) args.getOrThrow("msg", "Use [ACTION_BAR_ALL] <msg>");
                             v.loader.getMessage().sendAllActionBar(msg);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[TITLE]")
+                .argument(new ArgumentString<>("msg"))
+                .argument(new ArgumentInteger<>("fadeIn"))
+                .argument(new ArgumentInteger<>("stay"))
+                .argument(new ArgumentInteger<>("fadeOut"))
+
+                .executor((v, args) -> {
+                            String msg = (String) args.getOrThrow("msg", "Use [TITLE] <\"Title\\nSubTitle\"> <?fadeIn> <?stay> <?fadeOut>");
+                            int fadeIn = (int) args.getOrDefault("fadeIn", 10);
+                            int stay = (int) args.getOrDefault("stay", 70);
+                            int fadeOut = (int) args.getOrDefault("fadeOut", 20);
+
+                            String[] arr = msg.split("\\\\n", 2);
+                            v.loader.getMessage().sendTitle(v.viewer, arr[0], arr.length == 2 ? arr[1] : "", fadeIn, stay, fadeOut);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[TITLE_ALL]")
+                .argument(new ArgumentString<>("msg"))
+                .argument(new ArgumentInteger<>("fadeIn"))
+                .argument(new ArgumentInteger<>("stay"))
+                .argument(new ArgumentInteger<>("fadeOut"))
+                .executor((v, args) -> {
+                            String msg = (String) args.getOrThrow("msg", "Use [TITLE_ALL] <\"Title\\nSubTitle\"> <?fadeIn> <?stay> <?fadeOut>");
+                            int fadeIn = (int) args.getOrDefault("fadeIn", 10);
+                            int stay = (int) args.getOrDefault("stay", 70);
+                            int fadeOut = (int) args.getOrDefault("fadeOut", 20);
+
+                            String[] arr = msg.split("\\\\n", 2);
+                            Bukkit.getOnlinePlayers().forEach(player -> v.loader.getMessage().sendTitle(player, arr[0], arr.length == 2 ? arr[1] : "", fadeIn, stay, fadeOut));
                         }
                 )
         );
         commands.addSubCommand(new Command<Menu>("[BROADCAST]")
                 .argument(new ArgumentStrings<>("msg"))
                 .executor((v, args) -> {
-                            String msg = (String) args.getOrThrow("msg");
+                            String msg = (String) args.getOrThrow("msg", "Use [BROADCAST] <msg>");
                             v.loader.getMessage().sendAllMsg(msg);
                         }
                 )
