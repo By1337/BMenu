@@ -9,11 +9,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandSyntaxError;
 import org.by1337.blib.command.CommandWrapper;
+import org.by1337.blib.command.argument.ArgumentChoice;
 import org.by1337.blib.command.argument.ArgumentPlayer;
 import org.by1337.blib.command.argument.ArgumentSetList;
 import org.by1337.blib.command.requires.RequiresPermission;
 import org.by1337.blib.util.ResourceUtil;
 import org.by1337.blib.util.SpacedNameKey;
+import org.by1337.bmenu.command.argument.ArgumentChoiceMenu;
+import org.by1337.bmenu.command.argument.MenuArgumentList;
 import org.by1337.bmenu.command.menu.OpenCommands;
 import org.by1337.bmenu.metrics.Metrics;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
@@ -90,8 +93,9 @@ public class BMenu extends JavaPlugin {
                 )
                 .addSubCommand(new Command<CommandSender>("open")
                         .requires(new RequiresPermission<>("bmenu.open"))
-                        .argument(new ArgumentSetList<>("menu", () -> loader.getMenus().stream().map(SpacedNameKey::toString).toList()))
+                        .argument(new ArgumentChoiceMenu<>("menu", () -> loader.getMenus().stream().map(SpacedNameKey::toString).toList()))
                         .argument(new ArgumentPlayer<>("player"))
+                        .argument(new MenuArgumentList("custom", openCommands))
                         .executor((sender, args) -> {
                             String menu = (String) args.getOrThrow("menu", "Use /bmenu open <menu> <player>");
                             Player player = (Player) args.get("player");
@@ -104,6 +108,13 @@ public class BMenu extends JavaPlugin {
                             }
                             try {
                                 Menu m = loader.findAndCreate(new SpacedNameKey(menu), player, null);
+
+                                for (String s : args.keySet()) {
+                                    if (s.equals("menu") || s.equals("player") || s.equals("custom")) continue;
+                                    Object obj = args.get(s);
+                                    m.addArgument(s, obj instanceof Player pl ? pl.getName() : String.valueOf(obj));
+                                }
+
                                 m.open();
                             } catch (Throwable t) {
                                 player.sendMessage(

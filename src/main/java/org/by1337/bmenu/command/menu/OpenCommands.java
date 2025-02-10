@@ -35,11 +35,15 @@ public class OpenCommands {
                     arguments.add(argumentType.creator().create(data, name));
                 });
             }
-            OpenCommand openCommand = new OpenCommand(string, menu, arguments, loader.getPlugin());
+            OpenCommand openCommand = new OpenCommand(string, menu, arguments, loader.getPlugin(), arguments);
             openCommand.setAliases(ctx.getList("aliases", String.class, Collections.emptyList()));
             openCommand.setPermission(ctx.getAsString("permission", null));
             openCommands.add(openCommand);
         }
+    }
+
+    public List<OpenCommand> openCommands() {
+        return openCommands;
     }
 
     public void register() {
@@ -54,13 +58,15 @@ public class OpenCommands {
         }
     }
 
-    private class OpenCommand extends Command<CommandSender> {
+    public class OpenCommand extends Command<CommandSender> {
         private final String menuId;
         private final CommandWrapper wrapper;
+        private final List<Argument<CommandSender>> arguments;
 
-        protected OpenCommand(@NotNull String name, String menuId, List<Argument<CommandSender>> arguments, Plugin plugin) {
+        protected OpenCommand(@NotNull String name, String menuId, List<Argument<CommandSender>> arguments, Plugin plugin, List<Argument<CommandSender>> arguments1) {
             super(name);
             this.menuId = menuId;
+            this.arguments = arguments1;
             arguments.forEach(this::argument);
             wrapper = new CommandWrapper(this, plugin);
             executor(((sender, args) -> {
@@ -94,6 +100,14 @@ public class OpenCommands {
 
         public void unregister() {
             wrapper.close();
+        }
+
+        public String menuId() {
+            return menuId;
+        }
+
+        public List<Argument<CommandSender>> arguments() {
+            return arguments;
         }
     }
 }
