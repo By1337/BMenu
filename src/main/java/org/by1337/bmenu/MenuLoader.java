@@ -13,6 +13,7 @@ import org.by1337.blib.chat.util.Message;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.blib.util.collection.SpacedNameRegistry;
 import org.by1337.bmenu.factory.MenuFactory;
+import org.by1337.bmenu.util.ObjectUtil;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -105,6 +106,21 @@ public class MenuLoader implements Listener {
             throw new IllegalArgumentException("Unknown menu provider " + config.getProvider().getName().getName());
         }
         return creator.createMenu(config, viewer, previousMenu);
+    }
+
+    public Menu create(String id, Player viewer, @Nullable Menu previousMenu) {
+        MenuConfig cfg = findMenu(id);
+        if (cfg == null) {
+            throw new IllegalArgumentException("Unknown menu " + id);
+        }
+        MenuRegistry.MenuCreator creator = ObjectUtil.requireNonNullElseGet(
+                registry.findCreator(cfg.getProvider()),
+                () -> registry.findCreatorByName(cfg.getProvider().getName().getName())
+        );
+        if (creator == null) {
+            throw new IllegalArgumentException("Unknown menu provider " + cfg.getProvider());
+        }
+        return creator.createMenu(cfg, viewer, previousMenu);
     }
 
     @Nullable
