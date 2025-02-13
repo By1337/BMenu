@@ -1,5 +1,6 @@
 package org.by1337.bmenu.factory;
 
+import blib.com.mojang.datafixers.util.Pair;
 import blib.com.mojang.serialization.Codec;
 import blib.com.mojang.serialization.DataResult;
 import blib.com.mojang.serialization.DynamicOps;
@@ -13,7 +14,6 @@ import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlOps;
 import org.by1337.blib.configuration.YamlValue;
 import org.by1337.blib.configuration.serialization.BukkitCodecs;
-import org.by1337.blib.util.Pair;
 import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.MenuLoader;
 import org.by1337.bmenu.click.ClickHandlerImpl;
@@ -137,7 +137,43 @@ public class ItemFactory {
         FIELD_CODECS.add(Codec.STRING, MenuItemBuilder::name, MenuItemBuilder::setName, "display_name");
         FIELD_CODECS.add(Codec.STRING, MenuItemBuilder::amount, MenuItemBuilder::setAmount, "amount", "1");
         FIELD_CODECS.add(Codec.STRING.listOf(), MenuItemBuilder::lore, MenuItemBuilder::setLore, "lore", List.of());
-        FIELD_CODECS.add(Codec.unboundedMap(Codec.STRING, Codec.STRING), MenuItemBuilder::args, MenuItemBuilder::setArgs, "args", Map.of());
+        FIELD_CODECS.add(new Codec<Map<String, String>>() {
+            @Override
+            public <T> DataResult<Pair<Map<String, String>, T>> decode(DynamicOps<T> ops, T t) {
+
+                ;
+                return ops.getMap(t).map(map -> {
+                    Map<String, String> result = new HashMap<>();
+                    map.entries().forEach(pair -> {
+                        String key = ops.getStringValue(pair.getFirst()).getOrThrow();
+                        T value = pair.getSecond();
+
+                        var v = ops.getStringValue(value);
+                        if (!v.isError()){
+                            result.put(key, v.getOrThrow());
+                        }else {
+                            var list = ops.getStream(value).getOrThrow();
+                            StringBuilder sb = new StringBuilder();
+                            list.forEach(t1 -> {
+                                sb.append(ops.getStringValue(t1).getOrThrow()).append("\\n");
+                            });
+                            if (!sb.isEmpty()){
+                                sb.setLength(sb.length() -2);
+                            }
+                            result.put(key, sb.toString());
+                        }
+                    });
+                    return DataResult.success(Pair.of(result, t));
+                }).getOrThrow();
+            }
+
+            @Override
+            public <T> DataResult<T> encode(Map<String, String> map, DynamicOps<T> ops, T t) {
+                Map<T, T> map0 = new IdentityHashMap<>();
+                map.forEach((k, v) -> map0.put(ops.createString(k), ops.createString(v)));
+                return DataResult.success(ops.createMap(map0));
+            }
+        }, MenuItemBuilder::args, MenuItemBuilder::setArgs, "args", Map.of());
 
         FIELD_CODECS.add(Codec.BOOL, MenuItemBuilder::unbreakable, MenuItemBuilder::setUnbreakable, "unbreakable", false);
         FIELD_CODECS.add(Codec.BOOL, MenuItemBuilder::ticking, MenuItemBuilder::setTicking, "ticking", false);
