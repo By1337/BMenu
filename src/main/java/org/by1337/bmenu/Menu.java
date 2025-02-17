@@ -618,6 +618,14 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                         }
                 )
         );
+        commands.addSubCommand(new Command<Menu>("[ANIMATION_FORCE_END]")
+                .executor((v, args) -> {
+                            if (v.animator != null){
+                                v.animator.forceEnd(v.animationMask, v);
+                            }
+                        }
+                )
+        );
         commands.addSubCommand(new Command<Menu>("[CONNECT]")
                 .argument(new ArgumentString<>("server"))
                 .executor((v, args) -> {
@@ -633,6 +641,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                             Animator.AnimatorContext ctx = v.config.getAnimations().get(animation);
                             if (ctx == null) {
                                 throw new CommandException("Неизвестная анимация {}", animation);
+                            }
+                            if (v.animator != null){
+                                v.animator.forceEnd(v.animationMask, v);
                             }
                             v.animator = ctx.createAnimator();
                         }

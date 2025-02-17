@@ -25,6 +25,12 @@ public class Animator {
         }
     }
 
+    public void forceEnd(MenuItem[] matrix, Menu menu) {
+        while (!isEnd()) {
+            tick(matrix, menu);
+        }
+    }
+
     public boolean isEnd() {
         return pos - 1 >= context.maxTick;
     }
