@@ -176,6 +176,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         flush();
     }
 
+    public void close() {
+        viewer.closeInventory();
+    }
 
     protected void flush() {
         setMatrix(matrix);
@@ -620,7 +623,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         );
         commands.addSubCommand(new Command<Menu>("[ANIMATION_FORCE_END]")
                 .executor((v, args) -> {
-                            if (v.animator != null){
+                            if (v.animator != null) {
                                 v.animator.forceEnd(v.animationMask, v);
                             }
                         }
@@ -642,7 +645,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                             if (ctx == null) {
                                 throw new CommandException("Неизвестная анимация {}", animation);
                             }
-                            if (v.animator != null){
+                            if (v.animator != null) {
                                 v.animator.forceEnd(v.animationMask, v);
                             }
                             v.animator = ctx.createAnimator();
