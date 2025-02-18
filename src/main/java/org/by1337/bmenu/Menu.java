@@ -629,6 +629,21 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                         }
                 )
         );
+        commands.addSubCommand(new Command<Menu>("[ANIMATION_TICK]")
+                .executor((v, args) -> {
+                            if (v.animator != null && !v.animator.isEnd()) {
+                                v.animator.tick(v.animationMask, v);
+                            }
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[FLUSH]")
+                .executor((v, args) -> {
+                            v.inventory.clear();
+                            v.flush();
+                        }
+                )
+        );
         commands.addSubCommand(new Command<Menu>("[CONNECT]")
                 .argument(new ArgumentString<>("server"))
                 .executor((v, args) -> {

@@ -345,7 +345,18 @@ animation:
       - commands: # выполняет команды
           - '[MESSAGE] msg'
       - title: title # устанавливает title меню
-
+# Алиасы к опкодам
+# set -> st
+# remove -> rm
+# move -> mv
+# swap -> sw
+# copy -> cl
+# goto -> gt
+# sound -> snd
+# commands -> cmd
+# title -> ttl
+# fill -> fl
+# remove-if-not-empty -> rne
 animations:
   default:
     - tick: 0
@@ -368,6 +379,7 @@ animations:
 # [BACK] <?commands>
 # [OPEN] <id> <?commands>
 # [BACK_OR_OPEN] <id> <?commands>
+# [FLUSH] - синхронизирует инвентарь с клиентом
 #
 # [REOPEN] - полностью заново открывает текущее меню
 # [REFRESH]
@@ -379,6 +391,8 @@ animations:
 # [RUN_RAND]
 # [CONNECT] <server> - подключает игрока к серверу
 # [SET_ANIMATION] <animation> - устанавливает анимацию из блока animations
+# [ANIMATION_TICK] - принудительно вызывает тик анимации
+# [ANIMATION_FORCE_END] - моментально завершает анимацию
 #
 # [GIVEMONEY] <count> - выдать деньги
 # [TAKEMONEY] <count> - забрать деньги
