@@ -23,7 +23,11 @@ public class AnimationUtil {
             dest = new int[]{start - 1};
         } else {
             src = readSlots(args[0]);
-            dest = readSlots(args[1]);
+            if (args.length != 1) {
+                dest = readSlots(args[1]);
+            } else {
+                dest = src;
+            }
         }
         return Pair.of(src, dest);
     }

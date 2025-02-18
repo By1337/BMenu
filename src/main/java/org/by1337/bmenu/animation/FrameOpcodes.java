@@ -19,6 +19,8 @@ public enum FrameOpcodes {
     TITLE(SetTitleOpcode::new, "title", "ttl"),
     FILL(FillAnimOpcode::new, "fill", "fl"),
     REMOVE_IF_NOT_EMPTY(RemoveIfNotEmptyAnimOpcode::new, "remove-if-not-empty", "rne"),
+    COPY_FROM_BASE(CopyFromBaseAnimOpcode::new, "copy-from-base", "cfb"),
+    SET_IF_EMPTY(SetIfEmptyAnimOpcode::new, "set-if-empty", "sie"),
     ;
     private static final Map<String, FrameOpcodes> LOOKUP;
     private final Function<YamlValue, FrameOpcode> creator;
