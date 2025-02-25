@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Locale;
 import java.util.UUID;
 
 public class ItemStackCreator {
@@ -49,7 +50,7 @@ public class ItemStackCreator {
             return head;
         }
         try {
-            return new ItemStack(Material.valueOf(argument));
+            return new ItemStack(Material.valueOf(argument.toUpperCase(Locale.ENGLISH)));
         } catch (IllegalArgumentException e) {
             LOGGER.error("Failed to load item {}", argument);
             return new ItemStack(Material.DIRT);

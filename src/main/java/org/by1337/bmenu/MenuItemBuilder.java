@@ -76,11 +76,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         ItemStack result;
         if (itemStack == null) {
             String tmpMaterial = placeholder.replace(material);
-            if (tmpMaterial.startsWith("basehead-")) {
-                result = ItemStackCreator.getItem(tmpMaterial);
-            } else {
-                result = new ItemStack(Material.valueOf(menu.replace(tmpMaterial).toUpperCase(Locale.ENGLISH)));
-            }
+            result = ItemStackCreator.getItem(tmpMaterial);
         } else {
             result = itemStack.clone();
         }
@@ -161,6 +157,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         }
         return item;
     }
+
     public void setDamage(int damage) {
         this.damage = damage;
     }
