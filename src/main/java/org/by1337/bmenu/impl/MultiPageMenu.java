@@ -35,7 +35,14 @@ public abstract class MultiPageMenu<T> extends Menu {
 
     protected abstract List<T> getItems();
 
-    protected abstract Function<T, MenuItem> getItemFunction();
+    @Deprecated
+    protected Function<T, MenuItem> getItemFunction() {
+        return i -> null;
+    }
+
+    protected MenuItem map(T input){
+        return getItemFunction().apply(input);
+    }
 
     protected void generate0() {
         generate$0();
@@ -67,7 +74,7 @@ public abstract class MultiPageMenu<T> extends Menu {
         for (int x = currentPage * itemSlots.length; x < items.size(); x++) {
             T item = items.get(x);
             if (slotsIterator.hasNext()) {
-                MenuItem menuItem = getItemFunction().apply(item);
+                MenuItem menuItem = map(item);
                 if (menuItem == null) continue;
                 menuItem.setSlots(new int[]{slotsIterator.next()});
                 setItemToBuffer(menuItem);

@@ -24,7 +24,9 @@ import org.by1337.blib.nbt.impl.StringNBT;
 import org.by1337.blib.text.MessageFormatter;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
+import org.by1337.bmenu.animation.util.AnimationUtil;
 import org.by1337.bmenu.click.MenuClickType;
+import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.hook.VaultHook;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
 import org.by1337.bmenu.requirement.CommandRequirements;
@@ -171,6 +173,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         Arrays.fill(matrix, null);
         config.generate(this);
         generate();
+        onEvent(MenuEvents.ON_REFRESH);
         sendFakeTitle(config.getTitle());
         inventory.clear();
         flush();
@@ -696,6 +699,53 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                             int delay = (int) args.getOrThrow("delay", "Use: [DELAY] <delay> <command>");
                             String cmd = (String) args.getOrThrow("cmd", "Use: [DELAY] <delay> <command>");
                             v.sync(() -> v.runCommands(List.of(cmd)), delay);
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[SET_ITEM]")
+                .argument(new ArgumentString<>("slots"))
+                .argument(new ArgumentString<>("item"))
+                .executor((v, args) -> {
+                            int[] slots = AnimationUtil.readSlots((String) args.getOrThrow("slots", "Use: [SET_ITEM] <slots> <item>"));
+                            String item = (String) args.getOrThrow("item", "Use: [SET_ITEM] <slot> <item>");
+                            MenuItemBuilder builder = v.getConfig().findMenuItem(v.replace(item), v);
+                            MenuItem menuItem;
+                            if (builder == null) {
+                                menuItem = new MenuItem(slots, ItemStackCreator.getItem(v.replace(item)));
+                            } else {
+                                menuItem = builder.build(v);
+                            }
+                            if (menuItem != null) {
+                                menuItem.setSlots(slots);
+                                v.setItem(menuItem);
+                            }
+                        }
+                )
+        );
+        commands.addSubCommand(new Command<Menu>("[COPY_FROM_PREVIOUS_MENU]")
+                .argument(new ArgumentString<>("src"))
+                .argument(new ArgumentString<>("dest"))
+                .executor((v, args) -> {
+                            int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [COPY_FROM_PREVIOUS_MENU] <src> <dest>"));
+                            int[] dest = AnimationUtil.readSlots((String) args.getOrThrow("dest", "Use: [COPY_FROM_PREVIOUS_MENU] <src> <dest>"));
+                            if (v.previousMenu == null) {
+                                throw new CommandException("Failed to execute [COPY_FROM_PREVIOUS_MENU] because previousMenu is null!");
+                            }
+
+                            int srcIndex = 0;
+                            for (int toIndex : dest) {
+                                int fromIndex = src[srcIndex];
+
+                                if (fromIndex < 0 || fromIndex >= v.matrix.length || toIndex < 0 || toIndex >= v.matrix.length) {
+                                    throw new IndexOutOfBoundsException("Индексы 'from' или 'to' выходят за пределы меню.");
+                                }
+
+                                v.matrix[toIndex] = v.previousMenu.findItemInSlot(fromIndex);
+                                if (srcIndex < src.length - 1) {
+                                    srcIndex++;
+                                }
+                            }
+
                         }
                 )
         );
