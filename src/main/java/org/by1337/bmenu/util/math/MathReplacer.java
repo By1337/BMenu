@@ -1,10 +1,12 @@
 package org.by1337.bmenu.util.math;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MathReplacer {
+    private static final DecimalFormat df = new DecimalFormat("#.##");
 
     public static String replace(String input) throws ParseException {
         MathParserType type = input.contains(".") ? MathParserType.DOUBLE : MathParserType.DEFAULT;
@@ -17,9 +19,15 @@ public class MathReplacer {
             String s = replaceStrings(matcher.group(1));
             s = s.replace(" ", "");
 
-            input = input.replace(matcher.group(0), type.processor.apply(s));
+            String result;
+            if (type == MathParserType.DOUBLE) {
+                result = df.format(Double.parseDouble(type.processor.apply(s)));
+            } else {
+                result = type.processor.apply(s);
+            }
+            input = input.replace(matcher.group(0), result);
         }
-        return input.replace(".0", "");
+        return input;
     }
 
     public static String replaceStrings(String s) {
