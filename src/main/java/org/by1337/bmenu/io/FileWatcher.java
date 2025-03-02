@@ -16,6 +16,7 @@ public class FileWatcher implements Closeable {
     private final File configPath;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Consumer<Path> onChange;
+    private long lastUpdate = 0;
 
     public FileWatcher(File configDirectory, Consumer<Path> onChange) {
         this.configPath = configDirectory;
@@ -32,7 +33,10 @@ public class FileWatcher implements Closeable {
                     for (WatchEvent<?> event : key.pollEvents()) {
                         if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
                             Path changedFile = (Path) event.context();
-                            onChange.accept(changedFile);
+                            if (System.currentTimeMillis() - lastUpdate > 150) {
+                                onChange.accept(changedFile);
+                            }
+                            lastUpdate = System.currentTimeMillis();
                         }
                     }
                     key.reset();

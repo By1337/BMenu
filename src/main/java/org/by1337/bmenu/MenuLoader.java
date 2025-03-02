@@ -61,7 +61,7 @@ public class MenuLoader implements Listener {
     }
 
     private void onFileChange(Path path) {
-        plugin.getServer().getScheduler().runTask(plugin, this::hotReload);
+        plugin.getServer().getScheduler().runTaskLater(plugin, this::hotReload, 4);
     }
 
     @ApiStatus.Experimental
