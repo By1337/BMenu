@@ -9,10 +9,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandSyntaxError;
 import org.by1337.blib.command.CommandWrapper;
-import org.by1337.blib.command.argument.ArgumentChoice;
 import org.by1337.blib.command.argument.ArgumentPlayer;
 import org.by1337.blib.command.argument.ArgumentSetList;
 import org.by1337.blib.command.requires.RequiresPermission;
+import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.ResourceUtil;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.command.argument.ArgumentChoiceMenu;
@@ -28,6 +28,7 @@ public class BMenu extends JavaPlugin {
     private CommandWrapper commandWrapper;
     private OpenCommands openCommands;
     private Metrics metrics;
+    private YamlContext config;
 
     @Override
     public void onLoad() {
@@ -42,16 +43,18 @@ public class BMenu extends JavaPlugin {
             ResourceUtil.saveIfNotExist("menu/random-colors/rand-colors-menu.yml", this);
             ResourceUtil.saveIfNotExist("menu/admin/kick.yml", this);
         }
+        config = ResourceUtil.load("config.yml", this);
         loader = new MenuLoader(
                 new File(getDataFolder(), "menu"),
-                this
+                this,
+                config.getAsBoolean("hot-reload", false)
         );
     }
 
     @Override
     public void onEnable() {
         BungeeCordMessageSender.registerChannel(this);
-        openCommands = new OpenCommands(loader, ResourceUtil.load("config.yml", this));
+        openCommands = new OpenCommands(loader, config);
         loader.loadMenus();
         loader.registerListeners();
         commandWrapper = new CommandWrapper(createCommand(), this);
@@ -78,13 +81,7 @@ public class BMenu extends JavaPlugin {
                 .addSubCommand(new Command<CommandSender>("reload")
                         .requires(new RequiresPermission<>("bmenu.reload"))
                         .executor((sender, args) -> {
-                            loader.close();
-                            loader = new MenuLoader(
-                                    new File(getDataFolder(), "menu"),
-                                    this
-                            );
-                            loader.loadMenus();
-                            loader.registerListeners();
+                            loader.fullReload();
                             openCommands.unregister();
                             openCommands = new OpenCommands(loader, ResourceUtil.load("config.yml", this));
                             openCommands.register();

@@ -9,6 +9,7 @@ import org.by1337.bmenu.yaml.CashedYamlContext;
 import org.by1337.bmenu.yaml.RawYamlContext;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,8 +35,9 @@ public class MenuConfig implements MenuItemLookup {
     private Object data;
     private final CashedYamlContext cashedContext;
     private final Map<String, Animator.AnimatorContext> animations;
+    private final List<File> fromFiles;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, RawYamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, Map<String, Animator.AnimatorContext> animations) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, RawYamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
@@ -46,6 +48,7 @@ public class MenuConfig implements MenuItemLookup {
         this.idToItems = idToItems;
         this.context = context;
         this.animations = animations;
+        this.fromFiles = fromFiles;
         cashedContext = new CashedYamlContext(this.context);
         this.loader = loader;
         this.title = title;
@@ -213,5 +216,17 @@ public class MenuConfig implements MenuItemLookup {
 
     public Map<String, Animator.AnimatorContext> getAnimations() {
         return animations;
+    }
+
+    public List<File> getFromFiles() {
+        return fromFiles;
+    }
+
+    @Override
+    public String toString() {
+        return "MenuConfig{" +
+                "id=" + id +
+                ", supers=" + supers +
+                '}';
     }
 }

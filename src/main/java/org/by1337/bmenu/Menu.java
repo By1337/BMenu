@@ -31,6 +31,7 @@ import org.by1337.bmenu.hook.VaultHook;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
 import org.by1337.bmenu.requirement.CommandRequirements;
 import org.by1337.bmenu.util.math.MathReplacer;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -356,6 +357,42 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         String name = "${" + key + "}";
         placeholders.remove(name);
         registerPlaceholder(name, () -> args.get(key));
+    }
+
+    /**
+     * Определяет, поддерживает ли меню горячую перезагрузку.
+     * Если возвращает {@code true}, то при горячей перезагрузке будет создан новый экземпляр меню,
+     * а также новый экземпляр {@link Menu#previousMenu}.
+     *
+     * @return {@code true}, если меню поддерживает горячую перезагрузку, иначе {@code false}.
+     */
+    @ApiStatus.Experimental
+    public boolean isSupportsHotReload() {
+        return false;
+    }
+
+    /**
+     * Вызывается при горячей перезагрузке меню. Позволяет перенести данные из старого экземпляра в новый.
+     * Этот метод вызывается только если {@link #isSupportsHotReload()} возвращает {@code true}.
+     *
+     * @param oldMenu старый экземпляр меню, из которого можно перенести данные в новый.
+     */
+    @ApiStatus.Experimental
+    public void onHotReload(@NotNull Menu oldMenu) {
+        args.putAll(oldMenu.args);
+        for (String param : args.keySet()) {
+            registerPlaceholder("${" + param + "}", () -> args.get(param));
+        }
+    }
+
+
+    @Override
+    public String toString() {
+        return "Menu{" +
+                "loader=" + loader +
+                ", config=" + config +
+                ", viewer=" + viewer +
+                '}';
     }
 
     private static void runIn(String rawNBT, Menu menu, MenuLoader loader) {

@@ -13,11 +13,15 @@ import org.by1337.blib.chat.util.Message;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.blib.util.collection.SpacedNameRegistry;
 import org.by1337.bmenu.factory.MenuFactory;
+import org.by1337.bmenu.io.FileWatcher;
 import org.by1337.bmenu.util.ObjectUtil;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,10 +33,22 @@ public class MenuLoader implements Listener {
     private final Plugin plugin;
     private final Logger logger;
     private final Message message;
-    private final SpacedNameRegistry<MenuConfig> menuRegistry;
+    private SpacedNameRegistry<MenuConfig> menuRegistry;
     private final String defaultSpace;
+    private final @Nullable FileWatcher fileWatcher;
 
     public MenuLoader(File homeDir, Plugin plugin) {
+        this(homeDir, plugin, false);
+    }
+
+    @ApiStatus.Experimental
+    public MenuLoader(File homeDir, Plugin plugin, boolean hotReload) {
+        if (hotReload) {
+            fileWatcher = new FileWatcher(homeDir, this::onFileChange);
+            fileWatcher.startWatching();
+        } else {
+            fileWatcher = null;
+        }
         this.homeDir = homeDir;
         homeDir.mkdirs();
         this.plugin = plugin;
@@ -44,17 +60,69 @@ public class MenuLoader implements Listener {
         menuRegistry = new SpacedNameRegistry<>();
     }
 
+    private void onFileChange(Path path) {
+        plugin.getServer().getScheduler().runTask(plugin, this::hotReload);
+    }
+
+    @ApiStatus.Experimental
+    public void hotReload() {
+        menuRegistry = new SpacedNameRegistry<>();
+        loadMenus();
+
+        List<Menu> toUpDate = new ArrayList<>();
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu m && m.getLoader() == this) {
+                toUpDate.add(m);
+            }
+        }
+        toUpDate.forEach(Menu::close);
+
+        for (Menu menu : toUpDate) {
+            List<Menu> hierarchy = new ArrayList<>();
+            Menu m = menu;
+            do {
+                hierarchy.add(m);
+                m = m.previousMenu;
+            } while (m != null);
+
+            Menu lastMenu = null;
+            for (int i = hierarchy.size() - 1; i >= 0; i--) {
+                Menu menu2 = hierarchy.get(i);
+                if (!menu2.isSupportsHotReload()) break;
+                lastMenu = create(menu2.config.getId().toString(), menu2.viewer, lastMenu);
+                lastMenu.onHotReload(menu2);
+            }
+            if (lastMenu != null) {
+                lastMenu.open();
+            }
+        }
+    }
+
+    public void fullReload() {
+        closeAllOpenMenus();
+        menuRegistry = new SpacedNameRegistry<>();
+        loadMenus();
+    }
+
     public void registerListeners() {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    public void close() {
+    public void closeAllOpenMenus() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu m && m.getLoader() == this) {
                 player.closeInventory();
             }
         }
+    }
+
+    public void close() {
+        closeAllOpenMenus();
         HandlerList.unregisterAll(this);
+        if (fileWatcher != null) {
+            fileWatcher.close();
+        }
     }
 
     public void loadMenus() {
@@ -108,6 +176,7 @@ public class MenuLoader implements Listener {
         return creator.createMenu(config, viewer, previousMenu);
     }
 
+    @NotNull
     public Menu create(String id, Player viewer, @Nullable Menu previousMenu) {
         MenuConfig cfg = findMenu(id);
         if (cfg == null) {

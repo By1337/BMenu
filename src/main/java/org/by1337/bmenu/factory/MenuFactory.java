@@ -100,7 +100,8 @@ public class MenuFactory {
                 animator,
                 commandList,
                 menuEventListeners,
-                animations
+                animations,
+                loadContext.loadedFiles
         );
     }
 
@@ -125,6 +126,6 @@ public class MenuFactory {
     }
 
     private static class MenuLoadContext {
-        private final Set<File> loadedFiles = new HashSet<>();
+        private final List<File> loadedFiles = new ArrayList<>();
     }
 }

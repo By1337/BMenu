@@ -20,4 +20,9 @@ public class DefaultMenu extends Menu {
     protected boolean runCommand(String cmd) throws CommandException {
         return false;
     }
+
+    @Override
+    public boolean isSupportsHotReload() {
+        return true;
+    }
 }
