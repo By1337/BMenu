@@ -91,7 +91,7 @@ public class MenuConfig implements MenuItemLookup {
         for (MenuConfig superMenu : supers) {
             superMenu.generate(menu);
         }
-        var currentItems = items.stream().map(m -> m.build(menu)).filter(Objects::nonNull).toList();
+        var currentItems = items.stream().filter(m -> m.slots().length != 0).map(m -> m.build(menu)).filter(Objects::nonNull).toList();
         menu.setItems(currentItems);
     }
 
