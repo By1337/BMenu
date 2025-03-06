@@ -417,6 +417,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     static {
         commands = new Command<>("root");
         commands.addSubCommand(new Command<Menu>("[CONSOLE]")
+                        .aliases("[console]")
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
                             String cmd = (String) args.getOrThrow("cmd");
@@ -425,6 +426,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[PLAYER]")
+                .aliases("[player]")
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
                             String cmd = (String) args.getOrThrow("cmd");
@@ -433,6 +435,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[CHAT]")
+                .aliases("[chat]")
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
                             String cmd = (String) args.getOrThrow("cmd");
@@ -441,6 +444,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[SOUND]")
+                .aliases("[sound]")
                 .argument(new ArgumentSound<>("sound"))
                 .argument(new ArgumentFloat<>("volume"))
                 .argument(new ArgumentFloat<>("pitch"))
@@ -453,9 +457,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[CLOSE]")
+                .aliases("[close]")
                 .executor((v, args) -> v.sync(v.viewer::closeInventory))
         );
         commands.addSubCommand(new Command<Menu>("[BACK_OR_CLOSE]")
+                .aliases("[back_or_close]")
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> v.sync(() -> {
                     if (v.previousMenu != null) {
@@ -468,6 +474,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 }))
         );
         commands.addSubCommand(new Command<Menu>("[BACK_TO_OR_CLOSE]")
+                .aliases("[back_to_or_close]")
                 .argument(new ArgumentString<>("id"))
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
@@ -493,6 +500,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 })
         );
         commands.addSubCommand(new Command<Menu>("[BACK]")
+                .aliases("[back]")
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
                     var m = Objects.requireNonNull(v.previousMenu, "does not have a previous menu!");
@@ -502,9 +510,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 })
         );
         commands.addSubCommand(new Command<Menu>("[REFRESH]")
+                .aliases("[refresh]")
                 .executor((v, args) -> v.refresh())
         );
         commands.addSubCommand(new Command<Menu>("[MESSAGE]")
+                .aliases("[message]")
                 .argument(new ArgumentStrings<>("msg"))
                 .executor((v, args) -> {
                             String msg = (String) args.getOrThrow("msg", "Use [MESSAGE] <msg>");
@@ -513,6 +523,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[ACTION_BAR]")
+                .aliases("[action_bar]")
                 .argument(new ArgumentStrings<>("msg"))
                 .executor((v, args) -> {
                             String msg = (String) args.getOrThrow("msg", "Use [ACTION_BAR] <msg>");
@@ -521,6 +532,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[ACTION_BAR_ALL]")
+                .aliases("[action_bar_all]")
                 .argument(new ArgumentStrings<>("msg"))
                 .executor((v, args) -> {
                             String msg = (String) args.getOrThrow("msg", "Use [ACTION_BAR_ALL] <msg>");
@@ -529,6 +541,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[TITLE]")
+                .aliases("[title]")
                 .argument(new ArgumentString<>("msg"))
                 .argument(new ArgumentInteger<>("fadeIn"))
                 .argument(new ArgumentInteger<>("stay"))
@@ -546,6 +559,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[TITLE_ALL]")
+                .aliases("[title_all]")
                 .argument(new ArgumentString<>("msg"))
                 .argument(new ArgumentInteger<>("fadeIn"))
                 .argument(new ArgumentInteger<>("stay"))
@@ -562,6 +576,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[BROADCAST]")
+                .aliases("[broadcast]")
                 .argument(new ArgumentStrings<>("msg"))
                 .executor((v, args) -> {
                             String msg = (String) args.getOrThrow("msg", "Use [BROADCAST] <msg>");
@@ -570,6 +585,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[SET_PARAM]")
+                .aliases("[set_param]")
                 .argument(new ArgumentString<>("param"))
                 .argument(new ArgumentStrings<>("value"))
                 .executor((v, args) -> {
@@ -582,6 +598,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[IMPORT_PARAMS]")
+                .aliases("[import_params]")
                 .argument(new ArgumentString<>("item"))
                 .executor((v, args) -> {
                             String param = (String) args.getOrThrow("item", "Use [IMPORT_PARAMS] <item>");
@@ -595,6 +612,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[OPEN]")
+                .aliases("[open]")
                 .argument(new ArgumentString<>("menu"))
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
@@ -611,6 +629,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[BACK_OR_OPEN]")
+                .aliases("[back_or_open]")
                 .argument(new ArgumentString<>("menu"))
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
@@ -634,6 +653,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 })
         );
         commands.addSubCommand(new Command<Menu>("[RUN_RAND]")
+                .aliases("[run_rand]")
                 .executor((v, args) -> {
                             List<String> commands = v.config.getCommandList().getRandom();
                             if (commands == null) {
@@ -644,6 +664,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[RUN]")
+                .aliases("[run]")
                 .argument(new ArgumentString<>("name"))
                 .executor((v, args) -> {
                             String name = (String) args.getOrThrow("name", "Use [RUN] <name>");
@@ -656,12 +677,14 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[REOPEN]")
+                .aliases("[reopen]")
                 .executor((v, args) -> {
                             v.reopen();
                         }
                 )
         );
         commands.addSubCommand(new Command<Menu>("[ANIMATION_FORCE_END]")
+                .aliases("[animation_force_end]")
                 .executor((v, args) -> {
                             if (v.animator != null) {
                                 v.animator.forceEnd(v.animationMask, v);
@@ -670,6 +693,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[ANIMATION_TICK]")
+                .aliases("[animation_tick]")
                 .executor((v, args) -> {
                             if (v.animator != null && !v.animator.isEnd()) {
                                 v.animator.tick(v.animationMask, v);
@@ -678,6 +702,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[FLUSH]")
+                .aliases("[flush]")
                 .executor((v, args) -> {
                             v.inventory.clear();
                             v.flush();
@@ -685,6 +710,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[CONNECT]")
+                .aliases("[connect]")
                 .argument(new ArgumentString<>("server"))
                 .executor((v, args) -> {
                             String server = (String) args.getOrThrow("server", "Use [CONNECT] <server>");
@@ -693,6 +719,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[SET_ANIMATION]")
+                .aliases("[set_animation]")
                 .argument(new ArgumentString<>("animation"))
                 .executor((v, args) -> {
                             String animation = (String) args.getOrThrow("animation", "Use: [SET_ANIMATION] <animation>");
@@ -708,6 +735,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[GIVEMONEY]")
+                .aliases("[givemoney]")
                 .argument(new ArgumentFormattedDouble<>("count"))
                 .executor((v, args) -> {
                             Double count = (Double) args.getOrThrow("count", "Use: [GIVEMONEY] <count>");
@@ -719,6 +747,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[TAKEMONEY]")
+                .aliases("[takemoney]")
                 .argument(new ArgumentFormattedDouble<>("count"))
                 .executor((v, args) -> {
                             Double count = (Double) args.getOrThrow("count", "Use: [GIVEMONEY] <count>");
@@ -730,6 +759,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[DELAY]")
+                .aliases("[delay]")
                 .argument(new ArgumentInteger<>("delay"))
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
@@ -740,6 +770,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[SET_ITEM]")
+                .aliases("[set_item]")
                 .argument(new ArgumentString<>("slots"))
                 .argument(new ArgumentString<>("item"))
                 .executor((v, args) -> {
@@ -760,6 +791,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 )
         );
         commands.addSubCommand(new Command<Menu>("[COPY_FROM_PREVIOUS_MENU]")
+                .aliases("[copy_from_previous_menu]")
                 .argument(new ArgumentString<>("src"))
                 .argument(new ArgumentString<>("dest"))
                 .executor((v, args) -> {

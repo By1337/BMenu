@@ -94,13 +94,13 @@ public abstract class MultiPageMenu<T> extends Menu {
     @Override
     protected boolean runCommand(String cmd) throws CommandException {
         return switch (cmd) {
-            case "[NEXT_PAGE]" -> {
+            case "[NEXT_PAGE]","[next_page]" -> {
                 if (currentPage < maxPage - 1) {
                     currentPage++;
                 }
                 yield true;
             }
-            case "[PREVIOUS_PAGE]" -> {
+            case "[PREVIOUS_PAGE]","[previous_page]" -> {
                 if (currentPage > 0) {
                     currentPage--;
                 }

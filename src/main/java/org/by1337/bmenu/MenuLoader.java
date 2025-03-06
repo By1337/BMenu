@@ -69,16 +69,16 @@ public class MenuLoader implements Listener {
         menuRegistry = new SpacedNameRegistry<>();
         loadMenus();
 
-        List<Menu> toUpDate = new ArrayList<>();
+        List<Menu> toUpdate = new ArrayList<>();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu m && m.getLoader() == this) {
-                toUpDate.add(m);
+                toUpdate.add(m);
             }
         }
-        toUpDate.forEach(Menu::close);
+        toUpdate.forEach(Menu::close);
 
-        for (Menu menu : toUpDate) {
+        for (Menu menu : toUpdate) {
             List<Menu> hierarchy = new ArrayList<>();
             Menu m = menu;
             do {
@@ -88,18 +88,19 @@ public class MenuLoader implements Listener {
 
             Menu lastMenu = null;
             for (int i = hierarchy.size() - 1; i >= 0; i--) {
-                Menu menu2 = hierarchy.get(i);
-                if (!menu2.isSupportsHotReload()) break;
-                lastMenu = create(menu2.config.getId().toString(), menu2.viewer, lastMenu);
-                lastMenu.onHotReload(menu2);
+                Menu oldMenu = hierarchy.get(i);
+                if (!oldMenu.isSupportsHotReload()) break;
+                lastMenu = create(oldMenu.config.getId(), oldMenu.viewer, lastMenu);
+                lastMenu.onHotReload(oldMenu);
             }
             if (lastMenu != null) {
                 lastMenu.open();
             }
         }
+        logger.info("The configs have been reloaded!");
     }
 
-    public void fullReload() {
+    public void reload() {
         closeAllOpenMenus();
         menuRegistry = new SpacedNameRegistry<>();
         loadMenus();
@@ -139,7 +140,7 @@ public class MenuLoader implements Listener {
                 try {
                     result.add(MenuFactory.load(file, this));
                 } catch (Throwable t) {
-                    logger.warn("Failed to load menu config File: {}", file.getPath(), t);
+                    logger.error("Failed to load menu config File: {}", file.getPath(), t);
                 }
             }
         }
@@ -177,11 +178,15 @@ public class MenuLoader implements Listener {
     }
 
     @NotNull
+    public Menu create(SpacedNameKey id, Player viewer, @Nullable Menu previousMenu) {
+        return create(Objects.requireNonNull(findMenu(id), "Unknown menu id: " + id), viewer, previousMenu);
+    }
+
     public Menu create(String id, Player viewer, @Nullable Menu previousMenu) {
-        MenuConfig cfg = findMenu(id);
-        if (cfg == null) {
-            throw new IllegalArgumentException("Unknown menu " + id);
-        }
+        return create(Objects.requireNonNull(findMenu(id), "Unknown menu id: " + id), viewer, previousMenu);
+    }
+
+    public Menu create(MenuConfig cfg, Player viewer, @Nullable Menu previousMenu) {
         MenuRegistry.MenuCreator creator = ObjectUtil.requireNonNullElseGet(
                 registry.findCreator(cfg.getProvider()),
                 () -> registry.findCreatorByName(cfg.getProvider().getName().getName())

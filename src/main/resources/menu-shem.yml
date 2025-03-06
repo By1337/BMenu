@@ -236,33 +236,6 @@ items:
             - '[MESSAGE] string != string'
             - '[BREAK]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
             - '[CLOSE]' # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена
-####### НИЖЕ СТАРЫЙ ФОРМАТ ЕГО ТАКЖЕ МОЖНО ИСПОЛЬЗОВАТЬ #######
-#      requirements: # алиас req
-#        check: # если условие окажется ложным, то проверка остальных условий прервётся
-#          type: math
-#          expression: '100 + 100 == 10 * (5 * 4)'
-#          deny_commands: [ ] # во всех проверках тоже можно указывать команды
-#          commands: [ ]
-#        check-1:
-#          type: string equals
-#          input: 'str'
-#          output: 'str'
-#          commands:
-#        check-2:
-#          type: string equals ignorecase
-#          input: 'str'
-#          output: 'STR'
-#        check-3:
-#          type: string contains
-#          input: 'str_str_str'
-#          output: 'str'
-#        check-4:
-#          type: regex matches
-#          regex: '^(str)\d+'
-#          input: 'str88ing'
-#        check-5:
-#          type: has permission
-#          permission: 'admin.use'
       # Здесь можно выполнить команды в зависимости от результатов условий
       deny_commands: [ ] # если хотя бы одно из условий окажется ложным
     on_left_click: # обработка клика

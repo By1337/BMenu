@@ -81,7 +81,7 @@ public class BMenu extends JavaPlugin {
                 .addSubCommand(new Command<CommandSender>("reload")
                         .requires(new RequiresPermission<>("bmenu.reload"))
                         .executor((sender, args) -> {
-                            loader.fullReload();
+                            loader.reload();
                             openCommands.unregister();
                             openCommands = new OpenCommands(loader, ResourceUtil.load("config.yml", this));
                             openCommands.register();
@@ -161,5 +161,9 @@ public class BMenu extends JavaPlugin {
                 )*/;
 
         return cmd;
+    }
+
+    public MenuLoader getMenuLoader() {
+        return loader;
     }
 }
