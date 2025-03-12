@@ -4,12 +4,7 @@ import blib.com.mojang.datafixers.util.Pair;
 import blib.com.mojang.serialization.Codec;
 import blib.com.mojang.serialization.DataResult;
 import blib.com.mojang.serialization.DynamicOps;
-import org.bukkit.Color;
-import org.bukkit.NamespacedKey;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlOps;
 import org.by1337.blib.configuration.YamlValue;
@@ -34,6 +29,7 @@ public class ItemFactory {
         public <T> DataResult<blib.com.mojang.datafixers.util.Pair<MenuItemBuilder, T>> decode(DynamicOps<T> ops, T t) {
             MenuItemBuilder menuItemBuilder = new MenuItemBuilder();
             DataResult<MenuItemBuilder> result = FIELD_CODECS.decode(menuItemBuilder, ops, t);
+            menuItemBuilder.postDecode();
             return result.map(m -> blib.com.mojang.datafixers.util.Pair.of(m, t));
         }
 
@@ -56,7 +52,7 @@ public class ItemFactory {
     public static MenuItemBuilder readItem(YamlContext ctx, MenuLoader loader) {
         DataResult<blib.com.mojang.datafixers.util.Pair<MenuItemBuilder, YamlValue>> result = CODEC.decode(YamlOps.INSTANCE, ctx.get());
 
-        if (result.isError()){
+        if (result.isError()) {
             LOGGER.error(result.error().get().message());
 
         }
@@ -149,16 +145,16 @@ public class ItemFactory {
                         T value = pair.getSecond();
 
                         var v = ops.getStringValue(value);
-                        if (!v.isError()){
+                        if (!v.isError()) {
                             result.put(key, v.getOrThrow());
-                        }else {
+                        } else {
                             var list = ops.getStream(value).getOrThrow();
                             StringBuilder sb = new StringBuilder();
                             list.forEach(t1 -> {
                                 sb.append(ops.getStringValue(t1).getOrThrow()).append("\\n");
                             });
-                            if (!sb.isEmpty()){
-                                sb.setLength(sb.length() -2);
+                            if (!sb.isEmpty()) {
+                                sb.setLength(sb.length() - 2);
                             }
                             result.put(key, sb.toString());
                         }

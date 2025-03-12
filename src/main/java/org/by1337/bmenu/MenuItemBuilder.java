@@ -4,13 +4,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
-import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionEffect;
+import org.by1337.blib.BLib;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.MultiPlaceholder;
 import org.by1337.blib.chat.util.Message;
@@ -21,6 +21,7 @@ import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.ItemFactory;
 import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.requirement.Requirements;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,8 +30,17 @@ import java.util.function.Supplier;
 
 public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
+    @ApiStatus.Experimental
+    public static final boolean USE_CASH = true;
+
     private int[] slots = new int[]{0};
     private List<String> lore = new ArrayList<>();
+
+    @ApiStatus.Experimental
+    private List<Object> cachedLore = new ArrayList<>();
+    @ApiStatus.Experimental
+    private Object cachedName;
+
     private String name;
     private Map<MenuClickType, ClickHandler> clicks = new HashMap<>();
     private String amount = "1";
@@ -57,6 +67,18 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return ItemFactory.readItem(context, loader);
     }
 
+    @ApiStatus.Experimental
+    public void postDecode() {
+        if (cachedName == null || cachedName instanceof Component && (cachedLore.isEmpty() || cachedLore.stream().allMatch(l -> l instanceof Component))) {
+            if (viewRequirement.isEmpty() && hasNoPlaceholders(material) && hasNoPlaceholders(amount)) {
+                staticItem = true;
+            }
+        }
+    }
+
+    private static boolean hasNoPlaceholders(String s) {
+        return !s.contains("}") && !s.contains("{") && !s.contains("%");
+    }
 
     @Nullable
     public MenuItem build(Menu menu) {
@@ -90,20 +112,29 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         }
         Message message = menu.loader.getMessage();
         List<Component> lore = new ArrayList<>(Objects.requireNonNullElseGet(im.lore(), ArrayList::new));
-        for (String s : this.lore) {
-            String s1 = placeholder.replace(s);
-            s1 = s1.replace("\\n", "\n"); // \n
-            if (s1.contains("\n")) {
-                for (String string : s1.split("\n")) {
-                    lore.add(message.componentBuilder(string).decoration(TextDecoration.ITALIC, false));
+        for (Object o : cachedLore) {
+            if (o instanceof Component c) {
+                lore.add(c);
+            } else if (o instanceof String s) {
+                String s1 = placeholder.replace(s);
+                s1 = s1.replace("\\n", "\n"); // \n
+                if (s1.contains("\n")) {
+                    for (String string : s1.split("\n")) {
+                        lore.add(message.componentBuilder(string).decoration(TextDecoration.ITALIC, false));
+                    }
+                } else {
+                    lore.add(message.componentBuilder(s1).decoration(TextDecoration.ITALIC, false));
                 }
-            } else {
-                lore.add(message.componentBuilder(s1).decoration(TextDecoration.ITALIC, false));
             }
         }
         im.lore(lore);
-        if (name != null)
-            im.displayName(message.componentBuilder(placeholder.replace(name)).decoration(TextDecoration.ITALIC, false));
+        if (cachedName != null) {
+            if (cachedName instanceof Component c) {
+                im.displayName(c);
+            } else if (cachedName instanceof String s) {
+                im.displayName(message.componentBuilder(placeholder.replace(s)).decoration(TextDecoration.ITALIC, false));
+            }
+        }
 
         for (ItemFlag itemFlag : itemFlags)
             im.addItemFlags(itemFlag);
@@ -193,6 +224,15 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public void setName(String name) {
         this.name = name;
+        if (name == null) {
+            cachedName = null;
+            return;
+        }
+        if (name.contains("{") || name.contains("}") || name.contains("%") || !USE_CASH) {
+            cachedName = name;
+        } else {
+            cachedName = BLib.getApi().getMessage().componentBuilder(name).decoration(TextDecoration.ITALIC, false);
+        }
     }
 
     public void setColor(Color color) {
@@ -247,8 +287,24 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return name;
     }
 
+
     public void setLore(List<String> lore) {
         this.lore = lore;
+        cachedLore = new ArrayList<>();
+        for (String s : lore) {
+            if (s.contains("{") || s.contains("}") || s.contains("%") || !USE_CASH) {
+                cachedLore.add(s);
+            } else {
+                s = s.replace("\\n", "\n");
+                if (s.contains("\n")) {
+                    for (String string : s.split("\n")) {
+                        cachedLore.add(BLib.getApi().getMessage().componentBuilder(string).decoration(TextDecoration.ITALIC, false));
+                    }
+                } else {
+                    cachedLore.add(BLib.getApi().getMessage().componentBuilder(s).decoration(TextDecoration.ITALIC, false));
+                }
+            }
+        }
     }
 
     public void addLore(String lore) {
@@ -358,6 +414,10 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
         public List<String> getDenyCommands() {
             return denyCommands;
+        }
+
+        public boolean isEmpty() {
+            return requirement.isEmpty();
         }
     }
 

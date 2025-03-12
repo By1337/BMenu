@@ -417,7 +417,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     static {
         commands = new Command<>("root");
         commands.addSubCommand(new Command<Menu>("[CONSOLE]")
-                        .aliases("[console]")
+                .aliases("[console]")
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
                             String cmd = (String) args.getOrThrow("cmd");

@@ -56,4 +56,8 @@ public class Requirements {
         return EMPTY;
     }
 
+    public boolean isEmpty(){
+        return requirements.isEmpty();
+    }
+
 }
