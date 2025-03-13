@@ -320,6 +320,8 @@ animation:
       - commands: # выполняет команды
           - '[MESSAGE] msg'
       - title: title # устанавливает title меню
+      - copy-from-base: 10-10 10-10 # скопирует предметы из основного слоя на слой анимации
+      - set-if-empty: item 10-10 # установит предмет в слот только если слот пустой
 # Алиасы к опкодам
 # set -> st
 # remove -> rm
@@ -334,6 +336,8 @@ animation:
 # remove-if-not-empty -> rne
 # set-if-empty -> sie
 # copy-from-base -> cfb
+# copy-from-base -> cfb
+# set-if-empty -> sie
 animations:
   default:
     - tick: 0
@@ -343,6 +347,7 @@ animations:
       opcodes: [ ]
 
 # Все команды
+# Команды можно записывать в нижнем регистре
 # [CONSOLE] <cmd>
 # [PLAYER] <cmd>
 # [CHAT] <msg> - отправит сообщение от имени игрока, также можно выполнить команду
@@ -357,6 +362,8 @@ animations:
 # [OPEN] <id> <?commands>
 # [BACK_OR_OPEN] <id> <?commands>
 # [FLUSH] - синхронизирует инвентарь с клиентом
+# [SET_ITEM] <slots> <item> - установит указанный предмет в указанные слоты
+# [COPY_FROM_PREVIOUS_MENU] <slots from> <slots to> - скопирует предметы из предыдущего меню
 #
 # [REOPEN] - полностью заново открывает текущее меню
 # [REFRESH]
