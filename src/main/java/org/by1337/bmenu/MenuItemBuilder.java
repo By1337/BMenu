@@ -21,10 +21,12 @@ import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.ItemFactory;
 import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.requirement.Requirements;
+import org.by1337.bmenu.util.math.MathReplacer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -231,7 +233,11 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         if (name.contains("{") || name.contains("}") || name.contains("%") || !USE_CASH) {
             cachedName = name;
         } else {
-            cachedName = BLib.getApi().getMessage().componentBuilder(name).decoration(TextDecoration.ITALIC, false);
+            try {
+                cachedName = BLib.getApi().getMessage().componentBuilder(MathReplacer.replace(name)).decoration(TextDecoration.ITALIC, false);
+            } catch (ParseException e) {
+                cachedName = BLib.getApi().getMessage().componentBuilder(e.getMessage()).decoration(TextDecoration.ITALIC, false);
+            }
         }
     }
 
@@ -301,7 +307,11 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                         cachedLore.add(BLib.getApi().getMessage().componentBuilder(string).decoration(TextDecoration.ITALIC, false));
                     }
                 } else {
-                    cachedLore.add(BLib.getApi().getMessage().componentBuilder(s).decoration(TextDecoration.ITALIC, false));
+                    try {
+                        cachedLore.add(BLib.getApi().getMessage().componentBuilder(MathReplacer.replace(s)).decoration(TextDecoration.ITALIC, false));
+                    } catch (ParseException e) {
+                        cachedLore.add(BLib.getApi().getMessage().componentBuilder(e.getMessage()).decoration(TextDecoration.ITALIC, false));
+                    }
                 }
             }
         }

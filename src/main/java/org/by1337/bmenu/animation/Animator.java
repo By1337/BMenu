@@ -2,6 +2,8 @@ package org.by1337.bmenu.animation;
 
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
+import org.by1337.bmenu.animation.impl.GotoAnimOpcode;
+import org.by1337.bmenu.animation.impl.SoundAnimOpcode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +33,7 @@ public class Animator {
             var list = context.framePosToFrames.get(pos0++);
             if (list != null) {
                 for (Frame frame : list) {
-                    frame.apply(matrix, menu, this);
+                    frame.safeApply(matrix, menu, this);
                 }
             }
         }
@@ -86,6 +88,12 @@ public class Animator {
 
         public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
             for (FrameOpcode opcode : opcodes) {
+                opcode.apply(matrix, menu, animator);
+            }
+        }
+        public void safeApply(MenuItem[] matrix, Menu menu, Animator animator) {
+            for (FrameOpcode opcode : opcodes) {
+                if (opcode instanceof GotoAnimOpcode || opcode instanceof SoundAnimOpcode) continue;
                 opcode.apply(matrix, menu, animator);
             }
         }
