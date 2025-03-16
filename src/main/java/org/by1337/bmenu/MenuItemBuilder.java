@@ -72,7 +72,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     @ApiStatus.Experimental
     public void postDecode() {
         if (cachedName == null || cachedName instanceof Component && (cachedLore.isEmpty() || cachedLore.stream().allMatch(l -> l instanceof Component))) {
-            if (viewRequirement.isEmpty() && hasNoPlaceholders(material) && hasNoPlaceholders(amount)) {
+            if (hasNoPlaceholders(material) && hasNoPlaceholders(amount)) {
                 staticItem = true;
             }
         }
@@ -89,14 +89,14 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     @Nullable
     public MenuItem build(Menu menu, @Nullable final ItemStack itemStack, Placeholderable... placeholderables) {
-        if (staticItem && staticInstance != null) return staticInstance;
-
         MultiPlaceholder placeholder = new MultiPlaceholder(placeholderables);
         placeholder.add(menu);
         if (!viewRequirement.requirement.test(menu, placeholder, menu.viewer)) {
             menu.runCommands(viewRequirement.denyCommands);
             return null;
         }
+        if (staticItem && staticInstance != null) return staticInstance;
+
         ItemStack result;
         if (itemStack == null) {
             String tmpMaterial = placeholder.replace(material);
@@ -106,11 +106,16 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         }
         ItemMeta im = result.getItemMeta();
         if (im == null) {
-            return new MenuItem(
+            var v = new MenuItem(
                     slots,
                     result,
                     clicks
             );
+            if (staticItem) {
+                staticInstance = v;
+                staticInstance.setBuilder(() -> staticInstance);
+            }
+            return v;
         }
         Message message = menu.loader.getMessage();
         List<Component> lore = new ArrayList<>(Objects.requireNonNullElseGet(im.lore(), ArrayList::new));
