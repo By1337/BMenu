@@ -201,11 +201,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     public void setItems(List<MenuItem> item) {
         for (MenuItem menuItem : item) {
-            setItem(menuItem);
+            setItem(menuItem, matrix);
         }
     }
 
-    public void setItem(MenuItem item) {
+    public void setItem(MenuItem item, MenuItem[] matrix) {
         for (int slot : item.getSlots()) {
             if (slot == -1) continue;
             if (slot < 0 || matrix.length < slot) {
@@ -214,6 +214,10 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 matrix[slot] = item;
             }
         }
+    }
+
+    public void setItem(MenuItem item) {
+        setItem(item, matrix);
     }
 
     protected void createInventory(int size, Component title, InventoryType type) {
@@ -785,7 +789,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                             }
                             if (menuItem != null) {
                                 menuItem.setSlots(slots);
-                                v.setItem(menuItem);
+                                v.setItem(menuItem, v.animationMask);
                             }
                         }
                 )
@@ -809,7 +813,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                                     throw new IndexOutOfBoundsException("Индексы 'from' или 'to' выходят за пределы меню.");
                                 }
 
-                                v.matrix[toIndex] = v.previousMenu.findItemInSlot(fromIndex);
+                                v.animationMask[toIndex] = v.previousMenu.findItemInSlot(fromIndex);
                                 if (srcIndex < src.length - 1) {
                                     srcIndex++;
                                 }
