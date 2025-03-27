@@ -4,6 +4,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.inventory.ItemFlag;
@@ -16,6 +18,8 @@ import org.by1337.blib.chat.placeholder.MultiPlaceholder;
 import org.by1337.blib.chat.util.Message;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.Pair;
+import org.by1337.blib.util.Version;
+import org.by1337.blib.util.invoke.LambdaMetafactoryUtil;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.ItemFactory;
@@ -26,8 +30,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
@@ -49,7 +55,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private String material = "STONE";
     private ViewRequirement viewRequirement = ViewRequirement.EMPTY;
     private int modelData = 0;
-    private List<ItemFlag> itemFlags = new ArrayList<>();
+    private final Set<ItemFlag> itemFlags = EnumSet.noneOf(ItemFlag.class);
     private List<PotionEffect> potionEffects = new ArrayList<>();
     private Color color = null;
     private int priority = 0;
@@ -61,6 +67,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private int tickSpeed;
     private boolean staticItem;
     private MenuItem staticInstance;
+    private boolean hideTooltip;
 
     public MenuItemBuilder() {
     }
@@ -178,6 +185,11 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         if (im instanceof Damageable damageable) {
             damageable.setDamage(damage);
         }
+        if (itemFlags.contains(ItemFlag.HIDE_ATTRIBUTES) && Version.is1_20_5orNewer()){
+            // https://github.com/PaperMC/Paper/issues/10655
+            im.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("123", 1, AttributeModifier.Operation.ADD_NUMBER));
+        }
+
         result.setItemMeta(im);
         result.setAmount(Integer.parseInt(placeholder.replace(amount)));
         Supplier<@Nullable MenuItem> builder = () -> build(menu, itemStack, placeholderables);
@@ -255,7 +267,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public void setItemFlags(List<ItemFlag> itemFlags) {
-        this.itemFlags = itemFlags;
+        this.itemFlags.addAll(itemFlags);
     }
 
     public void setPotionEffects(List<PotionEffect> potionEffects) {
@@ -374,7 +386,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public List<ItemFlag> getItemFlags() {
-        return itemFlags;
+        return itemFlags.stream().toList();
     }
 
     public List<PotionEffect> getPotionEffects() {
@@ -469,7 +481,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public List<ItemFlag> itemFlags() {
-        return itemFlags;
+        return itemFlags.stream().toList();
     }
 
     public List<PotionEffect> potionEffects() {
@@ -506,5 +518,13 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public int tickSpeed() {
         return tickSpeed;
+    }
+
+    public boolean hideTooltip() {
+        return hideTooltip;
+    }
+
+    public void setHideTooltip(boolean hideTooltip) {
+        this.hideTooltip = hideTooltip;
     }
 }

@@ -9,7 +9,6 @@ public class MathReplacer {
     private static final DecimalFormat df = new DecimalFormat("#.##");
 
     public static String replace(String input) throws ParseException {
-        MathParserType type = input.contains(".") ? MathParserType.DOUBLE : MathParserType.DEFAULT;
 
         String pattern = "math\\[(.*?)]";
         Pattern regexPattern = Pattern.compile(pattern);
@@ -18,6 +17,7 @@ public class MathReplacer {
         while (matcher.find()) {
             String s = replaceStrings(matcher.group(1));
             s = s.replace(" ", "");
+            MathParserType type = s.contains(".") ? MathParserType.DOUBLE : MathParserType.DEFAULT;
 
             String result;
             if (type == MathParserType.DOUBLE) {
