@@ -33,8 +33,8 @@ public class RequirementsFactoryTest {
         Assertions.assertEquals(10, req.getRequirements().size());
         Assertions.assertTrue(req.getRequirements().get(0) instanceof MathRequirement);
         Assertions.assertTrue(req.getRequirements().get(1) instanceof MathRequirement);
-        Assertions.assertTrue(req.getRequirements().get(2) instanceof HasPermisionRequirement);
-        Assertions.assertTrue(req.getRequirements().get(3) instanceof HasPermisionRequirement);
+        Assertions.assertTrue(req.getRequirements().get(2) instanceof HasPermissionRequirement);
+        Assertions.assertTrue(req.getRequirements().get(3) instanceof HasPermissionRequirement);
         Assertions.assertTrue(req.getRequirements().get(4) instanceof StringContainsRequirement);
         Assertions.assertTrue(req.getRequirements().get(5) instanceof StringContainsRequirement);
         Assertions.assertTrue(req.getRequirements().get(6) instanceof StringEqualsIgnoreCaseRequirement);
