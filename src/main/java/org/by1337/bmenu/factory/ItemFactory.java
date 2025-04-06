@@ -133,7 +133,7 @@ public class ItemFactory {
         FIELD_CODECS.add(Codec.STRING, MenuItemBuilder::name, MenuItemBuilder::setName, "display_name");
         FIELD_CODECS.add(Codec.STRING, MenuItemBuilder::amount, MenuItemBuilder::setAmount, "amount", "1");
         FIELD_CODECS.add(Codec.STRING.listOf(), MenuItemBuilder::lore, MenuItemBuilder::setLore, "lore", List.of());
-        FIELD_CODECS.add(new Codec<Map<String, String>>() {
+        FIELD_CODECS.add(new Codec<>() {
             @Override
             public <T> DataResult<Pair<Map<String, String>, T>> decode(DynamicOps<T> ops, T t) {
 

@@ -37,7 +37,7 @@ public class ArgumentChoiceMenu<T> extends Argument<T> {
     }
 
     @Override
-    public void tabCompleter(T sender, StringReader reader, ArgumentMap<String, Object> argumentMap, SuggestionsBuilder builder) throws CommandSyntaxError {
+    public void tabCompleter(T sender, StringReader reader, ArgumentMap<String, Object> argumentMap, SuggestionsBuilder builder) {
         String str = reader.hasNext() ? ArgumentUtils.readString(reader) : "";
         if (str.isEmpty())
             addSuggestions(builder, ArgumentUtils.quoteAndEscapeIfNeeded(items.get()));
