@@ -69,8 +69,8 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     public MenuItemBuilder() {
     }
 
-    public static MenuItemBuilder read(YamlContext context) {
-        return ItemFactory.readItem(context);
+    public static MenuItemBuilder read(YamlContext context, MenuLoader loader) {
+        return ItemFactory.readItem(context, loader);
     }
 
     @ApiStatus.Experimental
