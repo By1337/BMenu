@@ -62,7 +62,7 @@ public class ItemFactory {
         builder.setViewRequirement(
                 ObjectUtil.mapIfNotNullOrDefault(
                         ctx.get("view_requirement.requirements"),
-                        v -> RequirementsFactory.read(v, loader),
+                        RequirementsFactory::read,
                         Requirements.EMPTY
                 ),
                 ctx.getList("view_requirement.deny_commands", String.class, Collections.emptyList())
@@ -81,7 +81,7 @@ public class ItemFactory {
                                 ,
                                 ObjectUtil.mapIfNotNullOrDefault(
                                         ctx.get(key + ".requirements"),
-                                        v -> RequirementsFactory.read(v, loader),
+                                        RequirementsFactory::read,
                                         Requirements.EMPTY
                                 )
                         )

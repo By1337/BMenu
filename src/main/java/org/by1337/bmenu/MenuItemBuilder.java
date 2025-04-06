@@ -19,7 +19,6 @@ import org.by1337.blib.chat.util.Message;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.Pair;
 import org.by1337.blib.util.Version;
-import org.by1337.blib.util.invoke.LambdaMetafactoryUtil;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.ItemFactory;
@@ -30,10 +29,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class MenuItemBuilder implements Comparable<MenuItemBuilder> {

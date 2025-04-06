@@ -1,7 +1,6 @@
 package org.by1337.bmenu.impl;
 
 import org.bukkit.entity.Player;
-import org.by1337.blib.command.CommandException;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuConfig;
 import org.by1337.bmenu.MenuItem;
@@ -92,7 +91,7 @@ public abstract class MultiPageMenu<T> extends Menu {
     }
 
     @Override
-    protected boolean runCommand(String cmd) throws CommandException {
+    protected boolean runCommand(String cmd) {
         return switch (cmd) {
             case "[NEXT_PAGE]","[next_page]" -> {
                 if (currentPage < maxPage - 1) {

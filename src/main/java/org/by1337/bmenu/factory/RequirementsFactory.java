@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RequirementsFactory {
-    public static Requirements read(YamlValue ctx, MenuLoader loader) {
+    public static Requirements read(YamlValue ctx) {
         if (ctx.getValue() == null) return Requirements.EMPTY;
         List<Requirement> requirements = new ArrayList<>();
         if (ctx.isMap()) {
