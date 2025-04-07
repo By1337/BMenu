@@ -2,7 +2,6 @@ package org.by1337.bmenu.factory;
 
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
-import org.by1337.bmenu.MenuLoader;
 import org.by1337.bmenu.requirement.*;
 
 import java.util.ArrayList;
