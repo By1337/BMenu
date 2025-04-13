@@ -620,7 +620,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 .argument(new ArgumentString<>("menu"))
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
-                            String menu = (String) args.getOrThrow("menu", "Use [OPEN_MENU] <menu id>");
+                            String menu = (String) args.getOrThrow("menu", "Use [OPEN] <menu id>");
                             MenuConfig settings = v.loader.findMenu(menu);
                             if (settings == null) {
                                 throw new CommandException("Unknown menu %s", menu);
@@ -682,9 +682,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         );
         commands.addSubCommand(new Command<Menu>("[REOPEN]")
                 .aliases("[reopen]")
-                .executor((v, args) -> {
-                            v.reopen();
-                        }
+                .executor((v, args) -> v.reopen()
                 )
         );
         commands.addSubCommand(new Command<Menu>("[ANIMATION_FORCE_END]")
@@ -754,7 +752,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 .aliases("[takemoney]")
                 .argument(new ArgumentFormattedDouble<>("count"))
                 .executor((v, args) -> {
-                            Double count = (Double) args.getOrThrow("count", "Use: [GIVEMONEY] <count>");
+                            Double count = (Double) args.getOrThrow("count", "Use: [TAKEMONEY] <count>");
                             if (!VaultHook.get().isAvailable()) {
                                 throw new CommandException("Economy not defined");
                             }

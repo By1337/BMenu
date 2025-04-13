@@ -14,7 +14,7 @@ import java.util.Map;
 public class AnimatorFactory {
 
     public static Animator.AnimatorContext read(List<YamlContext> frames, MenuLoader loader) {
-        List<Animator.Frame> frameList = new ArrayList<Animator.Frame>();
+        List<Animator.Frame> frameList = new ArrayList<>();
         int lastPos = 0;
         for (YamlContext frame : frames) {
             List<Map<String, YamlValue>> opcodesRaw = frame.get("opcodes").getAsList(v -> v.getAsMap(YamlValue::getAsString, v1 -> v1));

@@ -17,7 +17,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class MenuItemCodecs {
-    public static final Codec<PotionEffect> POTION_EFFECT_CODEC = new PrimitiveCodec<PotionEffect>() {
+    public static final Codec<PotionEffect> POTION_EFFECT_CODEC = new PrimitiveCodec<>() {
         @Override
         public <T> DataResult<PotionEffect> read(DynamicOps<T> ops, T t) {
             return ops.getStringValue(t).flatMap(s -> {

@@ -29,7 +29,7 @@ public class RequirementsFactoryTest {
     @Test
     public void run() throws InvalidConfigurationException {
         YamlContext ctx = load(YAML);
-        Requirements req = RequirementsFactory.read(ctx.get("requirements"), null);
+        Requirements req = RequirementsFactory.read(ctx.get("requirements"));
         Assertions.assertEquals(10, req.getRequirements().size());
         Assertions.assertTrue(req.getRequirements().get(0) instanceof MathRequirement);
         Assertions.assertTrue(req.getRequirements().get(1) instanceof MathRequirement);

@@ -33,12 +33,12 @@ public class StringContainsRequirement implements Requirement {
         not = context.getAsString("type").startsWith("!");
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> new YamlValue(v).getAsString()).toList(),
+                        .map(v -> YamlValue.wrap(v).getAsString()).toList(),
                 Collections.emptyList()
         );
         denyCommands = ObjectUtil.mapIfNotNullOrDefault(context.get("deny_commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> new YamlValue(v).getAsString()).toList(),
+                        .map(v -> YamlValue.wrap(v).getAsString()).toList(),
                 Collections.emptyList()
         );
     }

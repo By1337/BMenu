@@ -62,7 +62,7 @@ public class ItemFactory {
         builder.setViewRequirement(
                 ObjectUtil.mapIfNotNullOrDefault(
                         ctx.get("view_requirement.requirements"),
-                        v -> RequirementsFactory.read(v, loader),
+                        RequirementsFactory::read,
                         Requirements.EMPTY
                 ),
                 ctx.getList("view_requirement.deny_commands", String.class, Collections.emptyList())
@@ -81,7 +81,7 @@ public class ItemFactory {
                                 ,
                                 ObjectUtil.mapIfNotNullOrDefault(
                                         ctx.get(key + ".requirements"),
-                                        v -> RequirementsFactory.read(v, loader),
+                                        RequirementsFactory::read,
                                         Requirements.EMPTY
                                 )
                         )
@@ -133,7 +133,7 @@ public class ItemFactory {
         FIELD_CODECS.add(Codec.STRING, MenuItemBuilder::name, MenuItemBuilder::setName, "display_name");
         FIELD_CODECS.add(Codec.STRING, MenuItemBuilder::amount, MenuItemBuilder::setAmount, "amount", "1");
         FIELD_CODECS.add(Codec.STRING.listOf(), MenuItemBuilder::lore, MenuItemBuilder::setLore, "lore", List.of());
-        FIELD_CODECS.add(new Codec<Map<String, String>>() {
+        FIELD_CODECS.add(new Codec<>() {
             @Override
             public <T> DataResult<Pair<Map<String, String>, T>> decode(DynamicOps<T> ops, T t) {
 

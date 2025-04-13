@@ -75,7 +75,7 @@ public class MenuFactory {
                     YamlContext context = v.getAsYamlContext();
                     Requirements requirements = ObjectUtil.mapIfNotNullOrDefault(
                             context.get("requirements"),
-                            v1 -> RequirementsFactory.read(v1, loader),
+                            RequirementsFactory::read,
                             Requirements.EMPTY
                     );
 
