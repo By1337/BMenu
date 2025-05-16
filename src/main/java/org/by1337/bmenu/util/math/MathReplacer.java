@@ -1,5 +1,8 @@
 package org.by1337.bmenu.util.math;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.regex.Matcher;
@@ -7,9 +10,19 @@ import java.util.regex.Pattern;
 
 public class MathReplacer {
     private static final DecimalFormat df = new DecimalFormat("#.##");
+    private static final Logger log = LoggerFactory.getLogger("BMenu");
+
+
+    public static String safeReplace(String input)  {
+        try {
+            return replace(input);
+        } catch (ParseException e) {
+            log.error("Failed to replace math[] in '{}'", input, e);
+            return input;
+        }
+    }
 
     public static String replace(String input) throws ParseException {
-
         String pattern = "math\\[(.*?)]";
         Pattern regexPattern = Pattern.compile(pattern);
         Matcher matcher = regexPattern.matcher(input);

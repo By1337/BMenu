@@ -1,6 +1,9 @@
 package org.by1337.bmenu;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
@@ -18,10 +21,13 @@ import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.command.argument.ArgumentChoiceMenu;
 import org.by1337.bmenu.command.argument.MenuArgumentList;
 import org.by1337.bmenu.command.menu.OpenCommands;
+import org.by1337.bmenu.factory.MenuCodec;
 import org.by1337.bmenu.metrics.Metrics;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class BMenu extends JavaPlugin {
     private MenuLoader loader;
@@ -135,6 +141,23 @@ public class BMenu extends JavaPlugin {
                                     file.mkdirs();
                                     config.dump(file.toPath());
                                     loader.getMessage().sendMsg(sender, "&aSaved to {}", file.getPath());
+                                })
+                        )
+                )
+                .addSubCommand(new Command<CommandSender>("test")
+
+                        .addSubCommand(new Command<CommandSender>("menu")
+                                .executor((sender, args) -> {
+                                    JsonSchemaTypeBuilder builder = MenuCodec.schema().asBuilder();
+                                    builder.schema();
+                                    builder.title("BMenu item schema");
+                                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                                    String schema = gson.toJson(builder.getJsonObject());
+                                    try {
+                                        Files.writeString(getDataFolder().toPath().resolve("shema.json"), schema);
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 })
                         )
                 )

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class FileUtil {
-    public static List<File> findFiles(File file, MenuLoader loader, List<String> files) throws InvalidMenuConfigException {
+    public static List<File> findFiles(File file, MenuLoader loader, List<String> files) {
         if (files.isEmpty()) return Collections.emptyList();
         File fileFolder = file.getParentFile();
         List<File> result = new ArrayList<>();

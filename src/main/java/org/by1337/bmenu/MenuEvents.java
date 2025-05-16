@@ -5,4 +5,5 @@ public final class MenuEvents {
     public static final String ON_REOPEN = "on_reopen";
     public static final String ON_CLOSE = "on_close";
     public static final String ON_REFRESH = "on_refresh";
+
 }

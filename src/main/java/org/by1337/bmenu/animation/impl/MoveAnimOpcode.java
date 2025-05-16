@@ -1,20 +1,24 @@
 package org.by1337.bmenu.animation.impl;
 
-import org.by1337.blib.configuration.YamlValue;
+import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.by1337.blib.util.Pair;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
+import org.by1337.bmenu.animation.FrameOpcodes;
 import org.by1337.bmenu.animation.util.AnimationUtil;
+import org.jetbrains.annotations.Nullable;
 
 public class MoveAnimOpcode implements FrameOpcode {
+    public static final YamlCodec<MoveAnimOpcode> CODEC = YamlCodec.STRING.schema(SchemaTypes.STRING_OR_NUMBER)
+            .map(MoveAnimOpcode::new, v -> AnimationUtil.slotsToString(v.from) + " " + AnimationUtil.slotsToString(v.to));
     private final int[] from;
     private final int[] to;
 
-    public MoveAnimOpcode(YamlValue ctx) {
-        String args = ctx.getAsString();
-
+    public MoveAnimOpcode(String args) {
         Pair<int[], int[]> pair = AnimationUtil.parsePairSlots(args);
         from = pair.getLeft();
         to = pair.getRight();
@@ -44,5 +48,9 @@ public class MoveAnimOpcode implements FrameOpcode {
 
     public int[] getTo() {
         return to;
+    }
+    @Override
+    public @Nullable FrameOpcodes type() {
+        return FrameOpcodes.MOVE;
     }
 }

@@ -1,21 +1,26 @@
 package org.by1337.bmenu.animation.impl;
 
-import org.by1337.blib.configuration.YamlValue;
+import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
+import org.by1337.bmenu.animation.FrameOpcodes;
 import org.by1337.bmenu.hook.ItemStackCreator;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
 public class FillAnimOpcode implements FrameOpcode {
+    public static final YamlCodec<FillAnimOpcode> CODEC = YamlCodec.STRING.schema(SchemaTypes.STRING_OR_NUMBER)
+            .map(FillAnimOpcode::new, v -> v.item);
     private static final int[] EMPTY_ARRAY = new int[0];
     private final String item;
 
-    public FillAnimOpcode(YamlValue ctx) {
-        item = ctx.getAsString();
+    public FillAnimOpcode(String ctx) {
+        item = ctx;
     }
 
     @Override
@@ -28,5 +33,9 @@ public class FillAnimOpcode implements FrameOpcode {
             menuItem = builder.build(menu);
         }
         Arrays.fill(matrix, menuItem);
+    }
+    @Override
+    public @Nullable FrameOpcodes type() {
+        return FrameOpcodes.FILL;
     }
 }

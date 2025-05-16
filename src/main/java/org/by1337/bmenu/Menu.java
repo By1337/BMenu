@@ -17,6 +17,7 @@ import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandException;
 import org.by1337.blib.command.StringReader;
 import org.by1337.blib.command.argument.*;
+import org.by1337.blib.geom.Vec3d;
 import org.by1337.blib.nbt.NBT;
 import org.by1337.blib.nbt.NBTParser;
 import org.by1337.blib.nbt.impl.ListNBT;
@@ -166,6 +167,21 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
             animationMask[i] = cache.computeIfAbsent(item, k -> k.getBuilder().get());
         }
         generate0();
+    }
+
+    public void rebuildItemsInSlots(int[] slots) {
+        for (int slot : slots) {
+            MenuItem item;
+            if ((item = animationMask[slot]) != null) {
+                if (item.getBuilder() != null) {
+                    animationMask[slot] = item.getBuilder().get();
+                }
+            } else if ((item = matrix[slot]) != null) {
+                if (item.getBuilder() != null) {
+                    matrix[slot] = item.getBuilder().get();
+                }
+            }
+        }
     }
 
     protected abstract void generate();
@@ -733,6 +749,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                                 v.animator.forceEnd(v.animationMask, v);
                             }
                             v.animator = ctx.createAnimator();
+
                         }
                 )
         );
@@ -819,6 +836,15 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
                         }
                 )
+        );
+        commands.addSubCommand(new Command<Menu>("[REBUILD_SLOTS]")
+                .aliases("[rebuild_slots]")
+                .argument(new ArgumentString<>("src"))
+                .executor((v, args) -> {
+                    int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [REBUILD_SLOTS] <slots>"));
+                    v.rebuildItemsInSlots(src);
+                })
+
         );
     }
 }

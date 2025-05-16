@@ -33,6 +33,7 @@ build/
 
 ### VS Code ###
 .vscode/
+!src/resources/.vscode/settings.json
 
 ### Mac OS ###
 .DS_Store

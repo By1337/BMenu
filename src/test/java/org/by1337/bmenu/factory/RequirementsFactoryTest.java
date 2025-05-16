@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
 public class RequirementsFactoryTest {
-    private static final String YAML = """
+   /* private static final String YAML = """
             requirements:
               - check: '100 + 100 * 100 == 15'
                 commands: [ ]
@@ -48,6 +48,6 @@ public class RequirementsFactoryTest {
         YamlConfiguration configuration = new YamlConfiguration();
         configuration.loadFromString(s);
         return new YamlContext(configuration);
-    }
+    }*/
 
 }

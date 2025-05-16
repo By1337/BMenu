@@ -1,17 +1,23 @@
 package org.by1337.bmenu.animation.impl;
 
-import org.by1337.blib.configuration.YamlValue;
+import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
+import org.by1337.bmenu.animation.FrameOpcodes;
 import org.by1337.bmenu.animation.util.AnimationUtil;
+import org.jetbrains.annotations.Nullable;
 
 public class RemoveIfNotEmptyAnimOpcode implements FrameOpcode {
+    public static final YamlCodec<RemoveIfNotEmptyAnimOpcode> CODEC = YamlCodec.STRING.schema(SchemaTypes.STRING_OR_NUMBER)
+            .map(RemoveIfNotEmptyAnimOpcode::new, v -> AnimationUtil.slotsToString(v.slots));
     private final int[] slots;
 
-    public RemoveIfNotEmptyAnimOpcode(YamlValue ctx) {
-        slots = AnimationUtil.readSlots(ctx.getAsString());
+    public RemoveIfNotEmptyAnimOpcode(String ctx) {
+        slots = AnimationUtil.readSlots(ctx);
     }
 
     @Override
@@ -22,5 +28,9 @@ public class RemoveIfNotEmptyAnimOpcode implements FrameOpcode {
                 matrix[slot] = null;
             }
         }
+    }
+    @Override
+    public @Nullable FrameOpcodes type() {
+        return FrameOpcodes.REMOVE_IF_NOT_EMPTY;
     }
 }

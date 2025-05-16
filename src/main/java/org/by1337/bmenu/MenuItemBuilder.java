@@ -1,5 +1,10 @@
 package org.by1337.bmenu;
 
+import dev.by1337.yaml.BukkitYamlCodecs;
+import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
+import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.codec.schema.SchemaTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
@@ -20,8 +25,10 @@ import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.Pair;
 import org.by1337.blib.util.Version;
 import org.by1337.bmenu.click.ClickHandler;
+import org.by1337.bmenu.click.ClickHandlerImpl;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.ItemFactory;
+import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.requirement.Requirements;
 import org.by1337.bmenu.util.math.MathReplacer;
@@ -35,10 +42,13 @@ import java.util.function.Supplier;
 
 public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
+    public static final YamlCodec<MenuItemBuilder> YAML_CODEC;
+
+
     @ApiStatus.Experimental
     public static final boolean USE_CASH = true;
 
-    private int[] slots = new int[]{0};
+    private int[] slots = new int[]{-1};
     private List<String> lore = new ArrayList<>();
 
     @ApiStatus.Experimental
@@ -69,8 +79,10 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     public MenuItemBuilder() {
     }
 
+    @Deprecated(forRemoval = true) // todo
     public static MenuItemBuilder read(YamlContext context, MenuLoader loader) {
-        return ItemFactory.readItem(context, loader);
+        throw new UnsupportedOperationException();
+        //return ItemFactory.readItem(context, loader);
     }
 
     @ApiStatus.Experimental
@@ -182,7 +194,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         if (im instanceof Damageable damageable) {
             damageable.setDamage(damage);
         }
-        if (itemFlags.contains(ItemFlag.HIDE_ATTRIBUTES) && Version.is1_20_5orNewer()){
+        if (itemFlags.contains(ItemFlag.HIDE_ATTRIBUTES) && Version.is1_20_5orNewer()) {
             // https://github.com/PaperMC/Paper/issues/10655
             im.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("123", 1, AttributeModifier.Operation.ADD_NUMBER));
         }
@@ -301,6 +313,12 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public void addClickListener(MenuClickType type, ClickHandler handler) {
         clicks.put(type, handler);
+    }
+
+    public ClickHandlerImpl getClickHandlerImplOrNull(MenuClickType type){
+        var v = clicks.get(type);
+        if (v instanceof ClickHandlerImpl impl) return impl;
+        return null;
     }
 
     public String getName() {
@@ -424,6 +442,12 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public static class ViewRequirement {
         private static final ViewRequirement EMPTY = new ViewRequirement(Requirements.EMPTY, Collections.emptyList());
+        public static YamlCodec<ViewRequirement> CODEC = RecordYamlCodecBuilder.mapOf(
+                Requirements.CODEC.fieldOf("requirements", ViewRequirement::getRequirement, Requirements.EMPTY),
+                YamlCodec.STRINGS.fieldOf("deny_commands", ViewRequirement::getDenyCommands, List.of()),
+                ViewRequirement::new
+        );
+
         private final Requirements requirement;
         private final List<String> denyCommands;
 
@@ -523,5 +547,44 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public void setHideTooltip(boolean hideTooltip) {
         this.hideTooltip = hideTooltip;
+    }
+
+    @ApiStatus.Internal
+    public void setAllItemFlags(boolean b) {
+        if (!b) return;
+        setItemFlags(Arrays.stream(ItemFlag.values()).toList());
+    }
+
+    public boolean isAllItemFlags() {
+        return itemFlags.size() == ItemFlag.values().length;
+    }
+
+    static {
+        var builder = PipelineYamlCodecBuilder.of(MenuItemBuilder::new)
+                .field(MenuCodecs.MATERIAL, "material", b -> b.material, (b, m) -> b.material = m, "stone")
+                .string("name", MenuItemBuilder::name, MenuItemBuilder::setName)
+                .field(YamlCodec.STRING.schema(s -> s.or(SchemaTypes.INT)),"amount", MenuItemBuilder::amount, MenuItemBuilder::setAmount, "1")
+                .strings("lore", MenuItemBuilder::lore, MenuItemBuilder::setLore, List.of())
+                .field(MenuCodecs.ARGS_CODEC, "args", MenuItemBuilder::args, MenuItemBuilder::setArgs, Map.of())
+                .bool("unbreakable", MenuItemBuilder::unbreakable, MenuItemBuilder::setUnbreakable, false)
+                .bool("ticking", MenuItemBuilder::ticking, MenuItemBuilder::setTicking, false)
+                .bool("static", MenuItemBuilder::isStaticItem, MenuItemBuilder::setStaticItem, false)
+                .bool("all_flags", MenuItemBuilder::isAllItemFlags, MenuItemBuilder::setAllItemFlags, false)
+                .integer("model_data", MenuItemBuilder::modelData, MenuItemBuilder::setModelData, 0)
+                .integer("priority", MenuItemBuilder::priority, MenuItemBuilder::setPriority, 0)
+                .integer("damage", MenuItemBuilder::damage, MenuItemBuilder::setDamage, 0)
+                .integer("tick_speed", MenuItemBuilder::tickSpeed, MenuItemBuilder::setTickSpeed, 1)
+                .field(BukkitYamlCodecs.COLOR, "color", MenuItemBuilder::color, MenuItemBuilder::setColor)
+                .listOf(BukkitYamlCodecs.ITEM_FLAG, "item_flags", MenuItemBuilder::getItemFlags, MenuItemBuilder::setItemFlags, List.of())
+                .field(ItemFactory.SLOTS_YAML_CODEC, "slot", MenuItemBuilder::slots, MenuItemBuilder::setSlots, new int[]{-1})
+                .listOf(MenuCodecs.ENCHANTMENT_YAML_CODEC, "enchantments", MenuItemBuilder::enchantments, MenuItemBuilder::setEnchantments, List.of())
+                .listOf(MenuCodecs.POTION_EFFECT_YAML_CODEC, "potion_effects", MenuItemBuilder::potionEffects, MenuItemBuilder::setPotionEffects, List.of())
+                .field(ViewRequirement.CODEC, "view_requirement", MenuItemBuilder::viewRequirement, MenuItemBuilder::setViewRequirement)
+                ;
+        for (MenuClickType value : MenuClickType.values()) {
+            String key = value.getConfigKeyClick();
+            builder.field(ClickHandlerImpl.CODEC, key, m -> m.getClickHandlerImplOrNull(value), (m, v) -> m.addClickListener(value, v));
+        }
+        YAML_CODEC = builder.build();
     }
 }

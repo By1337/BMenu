@@ -1,6 +1,9 @@
 package org.by1337.bmenu.factory;
 
 
+import dev.by1337.yaml.BukkitYamlCodecs;
+import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.event.inventory.InventoryType;
 import org.by1337.blib.configuration.YamlContext;
@@ -23,6 +26,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public class MenuFactory {
+
     private static final MenuFactory INSTANCE = new MenuFactory();
 
     private MenuFactory() {
@@ -30,7 +34,8 @@ public class MenuFactory {
 
     public static MenuConfig load(File file, MenuLoader loader) throws InvalidMenuConfigException {
         try {
-            return INSTANCE.load0(file, loader, new MenuLoadContext());
+            MenuCodec codec = new MenuCodec(file, loader);
+            return codec.decode();
         } catch (InvalidMenuConfigException e) {
             throw e;
         } catch (Exception e) {
@@ -38,53 +43,53 @@ public class MenuFactory {
         }
     }
 
-    private MenuConfig load0(File file, MenuLoader loader, MenuLoadContext loadContext) throws InvalidMenuConfigException, IOException, InvalidConfigurationException {
+    /*private MenuConfig load0(File file, MenuLoader loader, MenuLoadContext loadContext) throws InvalidMenuConfigException, IOException, InvalidConfigurationException {
         loadContext.loadedFiles.add(file);
 
-        RawYamlContext ctx = MenuFilePostprocessor.apply(MenuFilePreprocessor.loadFile(file, loader), loader.getLogger());
-        List<MenuConfig> supers = load(FileUtil.findFiles(file, loader, ctx.get("extends").getAsList(YamlValue::getAsString, Collections.emptyList())), loader, loadContext);
+        YamlMap ctx = MenuFilePostprocessor.apply(MenuFilePreprocessor.loadFile(file, loader), loader.getLogger());
+        List<MenuConfig> supers = load(FileUtil.findFiles(file, loader, ctx.get("extends").decode(YamlCodec.STRING_LIST, List.of())), loader, loadContext);
         String title = ctx.get("title").getAsString("title is not set!");
         @Nullable SpacedNameKey id = getId(ctx.get("id").getAsString(null), loader);
         @Nullable SpacedNameKey provider = getId(ctx.get("provider").getAsString(null), loader);
 
-        InventoryType type = ctx.get("type").getAs(InventoryType.class, InventoryType.CHEST);
-        int size = ctx.get("size").getAsInteger(54);
+        InventoryType type = ctx.get("type").decode(BukkitYamlCodecs.INVENTORY_TYPE, InventoryType.CHEST);
+        int size = ctx.get("size").getAsInt(54);
 
-        List<SpacedNameKey> onlyOpenFrom = ctx.get("only-open-from").getAsList(v -> getId(v.getAsString(), loader), Collections.emptyList());
+        List<SpacedNameKey> onlyOpenFrom = ctx.get("only-open-from", List.of()).stream().map(v -> getId(v.getAsString(), loader)).toList(); //todo rename
 
-        Map<String, String> args = ctx.get("args").getAsMap(String.class, Collections.emptyMap());
+        Map<String, String> args = ctx.get("args").decode(MenuCodecs.ARGS_CODEC, Map.of());
 
-        Map<String, MenuItemBuilder> items = ItemFactory.readItems(ctx.get("items").getAsMap(YamlValue::getAsYamlContext, Collections.emptyMap()), loader);
+        Map<String, MenuItemBuilder> items = ItemFactory.readItems(ctx.get("items").decode(YamlCodec.STRING_TO_YAML_MAP_MAP, Map.of()));
 
         Animator.AnimatorContext animator;
         if (ctx.has("animation")) {
-            animator = AnimatorFactory.read(ctx.get("animation").getAsList(YamlValue::getAsYamlContext, Collections.emptyList()), loader);
+            animator = AnimatorFactory.readAnimation(ctx.get("animation").decode(YamlCodec.YAML_MAP_LIST, List.of()), loader);
         } else {
             animator = null;
         }
         Map<String, Animator.AnimatorContext> animations = new HashMap<>();
         if (ctx.has("animations")) {
-            Map<String, YamlValue> animationsRaw = ctx.get("animations").getAsMap(YamlValue::getAsString, Function.identity(), Collections.emptyMap());
-            for (Map.Entry<String, YamlValue> entry : animationsRaw.entrySet()) {
-                animations.put(entry.getKey(), AnimatorFactory.read(entry.getValue().getAsList(YamlValue::getAsYamlContext, Collections.emptyList()), loader));
+            Map<String, List<YamlMap>> animationsRaw = ctx.get("animations").decode(YamlCodec.mapOf(YamlCodec.STRING, YamlCodec.YAML_MAP_LIST), Map.of());
+            for (var entry : animationsRaw.entrySet()) {
+                animations.put(entry.getKey(), AnimatorFactory.readAnimation(entry.getValue(), loader));
             }
         }
-        CommandList commandList = new CommandList(ctx.get("commands-list"));
+        CommandList commandList = new CommandList(ctx.get("commands-list")); //todo rename
         Map<String, CommandRequirements> menuEventListeners =
-                ctx.get("menu-events").getAsMap(YamlValue::getAsString, v -> {
-                    YamlContext context = v.getAsYamlContext();
-                    Requirements requirements = ObjectUtil.mapIfNotNullOrDefault(
-                            context.get("requirements"),
-                            RequirementsFactory::read,
-                            Requirements.EMPTY
-                    );
+                ctx.get("menu-events").getAsMap(YamlCodec.STRING, v -> {  //todo rename
+                    YamlMap context = v.getAsYamlMap();
+//                    Requirements requirements = ObjectUtil.mapIfNotNullOrDefault(
+//                            context.get("requirements"),
+//                            RequirementsFactory::read,
+//                            Requirements.EMPTY
+//                    );
 
                     return new CommandRequirements(
-                            requirements,
-                            context.get("deny_commands").getAsList(YamlValue::getAsString, Collections.emptyList()),
-                            context.get("commands").getAsList(YamlValue::getAsString, Collections.emptyList())
+                            Requirements.EMPTY, //todo
+                            context.get("deny_commands").decode(YamlCodec.STRINGS, List.of()),
+                            context.get("commands").decode(YamlCodec.STRINGS, List.of())
                     );
-                }, Collections.emptyMap());
+                }, Map.of());
         return new MenuConfig(
                 supers,
                 id,
@@ -103,9 +108,9 @@ public class MenuFactory {
                 animations,
                 loadContext.loadedFiles
         );
-    }
+    }*/
 
-
+/*
     private SpacedNameKey getId(@Nullable String id, MenuLoader loader) {
         if (id == null) return null;
         if (id.contains(":")) {
@@ -113,9 +118,9 @@ public class MenuFactory {
         } else {
             return new SpacedNameKey(loader.getPlugin().getName().toLowerCase(Locale.ROOT), id);
         }
-    }
+    }*/
 
-    private List<MenuConfig> load(List<File> files, MenuLoader loader, MenuLoadContext ctx) throws InvalidMenuConfigException, IOException, InvalidConfigurationException {
+/*    private List<MenuConfig> load(List<File> files, MenuLoader loader, MenuLoadContext ctx) throws InvalidMenuConfigException, IOException, InvalidConfigurationException {
         if (files.isEmpty()) return Collections.emptyList();
         List<MenuConfig> result = new ArrayList<>();
         for (File file : files) {
@@ -123,9 +128,9 @@ public class MenuFactory {
             result.add(load0(file, loader, ctx));
         }
         return result;
-    }
-
+    }*/
+/*
     private static class MenuLoadContext {
         private final List<File> loadedFiles = new ArrayList<>();
-    }
+    }*/
 }

@@ -1,0 +1,82 @@
+id: debug:main
+provider: default
+type: chest
+size: 54
+title: '&7Debug Menu'
+
+args:
+  REBUILD_TEST: "123"
+  TEST:
+    - 122
+
+
+items-custom-section: # schema support
+  one-line-lore:
+    slot: 0
+    material: dirt
+    lore: '&7one line lore'
+
+items:
+  one-line-lore:
+    slot: 0
+    material: dirt
+    lore: '&7one line lore'
+
+  args-in-args:
+    slot: 1
+    amount: "1"
+    material: dirt
+    args:
+      TEST: '10'
+      TEST1: 'math[${TEST} + 10]'
+      TEST2: '${TEST} + ${TEST} = ${TEST1}'
+    lore:
+      - '&7TEST = ${TEST} (10)'
+      - '&7TEST1 = ${TEST1} (20)'
+      - '&7TEST2 = ${TEST2} (10 + 10 = 20)'
+
+  multi-line-args:
+    slot: 2
+    material: dirt
+    args:
+      LORE:
+        - 'line 1'
+        - 'line 2'
+        - 'line 3'
+    lore: '${LORE}'
+
+
+
+  static-test:
+    slot: 3
+    material: dirt
+    lore:
+      - 'is static line'
+      - 'is not static line %placeholder%'
+      - 'is not static line {placeholder}'
+
+
+
+  rebuild1:
+    slot: 4
+    name: '&7rebuild 1'
+    material: dirt
+    lore:
+      - '&c REBUILD_TEST is ${REBUILD_TEST}'
+    on_click:
+      commands:
+        - '[set_param] REBUILD_TEST math[${REBUILD_TEST} + 1]'
+        - '[rebuild_slots] 4'
+        - '[flush]'
+
+
+  rebuild2:
+    slot: 5
+    name: '&7rebuild 2'
+    material: dirt
+    lore: '&c REBUILD_TEST is ${REBUILD_TEST}'
+    on_click:
+      commands:
+        - '[set_param] REBUILD_TEST math[${REBUILD_TEST} + 1]'
+        - '[rebuild_slots] 5'
+        - '[flush]'

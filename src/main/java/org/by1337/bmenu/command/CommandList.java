@@ -1,29 +1,31 @@
 package org.by1337.bmenu.command;
 
-import org.by1337.blib.configuration.YamlContext;
-import org.by1337.blib.configuration.YamlValue;
+import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.by1337.blib.random.WeightedItem;
 import org.by1337.blib.random.WeightedItemSelector;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CommandList {
+    public static final YamlCodec<CommandList> CODEC =
+            YamlCodec.mapOf(YamlCodec.STRING, Commands.CODEC).map(CommandList::new, c -> c.commandByName);
     private final List<Commands> commands;
     private final Map<String, Commands> commandByName;
     private WeightedItemSelector<List<String>> randSelector;
 
-    public CommandList(YamlValue value) {
-        if (value.getValue() == null) {
-            commands = new ArrayList<>();
-            commandByName = new HashMap<>();
-            return;
-        }
-        Map<String, YamlContext> map = value.getAsMap(YamlContext.class);
+    public CommandList(Map<String, Commands> map) {
         commands = new ArrayList<>();
         commandByName = new HashMap<>();
+        if (map.isEmpty()) return;
         for (String string : map.keySet()) {
-            Commands commands1 = new Commands(map.get(string));
+            Commands commands1 = map.get(string);
             commands.add(commands1);
             commandByName.put(string, commands1);
         }
@@ -51,6 +53,11 @@ public class CommandList {
     }
 
     public static class Commands implements WeightedItem<List<String>> {
+        public static final YamlCodec<Commands> CODEC = RecordYamlCodecBuilder.mapOf(
+                YamlCodec.DOUBLE.fieldOf("weight", Commands::weight, 1D),
+                YamlCodec.STRINGS.fieldOf("commands", Commands::commands, List.of()),
+                Commands::new
+        );
         private static final Commands EMPTY = new Commands(0D, null);
         private final double weight;
         private final List<String> commands;
@@ -60,9 +67,9 @@ public class CommandList {
             this.commands = commands;
         }
 
-        public Commands(YamlContext ctx) {
-            weight = ctx.getAsDouble("weight", 1D);
-            commands = ctx.get("commands").getAsList(YamlValue::getAsString, Collections.emptyList());
+        public Commands(YamlMap ctx) {
+            weight = ctx.get("weight").getAsDouble(1D);
+            commands = ctx.get("commands").decode(YamlCodec.STRINGS, List.of());
         }
 
         @Override
@@ -73,6 +80,10 @@ public class CommandList {
         @Override
         public double weight() {
             return weight;
+        }
+
+        public List<String> commands() {
+            return commands;
         }
     }
 }

@@ -1,5 +1,6 @@
 package org.by1337.bmenu.requirement;
 
+import dev.by1337.yaml.YamlMap;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.Placeholder;
@@ -26,10 +27,10 @@ public class StringEqualsIgnoreCaseRequirement implements Requirement {
         this.denyCommands = denyCommands;
     }
 
-    public StringEqualsIgnoreCaseRequirement(YamlContext context) {
-        input = context.getAsString("input");
-        output = context.getAsString("output");
-        not = context.getAsString("type").startsWith("!");
+    public StringEqualsIgnoreCaseRequirement(YamlMap context) {
+        input = context.get("input").getAsString();
+        output = context.get("output").getAsString();
+        not = context.get("type").getAsString().startsWith("!");
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()
                         .map(v -> YamlValue.wrap(v).getAsString()).toList(),

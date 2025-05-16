@@ -19,8 +19,8 @@ args:
 items:
   confirm:
     material: lime_stained_glass_pane
-    display_name: '&aПодтвердить'
-    slots:
+    name: '&aПодтвердить'
+    slot:
       - '0-3'
       - '9-12'
       - '18-21'
@@ -36,9 +36,9 @@ items:
         - '[BACK]'
   reject:
     material: red_stained_glass_pane
-    display_name: '&cОтменить'
+    name: '&cОтменить'
     static: true
-    slots:
+    slot:
       - '5-8'
       - '14-17'
       - '23-26'
@@ -47,14 +47,14 @@ items:
         - '[BACK]'
   gui:
     material: black_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
-    slots:
+    slot:
       - 4
       - 22
   none:
     material: jigsaw
-    display_name: '&cПроизошла ошибка!'
+    name: '&cПроизошла ошибка!'
     static: true
   totem:
     <<: *seller-item-totem # это указатель на предмет который находится в файле items.yml

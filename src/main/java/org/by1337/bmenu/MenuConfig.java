@@ -1,5 +1,6 @@
 package org.by1337.bmenu;
 
+import dev.by1337.yaml.YamlMap;
 import org.bukkit.event.inventory.InventoryType;
 import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
@@ -22,10 +23,12 @@ public class MenuConfig implements MenuItemLookup {
     private final @Nullable SpacedNameKey provider;
     private final InventoryType invType;
     private final int size;
-    private final List<SpacedNameKey> onlyOpenFrom;
+    private final Set<SpacedNameKey> onlyOpenFrom;
     private final Map<String, String> args;
     private final Map<String, MenuItemBuilder> idToItems;
+    @Deprecated
     private final RawYamlContext context;
+    private final YamlMap yamlConfig;
     private final MenuLoader loader;
     private final String title;
     private final List<MenuItemBuilder> items;
@@ -37,19 +40,24 @@ public class MenuConfig implements MenuItemLookup {
     private final Map<String, Animator.AnimatorContext> animations;
     private final List<File> fromFiles;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, RawYamlContext context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, YamlMap context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
         this.invType = invType;
         this.size = size;
-        this.onlyOpenFrom = onlyOpenFrom;
+        this.onlyOpenFrom = new HashSet<>(onlyOpenFrom);
         this.args = args;
         this.idToItems = idToItems;
-        this.context = context;
-        this.animations = animations;
+        this.context = new RawYamlContext(context);
+        yamlConfig = context;
+        //this.context = context; //todo
+        this.animations = new HashMap<>(animations);
         this.fromFiles = fromFiles;
-        cashedContext = new CashedYamlContext(this.context);
+        //cashedContext = new CashedYamlContext(this.context); //todo
+        cashedContext = null;
+
+
         this.loader = loader;
         this.title = title;
         this.animation = animation;
@@ -119,7 +127,7 @@ public class MenuConfig implements MenuItemLookup {
             if (!toFolder.toFile().exists()) {
                 toFolder.toFile().mkdirs();
             }
-            Files.writeString(toFolder.resolve(name + ".yml"), context.saveToString());
+            Files.writeString(toFolder.resolve(name + ".yml"), yamlConfig.saveToString());
 
             int x = 0;
             for (MenuConfig superMenu : supers) {
@@ -138,8 +146,13 @@ public class MenuConfig implements MenuItemLookup {
         return menuEventListeners;
     }
 
+    @Deprecated
     public RawYamlContext getContext() {
         return context;
+    }
+
+    public YamlMap getYamlConfig() {
+        return yamlConfig;
     }
 
     public Set<SpacedNameKey> getSupersId() {
@@ -166,7 +179,7 @@ public class MenuConfig implements MenuItemLookup {
         return size;
     }
 
-    public List<SpacedNameKey> getOnlyOpenFrom() {
+    public Set<SpacedNameKey> getOnlyOpenFrom() {
         return onlyOpenFrom;
     }
 

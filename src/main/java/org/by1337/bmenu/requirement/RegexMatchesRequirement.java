@@ -1,5 +1,6 @@
 package org.by1337.bmenu.requirement;
 
+import dev.by1337.yaml.YamlMap;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.Placeholder;
@@ -21,10 +22,10 @@ public class RegexMatchesRequirement implements Requirement {
     private final List<String> commands;
     private final List<String> denyCommands;
 
-    public RegexMatchesRequirement(YamlContext context) {
-        input = context.getAsString("input");
-        regex = context.getAsString("regex");
-        not = context.getAsString("type").startsWith("!");
+    public RegexMatchesRequirement(YamlMap context) {
+        input = context.get("input").getAsString();
+        regex = context.get("regex").getAsString();
+        not = context.get("type").getAsString().startsWith("!");
         pattern = Pattern.compile(regex);
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()

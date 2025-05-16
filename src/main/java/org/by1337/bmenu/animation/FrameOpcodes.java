@@ -1,46 +1,56 @@
 package org.by1337.bmenu.animation;
 
-import org.by1337.blib.configuration.YamlValue;
-import org.by1337.bmenu.animation.impl.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
+import dev.by1337.yaml.codec.schema.SchemaType;
+import dev.by1337.yaml.codec.schema.SchemaTypes;
+import org.by1337.bmenu.animation.impl.*;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public enum FrameOpcodes {
-    SET(SetAnimOpcode::new, "set", "st"),
-    REMOVE(RemoveAnimOpcode::new, "remove", "rm"),
-    MOVE(MoveAnimOpcode::new, "move", "mv"),
-    SWAP(SwapAnimOpcode::new, "swap", "sw"),
-    COPY(CopyAnimOpcode::new, "copy", "cl"),
-    GOTO(GotoAnimOpcode::new, "goto", "gt"),
-    SOUND(SoundAnimOpcode::new, "sound", "snd"),
-    COMMANDS(CommandsAnimOpcode::new, "commands", "cmd"),
-    TITLE(SetTitleOpcode::new, "title", "ttl"),
-    FILL(FillAnimOpcode::new, "fill", "fl"),
-    REMOVE_IF_NOT_EMPTY(RemoveIfNotEmptyAnimOpcode::new, "remove-if-not-empty", "rne"),
-    COPY_FROM_BASE(CopyFromBaseAnimOpcode::new, "copy-from-base", "cfb"),
-    SET_IF_EMPTY(SetIfEmptyAnimOpcode::new, "set-if-empty", "sie"),
+    SET(SetAnimOpcode.CODEC, "set", "st"),
+    REMOVE(RemoveAnimOpcode.CODEC, "remove", "rm"),
+    MOVE(MoveAnimOpcode.CODEC, "move", "mv"),
+    SWAP(SwapAnimOpcode.CODEC, "swap", "sw"),
+    COPY(CopyAnimOpcode.CODEC, "copy", "cl"),
+    GOTO(GotoAnimOpcode.CODEC, "goto", "gt"),
+    SOUND(SoundAnimOpcode.CODEC, "sound", "snd"),
+    COMMANDS(CommandsAnimOpcode.CODEC, "commands", "cmd"),
+    TITLE(SetTitleOpcode.CODEC, "title", "ttl"),
+    FILL(FillAnimOpcode.CODEC, "fill", "fl"),
+    REMOVE_IF_NOT_EMPTY(RemoveIfNotEmptyAnimOpcode.CODEC, "remove-if-not-empty", "rne"),
+    COPY_FROM_BASE(CopyFromBaseAnimOpcode.CODEC, "copy-from-base", "cfb"),
+    SET_IF_EMPTY(SetIfEmptyAnimOpcode.CODEC, "set-if-empty", "sie"),
     ;
+    public static final YamlCodec<Map<String, FrameOpcode>> FRAMES_CODEC;
     private static final Map<String, FrameOpcodes> LOOKUP;
-    private final Function<YamlValue, FrameOpcode> creator;
+    private static final Logger log = LoggerFactory.getLogger("BMenu");
+    private final YamlCodec<? extends FrameOpcode> codec;
     private final String id;
     private final String[] aliases;
 
-    FrameOpcodes(Function<YamlValue, FrameOpcode> creator, String id) {
-        this.creator = creator;
+    FrameOpcodes(YamlCodec<? extends FrameOpcode> codec, String id) {
+        this.codec = codec;
         this.id = id;
         aliases = new String[]{};
     }
 
-    FrameOpcodes(Function<YamlValue, FrameOpcode> creator, String id, String... aliases) {
-        this.creator = creator;
+    FrameOpcodes(YamlCodec<? extends FrameOpcode> codec, String id, String... aliases) {
+        this.codec =codec;
         this.id = id;
         this.aliases = aliases;
     }
 
-    public Function<YamlValue, FrameOpcode> getCreator() {
-        return creator;
+
+    public YamlCodec<? extends FrameOpcode> getCodec() {
+        return codec;
     }
 
     public String getId() {
@@ -63,5 +73,57 @@ public enum FrameOpcodes {
                 LOOKUP.put(alias, value);
             }
         }
+        FRAMES_CODEC = new YamlCodec<Map<String, FrameOpcode>>() {
+            private SchemaType schemaType;
+            @Override
+            public Map<String, FrameOpcode> decode(YamlValue yamlValue) {
+                Map<String, FrameOpcode> result = new LinkedHashMap<>();
+                YamlMap map = yamlValue.getAsYamlMap();
+                for (String s : map.getRaw().keySet()) {
+                    var type = byId(s);
+                    if (type == null){
+                        log.error("Unknown animation opcode type {}", s);
+                        continue;
+                    }
+                    result.put(s, type.codec.decode(map.get(s)));
+                }
+                return result;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public YamlValue encode(Map<String, FrameOpcode> frames) {
+                YamlMap map = new YamlMap();
+                for (FrameOpcode frame : frames.values()) {
+                    var type = frame.type();
+                    if (type != null){
+                        map.set(type.id, ((YamlCodec<FrameOpcode>) type.codec).encode(frame));
+                    }
+                }
+                return YamlValue.wrap(map);
+            }
+
+            @Override
+            public @NotNull SchemaType schema() {
+                if (schemaType != null) return schemaType;
+                buildSchemaType();
+                return schemaType;
+            }
+
+            private void buildSchemaType(){
+                var builder = JsonSchemaTypeBuilder.create()
+                        .types(SchemaTypes.Type.OBJECT)
+                        .additionalProperties(false);
+
+                for (FrameOpcodes value : FrameOpcodes.values()) {
+                    builder.properties(value.id, value.codec.schema());
+                    for (String alias : value.aliases) {
+                        builder.properties(alias, value.codec.schema());
+                    }
+                }
+                schemaType = builder.build();
+            }
+        };
     }
+
 }

@@ -17,15 +17,16 @@ import java.util.stream.Stream;
 
 public class MenuFilePreprocessor {
 
-    public static YamlContext loadFile(File file, MenuLoader loader) throws InvalidMenuConfigException{
+    public static String loadFile(File file, MenuLoader loader) throws InvalidMenuConfigException{
         String str = readYamlAndApplyPreprocessor(file, loader, new HashSet<>());
         YamlConfiguration configuration = new YamlConfiguration();
-        try {
+        return str; //todo crash dump?
+        /*try {
             configuration.loadFromString(str);
         } catch (InvalidConfigurationException e) {
             throw new InvalidMenuConfigException("Не удалось прочитать файл так как в синтаксисе yaml ошибка! https://codebeautify.org/yaml-validator - здесь можно проверить конфиг на наличие ошибок в yaml", e);
         }
-        return new YamlContext(configuration);
+        return new YamlContext(configuration);*/
     }
 
     private static String readYamlAndApplyPreprocessor(File file, MenuLoader loader, Set<File> loaded) throws InvalidMenuConfigException {

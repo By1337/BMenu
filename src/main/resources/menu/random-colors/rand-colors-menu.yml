@@ -75,61 +75,61 @@ items:
   reload:
     material: barrier
     slot: 49
-    display_name: '&aОбновить'
+    name: '&aОбновить'
     on_click:
       commands:
         - '[REOPEN]'
   lime:
     material: lime_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   cyan:
     material: cyan_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   light_blue:
     material: light_blue_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   brown:
     material: brown_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   yellow:
     material: yellow_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   pink:
     material: pink_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   orange:
     material: orange_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   red:
     material: red_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   blue:
     material: blue_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   green:
     material: green_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   white:
     material: white_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   magenta:
     material: magenta_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
   purple:
     material: purple_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
 
 animation:

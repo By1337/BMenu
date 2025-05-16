@@ -75,5 +75,14 @@ public class AnimationUtil {
             to[inSlot] = who;
         }
     }
+    public static String slotsToString(int[] arr){
+        if (arr.length == 0) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i : arr) {
+            sb.append(i).append(",");
+        }
+        sb.setLength(sb.length() -1);
+        return sb.toString();
+    }
 
 }

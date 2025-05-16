@@ -1,14 +1,22 @@
 package org.by1337.bmenu.animation;
 
+import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
+import dev.by1337.yaml.codec.schema.SchemaType;
+import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.impl.GotoAnimOpcode;
 import org.by1337.bmenu.animation.impl.SoundAnimOpcode;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Animator {
     private int pos;
@@ -49,6 +57,7 @@ public class Animator {
     }
 
     public static class AnimatorContext {
+        public static YamlCodec<AnimatorContext> CODEC = new CodecImpl();
         private final List<Frame> frames;
         private final Map<Integer, List<Frame>> framePosToFrames;
         private int maxTick;
@@ -75,9 +84,63 @@ public class Animator {
         public Animator createAnimator() {
             return new Animator(this);
         }
+
+        private static class CodecImpl implements YamlCodec<AnimatorContext> {
+            private final SchemaType schemaType = Frame.SCHEMA_TYPE.listOf();
+
+            @Override
+            public AnimatorContext decode(YamlValue yamlValue) {
+                List<YamlMap> list = yamlValue.decode(YamlCodec.YAML_MAP_LIST);
+                List<Animator.Frame> frameList = new ArrayList<>();
+                int lastPos = 0;
+                for (YamlMap frame : list) {
+                    for (YamlMap yamlMap : frame.get("opcodes").decode(YamlCodec.YAML_MAP_LIST, List.of())) {
+                        List<FrameOpcode> opcodes = new ArrayList<>(
+                                FrameOpcodes.FRAMES_CODEC.decode(YamlValue.wrap(yamlMap)).values()
+                        );
+                        int pos = frame.get("tick").getAsInt(++lastPos);
+                        lastPos = pos;
+                        frameList.add(new Animator.Frame(pos, opcodes));
+                    }
+                }
+                return new AnimatorContext(frameList);
+            }
+
+            @Override
+            public YamlValue encode(AnimatorContext ctx) {
+                List<YamlMap> result = new ArrayList<>();
+                for (Frame frame : ctx.frames) {
+                    YamlMap map = new YamlMap();
+                    map.setRaw("tick", frame.frame);
+                    map.set("opcodes",
+                            frame.opcodes.stream().filter(e -> e.type() != null).collect(Collectors.toMap(
+                                    e -> e.type().getId(),
+                                    e -> e
+                            )),
+                            FrameOpcodes.FRAMES_CODEC
+                    );
+                    result.add(map);
+                }
+                return YamlValue.wrap(result);
+            }
+
+            @Override
+            public @NotNull SchemaType schema() {
+                return schemaType;
+            }
+        }
     }
 
     public static class Frame {
+        public static final SchemaType SCHEMA_TYPE = JsonSchemaTypeBuilder
+                .create()
+                .type(SchemaTypes.Type.OBJECT)
+                .properties("tick", SchemaTypes.INT)
+                .properties("opcodes", FrameOpcodes.FRAMES_CODEC.listOf().schema())
+                .required("opcodes")
+                .build();
+
+
         private final int frame;
         private final List<FrameOpcode> opcodes;
 
@@ -91,6 +154,7 @@ public class Animator {
                 opcode.apply(matrix, menu, animator);
             }
         }
+
         public void safeApply(MenuItem[] matrix, Menu menu, Animator animator) {
             for (FrameOpcode opcode : opcodes) {
                 if (opcode instanceof GotoAnimOpcode || opcode instanceof SoundAnimOpcode) continue;

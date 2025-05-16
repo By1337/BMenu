@@ -1,5 +1,6 @@
 package org.by1337.bmenu.click;
 
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -23,6 +24,7 @@ public enum MenuClickType {
     SWAP_OFFHAND(ClickType.SWAP_OFFHAND, "on_swap_offhand_click"),
     CONTROL_DROP(ClickType.CONTROL_DROP, "on_control_drop_click");
 
+    public static YamlCodec<MenuClickType> CODEC = YamlCodec.enumOf(MenuClickType.class);
 
     private final ClickType clickType;
     private final String configKeyClick;

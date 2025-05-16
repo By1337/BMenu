@@ -2,7 +2,7 @@ package org.by1337.bmenu.factory;
 
 import org.by1337.blib.text.MessageFormatter;
 
-public class InvalidMenuConfigException extends Exception {
+public class InvalidMenuConfigException extends RuntimeException {
     public InvalidMenuConfigException(String message) {
         super(message);
     }

@@ -1,10 +1,9 @@
 package org.by1337.bmenu.factory;
 
 import com.google.common.base.Joiner;
+import dev.by1337.yaml.YamlMap;
 import org.bukkit.configuration.MemorySection;
 import org.by1337.blib.chat.placeholder.Placeholder;
-import org.by1337.blib.configuration.YamlContext;
-import org.by1337.bmenu.yaml.RawYamlContext;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -15,18 +14,18 @@ public class MenuFilePostprocessor {
 
 
     @SuppressWarnings("unchecked")
-    public static RawYamlContext apply(YamlContext context, Logger logger) throws InvalidMenuConfigException {
-        Map<String, Object> raw = (Map<String, Object>) toMap(context.getHandle());
+    public static YamlMap apply(String data, Logger logger) throws InvalidMenuConfigException {
+        YamlMap yamlMap = YamlMap.loadFromString(data);
 
-        RawYamlContext ctx = new RawYamlContext((Map<String, Object>) process(raw, ""));
-        applyPlaceholders(ctx);
-        return ctx;
+        process(yamlMap.getRaw(), "");
+      //  applyPlaceholders(yamlMap);
+        return yamlMap;
     }
 
     @SuppressWarnings("unchecked")
-    private static void applyPlaceholders(RawYamlContext ccontextx) {
-        if (!ccontextx.has("items")) return;
-        Map<String, Object> items = (Map<String, Object>) ccontextx.get("items").getValue();
+    private static void applyPlaceholders(YamlMap yamlMap) {
+        if (!yamlMap.has("items")) return;
+        Map<String, Object> items = (Map<String, Object>) yamlMap.getRaw().get("items");
         for (String string : items.keySet()) {
             Map<String, Object> item = (Map<String, Object>) items.get(string);
             if (!item.containsKey("args")) continue;

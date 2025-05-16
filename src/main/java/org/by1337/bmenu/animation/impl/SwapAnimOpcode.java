@@ -1,19 +1,24 @@
 package org.by1337.bmenu.animation.impl;
 
-import org.by1337.blib.configuration.YamlValue;
+import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.by1337.blib.util.Pair;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
+import org.by1337.bmenu.animation.FrameOpcodes;
 import org.by1337.bmenu.animation.util.AnimationUtil;
+import org.jetbrains.annotations.Nullable;
 
 public class SwapAnimOpcode implements FrameOpcode {
+    public static final YamlCodec<SwapAnimOpcode> CODEC = YamlCodec.STRING.schema(SchemaTypes.STRING_OR_NUMBER)
+            .map(SwapAnimOpcode::new, v -> AnimationUtil.slotsToString(v.from) + " " + AnimationUtil.slotsToString(v.to));
     private final int[] from;
     private final int[] to;
 
-    public SwapAnimOpcode(YamlValue ctx) {
-        String args = ctx.getAsString();
+    public SwapAnimOpcode(String ctx) {
+        String args = ctx;
 
         Pair<int[], int[]> pair = AnimationUtil.parsePairSlots(args);
         from = pair.getLeft();
@@ -44,5 +49,10 @@ public class SwapAnimOpcode implements FrameOpcode {
 
     public int[] getTo() {
         return to;
+    }
+
+    @Override
+    public @Nullable FrameOpcodes type() {
+        return FrameOpcodes.SWAP;
     }
 }

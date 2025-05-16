@@ -1,5 +1,7 @@
 package org.by1337.bmenu.requirement;
 
+import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.bmenu.Menu;
@@ -7,6 +9,12 @@ import org.by1337.bmenu.Menu;
 import java.util.List;
 
 public class CommandRequirements {
+    public static final YamlCodec<CommandRequirements> CODEC = RecordYamlCodecBuilder.mapOf(
+            Requirements.CODEC.fieldOf("requirements", v -> v.requirements, Requirements.EMPTY),
+            YamlCodec.STRINGS.fieldOf("commands", v -> v.commands, List.of()),
+            YamlCodec.STRINGS.fieldOf("deny_commands", v -> v.denyCommands, List.of()),
+            CommandRequirements::new
+    );
     private final Requirements requirements;
     private final List<String> denyCommands;
     private final List<String> commands;
