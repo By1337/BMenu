@@ -24,7 +24,7 @@ public class ItemFixer {
         map.setRaw("name", fixDisplay(map.getRaw("name")));
         map.setRaw("lore", fixDisplay(map.getRaw("lore")));
 
-        if (map.getRaw("view_requirement") == null && map.getRaw("static") == null &&
+        if (map.getRaw("static") == null &&
                 hasNoPlaceholders(map.getRaw("name")) &&
                 hasNoPlaceholders(map.getRaw("lore")) &&
                 hasNoPlaceholders(map.getRaw("name")) &&
@@ -44,24 +44,14 @@ public class ItemFixer {
 
     private static Object fixDisplay(Object o) {
         if (o == null) return null;
-        if (o instanceof String s) {
-            StringBuilder sb = new StringBuilder();
-//            if (hasNoPlaceholders(s)) {
-//                sb.append(STATIC_LORE_TAG);
-//            }
-            sb.append("<!italic>");
-            sb.append(s);
-            return sb.toString();
-        } else if (o instanceof Collection<?> c) {
+        if (o instanceof Collection<?> c) {
             List<String> result = new ArrayList<>();
             for (Object object : c) {
                 String s = String.valueOf(object);
                 if (s.contains("\n")) {
-                    for (String string : s.split("\n")) {
-                        result.add((String) fixDisplay(string));
-                    }
+                    result.addAll(Arrays.asList(s.split("\n")));
                 } else {
-                    result.add((String) fixDisplay(s));
+                    result.add(s);
                 }
             }
             return result;

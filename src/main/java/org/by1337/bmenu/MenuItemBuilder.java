@@ -9,6 +9,7 @@ import dev.by1337.yaml.codec.schema.SchemaTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -18,7 +19,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionEffect;
-import org.by1337.blib.BLib;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.MultiPlaceholder;
 import org.by1337.blib.chat.util.Message;
@@ -32,31 +32,22 @@ import org.by1337.bmenu.factory.ItemFactory;
 import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.requirement.Requirements;
-import org.by1337.bmenu.util.math.MathReplacer;
+import org.by1337.bmenu.util.CachedComponent;
+import org.by1337.bmenu.util.ObjectUtil;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.ParseException;
 import java.util.*;
 import java.util.function.Supplier;
 
-public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
+public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public static final YamlCodec<MenuItemBuilder> YAML_CODEC;
 
-    @ApiStatus.Experimental
-    public static final boolean USE_CASH = true;
-
     private int[] slots = new int[]{-1};
-    private List<String> lore = new ArrayList<>();
-
-    @ApiStatus.Experimental
-    private List<Object> cachedLore = new ArrayList<>();
-    @ApiStatus.Experimental
-    private Object cachedName;
-
-    private String name;
+    private final List<CachedComponent> lore = new ArrayList<>();
+    private CachedComponent name;
     private Map<MenuClickType, ClickHandler> clicks = new HashMap<>();
     private String amount = "1";
     private String material = "STONE";
@@ -87,19 +78,6 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public static MenuItemBuilder read(YamlMap yamlMap) {
         return ItemFactory.readItem(yamlMap);
-    }
-
-    @ApiStatus.Experimental
-    public void postDecode() {
-        if (cachedName == null || cachedName instanceof Component && (cachedLore.isEmpty() || cachedLore.stream().allMatch(l -> l instanceof Component))) {
-            if (hasNoPlaceholders(material) && hasNoPlaceholders(amount)) {
-                staticItem = true;
-            }
-        }
-    }
-
-    private static boolean hasNoPlaceholders(String s) {
-        return !s.contains("}") && !s.contains("{") && !s.contains("%");
     }
 
     @Nullable
@@ -139,12 +117,12 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         }
         Message message = menu.loader.getMessage();
         List<Component> lore = new ArrayList<>(Objects.requireNonNullElseGet(im.lore(), ArrayList::new));
-        for (Object o : cachedLore) {
-            if (o instanceof Component c) {
-                lore.add(c);
-            } else if (o instanceof String s) {
-                String s1 = placeholder.replace(s);
-                s1 = s1.replace("\\n", "\n"); // \n
+        for (CachedComponent line : this.lore) {
+            if (line.isCached()) {
+                lore.add(line.getCached());
+            } else {
+                String s1 = placeholder.replace(line.getSource());
+                s1 = s1.replace("\\n", "\n");
                 if (s1.contains("\n")) {
                     for (String string : s1.split("\n")) {
                         lore.add(message.componentBuilder(string).decoration(TextDecoration.ITALIC, false));
@@ -155,12 +133,10 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
             }
         }
         im.lore(lore);
-        if (cachedName != null) {
-            if (cachedName instanceof Component c) {
-                im.displayName(c);
-            } else if (cachedName instanceof String s) {
-                im.displayName(message.componentBuilder(placeholder.replace(s)).decoration(TextDecoration.ITALIC, false));
-            }
+        if (name.isCached()) {
+            im.displayName(name.getCached());
+        } else {
+            im.displayName(message.componentBuilder(placeholder.replace(name.getSource())).decoration(TextDecoration.ITALIC, false));
         }
 
         for (ItemFlag itemFlag : itemFlags)
@@ -171,19 +147,22 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 potionMeta.addCustomEffect(potionEffect, true);
             } else if (im instanceof Arrow arrow) {
                 arrow.addCustomEffect(potionEffect, true);
+            } else if (im instanceof SuspiciousStewMeta m) {
+                m.addCustomEffect(potionEffect, true);
             }
         }
+
         if (color != null) {
-            if (im instanceof PotionMeta potionMeta) {
-                potionMeta.setColor(color);
-            } else if (im instanceof LeatherArmorMeta armorMeta) {
-                armorMeta.setColor(color);
-            } else if (im instanceof MapMeta mapMeta) {
-                mapMeta.setColor(color);
+            if (im instanceof TropicalFishBucketMeta buket) {
+                ObjectUtil.applyIfNotNull(DyeColor.getByColor(color), buket::setBodyColor);
+            } else if (im instanceof PotionMeta pm) {
+                pm.setColor(color);
+            } else if (im instanceof MapMeta map) {
+                map.setColor(color);
+            } else if (im instanceof LeatherArmorMeta m) {
+                m.setColor(color);
             } else if (im instanceof FireworkEffectMeta effectMeta) {
                 effectMeta.setEffect(FireworkEffect.builder().withColor(color).build());
-            } else if (im instanceof Arrow arrow) {
-                arrow.setColor(color);
             }
         }
         for (var pair : enchantments) {
@@ -255,20 +234,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public void setName(String name) {
-        this.name = name;
-        if (name == null) {
-            cachedName = null;
-            return;
-        }
-        if (name.contains("{") || name.contains("}") || name.contains("%") || !USE_CASH) {
-            cachedName = name;
-        } else {
-            try {
-                cachedName = BLib.getApi().getMessage().componentBuilder(MathReplacer.replace(name)).decoration(TextDecoration.ITALIC, false);
-            } catch (ParseException e) {
-                cachedName = BLib.getApi().getMessage().componentBuilder(e.getMessage()).decoration(TextDecoration.ITALIC, false);
-            }
-        }
+        this.name = new CachedComponent(name);
     }
 
     public void setColor(Color color) {
@@ -326,35 +292,26 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public String getName() {
-        return name;
+        return name.getSource();
     }
 
 
     public void setLore(List<String> lore) {
-        this.lore = lore;
-        cachedLore = new ArrayList<>();
+        this.lore.clear();
         for (String s : lore) {
-            if (s.contains("{") || s.contains("}") || s.contains("%") || !USE_CASH) {
-                cachedLore.add(s);
-            } else {
-                s = s.replace("\\n", "\n");
-                if (s.contains("\n")) {
-                    for (String string : s.split("\n")) {
-                        cachedLore.add(BLib.getApi().getMessage().componentBuilder(string).decoration(TextDecoration.ITALIC, false));
-                    }
-                } else {
-                    try {
-                        cachedLore.add(BLib.getApi().getMessage().componentBuilder(MathReplacer.replace(s)).decoration(TextDecoration.ITALIC, false));
-                    } catch (ParseException e) {
-                        cachedLore.add(BLib.getApi().getMessage().componentBuilder(e.getMessage()).decoration(TextDecoration.ITALIC, false));
-                    }
+            s = s.replace("\\n", "\n");
+            if (s.contains("\n")) {
+                for (String string : s.split("\n")) {
+                    this.lore.add(new CachedComponent("<!italic>".concat(string)));
                 }
+            } else {
+                this.lore.add(new CachedComponent(s));
             }
         }
     }
 
     public void addLore(String lore) {
-        this.lore.add(lore);
+        this.lore.add(new CachedComponent(lore));
     }
 
     public void setSlots(int[] slots) {
@@ -381,7 +338,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public List<String> getLore() {
-        return lore;
+        return lore();
     }
 
     public Map<MenuClickType, ClickHandler> getClicks() {
@@ -478,11 +435,11 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public List<String> lore() {
-        return lore;
+        return lore.stream().map(CachedComponent::getSource).toList();
     }
 
     public String name() {
-        return name;
+        return name.getSource();
     }
 
     public Map<MenuClickType, ClickHandler> clicks() {

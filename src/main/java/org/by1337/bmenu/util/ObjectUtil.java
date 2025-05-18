@@ -3,6 +3,7 @@ package org.by1337.bmenu.util;
 import com.google.common.base.Supplier;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ObjectUtil {
@@ -12,6 +13,11 @@ public class ObjectUtil {
 
     public static <T> T mapIfNotNull(@Nullable T t, Function<? super T, ? extends T> mapper) {
         return t != null ? mapper.apply(t) : null;
+    }
+    public static <T> void applyIfNotNull(@Nullable T t, Consumer<T> consumer) {
+        if (t != null){
+            consumer.accept(t);
+        }
     }
 
     @Nullable
