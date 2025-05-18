@@ -3,10 +3,9 @@ package org.by1337.bmenu.factory;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.yaml.codec.schema.SchemaType;
-import dev.by1337.yaml.codec.schema.SchemaTypes;
-import org.by1337.bmenu.requirement.*;
-import org.jetbrains.annotations.NotNull;
+import org.by1337.bmenu.requirement.Requirement;
+import org.by1337.bmenu.requirement.RequirementType;
+import org.by1337.bmenu.requirement.Requirements;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,7 @@ public class RequirementsFactory {
     @Deprecated
     public static Requirements readLegacy(YamlValue data) {
         List<Requirement> requirements = new ArrayList<>();
-        Map<String, YamlMap> map = data.decode(YamlCodec.STRING_TO_YAML_MAP_MAP);
+        Map<String, YamlMap> map = data.decode(YamlCodec.STRING_TO_YAML_MAP);
         for (YamlMap value : map.values()) {
             String type = value.get("type").getAsString();
             RequirementType requirementType = RequirementType.byName(type);
@@ -31,6 +30,6 @@ public class RequirementsFactory {
 
     @Deprecated(forRemoval = true)
     public static Requirements read(org.by1337.blib.configuration.YamlValue ctx) {
-        throw new UnsupportedOperationException();//todo
+        return Requirements.CODEC.decode(MenuFilePostprocessor.fromBLib(ctx));
     }
 }

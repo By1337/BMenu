@@ -4,10 +4,13 @@ package org.by1337.bmenu;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
+import dev.by1337.yaml.codec.schema.SchemaHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandSyntaxError;
@@ -55,6 +58,7 @@ public class BMenu extends JavaPlugin {
                 this,
                 config.getAsBoolean("hot-reload", false)
         );
+        writeSchemas(this);
     }
 
     @Override
@@ -152,7 +156,7 @@ public class BMenu extends JavaPlugin {
                                     builder.schema();
                                     builder.title("BMenu item schema");
                                     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                                    String schema = gson.toJson(builder.getJsonObject());
+                                    String schema = gson.toJson(builder.build().buildJson());
                                     try {
                                         Files.writeString(getDataFolder().toPath().resolve("shema.json"), schema);
                                     } catch (IOException e) {
@@ -184,6 +188,12 @@ public class BMenu extends JavaPlugin {
                 )*/;
 
         return cmd;
+    }
+
+    public static void writeSchemas(Plugin plugin) {
+        Plugin bMenu = Bukkit.getPluginManager().getPlugin("BMenu");
+        String bMenuVersion = bMenu == null ? plugin.getDescription().getVersion() : bMenu.getDescription().getVersion();
+        SchemaHolder.addSchema(plugin.getDataFolder(), "bmenu-schema-v" + bMenuVersion + ".json", "menu/**/*.yml", MenuCodec.schema(), "BMenu menu schema");
     }
 
     public MenuLoader getMenuLoader() {

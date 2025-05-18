@@ -1,9 +1,6 @@
 extends: [ ]
-id: ~
-provider: ~
-type: CHEST
+type: chest
 size: 54
-title: ~
 only-open-from: [ ]
 args: { }
 

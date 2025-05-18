@@ -35,12 +35,17 @@ import org.by1337.bmenu.util.math.MathReplacer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.util.*;
 
 public abstract class Menu extends Placeholder implements InventoryHolder {
+
     private static final Command<Menu> commands;
+    private static final Logger log = LoggerFactory.getLogger("BMenu");
+
     protected final MenuConfig config;
     protected final MenuLoader loader;
     protected final Player viewer;
@@ -259,6 +264,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     public void runCommands(List<String> commands) {
         for (String command : commands) {
             String replaced = replace(command);
+         //   log.info("[{}] run command '{}'", config.getId(), replaced);
             try {
                 if (!runCommand(replaced)) {
                     Menu.commands.process(this, new StringReader(replaced));

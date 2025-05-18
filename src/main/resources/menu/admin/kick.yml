@@ -1,6 +1,6 @@
 id: example:kick
 provider: default
-type: CHEST
+type: chest
 size: 27
 title: '&7Кикнуть игрока ${PLAYER}'
 
@@ -11,8 +11,8 @@ on_open: &on_open
   requirements:
     - check: '${PLAYER} != null'
       deny_commands:
-        - '[MESSAGE] &cВы должны указать игрока!'
-        - '[CLOSE]'
+        - '[message] &cВы должны указать игрока!'
+        - '[close]'
 
 menu-events:
   on_open: *on_open
@@ -21,36 +21,36 @@ menu-events:
 items:
   gui-lime:
     material: lime_stained_glass_pane
-    display_name: ''
+    name: ''
     static: true
 
   kick-1:
     material: barrier
-    display_name: '&cКикнуть игрока ${PLAYER} по причине 1.1'
+    name: '&cКикнуть игрока ${PLAYER} по причине 1.1'
     slot: 11
     on_click:
       commands:
-        - '[CONSOLE] kick ${PLAYER} 1.1'
-        - '[MESSAGE] &aИгрок ${PLAYER} был кикнут по причине 1.1'
-        - '[CLOSE]'
+        - '[console] kick ${PLAYER} 1.1'
+        - '[message] &aИгрок ${PLAYER} был кикнут по причине 1.1'
+        - '[close]'
   kick-2:
     material: barrier
-    display_name: '&cКикнуть игрока ${PLAYER} по причине 1.2'
+    name: '&cКикнуть игрока ${PLAYER} по причине 1.2'
     slot: 13
     on_click:
       commands:
-        - '[CONSOLE] kick ${PLAYER} 1.2'
-        - '[MESSAGE] &aИгрок ${PLAYER} был кикнут по причине 1.2'
-        - '[CLOSE]'
+        - '[console] kick ${PLAYER} 1.2'
+        - '[message] &aИгрок ${PLAYER} был кикнут по причине 1.2'
+        - '[close]'
   kick-3:
     material: barrier
-    display_name: '&cКикнуть игрока ${PLAYER} по причине 1.3'
+    name: '&cКикнуть игрока ${PLAYER} по причине 1.3'
     slot: 15
     on_click:
       commands:
-        - '[CONSOLE] kick ${PLAYER} 1.3'
-        - '[MESSAGE] &aИгрок ${PLAYER} был кикнут по причине 1.3'
-        - '[CLOSE]'
+        - '[console] kick ${PLAYER} 1.3'
+        - '[message] &aИгрок ${PLAYER} был кикнут по причине 1.3'
+        - '[close]'
 
 animation:
   - opcodes:

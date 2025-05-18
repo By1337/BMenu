@@ -3,18 +3,18 @@ extends:
 
 id: example:seller
 provider: default
-type: CHEST
+type: chest
 size: 54
 title: '&7Селлер'
 only-open-from: [ ]
 
 args: { }
 
-defaults:
+items-defaults:
   buyer-item: &item
     material: ${MATERIAL}
     amount: ${AMOUNT}
-    display_name: '&7${NAME} x${AMOUNT}'
+    name: '&7${NAME} x${AMOUNT}'
     lore:
       - '&r '
       - '&r &7Нажмите лкм'
@@ -25,21 +25,19 @@ defaults:
     on_left_click:
       requirements:
         - check: '%vault_eco_balance_fixed% >= ${PRICE}'
-      deny_commands:
-        - '[MESSAGE] &cУ Вас не достаточно баланса!'
+      deny_commands: '[message] &cУ Вас не достаточно баланса!'
       commands:
-        - '[TAKEMONEY] ${PRICE}'
-        - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
-        - '[MESSAGE] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'
+        - '[takemoney] ${PRICE}'
+        - '[console] give %player_name% ${MATERIAL} ${AMOUNT}'
+        - '[message] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'
     on_right_click:
       requirements:
         - check: '%vault_eco_balance_fixed% >= ${PRICE_32}'
-      deny_commands:
-        - '[MESSAGE] &cУ Вас не достаточно баланса!'
+      deny_commands: '[message] &cУ Вас не достаточно баланса!'
       commands:
-        - '[CONSOLE] eco take %player_name% ${PRICE_32}'
-        - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT_32}'
-        - '[MESSAGE] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT_32}'
+        - '[console] eco take %player_name% ${PRICE_32}'
+        - '[console] give %player_name% ${MATERIAL} ${AMOUNT_32}'
+        - '[message] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT_32}'
 
 items:
   item-lapis_lazuli:

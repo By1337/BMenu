@@ -46,9 +46,9 @@ public class ItemFixer {
         if (o == null) return null;
         if (o instanceof String s) {
             StringBuilder sb = new StringBuilder();
-            if (hasNoPlaceholders(s)) {
-                sb.append(STATIC_LORE_TAG);
-            }
+//            if (hasNoPlaceholders(s)) {
+//                sb.append(STATIC_LORE_TAG);
+//            }
             sb.append("<!italic>");
             sb.append(s);
             return sb.toString();

@@ -60,7 +60,7 @@
 # Иерархия: A -> B -> C
 # В этом примере образовалась цепочка из трёх меню
 # Меню B знает, что до него было меню A, но не знает, что после него меню C
-# Если пользователь воспользуется командой [BACK], он вернётся в предыдущее меню, а текущее меню закроется
+# Если пользователь воспользуется командой [back], он вернётся в предыдущее меню, а текущее меню закроется
 # Иерархия: A -> B
 
 
@@ -91,18 +91,18 @@ include: [
 
 # здесь вы можете объявлять наборы команд
 # после вы можете их выполнять используя команду
-# [RUN] <имя набора>
+# [run] <имя набора>
 # Или выполнять рандомно
-# [RUN_RAND]
+# [run_rand]
 commands-list:
   example-1:
     weight: 1.0 # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND]
     commands:
-      - '[MESSAGE] &7Это команда из example-1'
+      - '[message] &7Это команда из example-1'
   example-2:
     weight: 1.0
     commands:
-      - '[MESSAGE] &7Это команда из example-1'
+      - '[message] &7Это команда из example-1'
 
 # Меню ивенты
 menu-events:
@@ -112,19 +112,19 @@ menu-events:
         deny_commands: [ ] # во всех проверках тоже можно указывать команды
     deny_commands: [ ]
     commands:
-      - '[MESSAGE] Меню открыто!'
+      - '[message] Меню открыто!'
   on_reopen: # когда меню пере-открывается, когда используется команда [BACK]
     deny_commands: [ ]
     commands:
-      - '[MESSAGE] Меню открыто заново!'
+      - '[message] Меню открыто заново!'
   on_close: # когда меню закрывается
     deny_commands: [ ]
     commands:
-      - '[MESSAGE] Меню закрыто!'
+      - '[message] Меню закрыто!'
 
 
 # Если namespace не указан, должно использоваться имя плагина, который загрузил это меню
-# При использовании команд [OPEN] или аналогичных без указания конкретного namespace,
+# При использовании команд [open] или аналогичных без указания конкретного namespace,
 # menu loader должен сначала искать меню в своём окружении
 # В случае неоднозначных вызовов должна быть выведена ошибка
 # Один menu loader не может получить доступ к другому, если это явно не указано в реализации
@@ -154,7 +154,7 @@ only-open-from:
 # Все наследники этого меню могут использовать эти переменные
 # Этот параметр наследуется
 # синтаксис использования ${PARAM_1}
-# могут быть изменены командой [SET_PARAM]
+# могут быть изменены командой [set_param]
 # Эти параметры не статичны и уникальны для каждого открытого меню, а также они существуют пока это меню открыто или находится в иерархии открытых меню
 args:
   PARAM_1: 'value'
@@ -169,12 +169,11 @@ defaults:
   on_left_click_logic: &on_left_click_logic
     requirements:
       - check: '%vault_eco_balance_fixed% >= ${PRICE}'
-    deny_commands:
-      - '[MESSAGE] &cУ Вас не достаточно баланса!'
+    deny_commands: '[message] &cУ Вас не достаточно баланса!'
     commands:
-      - '[CONSOLE] eco take %player_name% ${PRICE}'
-      - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
-      - '[MESSAGE] &aВы успешно купили ${NAME} в количестве ${AMOUNT}'
+      - '[console] eco take %player_name% ${PRICE}'
+      - '[console] give %player_name% ${MATERIAL} ${AMOUNT}'
+      - '[message] &aВы успешно купили ${NAME} в количестве ${AMOUNT}'
 
 items:
   # наследники могут использовать объявленные здесь предметы в анимациях,
@@ -237,9 +236,9 @@ items:
         - check: 'string != string' # строка не равна
         - check: 'nearby world 10 10 10 100' # условие что игрок находится в радиусе 100 блоков от координат 10 10 10 в мире world
           commands:
-            - '[MESSAGE] string != string'
-            - '[BREAK]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
-            - '[CLOSE]' # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена
+            - '[message] string != string'
+            - '[break]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
+            - '[close]' # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена
       # Здесь можно выполнить команды в зависимости от результатов условий
       deny_commands: [ ] # если хотя бы одно из условий окажется ложным
     on_left_click: # обработка клика
@@ -320,7 +319,7 @@ animation:
       - copy: 10-15 20-25 # копирует предметы из слотов 10-15 в слоты 20-25
       - copy-from-base: 10-15 20-25 # копирует предметы из основного слоя на слой анимации
       - goto: 13 # переходит к указанному тику, позволяет зациклить анимацию
-      - sound: ENTITY_EXPERIENCE_ORB_PICKUP 1.0 1.0 # воспроизводит звук для игрока
+      - sound: ui.button.click  1.0 1.0
       - commands: # выполняет команды
           - '[MESSAGE] msg'
       - title: title # устанавливает title меню
@@ -351,44 +350,43 @@ animations:
       opcodes: [ ]
 
 # Все команды
-# Команды можно записывать в нижнем регистре
-# [CONSOLE] <cmd>
-# [PLAYER] <cmd>
-# [CHAT] <msg> - отправит сообщение от имени игрока, также можно выполнить команду
-# [SOUND] <sound> <?volume> <?pitch>
-# [CLOSE]
+# [console] <cmd>
+# [player] <cmd>
+# [chat] <msg> - отправит сообщение от имени игрока, также можно выполнить команду
+# [sound] <sound> <?volume> <?pitch>
+# [close]
 # здесь команды открытия меню
 # В commands вы можете передать список команд которые необходимо выполнить в открывающейся менюшке
-# Синтаксис [OPEN] menu ["[MESSAGE] сообщение из открытого меню", "[что-то] некст команда"]
-# [BACK_OR_CLOSE] <?commands>
-# [BACK_TO_OR_CLOSE] <id> <?commands>
-# [BACK] <?commands>
-# [OPEN] <id> <?commands>
-# [BACK_OR_OPEN] <id> <?commands>
-# [FLUSH] - синхронизирует инвентарь с клиентом
-# [REBUILD_SLOTS] <slots> - обновляет предметы в указанных слотах. (после необходимо использовать команду [FLUSH])
-# [SET_ITEM] <slots> <item> - установит указанный предмет в указанные слоты. (после необходимо использовать команду [FLUSH])
-# [COPY_FROM_PREVIOUS_MENU] <slots from> <slots to> - скопирует предметы из предыдущего меню. (после необходимо использовать команду [FLUSH])
+# Синтаксис [open] menu ["[message] сообщение из открытого меню", "[что-то] некст команда"]
+# [back_or_close] <?commands>
+# [back_to_or_close] <id> <?commands>
+# [back] <?commands>
+# [open] <id> <?commands>
+# [back_or_open] <id> <?commands>
+# [flush] - синхронизирует инвентарь с клиентом
+# [rebuild_slots] <slots> - обновляет предметы в указанных слотах. (после необходимо использовать команду [FLUSH])
+# [set_item] <slots> <item> - установит указанный предмет в указанные слоты. (после необходимо использовать команду [FLUSH])
+# [copy_from_previous_menu] <slots from> <slots to> - скопирует предметы из предыдущего меню. (после необходимо использовать команду [FLUSH])
 #
-# [REOPEN] - полностью заново открывает текущее меню
-# [REFRESH] - Обновляет все предметы в меню и синхронизирует инвентарь с клиентом
-# [MESSAGE] <msg>
-# [SET_PARAM] <param> <value>
-# [IMPORT_PARAMS] <item>
+# [reopen] - полностью заново открывает текущее меню
+# [refresh] - Обновляет все предметы в меню и синхронизирует инвентарь с клиентом
+# [message] <msg>
+# [set_param] <param> <value>
+# [import_params] <item>
 # Команды ниже выполняют команды из блока commands-list
-# [RUN] <имя набора>
-# [RUN_RAND]
-# [CONNECT] <server> - подключает игрока к серверу
-# [SET_ANIMATION] <animation> - устанавливает анимацию из блока animations
-# [ANIMATION_TICK] - принудительно вызывает тик анимации
-# [ANIMATION_FORCE_END] - моментально завершает анимацию
+# [run] <имя набора>
+# [run_rand]
+# [connect] <server> - подключает игрока к серверу
+# [set_animation] <animation> - устанавливает анимацию из блока animations
+# [animation_tick] - принудительно вызывает тик анимации
+# [animation_force_end] - моментально завершает анимацию
 #
-# [GIVEMONEY] <count> - выдать деньги
-# [TAKEMONEY] <count> - забрать деньги
-# [DELAY] <delay> <cmd> - выполнить команду с задержкой например [DELAY] 20 [MESSAGE] &aЭто сообщение отправилось спустя 1 секунду!
+# [givemoney] <count> - выдать деньги
+# [takemoney] <count> - забрать деньги
+# [delay] <delay> <cmd> - выполнить команду с задержкой например [DELAY] 20 [MESSAGE] &aЭто сообщение отправилось спустя 1 секунду!
 #
-# [TITLE_ALL] <"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>
-# [TITLE] <"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>
-# [ACTION_BAR_ALL] <msg>
-# [ACTION_BAR] <msg>
-# [BROADCAST] <msg>
+# [title_all] <"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>
+# [title] <"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>
+# [action_bar_all] <msg>
+# [action_bar] <msg>
+# [broadcast] <msg>

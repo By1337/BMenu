@@ -1,8 +1,6 @@
 package org.by1337.bmenu.factory;
 
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.nbt.NBTParser;
 import org.by1337.blib.nbt.impl.ListNBT;
 import org.by1337.bmenu.MenuLoader;
@@ -17,9 +15,9 @@ import java.util.stream.Stream;
 
 public class MenuFilePreprocessor {
 
-    public static String loadFile(File file, MenuLoader loader) throws InvalidMenuConfigException{
+    public static String loadFile(File file, MenuLoader loader) throws InvalidMenuConfigException {
         String str = readYamlAndApplyPreprocessor(file, loader, new HashSet<>());
-        YamlConfiguration configuration = new YamlConfiguration();
+     //   YamlConfiguration configuration = new YamlConfiguration();
         return str; //todo crash dump?
         /*try {
             configuration.loadFromString(str);

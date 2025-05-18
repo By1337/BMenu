@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@Deprecated
 public class CashedYamlContext extends RawYamlContext {
 
     private final Map<String, Object> cashed = new HashMap<>();

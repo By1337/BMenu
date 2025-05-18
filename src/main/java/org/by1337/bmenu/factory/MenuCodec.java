@@ -59,7 +59,7 @@ public class MenuCodec {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public MenuConfig decode() {
         this.ctx.loadedFiles.add(file);
-        YamlMap ctx = MenuFilePostprocessor.apply(MenuFilePreprocessor.loadFile(file, loader), loader.getLogger());
+        YamlMap ctx = MenuFilePostprocessor.apply(MenuFilePreprocessor.loadFile(file, loader));
 
         for (YamlField field : FIELDS) {
             if (ctx.has(field.name())) {
@@ -67,6 +67,8 @@ public class MenuCodec {
                 if (v != null){
                     field.setter().accept(this, v);
                 }
+            }else if (field.defaultValue() != null){
+                field.setter().accept(this, field.defaultValue());
             }
         }
         return new MenuConfig(
@@ -110,7 +112,7 @@ public class MenuCodec {
                 List.of()
         ));
         FIELDS.add(MenuCodecs.ARGS_CODEC.fieldOf("args", m -> m.args, (m, v) -> m.args = v, Map.of()));
-        FIELDS.add(YamlCodec.STRING_TO_YAML_MAP_MAP.schema(MenuItemBuilder.YAML_CODEC.schema().asMap()).fieldOf(
+        FIELDS.add(YamlCodec.STRING_TO_YAML_MAP.schema(MenuItemBuilder.YAML_CODEC.schema().asMap()).fieldOf(
                 "items",
                 m -> m.items.entrySet().stream().collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -132,6 +134,7 @@ public class MenuCodec {
         for (YamlField<MenuCodec, ?> field : FIELDS) {
             builder.properties(field.name(), field.codec().schema());
         }
+        builder.patternProperties("^items-", MenuItemBuilder.YAML_CODEC.schema().asMap());
         SCHEMA_TYPE = builder.build();
     }
 

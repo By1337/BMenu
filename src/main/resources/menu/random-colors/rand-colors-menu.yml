@@ -1,6 +1,6 @@
 id: example:rand-colors
 provider: default
-type: CHEST
+type: chest
 size: 54
 title: '&7Случайные цвета'
 only-open-from: [ ]
@@ -9,64 +9,64 @@ commands-list:
   lime:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR lime'
+      - '[set_param] COLOR lime'
   cyan:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR cyan'
+      - '[set_param] COLOR cyan'
   light_blue:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR light_blue'
+      - '[set_param] COLOR light_blue'
   brown:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR brown'
+      - '[set_param] COLOR brown'
   yellow:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR yellow'
+      - '[set_param] COLOR yellow'
   pink:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR pink'
+      - '[set_param] COLOR pink'
   orange:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR orange'
+      - '[set_param] COLOR orange'
   red:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR red'
+      - '[set_param] COLOR red'
   blue:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR blue'
+      - '[set_param] COLOR blue'
   green:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR green'
+      - '[set_param] COLOR green'
   white:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR white'
+      - '[set_param] COLOR white'
   magenta:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR magenta'
+      - '[set_param] COLOR magenta'
   purple:
     weight: 1.0
     commands:
-      - '[SET_PARAM] COLOR purple'
+      - '[set_param] COLOR purple'
 
 
 menu-events:
   on_open:
     commands:
-      - '[RUN_RAND]'
+      - '[run_rand]'
   on_reopen:
     commands:
-      - '[RUN_RAND]'
+      - '[run_rand]'
 
 args:
   COLOR: gray
@@ -77,8 +77,7 @@ items:
     slot: 49
     name: '&aОбновить'
     on_click:
-      commands:
-        - '[REOPEN]'
+      commands: '[reopen]'
   lime:
     material: lime_stained_glass_pane
     name: ''

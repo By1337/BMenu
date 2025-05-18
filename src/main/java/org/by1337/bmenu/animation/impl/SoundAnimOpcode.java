@@ -2,16 +2,18 @@ package org.by1337.bmenu.animation.impl;
 
 import dev.by1337.yaml.BukkitYamlCodecs;
 import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
-import dev.by1337.yaml.YamlValue;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
 import org.by1337.bmenu.animation.FrameOpcodes;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
 
 public class SoundAnimOpcode implements FrameOpcode {
     public static YamlCodec<SoundAnimOpcode> CODEC = YamlCodec.STRING.schema(SchemaTypes.STRING_OR_NUMBER).map(
@@ -20,14 +22,22 @@ public class SoundAnimOpcode implements FrameOpcode {
     ).schema(
             SchemaTypes.STRING.or(BukkitYamlCodecs.SOUND.schema())
     );
-    private final Sound sound;
+    private Sound sound;
     private final float volume;
     private final float pitch;
 
     public SoundAnimOpcode(String ctx) {
         String string = ctx;
         String[] args = string.split(" ");
-        sound = Sound.valueOf(args[0]); //todo?
+        String snd = args[0];
+        if (snd.contains(":")) {
+            sound = Registry.SOUNDS.get(NamespacedKey.fromString(snd));
+        } else {
+            sound = Registry.SOUNDS.get(NamespacedKey.minecraft(snd));
+        }
+        if (sound == null) {
+            sound = Sound.valueOf(snd.toUpperCase(Locale.ENGLISH));
+        }
         if (args.length > 1) {
             volume = Float.parseFloat(args[1]);
             if (args.length > 2) {
@@ -45,6 +55,7 @@ public class SoundAnimOpcode implements FrameOpcode {
     public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
         menu.getLoader().getMessage().sendSound(menu.getViewer(), sound, volume, pitch);
     }
+
     @Override
     public @Nullable FrameOpcodes type() {
         return FrameOpcodes.SOUND;

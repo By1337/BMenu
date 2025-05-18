@@ -11,8 +11,8 @@ import java.util.List;
 public class CommandRequirements {
     public static final YamlCodec<CommandRequirements> CODEC = RecordYamlCodecBuilder.mapOf(
             Requirements.CODEC.fieldOf("requirements", v -> v.requirements, Requirements.EMPTY),
-            YamlCodec.STRINGS.fieldOf("commands", v -> v.commands, List.of()),
             YamlCodec.STRINGS.fieldOf("deny_commands", v -> v.denyCommands, List.of()),
+            YamlCodec.STRINGS.fieldOf("commands", v -> v.commands, List.of()),
             CommandRequirements::new
     );
     private final Requirements requirements;

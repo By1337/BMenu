@@ -1,96 +1,23 @@
 package org.by1337.bmenu.factory;
 
-import com.google.common.base.Joiner;
 import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.YamlValue;
 import org.bukkit.configuration.MemorySection;
-import org.by1337.blib.chat.placeholder.Placeholder;
-import org.slf4j.Logger;
+import org.by1337.blib.configuration.YamlContext;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MenuFilePostprocessor {
     private static final String SOFT_MERGE_TAG = "<<+";
     private static final String HARD_MERGE_TAG = "<<*";
 
 
-    @SuppressWarnings("unchecked")
-    public static YamlMap apply(String data, Logger logger) throws InvalidMenuConfigException {
+    public static YamlMap apply(String data) throws InvalidMenuConfigException {
         YamlMap yamlMap = YamlMap.loadFromString(data);
 
         process(yamlMap.getRaw(), "");
-      //  applyPlaceholders(yamlMap);
         return yamlMap;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static void applyPlaceholders(YamlMap yamlMap) {
-        if (!yamlMap.has("items")) return;
-        Map<String, Object> items = (Map<String, Object>) yamlMap.getRaw().get("items");
-        for (String string : items.keySet()) {
-            Map<String, Object> item = (Map<String, Object>) items.get(string);
-            if (!item.containsKey("args")) continue;
-
-            Map<String, Object> args = (Map<String, Object>) deepCopy(item.get("args"));
-            if (args.isEmpty()) continue;
-            replaceLists(args);
-            replacePlaceholdersInPlaceholders(args);
-            Placeholder argsReplacer = new Placeholder();
-            args.forEach((key, value) ->
-                    argsReplacer.registerPlaceholder("${" + key + "}", () -> args.get(key))
-            );
-
-            items.put(string, replacePlaceholders(item, argsReplacer));
-        }
-    }
-
-    private static void replaceLists(Map<String, Object> args) {
-        for (String key : new ArrayList<>(args.keySet())) {
-            Object item = args.get(key);
-            if (item instanceof Collection<?> c) {
-                args.put(key, Joiner.on("\\n").join(c));
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Object replacePlaceholders(Object in, Placeholder argsReplacer) {
-        if (in instanceof Map<?, ?> m) {
-            Map<String, Object> map = (Map<String, Object>) m;
-            Map<String, Object> result = new LinkedHashMap<>();
-            for (String string : map.keySet()) {
-                result.put(string, replacePlaceholders(map.get(string), argsReplacer));
-            }
-            return result;
-        } else if (in instanceof Collection<?> c) {
-            List<Object> result = new ArrayList<>();
-            for (Object o : c) {
-                result.add(replacePlaceholders(o, argsReplacer));
-            }
-            return result;
-        } else if (in instanceof String s) {
-            return argsReplacer.replace(s);
-        } else {
-            return in;
-        }
-    }
-
-    private static void replacePlaceholdersInPlaceholders(Map<String, Object> map) {
-        List<String> args = new ArrayList<>(map.keySet());
-        boolean hasChanges;
-        do {
-            hasChanges = false;
-            for (String key : map.keySet()) {
-                Object valueRaw = map.get(key);
-                if (valueRaw instanceof String value) {
-                    for (String arg : args) {
-                        if (value.contains("${" + arg + "}")) {
-                            map.put(key, value.replace("${" + arg + "}", String.valueOf(map.get(arg))));
-                            hasChanges = true;
-                        }
-                    }
-                }
-            }
-        } while (hasChanges);
     }
 
     @SuppressWarnings("unchecked")
@@ -127,6 +54,32 @@ public class MenuFilePostprocessor {
             return list;
         }
         return o;
+    }
+
+    @Deprecated
+    public static YamlValue fromBLib(org.by1337.blib.configuration.YamlValue yamlValue) {
+        Object raw = yamlValue.getValue();
+        if (raw instanceof YamlContext ctx) {
+            return YamlValue.wrap(toMap(ctx.getHandle()));
+        } else if (raw instanceof MemorySection ms) {
+            return YamlValue.wrap(toMap(ms));
+        } else if (raw instanceof Collection<?> c) {
+            List<Object> list = new ArrayList<>();
+            for (Object o : c) {
+                list.add(fromBLib(org.by1337.blib.configuration.YamlValue.wrap(o)).getValue());
+            }
+            return YamlValue.wrap(list);
+        } else if (raw instanceof Map<?, ?>) {
+            return YamlValue.wrap(
+                    yamlValue.mapStream().collect(Collectors.toMap(
+                            e -> fromBLib(e.getKey()).getValue(),
+                            e -> fromBLib(e.getValue()).getValue(),
+                            (v1, v2) -> v1,
+                            LinkedHashMap::new
+                    ))
+            );
+        }
+        return YamlValue.wrap(raw);
     }
 
     public static Map<?, ?> toMap(MemorySection memorySection) {

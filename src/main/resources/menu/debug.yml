@@ -19,7 +19,7 @@ items-custom-section: # schema support
 items:
   one-line-lore:
     slot: 0
-    material: dirt
+    material: di
     lore: '&7one line lore'
 
   args-in-args:
@@ -68,6 +68,7 @@ items:
         - '[set_param] REBUILD_TEST math[${REBUILD_TEST} + 1]'
         - '[rebuild_slots] 4'
         - '[flush]'
+    ticking: false
 
 
   rebuild2:
@@ -75,6 +76,7 @@ items:
     name: '&7rebuild 2'
     material: dirt
     lore: '&c REBUILD_TEST is ${REBUILD_TEST}'
+
     on_click:
       commands:
         - '[set_param] REBUILD_TEST math[${REBUILD_TEST} + 1]'

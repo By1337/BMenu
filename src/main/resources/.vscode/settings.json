@@ -1,6 +1,0 @@
-{
-    "yaml.schemas": {
-      "./menu-schema.json": ["menu/*.yml"]
-    }
-  }
-  

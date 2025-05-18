@@ -5,7 +5,7 @@ include: [
 
 id: example:prem-seller-confirm
 provider: default
-type: CHEST
+type: chest
 size: 27
 title: '&7Подтверждение покупки'
 
@@ -26,14 +26,14 @@ items:
       - '18-21'
     on_left_click:
       requirements:
-        - check: '%vault_eco_balance_fixed% >= ${PRICE}' # Мы использовали [IMPORT_PARAMS] при открытии этого меню поэтому плейс ${PRICE} доступен
+        - check: '%vault_eco_balance_fixed% >= ${PRICE}' # Мы использовали [import_params] при открытии этого меню поэтому плейс ${PRICE} доступен
       deny_commands:
-        - '[MESSAGE] &cУ Вас не достаточно баланса!'
+        - '[message] &cУ Вас не достаточно баланса!'
       commands:
-        - '[TAKEMONEY] ${PRICE}'
-        - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
-        - '[MESSAGE] &aВы успешно купили ${NAME}'
-        - '[BACK]'
+        - '[takemoney] ${PRICE}'
+        - '[console] give %player_name% ${MATERIAL} ${AMOUNT}'
+        - '[message] &aВы успешно купили ${NAME}'
+        - '[back]'
   reject:
     material: red_stained_glass_pane
     name: '&cОтменить'
@@ -44,7 +44,7 @@ items:
       - '23-26'
     on_click:
       commands:
-        - '[BACK]'
+        - '[back]'
   gui:
     material: black_stained_glass_pane
     name: ''

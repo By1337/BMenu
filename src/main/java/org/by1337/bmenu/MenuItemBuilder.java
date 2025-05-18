@@ -1,6 +1,7 @@
 package org.by1337.bmenu;
 
 import dev.by1337.yaml.BukkitYamlCodecs;
+import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -44,7 +45,6 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public static final YamlCodec<MenuItemBuilder> YAML_CODEC;
 
-
     @ApiStatus.Experimental
     public static final boolean USE_CASH = true;
 
@@ -79,10 +79,14 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     public MenuItemBuilder() {
     }
 
-    @Deprecated(forRemoval = true) // todo
+    @Deprecated(forRemoval = true)
+    @SuppressWarnings("removal")
     public static MenuItemBuilder read(YamlContext context, MenuLoader loader) {
-        throw new UnsupportedOperationException();
-        //return ItemFactory.readItem(context, loader);
+        return ItemFactory.readItem(context, loader);
+    }
+
+    public static MenuItemBuilder read(YamlMap yamlMap) {
+        return ItemFactory.readItem(yamlMap);
     }
 
     @ApiStatus.Experimental
@@ -315,7 +319,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         clicks.put(type, handler);
     }
 
-    public ClickHandlerImpl getClickHandlerImplOrNull(MenuClickType type){
+    public ClickHandlerImpl getClickHandlerImplOrNull(MenuClickType type) {
         var v = clicks.get(type);
         if (v instanceof ClickHandlerImpl impl) return impl;
         return null;
@@ -563,7 +567,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         var builder = PipelineYamlCodecBuilder.of(MenuItemBuilder::new)
                 .field(MenuCodecs.MATERIAL, "material", b -> b.material, (b, m) -> b.material = m, "stone")
                 .string("name", MenuItemBuilder::name, MenuItemBuilder::setName)
-                .field(YamlCodec.STRING.schema(s -> s.or(SchemaTypes.INT)),"amount", MenuItemBuilder::amount, MenuItemBuilder::setAmount, "1")
+                .field(YamlCodec.STRING.schema(s -> s.or(SchemaTypes.INT)), "amount", MenuItemBuilder::amount, MenuItemBuilder::setAmount, "1")
                 .strings("lore", MenuItemBuilder::lore, MenuItemBuilder::setLore, List.of())
                 .field(MenuCodecs.ARGS_CODEC, "args", MenuItemBuilder::args, MenuItemBuilder::setArgs, Map.of())
                 .bool("unbreakable", MenuItemBuilder::unbreakable, MenuItemBuilder::setUnbreakable, false)
@@ -579,8 +583,7 @@ public class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 .field(ItemFactory.SLOTS_YAML_CODEC, "slot", MenuItemBuilder::slots, MenuItemBuilder::setSlots, new int[]{-1})
                 .listOf(MenuCodecs.ENCHANTMENT_YAML_CODEC, "enchantments", MenuItemBuilder::enchantments, MenuItemBuilder::setEnchantments, List.of())
                 .listOf(MenuCodecs.POTION_EFFECT_YAML_CODEC, "potion_effects", MenuItemBuilder::potionEffects, MenuItemBuilder::setPotionEffects, List.of())
-                .field(ViewRequirement.CODEC, "view_requirement", MenuItemBuilder::viewRequirement, MenuItemBuilder::setViewRequirement)
-                ;
+                .field(ViewRequirement.CODEC, "view_requirement", MenuItemBuilder::viewRequirement, MenuItemBuilder::setViewRequirement);
         for (MenuClickType value : MenuClickType.values()) {
             String key = value.getConfigKeyClick();
             builder.field(ClickHandlerImpl.CODEC, key, m -> m.getClickHandlerImplOrNull(value), (m, v) -> m.addClickListener(value, v));

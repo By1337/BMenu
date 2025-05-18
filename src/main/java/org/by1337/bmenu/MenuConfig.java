@@ -7,6 +7,7 @@ import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.command.CommandList;
 import org.by1337.bmenu.requirement.CommandRequirements;
 import org.by1337.bmenu.yaml.CashedYamlContext;
+import org.by1337.bmenu.yaml.CashedYamlMap;
 import org.by1337.bmenu.yaml.RawYamlContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +29,10 @@ public class MenuConfig implements MenuItemLookup {
     private final Map<String, MenuItemBuilder> idToItems;
     @Deprecated
     private final RawYamlContext context;
+    @Deprecated
+    private final CashedYamlContext cashedContext;
     private final YamlMap yamlConfig;
+    private final CashedYamlMap cashedYamlConfig;
     private final MenuLoader loader;
     private final String title;
     private final List<MenuItemBuilder> items;
@@ -36,7 +40,7 @@ public class MenuConfig implements MenuItemLookup {
     private final CommandList commandList;
     private final Map<String, CommandRequirements> menuEventListeners;
     private Object data;
-    private final CashedYamlContext cashedContext;
+
     private final Map<String, Animator.AnimatorContext> animations;
     private final List<File> fromFiles;
 
@@ -50,14 +54,12 @@ public class MenuConfig implements MenuItemLookup {
         this.args = args;
         this.idToItems = idToItems;
         this.context = new RawYamlContext(context);
+        cashedContext = new CashedYamlContext(this.context);
         yamlConfig = context;
-        //this.context = context; //todo
+        cashedYamlConfig = new CashedYamlMap(yamlConfig);
+
         this.animations = new HashMap<>(animations);
         this.fromFiles = fromFiles;
-        //cashedContext = new CashedYamlContext(this.context); //todo
-        cashedContext = null;
-
-
         this.loader = loader;
         this.title = title;
         this.animation = animation;
@@ -153,6 +155,10 @@ public class MenuConfig implements MenuItemLookup {
 
     public YamlMap getYamlConfig() {
         return yamlConfig;
+    }
+
+    public CashedYamlMap getCashedYamlConfig() {
+        return cashedYamlConfig;
     }
 
     public Set<SpacedNameKey> getSupersId() {

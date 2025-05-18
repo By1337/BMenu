@@ -175,7 +175,7 @@ public class Requirements {
 
     private boolean runCommands(List<String> commands, Menu menu, Placeholderable placeholderable) {
         for (String command : commands) {
-            if (command.equals("[BREAK]")) return true;
+            if (command.equals("[BREAK]") || command.equals("[break]")) return true;
             menu.runCommands(List.of(placeholderable.replace(command)));
         }
         return false;

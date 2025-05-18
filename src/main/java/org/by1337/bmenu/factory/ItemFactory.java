@@ -10,8 +10,6 @@ import org.by1337.blib.configuration.YamlContext;
 import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.MenuLoader;
 import org.by1337.bmenu.animation.util.AnimationUtil;
-import org.by1337.bmenu.click.ClickHandlerImpl;
-import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.fixer.ItemFixer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +42,7 @@ public class ItemFactory {
 
     @Deprecated(forRemoval = true)
     public static MenuItemBuilder readItem(YamlContext ctx, MenuLoader loader) {
-        throw new UnsupportedOperationException(); //todo
+        return readItem(MenuFilePostprocessor.fromBLib(ctx.get()).getAsYamlMap());
     }
 
     public static Map<String, MenuItemBuilder> readItems(Map<String, YamlMap> items) {
