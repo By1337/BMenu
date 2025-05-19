@@ -6,34 +6,23 @@ import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
-import org.bukkit.DyeColor;
-import org.bukkit.FireworkEffect;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionEffect;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.MultiPlaceholder;
-import org.by1337.blib.chat.util.Message;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.Pair;
-import org.by1337.blib.util.Version;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.ClickHandlerImpl;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.ItemFactory;
 import org.by1337.bmenu.factory.MenuCodecs;
-import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.requirement.Requirements;
 import org.by1337.bmenu.util.CachedComponent;
-import org.by1337.bmenu.util.ObjectUtil;
+import org.by1337.bmenu.util.ItemStackBuilder;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,13 +48,14 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private int priority = 0;
     private List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     private boolean unbreakable;
-    private int damage;
+    private String damage;
     private Map<String, String> args;
     private boolean ticking;
     private int tickSpeed;
     private boolean staticItem;
     private MenuItem staticInstance;
     private boolean hideTooltip;
+    private ItemStackBuilder itemStackBuilder;
 
     public MenuItemBuilder() {
     }
@@ -93,101 +83,14 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
             menu.runCommands(viewRequirement.denyCommands);
             return null;
         }
+        if (itemStackBuilder == null) itemStackBuilder = new ItemStackBuilder(this);
         if (staticItem && staticInstance != null) return staticInstance;
 
-        ItemStack result;
-        if (itemStack == null) {
-            String tmpMaterial = placeholder.replace(material);
-            result = ItemStackCreator.getItem(tmpMaterial);
-        } else {
-            result = itemStack.clone();
-        }
-        ItemMeta im = result.getItemMeta();
-        if (im == null) {
-            var v = new MenuItem(
-                    slots,
-                    result,
-                    clicks
-            );
-            if (staticItem) {
-                staticInstance = v;
-                staticInstance.setBuilder(() -> staticInstance);
-            }
-            return v;
-        }
-        Message message = menu.loader.getMessage();
-        List<Component> lore = new ArrayList<>(Objects.requireNonNullElseGet(im.lore(), ArrayList::new));
-        for (CachedComponent line : this.lore) {
-            if (line.isCached()) {
-                lore.add(line.getCached());
-            } else {
-                String s1 = placeholder.replace(line.getSource());
-                s1 = s1.replace("\\n", "\n");
-                if (s1.contains("\n")) {
-                    for (String string : s1.split("\n")) {
-                        lore.add(message.componentBuilder(string).decoration(TextDecoration.ITALIC, false));
-                    }
-                } else {
-                    lore.add(message.componentBuilder(s1).decoration(TextDecoration.ITALIC, false));
-                }
-            }
-        }
-        im.lore(lore);
-        if (name.isCached()) {
-            im.displayName(name.getCached());
-        } else {
-            im.displayName(message.componentBuilder(placeholder.replace(name.getSource())).decoration(TextDecoration.ITALIC, false));
-        }
 
-        for (ItemFlag itemFlag : itemFlags)
-            im.addItemFlags(itemFlag);
-
-        for (PotionEffect potionEffect : potionEffects) {
-            if (im instanceof PotionMeta potionMeta) {
-                potionMeta.addCustomEffect(potionEffect, true);
-            } else if (im instanceof Arrow arrow) {
-                arrow.addCustomEffect(potionEffect, true);
-            } else if (im instanceof SuspiciousStewMeta m) {
-                m.addCustomEffect(potionEffect, true);
-            }
-        }
-
-        if (color != null) {
-            if (im instanceof TropicalFishBucketMeta buket) {
-                ObjectUtil.applyIfNotNull(DyeColor.getByColor(color), buket::setBodyColor);
-            } else if (im instanceof PotionMeta pm) {
-                pm.setColor(color);
-            } else if (im instanceof MapMeta map) {
-                map.setColor(color);
-            } else if (im instanceof LeatherArmorMeta m) {
-                m.setColor(color);
-            } else if (im instanceof FireworkEffectMeta effectMeta) {
-                effectMeta.setEffect(FireworkEffect.builder().withColor(color).build());
-            }
-        }
-        for (var pair : enchantments) {
-            im.addEnchant(pair.getLeft(), pair.getRight(), true);
-        }
-        if (modelData != 0) {
-            im.setCustomModelData(modelData);
-        }
-        if (unbreakable) {
-            im.setUnbreakable(true);
-        }
-        if (im instanceof Damageable damageable) {
-            damageable.setDamage(damage);
-        }
-        if (itemFlags.contains(ItemFlag.HIDE_ATTRIBUTES) && Version.is1_20_5orNewer()) {
-            // https://github.com/PaperMC/Paper/issues/10655
-            im.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("123", 1, AttributeModifier.Operation.ADD_NUMBER));
-        }
-
-        result.setItemMeta(im);
-        result.setAmount(Integer.parseInt(placeholder.replace(amount)));
         Supplier<@Nullable MenuItem> builder = () -> build(menu, itemStack, placeholderables);
         MenuItem item = new MenuItem(
                 slots,
-                result,
+                () -> itemStackBuilder.build(itemStack, placeholder, menu.loader.getMessage()),
                 clicks,
                 ticking,
                 builder
@@ -201,6 +104,10 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public void setDamage(int damage) {
+        this.damage = String.valueOf(damage);
+    }
+
+    public void setDamage(String damage) {
         this.damage = damage;
     }
 
@@ -302,7 +209,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
             s = s.replace("\\n", "\n");
             if (s.contains("\n")) {
                 for (String string : s.split("\n")) {
-                    this.lore.add(new CachedComponent("<!italic>".concat(string)));
+                    this.lore.add(new CachedComponent(string));
                 }
             } else {
                 this.lore.add(new CachedComponent(s));
@@ -385,7 +292,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return unbreakable;
     }
 
-    public int getDamage() {
+    public String getDamage() {
         return damage;
     }
 
@@ -486,7 +393,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return unbreakable;
     }
 
-    public int damage() {
+    public String damage() {
         return damage;
     }
 
@@ -520,6 +427,14 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return itemFlags.size() == ItemFlag.values().length;
     }
 
+    public CachedComponent getCashedName() {
+        return name;
+    }
+
+    public List<CachedComponent> getCashedLore() {
+        return lore;
+    }
+
     static {
         var builder = PipelineYamlCodecBuilder.of(MenuItemBuilder::new)
                 .field(MenuCodecs.MATERIAL, "material", b -> b.material, (b, m) -> b.material = m, "stone")
@@ -533,7 +448,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 .bool("all_flags", MenuItemBuilder::isAllItemFlags, MenuItemBuilder::setAllItemFlags, false)
                 .integer("model_data", MenuItemBuilder::modelData, MenuItemBuilder::setModelData, 0)
                 .integer("priority", MenuItemBuilder::priority, MenuItemBuilder::setPriority, 0)
-                .integer("damage", MenuItemBuilder::damage, MenuItemBuilder::setDamage, 0)
+                .string("damage", MenuItemBuilder::damage, MenuItemBuilder::setDamage, null)
                 .integer("tick_speed", MenuItemBuilder::tickSpeed, MenuItemBuilder::setTickSpeed, 1)
                 .field(BukkitYamlCodecs.COLOR, "color", MenuItemBuilder::color, MenuItemBuilder::setColor)
                 .listOf(BukkitYamlCodecs.ITEM_FLAG, "item_flags", MenuItemBuilder::getItemFlags, MenuItemBuilder::setItemFlags, List.of())

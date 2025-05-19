@@ -30,10 +30,13 @@ public class SoundAnimOpcode implements FrameOpcode {
         String string = ctx;
         String[] args = string.split(" ");
         String snd = args[0];
-        if (snd.contains(":")) {
-            sound = Registry.SOUNDS.get(NamespacedKey.fromString(snd));
-        } else {
-            sound = Registry.SOUNDS.get(NamespacedKey.minecraft(snd));
+        try {
+            if (snd.contains(":")) {
+                sound = Registry.SOUNDS.get(NamespacedKey.fromString(snd));
+            } else {
+                sound = Registry.SOUNDS.get(NamespacedKey.minecraft(snd));
+            }
+        }catch (IllegalArgumentException ignore){
         }
         if (sound == null) {
             sound = Sound.valueOf(snd.toUpperCase(Locale.ENGLISH));

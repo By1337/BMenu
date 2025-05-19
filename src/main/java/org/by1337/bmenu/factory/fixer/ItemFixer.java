@@ -28,6 +28,7 @@ public class ItemFixer {
                 hasNoPlaceholders(map.getRaw("name")) &&
                 hasNoPlaceholders(map.getRaw("lore")) &&
                 hasNoPlaceholders(map.getRaw("name")) &&
+                hasNoPlaceholders(map.getRaw("damage")) &&
                 hasNoPlaceholders(map.getRaw("amount"))
         ) {
             map.setRaw("static", true);

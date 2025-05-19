@@ -2,19 +2,28 @@ package org.by1337.bmenu.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.by1337.blib.BLib;
 import org.by1337.bmenu.util.math.MathReplacer;
+import org.jetbrains.annotations.Nullable;
 
 public class CachedComponent {
     private final String source;
     private final Component cached;
+    private final String cachedJson;
 
     public CachedComponent(String source) {
         this.source = source;
         if (canBeCached(source)) {
             cached = BLib.getApi().getMessage().componentBuilder(MathReplacer.safeReplace(source)).decoration(TextDecoration.ITALIC, false);
+            if (BLib.getApi().getUnsafe().getItemStackUtil().isJsonSupport()){
+                cachedJson = GsonComponentSerializer.gson().serializer().toJson(cached);
+            }else {
+                cachedJson = null;
+            }
         } else {
             cached = null;
+            cachedJson = null;
         }
     }
     public boolean isCached(){
@@ -27,6 +36,10 @@ public class CachedComponent {
 
     public Component getCached() {
         return cached;
+    }
+
+    public @Nullable String getCachedJson() {
+        return cachedJson;
     }
 
     private static boolean canBeCached(String s) {

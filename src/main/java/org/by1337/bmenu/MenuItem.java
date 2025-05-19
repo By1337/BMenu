@@ -6,6 +6,7 @@ import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.BiPlaceholder;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
+import org.by1337.bmenu.util.CachedSupplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -14,7 +15,7 @@ import java.util.function.Supplier;
 
 public class MenuItem {
     private int[] slots;
-    private ItemStack itemStack;
+    private CachedSupplier<ItemStack> itemStack;
     private Map<MenuClickType, ClickHandler> clicks = new HashMap<>();
     private @Nullable Placeholderable customPlaceholderable;
     private @Nullable Object data;
@@ -23,9 +24,17 @@ public class MenuItem {
     private int tickSpeed;
     private int tickCount;
 
+    public MenuItem(int[] slots, Supplier<ItemStack> itemStack, Map<MenuClickType, ClickHandler> clicks, boolean ticking, @Nullable Supplier<@Nullable MenuItem> builder) {
+        this.slots = slots;
+        this.itemStack = new CachedSupplier<>(itemStack);
+        this.clicks = clicks;
+        this.ticking = ticking;
+        this.builder = builder;
+    }
+
     public MenuItem(int[] slots, ItemStack itemStack, Map<MenuClickType, ClickHandler> clicks, boolean ticking, @Nullable Supplier<@Nullable MenuItem> builder) {
         this.slots = slots;
-        this.itemStack = itemStack;
+        this.itemStack = new CachedSupplier<>(itemStack);
         this.clicks = clicks;
         this.ticking = ticking;
         this.builder = builder;
@@ -33,13 +42,13 @@ public class MenuItem {
 
     public MenuItem(int[] slots, ItemStack itemStack, Map<MenuClickType, ClickHandler> clicks) {
         this.slots = slots;
-        this.itemStack = itemStack;
+        this.itemStack = new CachedSupplier<>(itemStack);
         this.clicks = clicks;
     }
 
     public MenuItem(int[] slots, ItemStack itemStack) {
         this.slots = slots;
-        this.itemStack = itemStack;
+        this.itemStack = new CachedSupplier<>(itemStack);
     }
 
     public void doClick(Menu menu, Player player, MenuClickType type) {
@@ -85,11 +94,11 @@ public class MenuItem {
     }
 
     public ItemStack getItemStack() {
-        return itemStack;
+        return itemStack.get();
     }
 
     public void setItemStack(ItemStack itemStack) {
-        this.itemStack = itemStack;
+        this.itemStack = new CachedSupplier<>(itemStack);
     }
 
     public Map<MenuClickType, ClickHandler> getClicks() {

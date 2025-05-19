@@ -17,7 +17,7 @@ import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandException;
 import org.by1337.blib.command.StringReader;
 import org.by1337.blib.command.argument.*;
-import org.by1337.blib.geom.Vec3d;
+import org.by1337.blib.inventory.ItemStackUtil;
 import org.by1337.blib.nbt.NBT;
 import org.by1337.blib.nbt.NBTParser;
 import org.by1337.blib.nbt.impl.ListNBT;
@@ -42,6 +42,7 @@ import java.text.ParseException;
 import java.util.*;
 
 public abstract class Menu extends Placeholder implements InventoryHolder {
+    private static final ItemStackUtil UNSAFE_ITEM = BLib.getApi().getUnsafe().getItemStackUtil();
 
     private static final Command<Menu> commands;
     private static final Logger log = LoggerFactory.getLogger("BMenu");
@@ -59,6 +60,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     protected Animator animator;
     protected @Nullable MenuItem lastClickedItem;
     protected long lastClickTime;
+    protected String lastTitle;
 
     public Menu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
         this.config = config;
@@ -128,7 +130,6 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                     1
             );
         });
-
     }
 
     protected void tick() {
@@ -196,7 +197,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         config.generate(this);
         generate();
         onEvent(MenuEvents.ON_REFRESH);
-        sendFakeTitle(config.getTitle());
+        updateTitle();
         inventory.clear();
         flush();
     }
@@ -208,6 +209,10 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     protected void flush() {
         setMatrix(matrix);
         setMatrix(animationMask);
+        syncItems();
+    }
+
+    protected void syncItems() {
         BLib.getApi().getInventoryUtil().flushInv(viewer);
     }
 
@@ -215,7 +220,8 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         for (int i = 0; i < mask.length; i++) {
             MenuItem item = mask[i];
             if (item != null) {
-                inventory.setItem(i, item.getItemStack());
+                UNSAFE_ITEM.setStemStackWithoutCopy(inventory, item.getItemStack(), i);
+                //inventory.setItem(i, item.getItemStack());
             }
         }
     }
@@ -264,7 +270,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     public void runCommands(List<String> commands) {
         for (String command : commands) {
             String replaced = replace(command);
-         //   log.info("[{}] run command '{}'", config.getId(), replaced);
+            //   log.info("[{}] run command '{}'", config.getId(), replaced);
             try {
                 if (!runCommand(replaced)) {
                     Menu.commands.process(this, new StringReader(replaced));
@@ -306,12 +312,12 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     }
 
     @Nullable
-    protected MenuItem findItemInSlot(int slot) {
+    public MenuItem findItemInSlot(int slot) {
         MenuItem item = findItemInSlot(slot, animationMask);
         return item == null ? findItemInSlot(slot, matrix) : item;
     }
 
-    protected MenuItem findItemInSlot(int slot, MenuItem[] matrix) {
+    public MenuItem findItemInSlot(int slot, MenuItem[] matrix) {
         if (slot >= matrix.length || slot < 0) return null;
         return matrix[slot];
     }
@@ -326,8 +332,16 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         else runnable.run();
     }
 
-    protected void sendFakeTitle(String title) {
+    public void sendFakeTitle(String title) {
         BLib.getApi().getInventoryUtil().sendFakeTitle(inventory, loader.getMessage().componentBuilder(replace(title)));
+    }
+
+    public void updateTitle(){
+        String newTitle = replace(config.getTitle());
+        if (!Objects.equals(lastTitle, newTitle)){
+            lastTitle = newTitle;
+            BLib.getApi().getInventoryUtil().sendFakeTitle(inventory, loader.getMessage().componentBuilder(newTitle));
+        }
     }
 
     public void setTitle(String title) {

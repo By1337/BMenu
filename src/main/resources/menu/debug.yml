@@ -5,7 +5,8 @@ size: 54
 title: '&7Debug Menu'
 
 args:
-  REBUILD_TEST: "123"
+  REBUILD_TEST: 0
+  DAMAGE_TEST: 0
   TEST:
     - 122
 
@@ -82,3 +83,28 @@ items:
         - '[set_param] REBUILD_TEST math[${REBUILD_TEST} + 1]'
         - '[rebuild_slots] 5'
         - '[flush]'
+
+  damage-test:
+    slot: 6
+    material: diamond_pickaxe
+    name: "&7Damage test"
+    damage: "${DAMAGE_TEST}"
+    lore:
+      - '&r '
+      - '&7 test ${DAMAGE_TEST}'
+      - '&r '
+    on_click:
+      commands:
+        - '[set_param] DAMAGE_TEST math[${DAMAGE_TEST} + 20]'
+        - '[rebuild_slots] 6,7'
+        - '[flush]'
+
+  damage-test2:
+    slot: 7
+    material: diamond_pickaxe
+    name: "&7Damage test"
+    damage: "${DAMAGE_TEST}"
+    lore:
+      - '&r '
+      - '&7 test'
+      - '&r '

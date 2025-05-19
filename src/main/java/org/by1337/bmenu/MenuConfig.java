@@ -104,8 +104,22 @@ public class MenuConfig implements MenuItemLookup {
         for (MenuConfig superMenu : supers) {
             superMenu.generate(menu);
         }
-        var currentItems = items.stream().filter(m -> m.slots().length != 0).map(m -> m.build(menu)).filter(Objects::nonNull).toList();
-        menu.setItems(currentItems);
+        MenuItem[] matrix = menu.matrix;
+        MenuItem[] animationMask = menu.animationMask;
+        int invSize = menu.matrix.length;
+
+        for (MenuItemBuilder builder : items) {
+            MenuItem menuItem = null;
+            var slots = builder.slots();
+            for (int slot : slots) {
+                if (slot < 0 || slot >= invSize) continue;
+                if (menuItem == null) {
+                    menuItem = builder.build(menu);
+                    if (menuItem == null) break;
+                }
+                matrix[slot] = menuItem;
+            }
+        }
     }
 
     @Override
