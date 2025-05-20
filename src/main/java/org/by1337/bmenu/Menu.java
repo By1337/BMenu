@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.text.ParseException;
 import java.util.*;
 
-public abstract class Menu extends Placeholder implements InventoryHolder {
+public abstract class Menu extends Placeholder implements InventoryHolder, CommandRunner {
     private static final ItemStackUtil UNSAFE_ITEM = BLib.getApi().getUnsafe().getItemStackUtil();
 
     private static final Command<Menu> commands;
@@ -61,18 +61,25 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     protected @Nullable MenuItem lastClickedItem;
     protected long lastClickTime;
     protected String lastTitle;
+    protected final List<MenuItem[]> externalLayers;
 
     public Menu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
         this.config = config;
         loader = config.getLoader();
         this.viewer = viewer;
-        matrix = new MenuItem[config.getSize()];
-        animationMask = new MenuItem[config.getSize()];
+        matrix = newMatrix();
+        animationMask = newMatrix();
         args = new HashMap<>(config.getArgs());
         this.previousMenu = previousMenu;
         registerPlaceholders(RandomPlaceholders.getInstance());
         args.keySet().forEach(k -> registerPlaceholder("${" + k + "}", () -> args.get(k)));
         registerPlaceholder("{has_back_menu}", () -> String.valueOf(previousMenu != null));
+        externalLayers = new ArrayList<>();
+    }
+
+    public MenuItem[] newMatrix() {
+        if (config.getInvType() == InventoryType.CHEST) return new MenuItem[config.getSize()];
+        return new MenuItem[config.getInvType().getDefaultSize()];
     }
 
     public void open() {
@@ -139,15 +146,20 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         }
         doItemTick(matrix);
         doItemTick(animationMask);
+        for (MenuItem[] externalLayer : externalLayers) {
+            doItemTick(externalLayer);
+        }
         flush();
     }
 
+    private final Map<MenuItem, @Nullable MenuItem> cache = new IdentityHashMap<>();
+
     private void doItemTick(MenuItem[] matrix) {
-        Map<MenuItem, MenuItem> cache = new IdentityHashMap<>();
+        cache.clear();
         for (int i = 0; i < matrix.length; i++) {
             MenuItem item = matrix[i];
-            if (item != null && item.isTicking() && item.getBuilder() != null) {
-                item.doTick();
+            if (item != null && item.isTicking()) {
+                item.doTick(this);
                 if (item.shouldBeRebuild()) {
                     matrix[i] = cache.computeIfAbsent(item, k -> k.getBuilder().get());
                 }
@@ -169,7 +181,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         Map<MenuItem, MenuItem> cache = new IdentityHashMap<>();
         for (int i = 0; i < animationMask.length; i++) {
             MenuItem item = animationMask[i];
-            if (item == null || item.getBuilder() == null) continue;
+            if (item == null) continue;
             animationMask[i] = cache.computeIfAbsent(item, k -> k.getBuilder().get());
         }
         generate0();
@@ -179,13 +191,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         for (int slot : slots) {
             MenuItem item;
             if ((item = animationMask[slot]) != null) {
-                if (item.getBuilder() != null) {
-                    animationMask[slot] = item.getBuilder().get();
-                }
+                animationMask[slot] = item.getBuilder().get();
             } else if ((item = matrix[slot]) != null) {
-                if (item.getBuilder() != null) {
-                    matrix[slot] = item.getBuilder().get();
-                }
+                matrix[slot] = item.getBuilder().get();
             }
         }
     }
@@ -209,6 +217,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
     protected void flush() {
         setMatrix(matrix);
         setMatrix(animationMask);
+        for (MenuItem[] externalLayer : externalLayers) {
+            setMatrix(externalLayer);
+        }
         syncItems();
     }
 
@@ -267,17 +278,22 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     protected abstract boolean runCommand(String cmd) throws CommandException;
 
+    @Override
     public void runCommands(List<String> commands) {
         for (String command : commands) {
-            String replaced = replace(command);
-            //   log.info("[{}] run command '{}'", config.getId(), replaced);
-            try {
-                if (!runCommand(replaced)) {
-                    Menu.commands.process(this, new StringReader(replaced));
-                }
-            } catch (CommandException e) {
-                loader.getLogger().error("Failed to run command: {}", replaced, e);
+            executeCommand(command);
+        }
+    }
+
+    @Override
+    public final void executeCommand(String command) {
+        String replaced = replace(command);
+        try {
+            if (!runCommand(replaced)) {
+                Menu.commands.process(this, new StringReader(replaced));
             }
+        } catch (CommandException e) {
+            loader.getLogger().error("Failed to run command: {}", replaced, e);
         }
     }
 
@@ -313,6 +329,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
 
     @Nullable
     public MenuItem findItemInSlot(int slot) {
+        for (int i = externalLayers.size() - 1; i >= 0; i--) {
+            var matrix = externalLayers.get(i);
+            MenuItem item = findItemInSlot(slot, matrix);
+            if (item != null) return item;
+        }
         MenuItem item = findItemInSlot(slot, animationMask);
         return item == null ? findItemInSlot(slot, matrix) : item;
     }
@@ -336,9 +357,9 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         BLib.getApi().getInventoryUtil().sendFakeTitle(inventory, loader.getMessage().componentBuilder(replace(title)));
     }
 
-    public void updateTitle(){
+    public void updateTitle() {
         String newTitle = replace(config.getTitle());
-        if (!Objects.equals(lastTitle, newTitle)){
+        if (!Objects.equals(lastTitle, newTitle)) {
             lastTitle = newTitle;
             BLib.getApi().getInventoryUtil().sendFakeTitle(inventory, loader.getMessage().componentBuilder(newTitle));
         }
@@ -425,6 +446,16 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
         }
     }
 
+    public List<MenuItem[]> getExternalLayers() {
+        return externalLayers;
+    }
+
+    public MenuItem[] getOrCreateExternalLayer(int index) {
+        while (externalLayers.size() <= index) {
+            externalLayers.add(newMatrix());
+        }
+        return externalLayers.get(index);
+    }
 
     @Override
     public String toString() {
@@ -863,6 +894,41 @@ public abstract class Menu extends Placeholder implements InventoryHolder {
                 .executor((v, args) -> {
                     int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [REBUILD_SLOTS] <slots>"));
                     v.rebuildItemsInSlots(src);
+                })
+
+        );
+        commands.addSubCommand(new Command<Menu>("[set_item_to_layer]")
+                .aliases("[SET_ITEM_TO_LAYER]")
+                .argument(new ArgumentString<>("slots"))
+                .argument(new ArgumentInteger<>("layer"))
+                .argument(new ArgumentString<>("item"))
+                .executor((v, args) -> {
+                    int[] slots = AnimationUtil.readSlots((String) args.getOrThrow("slots", "Use: [set_item_to] <slots> <layer> <item>"));
+                    String item = (String) args.getOrThrow("item", "Use: [set_item_to] <slot> <layer> <item>");
+                    int layer = (int) args.getOrThrow("layer", "Use: [set_item_to] <slot> <layer> <item>");
+                    ;
+                    MenuItemBuilder builder = v.getConfig().findMenuItem(v.replace(item), v);
+                    MenuItem menuItem;
+                    if (builder == null) {
+                        menuItem = new MenuItem(slots, ItemStackCreator.getItem(v.replace(item)));
+                    } else {
+                        menuItem = builder.build(v);
+                    }
+                    if (menuItem != null) {
+                        menuItem.setSlots(slots);
+                        var matrix = v.getOrCreateExternalLayer(layer);
+                        v.setItem(menuItem, matrix);
+                    }
+                })
+
+        );
+        commands.addSubCommand(new Command<Menu>("[clear_layer]")
+                .aliases("[CLEAR_LAYER]")
+                .argument(new ArgumentInteger<>("layer"))
+                .executor((v, args) -> {
+                    int layer = (int) args.getOrThrow("layer", "Use: [clear_layer] <layer>");
+                    var matrix = v.getOrCreateExternalLayer(layer);
+                    Arrays.fill(matrix, null);
                 })
 
         );

@@ -5,6 +5,7 @@ import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.Color;
 import org.bukkit.enchantments.Enchantment;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.by1337.blib.chat.Placeholderable;
+import org.by1337.blib.chat.placeholder.BiPlaceholder;
 import org.by1337.blib.chat.placeholder.MultiPlaceholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.Pair;
@@ -20,6 +22,7 @@ import org.by1337.bmenu.click.ClickHandlerImpl;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.ItemFactory;
 import org.by1337.bmenu.factory.MenuCodecs;
+import org.by1337.bmenu.item.MenuItemTickListener;
 import org.by1337.bmenu.requirement.Requirements;
 import org.by1337.bmenu.util.CachedComponent;
 import org.by1337.bmenu.util.ItemStackBuilder;
@@ -29,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
@@ -50,10 +54,10 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private boolean unbreakable;
     private String damage;
     private Map<String, String> args;
-    private boolean ticking;
+    private MenuItemTickListener tickListener;
     private int tickSpeed;
     private boolean staticItem;
-    private MenuItem staticInstance;
+    private ItemStack staticInstance;
     private boolean hideTooltip;
     private ItemStackBuilder itemStackBuilder;
 
@@ -84,22 +88,21 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
             return null;
         }
         if (itemStackBuilder == null) itemStackBuilder = new ItemStackBuilder(this);
-        if (staticItem && staticInstance != null) return staticInstance;
 
+
+        if (staticItem) {
+            staticInstance = itemStackBuilder.build(itemStack, menu.loader.getMessage(), placeholder);
+        }
 
         Supplier<@Nullable MenuItem> builder = () -> build(menu, itemStack, placeholderables);
         MenuItem item = new MenuItem(
                 slots,
-                () -> itemStackBuilder.build(itemStack, placeholder, menu.loader.getMessage()),
+                (t) -> staticInstance != null ? staticInstance : itemStackBuilder.build(itemStack, menu.loader.getMessage(), new BiPlaceholder(placeholder, t)),
                 clicks,
-                ticking,
+                tickListener,
                 builder
         );
         item.setTickSpeed(tickSpeed);
-        if (staticItem) {
-            staticInstance = item;
-            staticInstance.setBuilder(() -> staticInstance);
-        }
         return item;
     }
 
@@ -225,8 +228,9 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         this.slots = slots;
     }
 
+    @Deprecated(forRemoval = true)
     public void setTicking(boolean ticking) {
-        this.ticking = ticking;
+        if (ticking && tickListener != null) tickListener = MenuItemTickListener.DEFAULT;
     }
 
     public void setTickSpeed(int tickSpeed) {
@@ -296,8 +300,9 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return damage;
     }
 
+    @Deprecated(forRemoval = true)
     public boolean isTicking() {
-        return ticking;
+        return tickListener != null;
     }
 
     public boolean isStaticItem() {
@@ -401,8 +406,9 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return args;
     }
 
+    @Deprecated(forRemoval = true)
     public boolean ticking() {
-        return ticking;
+        return isTicking();
     }
 
     public int tickSpeed() {
@@ -435,6 +441,14 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return lore;
     }
 
+    public MenuItemTickListener getTickListener() {
+        return tickListener;
+    }
+
+    public void setTickListener(MenuItemTickListener tickListener) {
+        this.tickListener = tickListener;
+    }
+
     static {
         var builder = PipelineYamlCodecBuilder.of(MenuItemBuilder::new)
                 .field(MenuCodecs.MATERIAL, "material", b -> b.material, (b, m) -> b.material = m, "stone")
@@ -443,13 +457,14 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 .strings("lore", MenuItemBuilder::lore, MenuItemBuilder::setLore, List.of())
                 .field(MenuCodecs.ARGS_CODEC, "args", MenuItemBuilder::args, MenuItemBuilder::setArgs, Map.of())
                 .bool("unbreakable", MenuItemBuilder::unbreakable, MenuItemBuilder::setUnbreakable, false)
-                .bool("ticking", MenuItemBuilder::ticking, MenuItemBuilder::setTicking, false)
+                //.bool("ticking", MenuItemBuilder::ticking, MenuItemBuilder::setTicking, false)
+                .field(MenuItemTickListener.CODEC, "on_tick", MenuItemBuilder::getTickListener, MenuItemBuilder::setTickListener)
                 .bool("static", MenuItemBuilder::isStaticItem, MenuItemBuilder::setStaticItem, false)
                 .bool("all_flags", MenuItemBuilder::isAllItemFlags, MenuItemBuilder::setAllItemFlags, false)
                 .integer("model_data", MenuItemBuilder::modelData, MenuItemBuilder::setModelData, 0)
                 .integer("priority", MenuItemBuilder::priority, MenuItemBuilder::setPriority, 0)
                 .string("damage", MenuItemBuilder::damage, MenuItemBuilder::setDamage, null)
-                .integer("tick_speed", MenuItemBuilder::tickSpeed, MenuItemBuilder::setTickSpeed, 1)
+                .field(YamlCodec.INT.schema(s -> s.or(SchemaTypes.pattern("^\\$\\{[^}]+\\}$"))), "tick_speed", MenuItemBuilder::tickSpeed, MenuItemBuilder::setTickSpeed, 1)
                 .field(BukkitYamlCodecs.COLOR, "color", MenuItemBuilder::color, MenuItemBuilder::setColor)
                 .listOf(BukkitYamlCodecs.ITEM_FLAG, "item_flags", MenuItemBuilder::getItemFlags, MenuItemBuilder::setItemFlags, List.of())
                 .field(ItemFactory.SLOTS_YAML_CODEC, "slot", MenuItemBuilder::slots, MenuItemBuilder::setSlots, new int[]{-1})

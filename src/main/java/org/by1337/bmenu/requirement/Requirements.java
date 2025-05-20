@@ -7,6 +7,7 @@ import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
+import org.by1337.bmenu.CommandRunner;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.factory.RequirementsFactory;
@@ -153,16 +154,20 @@ public class Requirements {
 
 
     public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
+        return test(menu, placeholderable, clicker, menu);
+    }
+
+    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker, CommandRunner commandRunner) {
         boolean result = true;
         for (Requirement requirement : requirements) {
             try {
                 if (!requirement.test(menu, placeholderable, clicker)) {
-                    if (runCommands(requirement.getDenyCommands(), menu, placeholderable)){
+                    if (runCommands(requirement.getDenyCommands(), placeholderable, commandRunner)){
                         return false;
                     }
                     result = false;
                 } else {
-                    if (runCommands(requirement.getCommands(), menu, placeholderable)) {
+                    if (runCommands(requirement.getCommands(), placeholderable, commandRunner)) {
                         return true;
                     }
                 }
@@ -173,10 +178,10 @@ public class Requirements {
         return result;
     }
 
-    private boolean runCommands(List<String> commands, Menu menu, Placeholderable placeholderable) {
+    private boolean runCommands(List<String> commands, Placeholderable placeholderable, CommandRunner commandRunner) {
         for (String command : commands) {
             if (command.equals("[BREAK]") || command.equals("[break]")) return true;
-            menu.runCommands(List.of(placeholderable.replace(command)));
+            commandRunner.executeCommand(placeholderable.replace(command));
         }
         return false;
     }

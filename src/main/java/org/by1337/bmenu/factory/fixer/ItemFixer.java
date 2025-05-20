@@ -5,12 +5,14 @@ import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.bmenu.factory.MenuFilePostprocessor;
+import org.by1337.bmenu.item.MenuItemTickListener;
 import org.by1337.bmenu.util.math.MathReplacer;
 
 import java.util.*;
 
 public class ItemFixer {
     public static final String STATIC_LORE_TAG = "<static>";
+    private static final YamlValue REPLACE_TICKING = MenuItemTickListener.CODEC.encode(MenuItemTickListener.DEFAULT);
 
     public static void fixItem(YamlMap map) {
         if (map.has("$fixed")) return;
@@ -33,6 +35,15 @@ public class ItemFixer {
         ) {
             map.setRaw("static", true);
             map.setRaw("$synthetic-static", true);
+        }
+        if (Objects.equals(map.getRaw("ticking"), true)) {
+            if (map.has("on_tick")) {
+                map.setRaw("$fixed-ticking", false);
+                map.setRaw("$fixed-ticking-failed", "item already has on_tick!");
+            } else {
+                map.setRaw("$fixed-ticking", true);
+                map.set("on_tick", REPLACE_TICKING);
+            }
         }
     }
 

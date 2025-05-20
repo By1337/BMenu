@@ -50,7 +50,7 @@ public class ItemStackBuilder {
         }
     }
 
-    public ItemStack build(@Nullable ItemStack i, Placeholderable placeholderable, Message message) {
+    public ItemStack build(@Nullable ItemStack i, Message message, Placeholderable placeholderable) {
         if (i == null && fullCached) return UNSAFE_ITEM.asBukkitMirror(cached);
         Object itemStack;
         if (i != null) {

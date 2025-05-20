@@ -1,54 +1,65 @@
 package org.by1337.bmenu;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.BiPlaceholder;
+import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
+import org.by1337.bmenu.item.MenuItemTickListener;
 import org.by1337.bmenu.util.CachedSupplier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class MenuItem {
+public class MenuItem extends Placeholder {
     private int[] slots;
-    private CachedSupplier<ItemStack> itemStack;
-    private Map<MenuClickType, ClickHandler> clicks = new HashMap<>();
+    private CachedSupplier<MenuItem, ItemStack> itemStack;
+    private Map<MenuClickType, ClickHandler> clicks;
     private @Nullable Placeholderable customPlaceholderable;
     private @Nullable Object data;
-    private boolean ticking;
-    private @Nullable Supplier<@Nullable MenuItem> builder;
+    private @Nullable MenuItemTickListener tickListener;
+    private @NotNull Supplier<@Nullable MenuItem> builder;
     private int tickSpeed;
-    private int tickCount;
+    private int ticks;
+    private boolean doRebuild = false;
+    private boolean die = false;
+    private boolean recreate = false;
 
-    public MenuItem(int[] slots, Supplier<ItemStack> itemStack, Map<MenuClickType, ClickHandler> clicks, boolean ticking, @Nullable Supplier<@Nullable MenuItem> builder) {
+    public MenuItem(int[] slots, Function<MenuItem, ItemStack> itemStack, Map<MenuClickType, ClickHandler> clicks, @Nullable MenuItemTickListener tickListener, @Nullable Supplier<@Nullable MenuItem> builder) {
         this.slots = slots;
         this.itemStack = new CachedSupplier<>(itemStack);
         this.clicks = clicks;
-        this.ticking = ticking;
-        this.builder = builder;
+        this.tickListener = tickListener;
+        this.builder = Objects.requireNonNullElse(builder, () -> this);
+        registerPlaceholder("{tick}", () -> ticks / tickSpeed);
+        customPlaceholderable = this;
     }
 
     public MenuItem(int[] slots, ItemStack itemStack, Map<MenuClickType, ClickHandler> clicks, boolean ticking, @Nullable Supplier<@Nullable MenuItem> builder) {
-        this.slots = slots;
-        this.itemStack = new CachedSupplier<>(itemStack);
-        this.clicks = clicks;
-        this.ticking = ticking;
-        this.builder = builder;
+        this(
+                slots,
+                t -> itemStack,
+                clicks,
+                ticking ? MenuItemTickListener.DEFAULT : null,
+                builder
+        );
     }
 
     public MenuItem(int[] slots, ItemStack itemStack, Map<MenuClickType, ClickHandler> clicks) {
-        this.slots = slots;
-        this.itemStack = new CachedSupplier<>(itemStack);
-        this.clicks = clicks;
+        this(slots, itemStack, clicks, false, () -> null);
     }
 
     public MenuItem(int[] slots, ItemStack itemStack) {
-        this.slots = slots;
-        this.itemStack = new CachedSupplier<>(itemStack);
+        this(slots, itemStack, Map.of());
     }
 
     public void doClick(Menu menu, Player player, MenuClickType type) {
@@ -69,20 +80,23 @@ public class MenuItem {
         }
     }
 
-    public @Nullable Supplier<@Nullable MenuItem> getBuilder() {
+    public @NotNull Supplier<@Nullable MenuItem> getBuilder() {
         return builder;
     }
 
     public void setBuilder(@Nullable Supplier<@Nullable MenuItem> builder) {
-        this.builder = builder;
+        this.builder = Objects.requireNonNullElse(builder, () -> this);
     }
 
     public boolean isTicking() {
-        return ticking;
+        return tickListener != null;
     }
 
+    @Deprecated(forRemoval = true)
     public void setTicking(boolean ticking) {
-        this.ticking = ticking;
+        if (tickListener == null && ticking) {
+            tickListener = MenuItemTickListener.DEFAULT;
+        }
     }
 
     public int[] getSlots() {
@@ -94,7 +108,7 @@ public class MenuItem {
     }
 
     public ItemStack getItemStack() {
-        return itemStack.get();
+        return itemStack.apply(this);
     }
 
     public void setItemStack(ItemStack itemStack) {
@@ -102,15 +116,11 @@ public class MenuItem {
     }
 
     public Map<MenuClickType, ClickHandler> getClicks() {
-        return clicks;
+        return Collections.unmodifiableMap(clicks);
     }
 
     public void setClicks(Map<MenuClickType, ClickHandler> clicks) {
         this.clicks = clicks;
-    }
-
-    public Placeholderable getCustomPlaceholderable() {
-        return customPlaceholderable;
     }
 
     public @Nullable Object getData() {
@@ -122,13 +132,23 @@ public class MenuItem {
     }
 
     public void setCustomPlaceholderable(@Nullable Placeholderable customPlaceholderable) {
-        this.customPlaceholderable = customPlaceholderable;
+        if (customPlaceholderable == null)
+            this.customPlaceholderable = this;
+        else this.customPlaceholderable = new BiPlaceholder(this, customPlaceholderable);
     }
-    public void doTick(){
-        tickCount++;
+
+    @Deprecated(forRemoval = true)
+    public void doTick() {
     }
-    public boolean shouldBeRebuild(){
-        return tickCount > tickSpeed;
+
+    public void doTick(Menu menu) {
+        if (tickListener != null && ++ticks % tickSpeed == 0) {
+            tickListener.tick(this, menu, ticks / tickSpeed);
+        }
+    }
+
+    public boolean shouldBeRebuild() {
+        return doRebuild || die;
     }
 
     public int getTickSpeed() {
@@ -137,5 +157,19 @@ public class MenuItem {
 
     public void setTickSpeed(int tickSpeed) {
         this.tickSpeed = tickSpeed;
+    }
+
+    public void doRebuild() {
+        doRebuild = true;
+    }
+
+
+    public void die() {
+        die = true;
+        builder = () -> null;
+    }
+
+    public void invalidateCash() {
+        itemStack.invalidateCash();
     }
 }

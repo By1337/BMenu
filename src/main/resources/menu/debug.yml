@@ -10,6 +10,9 @@ args:
   TEST:
     - 122
 
+menu-events:
+  on_refresh:
+    commands: '[clear_layer] 0'
 
 items-custom-section: # schema support
   one-line-lore:
@@ -108,3 +111,56 @@ items:
       - '&r '
       - '&7 test'
       - '&r '
+
+  ticking-test:
+    slot: 8
+    ticking: true
+    material: netherite_pickaxe
+    tick_speed: 5
+    name: "&7Damage test"
+    damage: "${DAMAGE_TEST}"
+    lore:
+      - '&r '
+      - '&7 damage is ${DAMAGE_TEST}'
+      - '&r '
+
+  damager-click:
+    material: bedrock
+    slot: 9
+    name: "&aДамагер тест"
+    on_click:
+      commands:
+        - '[set_item_to_layer] 9 0 damager'
+        - '[flush]'
+
+  click_me:
+    material: knowledge_book
+    slot: 20
+    name: "&aНажми меня!"
+    on_click:
+      commands:
+        - '[set_item_to_layer] 20 0 banned-item'
+        - '[flush]'
+
+  banned-item:
+    args:
+      TIME: '5' # 5 секунд
+    material: barrier
+    name: '&cКд math[${TIME} - {tick}] сек...'
+    tick_speed: 20
+    on_tick:
+      requirements:
+        - check: '{tick} == ${TIME}'
+          commands: '[die]'
+      deny_commands: '[update]'
+
+  damager:
+    material: diamond_pickaxe
+    name: '&7Дамагер'
+    tick_speed: 1
+    damage: 'math[{tick} * 16]'
+    on_tick:
+      requirements:
+        - check: '{tick} == 97'
+          commands: '[die]'
+      deny_commands: '[update]'
