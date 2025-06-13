@@ -17,7 +17,7 @@ import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandException;
 import org.by1337.blib.command.StringReader;
 import org.by1337.blib.command.argument.*;
-import org.by1337.blib.inventory.ItemStackUtil;
+import org.by1337.blib.inventory.InventoryUtil;
 import org.by1337.blib.nbt.NBT;
 import org.by1337.blib.nbt.NBTParser;
 import org.by1337.blib.nbt.impl.ListNBT;
@@ -42,8 +42,7 @@ import java.text.ParseException;
 import java.util.*;
 
 public abstract class Menu extends Placeholder implements InventoryHolder, CommandRunner {
-    private static final ItemStackUtil UNSAFE_ITEM = BLib.getApi().getUnsafe().getItemStackUtil();
-
+    private static InventoryUtil INV_UTIL = BLib.getApi().getInventoryUtil();
     private static final Command<Menu> commands;
     private static final Logger log = LoggerFactory.getLogger("BMenu");
 
@@ -62,6 +61,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
     protected long lastClickTime;
     protected String lastTitle;
     protected final List<MenuItem[]> externalLayers;
+    protected int lastClickedSlot = 0;
 
     public Menu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
         this.config = config;
@@ -74,6 +74,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
         registerPlaceholders(RandomPlaceholders.getInstance());
         args.keySet().forEach(k -> registerPlaceholder("${" + k + "}", () -> args.get(k)));
         registerPlaceholder("{has_back_menu}", () -> String.valueOf(previousMenu != null));
+        registerPlaceholder("{clicked_slot}", () -> lastClickedSlot);
         externalLayers = new ArrayList<>();
     }
 
@@ -111,7 +112,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
             // Отключаем автоматическую синхронизацию инвентаря с клиентом,
             // так как сервер может периодически отправлять обновления,
             // что может нарушить отображение анимаций.
-            BLib.getApi().getInventoryUtil().disableAutoFlush(viewer);
+            INV_UTIL.disableAutoFlush(viewer);
 
             onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
             if (animator == null && config.getAnimation() != null) {
@@ -149,6 +150,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
         for (MenuItem[] externalLayer : externalLayers) {
             doItemTick(externalLayer);
         }
+        inventory.clear();
         flush();
     }
 
@@ -158,10 +160,16 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
         cache.clear();
         for (int i = 0; i < matrix.length; i++) {
             MenuItem item = matrix[i];
-            if (item != null && item.isTicking()) {
-                item.doTick(this);
-                if (item.shouldBeRebuild()) {
-                    matrix[i] = cache.computeIfAbsent(item, k -> k.getBuilder().get());
+            if (item != null && (item.isTicking() || item.shouldBeRebuild())) {
+                if (cache.containsKey(item)) {
+                    matrix[i] = cache.get(item);
+                } else {
+                    item.doTick(this);
+                    if (item.shouldBeRebuild()) {
+                        matrix[i] = cache.computeIfAbsent(item, k -> k.getBuilder().get());
+                    } else {
+                        cache.put(item, item);
+                    }
                 }
             }
         }
@@ -224,14 +232,14 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
     }
 
     protected void syncItems() {
-        BLib.getApi().getInventoryUtil().flushInv(viewer);
+        INV_UTIL.flushInv(viewer);
     }
 
     protected void setMatrix(MenuItem[] mask) {
         for (int i = 0; i < mask.length; i++) {
             MenuItem item = mask[i];
             if (item != null) {
-                UNSAFE_ITEM.setStemStackWithoutCopy(inventory, item.getItemStack(), i);
+                INV_UTIL.setItemStackWithoutCopy(inventory, item.getItemStack(), i);
                 //inventory.setItem(i, item.getItemStack());
             }
         }
@@ -281,19 +289,18 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
     @Override
     public void runCommands(List<String> commands) {
         for (String command : commands) {
-            executeCommand(command);
+            executeCommand(replace(command));
         }
     }
 
     @Override
     public final void executeCommand(String command) {
-        String replaced = replace(command);
         try {
-            if (!runCommand(replaced)) {
-                Menu.commands.process(this, new StringReader(replaced));
+            if (!runCommand(command)) {
+                Menu.commands.process(this, new StringReader(command));
             }
         } catch (CommandException e) {
-            loader.getLogger().error("Failed to run command: {}", replaced, e);
+            loader.getLogger().error("Failed to run command: {}", command, e);
         }
     }
 
@@ -305,7 +312,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
         // Восстанавливаем автоматическую синхронизацию инвентаря с клиентом,
         // так как пользователь закрыл кастомное меню, и ответственность за обновление
         // инвентаря теперь возвращается серверу.
-        BLib.getApi().getInventoryUtil().enableAutoFlush(viewer);
+        INV_UTIL.enableAutoFlush(viewer);
 
         onEvent(MenuEvents.ON_CLOSE);
     }
@@ -320,6 +327,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
             return;
         }
         if (!Objects.equals(inventory, e.getClickedInventory())) return;
+        lastClickedSlot = e.getSlot();
         MenuItem item = findItemInSlot(e.getSlot());
         if (item == null) return;
         lastClickedItem = item;
@@ -354,14 +362,14 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
     }
 
     public void sendFakeTitle(String title) {
-        BLib.getApi().getInventoryUtil().sendFakeTitle(inventory, loader.getMessage().componentBuilder(replace(title)));
+        INV_UTIL.sendFakeTitle(inventory, loader.getMessage().componentBuilder(replace(title)));
     }
 
     public void updateTitle() {
         String newTitle = replace(config.getTitle());
         if (!Objects.equals(lastTitle, newTitle)) {
             lastTitle = newTitle;
-            BLib.getApi().getInventoryUtil().sendFakeTitle(inventory, loader.getMessage().componentBuilder(newTitle));
+            INV_UTIL.sendFakeTitle(inventory, loader.getMessage().componentBuilder(newTitle));
         }
     }
 
@@ -483,6 +491,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
                 loader.getLogger().error("Failed to parse commands {}", rawNBT, t);
             }
         }
+    }
+
+    @ApiStatus.Internal
+    public static Command<Menu> getCommands() {
+        return commands;
     }
 
     static {
@@ -839,27 +852,6 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[SET_ITEM]")
-                .aliases("[set_item]")
-                .argument(new ArgumentString<>("slots"))
-                .argument(new ArgumentString<>("item"))
-                .executor((v, args) -> {
-                            int[] slots = AnimationUtil.readSlots((String) args.getOrThrow("slots", "Use: [SET_ITEM] <slots> <item>"));
-                            String item = (String) args.getOrThrow("item", "Use: [SET_ITEM] <slot> <item>");
-                            MenuItemBuilder builder = v.getConfig().findMenuItem(v.replace(item), v);
-                            MenuItem menuItem;
-                            if (builder == null) {
-                                menuItem = new MenuItem(slots, ItemStackCreator.getItem(v.replace(item)));
-                            } else {
-                                menuItem = builder.build(v);
-                            }
-                            if (menuItem != null) {
-                                menuItem.setSlots(slots);
-                                v.setItem(menuItem, v.animationMask);
-                            }
-                        }
-                )
-        );
         commands.addSubCommand(new Command<Menu>("[COPY_FROM_PREVIOUS_MENU]")
                 .aliases("[copy_from_previous_menu]")
                 .argument(new ArgumentString<>("src"))
@@ -907,10 +899,10 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
                     String item = (String) args.getOrThrow("item", "Use: [set_item_to] <slot> <layer> <item>");
                     int layer = (int) args.getOrThrow("layer", "Use: [set_item_to] <slot> <layer> <item>");
                     ;
-                    MenuItemBuilder builder = v.getConfig().findMenuItem(v.replace(item), v);
+                    MenuItemBuilder builder = v.getConfig().findMenuItem(item, v);
                     MenuItem menuItem;
                     if (builder == null) {
-                        menuItem = new MenuItem(slots, ItemStackCreator.getItem(v.replace(item)));
+                        menuItem = new MenuItem(slots, ItemStackCreator.getItem(item));
                     } else {
                         menuItem = builder.build(v);
                     }
@@ -933,4 +925,5 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
 
         );
     }
+
 }

@@ -4,10 +4,12 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.by1337.blib.BLib;
+import org.by1337.blib.util.Version;
 import org.by1337.bmenu.util.math.MathReplacer;
 import org.jetbrains.annotations.Nullable;
 
 public class CachedComponent {
+    private static final boolean JSON_SUPPORT = Version.is1_20_4orOlder();
     private final String source;
     private final Component cached;
     private final String cachedJson;
@@ -16,7 +18,7 @@ public class CachedComponent {
         this.source = source;
         if (canBeCached(source)) {
             cached = BLib.getApi().getMessage().componentBuilder(MathReplacer.safeReplace(source)).decoration(TextDecoration.ITALIC, false);
-            if (BLib.getApi().getUnsafe().getItemStackUtil().isJsonSupport()){
+            if (JSON_SUPPORT){
                 cachedJson = GsonComponentSerializer.gson().serializer().toJson(cached);
             }else {
                 cachedJson = null;

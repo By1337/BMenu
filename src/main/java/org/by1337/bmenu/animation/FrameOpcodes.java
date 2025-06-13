@@ -3,6 +3,7 @@ package org.by1337.bmenu.animation;
 
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
 import dev.by1337.yaml.codec.schema.SchemaType;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.crypto.Data;
 import java.util.*;
 
 public enum FrameOpcodes {
@@ -76,28 +78,40 @@ public enum FrameOpcodes {
         FRAMES_CODEC = new YamlCodec<Map<String, FrameOpcode>>() {
             private SchemaType schemaType;
             @Override
-            public Map<String, FrameOpcode> decode(YamlValue yamlValue) {
-                Map<String, FrameOpcode> result = new LinkedHashMap<>();
-                YamlMap map = yamlValue.getAsYamlMap();
-                for (String s : map.getRaw().keySet()) {
-                    var type = byId(s);
-                    if (type == null){
-                        log.error("Unknown animation opcode type {}", s);
-                        continue;
-                    }
-                    result.put(s, type.codec.decode(map.get(s)));
-                }
-                return result;
+            public DataResult<Map<String, FrameOpcode>> decode(YamlValue yamlValue) {
+               return yamlValue.asYamlMap().flatMap(map -> {
+                   Map<String, FrameOpcode> result = new LinkedHashMap<>();
+                   StringBuilder error = new StringBuilder();
+                   for (String s : map.getRaw().keySet()) {
+                       var type = byId(s);
+                       if (type == null){
+                           error.append("Unknown animation opcode type ").append(s).append("\n");
+                       }else {
+                           DataResult<? extends FrameOpcode> dataResult = type.codec.decode(map.get(s));
+                           if (dataResult.hasError()){
+                               error.append(dataResult.error()).append("\n");
+                           }
+                           if (dataResult.hasResult()){
+                               result.put(s, dataResult.result());
+                           }
+                       }
+                   }
+                   if (!error.isEmpty()){
+                       error.setLength(error.length()-1);
+                       return DataResult.error(error.toString()).partial(result);
+                   }
+                   return DataResult.success(result);
+               });
             }
 
             @Override
             @SuppressWarnings("unchecked")
             public YamlValue encode(Map<String, FrameOpcode> frames) {
-                YamlMap map = new YamlMap();
+                Map<String, Object> map = new LinkedHashMap<>();
                 for (FrameOpcode frame : frames.values()) {
                     var type = frame.type();
                     if (type != null){
-                        map.set(type.id, ((YamlCodec<FrameOpcode>) type.codec).encode(frame));
+                        map.put(type.id, ((YamlCodec<FrameOpcode>) type.codec).encode(frame).getValue());
                     }
                 }
                 return YamlValue.wrap(map);

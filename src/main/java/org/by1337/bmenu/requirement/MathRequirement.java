@@ -1,6 +1,7 @@
 package org.by1337.bmenu.requirement;
 
 import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.configuration.YamlContext;
@@ -27,8 +28,8 @@ public class MathRequirement implements Requirement {
     }
 
     public MathRequirement(YamlMap context) {
-        expression = context.get("expression").getAsString();
-        not = context.get("type").getAsString().startsWith("!");
+        expression = context.get("expression").decode(YamlCodec.STRING).getOrThrow();
+        not = context.get("type").decode(YamlCodec.STRING).getOrThrow().startsWith("!");
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()
                         .map(v -> YamlValue.wrap(v).getAsString()).toList(),

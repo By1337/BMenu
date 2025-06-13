@@ -1,6 +1,7 @@
 package org.by1337.bmenu.requirement;
 
 import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.configuration.YamlContext;
@@ -26,8 +27,8 @@ public class HasPermissionRequirement implements Requirement {
     }
 
     public HasPermissionRequirement(YamlMap context) {
-        permission = context.get("permission").getAsString();
-        not = context.get("type").getAsString().startsWith("!");
+        permission = context.get("permission").decode(YamlCodec.STRING).getOrThrow();
+        not = context.get("type").decode(YamlCodec.STRING).getOrThrow().startsWith("!");
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()
                         .map(v -> YamlValue.wrap(v).getAsString()).toList(),

@@ -2,6 +2,7 @@ package org.by1337.bmenu.animation;
 
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
 import dev.by1337.yaml.codec.schema.SchemaType;
@@ -87,31 +88,46 @@ public class Animator {
 
         private static class CodecImpl implements YamlCodec<AnimatorContext> {
             private final SchemaType schemaType = Frame.SCHEMA_TYPE.listOf();
+            private static final YamlCodec<List<YamlMap>> YAML_MAP_LIST = YamlCodec.YAML_MAP.listOf();
 
             @Override
-            public AnimatorContext decode(YamlValue yamlValue) {
-                List<YamlMap> list = yamlValue.decode(YamlCodec.YAML_MAP_LIST);
-                List<Animator.Frame> frameList = new ArrayList<>();
-                int lastPos = 0;
-                for (YamlMap frame : list) {
-                    for (YamlMap yamlMap : frame.get("opcodes").decode(YamlCodec.YAML_MAP_LIST, List.of())) {
-                        List<FrameOpcode> opcodes = new ArrayList<>(
-                                FrameOpcodes.FRAMES_CODEC.decode(YamlValue.wrap(yamlMap)).values()
-                        );
-                        int pos = frame.get("tick").getAsInt(++lastPos);
-                        lastPos = pos;
-                        frameList.add(new Animator.Frame(pos, opcodes));
-                    }
-                }
-                return new AnimatorContext(frameList);
+            public DataResult<AnimatorContext> decode(YamlValue yamlValue) {
+               return yamlValue.decode(YAML_MAP_LIST).flatMap(list -> {
+                   List<Animator.Frame> frameList = new ArrayList<>();
+                   int lastPos = 0;
+                   StringBuilder error = new StringBuilder();
+                   for (YamlMap frame : list) {
+                       List<FrameOpcode> opcodes = frame.get("opcodes").decode(YAML_MAP_LIST, List.of()).mapValue(l -> {
+                           List<FrameOpcode> res1 = new ArrayList<>();
+                           for (YamlMap yamlMap : l) {
+                               DataResult<Map<String, FrameOpcode>> v = FrameOpcodes.FRAMES_CODEC.decode(YamlValue.wrap(yamlMap));
+                               if (v.hasError()){
+                                   error.append(v.error()).append("\n");
+                               }
+                               if (v.hasResult()){
+                                   res1.addAll(v.result().values());
+                               }
+                           }
+                           return res1;
+                       }).result();
+                       int pos = frame.get("tick").decode(INT, ++lastPos).getOrThrow();
+                       lastPos = pos;
+                       frameList.add(new Animator.Frame(pos, opcodes));
+                   }
+                   if (!error.isEmpty()){
+                       error.setLength(error.length() -1);
+                       return DataResult.error(error.toString()).partial(new AnimatorContext(frameList));
+                   }
+                   return DataResult.success(new AnimatorContext(frameList));
+               });
             }
 
             @Override
             public YamlValue encode(AnimatorContext ctx) {
-                List<YamlMap> result = new ArrayList<>();
+                List<Map<String, Object>> result = new ArrayList<>();
                 for (Frame frame : ctx.frames) {
                     YamlMap map = new YamlMap();
-                    map.setRaw("tick", frame.frame);
+                    map.set("tick", frame.frame);
                     map.set("opcodes",
                             frame.opcodes.stream().filter(e -> e.type() != null).collect(Collectors.toMap(
                                     e -> e.type().getId(),
@@ -119,7 +135,7 @@ public class Animator {
                             )),
                             FrameOpcodes.FRAMES_CODEC
                     );
-                    result.add(map);
+                    result.add(map.getRaw());
                 }
                 return YamlValue.wrap(result);
             }

@@ -5,15 +5,16 @@ import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.factory.MenuCodecs;
 
 import java.util.List;
 
 public class CommandRequirements {
     public static final YamlCodec<CommandRequirements> CODEC = RecordYamlCodecBuilder.mapOf(
+            CommandRequirements::new,
             Requirements.CODEC.fieldOf("requirements", v -> v.requirements, Requirements.EMPTY),
-            YamlCodec.STRINGS.fieldOf("deny_commands", v -> v.denyCommands, List.of()),
-            YamlCodec.STRINGS.fieldOf("commands", v -> v.commands, List.of()),
-            CommandRequirements::new
+            MenuCodecs.COMMANDS.fieldOf("deny_commands", v -> v.denyCommands, List.of()),
+            MenuCodecs.COMMANDS.fieldOf("commands", v -> v.commands, List.of())
     );
     private final Requirements requirements;
     private final List<String> denyCommands;
@@ -39,8 +40,8 @@ public class CommandRequirements {
 
     private void runCommands(List<String> commands, Menu menu, Placeholderable placeholderable) {
         for (String command : commands) {
-            if (command.equals("[BREAK]")) return;
-            menu.runCommands(List.of(placeholderable.replace(command)));
+            if (command.equalsIgnoreCase("[break]")) return;
+            menu.executeCommand(placeholderable.replace(command));
         }
         return;
     }

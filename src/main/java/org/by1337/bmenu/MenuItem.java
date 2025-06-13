@@ -1,26 +1,25 @@
 package org.by1337.bmenu;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.BiPlaceholder;
-import org.by1337.blib.chat.placeholder.Placeholder;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.item.MenuItemTickListener;
 import org.by1337.bmenu.util.CachedSupplier;
+import org.by1337.bmenu.util.MenuPlaceholders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class MenuItem extends Placeholder {
+public class MenuItem implements Placeholderable {
+    private static final Logger log = LoggerFactory.getLogger("BMenu");
     private int[] slots;
     private CachedSupplier<MenuItem, ItemStack> itemStack;
     private Map<MenuClickType, ClickHandler> clicks;
@@ -32,25 +31,32 @@ public class MenuItem extends Placeholder {
     private int ticks;
     private boolean doRebuild = false;
     private boolean die = false;
-    private boolean recreate = false;
+    private @Nullable MenuPlaceholders localArgs;
 
-    public MenuItem(int[] slots, Function<MenuItem, ItemStack> itemStack, Map<MenuClickType, ClickHandler> clicks, @Nullable MenuItemTickListener tickListener, @Nullable Supplier<@Nullable MenuItem> builder) {
+    public MenuItem(int[] slots, Function<MenuItem, ItemStack> itemStack, Map<MenuClickType, ClickHandler> clicks, @Nullable MenuItemTickListener tickListener, @Nullable Supplier<@Nullable MenuItem> builder, @Nullable MenuPlaceholders localArgs) {
         this.slots = slots;
         this.itemStack = new CachedSupplier<>(itemStack);
         this.clicks = clicks;
         this.tickListener = tickListener;
         this.builder = Objects.requireNonNullElse(builder, () -> this);
-        registerPlaceholder("{tick}", () -> ticks / tickSpeed);
-        customPlaceholderable = this;
+        if (localArgs != null) {
+            this.localArgs = localArgs.copy();
+        }
+        if (tickListener != null) {
+            if (this.localArgs == null) this.localArgs = new MenuPlaceholders(new LinkedHashMap<>(), false);
+            this.localArgs.setPlaceholder("tick", () -> ticks / tickSpeed);
+        }
     }
 
+    @Deprecated
     public MenuItem(int[] slots, ItemStack itemStack, Map<MenuClickType, ClickHandler> clicks, boolean ticking, @Nullable Supplier<@Nullable MenuItem> builder) {
         this(
                 slots,
                 t -> itemStack,
                 clicks,
                 ticking ? MenuItemTickListener.DEFAULT : null,
-                builder
+                builder,
+                null
         );
     }
 
@@ -62,21 +68,30 @@ public class MenuItem extends Placeholder {
         this(slots, itemStack, Map.of());
     }
 
-    public void doClick(Menu menu, Player player, MenuClickType type) {
-        Placeholderable placeholderable;
-        if (customPlaceholderable == null) {
-            placeholderable = menu;
+    public void executeCommand(String command, Menu menu) {
+        if (command.equalsIgnoreCase("[rebuild]")) {
+            doRebuild();
+        } else if (command.equalsIgnoreCase("[die]")) {
+            die();
+        } else if (command.equalsIgnoreCase("[update]")) {
+            invalidateCash();
+        } else if (command.startsWith("[set_local] ") || command.startsWith("[SET_LOCAL] ")) {
+            String[] args = command.split(" ", 3);
+            if (args.length != 3){
+                log.error("Failed to execute command! expected [set_local] <param> <value> but got {}", command);
+                return;
+            }
+            setPlaceholder(args[1], () -> args[2]);
         } else {
-            placeholderable = new BiPlaceholder(menu, customPlaceholderable);
+            menu.executeCommand(command);
         }
+    }
 
-        ClickHandler handler = clicks.get(type);
+    public void doClick(Menu menu, Player player, MenuClickType type) {
+        Placeholderable placeholderable = new BiPlaceholder(menu, this);
+        ClickHandler handler = clicks.getOrDefault(type, clicks.get(MenuClickType.ANY_CLICK));
         if (handler != null) {
-            handler.onClick(menu, placeholderable, player);
-        } else {
-            handler = clicks.get(MenuClickType.ANY_CLICK);
-            if (handler != null)
-                handler.onClick(menu, placeholderable, player);
+            handler.onClick(menu, placeholderable, player, s -> executeCommand(s, menu));
         }
     }
 
@@ -132,9 +147,7 @@ public class MenuItem extends Placeholder {
     }
 
     public void setCustomPlaceholderable(@Nullable Placeholderable customPlaceholderable) {
-        if (customPlaceholderable == null)
-            this.customPlaceholderable = this;
-        else this.customPlaceholderable = new BiPlaceholder(this, customPlaceholderable);
+        this.customPlaceholderable = customPlaceholderable;
     }
 
     @Deprecated(forRemoval = true)
@@ -143,7 +156,7 @@ public class MenuItem extends Placeholder {
 
     public void doTick(Menu menu) {
         if (tickListener != null && ++ticks % tickSpeed == 0) {
-            tickListener.tick(this, menu, ticks / tickSpeed);
+            tickListener.tick(this, menu);
         }
     }
 
@@ -163,7 +176,6 @@ public class MenuItem extends Placeholder {
         doRebuild = true;
     }
 
-
     public void die() {
         die = true;
         builder = () -> null;
@@ -171,5 +183,26 @@ public class MenuItem extends Placeholder {
 
     public void invalidateCash() {
         itemStack.invalidateCash();
+    }
+
+    @Override
+    public String replace(String string) {
+        var s = customPlaceholderable == null ? string : customPlaceholderable.replace(string);
+        return localArgs == null ? s : localArgs.replace(s);
+    }
+
+    public void setPlaceholder(String placeholder, Supplier<Object> value) {
+        if (localArgs == null) localArgs = new MenuPlaceholders(new LinkedHashMap<>(), false);
+        localArgs.setPlaceholder(placeholder, value);
+    }
+
+    @Nullable
+    public Supplier<Object> getPlaceholder(String placeholder) {
+        if (localArgs == null) return null;
+        return localArgs.getPlaceholder(placeholder);
+    }
+
+    public @Nullable MenuPlaceholders getLocalArgs() {
+        return localArgs;
     }
 }

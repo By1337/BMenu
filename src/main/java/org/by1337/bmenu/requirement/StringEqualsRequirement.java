@@ -1,6 +1,8 @@
 package org.by1337.bmenu.requirement;
 
 import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.Placeholder;
@@ -28,9 +30,9 @@ public class StringEqualsRequirement implements Requirement {
     }
 
     public StringEqualsRequirement(YamlMap context) {
-        input = context.get("input").getAsString();
-        output = context.get("output").getAsString();
-        not = context.get("type").getAsString().startsWith("!");
+        input = context.get("input").decode(YamlCodec.STRING).getOrThrow();
+        output = context.get("output").decode(YamlCodec.STRING).getOrThrow();
+        not = context.get("type").decode(YamlCodec.STRING).getOrThrow().startsWith("!");
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()
                         .map(v -> YamlValue.wrap(v).getAsString()).toList(),
@@ -58,4 +60,5 @@ public class StringEqualsRequirement implements Requirement {
     public List<String> getDenyCommands() {
         return denyCommands;
     }
+
 }

@@ -4,13 +4,16 @@ import com.google.common.base.Joiner;
 import com.google.common.primitives.Ints;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.MenuLoader;
 import org.by1337.bmenu.animation.util.AnimationUtil;
 import org.by1337.bmenu.factory.fixer.ItemFixer;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +24,23 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class ItemFactory {
-    public static final YamlCodec<int[]> SLOTS_YAML_CODEC = YamlCodec.of(
-            ItemFactory::readSlots,
-            v -> YamlValue.wrap(Joiner.on(",").join(Ints.asList(v))),
-            SchemaTypes.oneOf(SchemaTypes.STRING_OR_NUMBER, SchemaTypes.array(SchemaTypes.STRING_OR_NUMBER))
-    );
+    public static final YamlCodec<int[]> SLOTS_YAML_CODEC = new YamlCodec<int[]>() {
+        private final SchemaType schemaType = SchemaTypes.oneOf(SchemaTypes.STRING_OR_NUMBER, SchemaTypes.array(SchemaTypes.STRING_OR_NUMBER));
+        @Override
+        public DataResult<int[]> decode(YamlValue yamlValue) {
+            return DataResult.success(readSlots(yamlValue)); // todo
+        }
+
+        @Override
+        public YamlValue encode(int[] ints) {
+            return YamlValue.wrap(Ints.asList(ints));
+        }
+
+        @Override
+        public @NotNull SchemaType schema() {
+            return schemaType;
+        }
+    };
     private static final Logger LOGGER = LoggerFactory.getLogger("BMenu#ItemFactory");
 
 
@@ -42,9 +57,10 @@ public class ItemFactory {
 
     @Deprecated(forRemoval = true)
     public static MenuItemBuilder readItem(YamlContext ctx, MenuLoader loader) {
-        return readItem(MenuFilePostprocessor.fromBLib(ctx.get()).getAsYamlMap());
+        return readItem(MenuFilePostprocessor.fromBLib(ctx.get()).asYamlMap().getOrThrow());
     }
 
+    @Deprecated
     public static Map<String, MenuItemBuilder> readItems(Map<String, YamlMap> items) {
         Map<String, MenuItemBuilder> itemMap = new HashMap<>();
 
@@ -54,29 +70,25 @@ public class ItemFactory {
         return itemMap;
     }
 
+    @Deprecated
     public static MenuItemBuilder readItem(YamlMap item) {
-        ItemFixer.fixItem(item);
-        return item.get().decode(MenuItemBuilder.YAML_CODEC);
+        return item.get().decode(MenuItemBuilder.YAML_CODEC).getOrThrow();
     }
 
 
     public static int[] readSlots(YamlValue data) {
         List<Integer> slots = new ArrayList<>();
         if (data.isPrimitive()) {
-            parseSlot(data.getAsString(), slots::add);
+            parseSlot(data.decode(YamlCodec.STRING).getOrThrow(), slots::add);
         } else if (data.isCollection()) {
-            for (String s : data.getAsStringList()) {
+            for (String s : data.getAsStringList().getOrThrow()) {
                 parseSlot(s, slots::add);
             }
         }
         if (slots.isEmpty()) {
             return new int[]{-1};
         }
-        int[] slot = new int[slots.size()];
-        for (int x = 0; x < slots.size(); x++) {
-            slot[x] = slots.get(x);
-        }
-        return slot;
+        return Ints.toArray(slots);
     }
 
     private static void parseSlot(String input, Consumer<Integer> consumer) {

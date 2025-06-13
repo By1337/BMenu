@@ -58,6 +58,10 @@ items:
       - 'is static line'
       - 'is not static line %placeholder%'
       - 'is not static line {placeholder}'
+      - '&7Do Click'
+    on_click:
+      commands:
+        - set_item_to_layer: 0-53 0 banned-item
 
 
 
@@ -70,8 +74,7 @@ items:
     on_click:
       commands:
         - '[set_param] REBUILD_TEST math[${REBUILD_TEST} + 1]'
-        - '[rebuild_slots] 4'
-        - '[flush]'
+        - '[update]'
     ticking: false
 
 
@@ -84,8 +87,7 @@ items:
     on_click:
       commands:
         - '[set_param] REBUILD_TEST math[${REBUILD_TEST} + 1]'
-        - '[rebuild_slots] 5'
-        - '[flush]'
+        - '[update]'
 
   damage-test:
     slot: 6
@@ -100,7 +102,6 @@ items:
       commands:
         - '[set_param] DAMAGE_TEST math[${DAMAGE_TEST} + 20]'
         - '[rebuild_slots] 6,7'
-        - '[flush]'
 
   damage-test2:
     slot: 7
@@ -131,7 +132,6 @@ items:
     on_click:
       commands:
         - '[set_item_to_layer] 9 0 damager'
-        - '[flush]'
 
   click_me:
     material: knowledge_book
@@ -140,17 +140,16 @@ items:
     on_click:
       commands:
         - '[set_item_to_layer] 20 0 banned-item'
-        - '[flush]'
 
   banned-item:
     args:
       TIME: '5' # 5 секунд
     material: barrier
-    name: '&cКд math[${TIME} - {tick}] сек...'
+    name: '&cКд math[${TIME} - ${tick}] сек...'
     tick_speed: 20
     on_tick:
       requirements:
-        - check: '{tick} == ${TIME}'
+        - check: '${tick} == ${TIME}'
           commands: '[die]'
       deny_commands: '[update]'
 
@@ -158,9 +157,46 @@ items:
     material: diamond_pickaxe
     name: '&7Дамагер'
     tick_speed: 1
-    damage: 'math[{tick} * 16]'
+    damage: 'math[${tick} * 16]'
     on_tick:
       requirements:
-        - check: '{tick} == 97'
+        - check: '${tick} == 97'
           commands: '[die]'
       deny_commands: '[update]'
+
+  multi_lore_item:
+    material: knowledge_book
+    slot: 15
+    local_args:
+      name1: '&7Это страница 1'
+      name2: '&7Это страница 2'
+      lore1:
+        - '&r '
+        - '&r &fКакая-то информация'
+        - '&r '
+        - '&r &7<-----------&a>'
+        - '&r '
+      lore2:
+        - '&r '
+        - '&r &fКакая-то информация 2'
+        - '&r '
+        - '&r &a<&7----------->'
+        - '&r '
+      current_name: '${name1}'
+      current_lore: '${lore1}'
+      page: 0
+    name: '${current_name}'
+    lore: '${current_lore}'
+    on_click:
+      requirements:
+        - check: '${page} == 0'
+          commands:
+            - '[set_local] current_name ${name2}'
+            - '[set_local] current_lore ${lore2}'
+            - '[set_local] page 1'
+            - '[update]'
+          deny_commands:
+            - '[set_local] current_name ${name1}'
+            - '[set_local] current_lore ${lore1}'
+            - '[set_local] page 0'
+            - '[update]'

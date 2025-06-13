@@ -6,6 +6,7 @@ import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.placeholder.BiPlaceholder;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
+import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.requirement.Requirements;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,10 +15,10 @@ import java.util.List;
 public class MenuItemTickListener {
     public static final MenuItemTickListener DEFAULT = new MenuItemTickListener(Requirements.EMPTY, List.of("[rebuild]"), List.of());
     public static final YamlCodec<MenuItemTickListener> CODEC = RecordYamlCodecBuilder.mapOf(
+            MenuItemTickListener::new,
             Requirements.CODEC.fieldOf("requirements", MenuItemTickListener::getRequirements, Requirements.EMPTY),
-            YamlCodec.STRINGS.fieldOf("commands", MenuItemTickListener::getCommands, List.of()),
-            YamlCodec.STRINGS.fieldOf("deny_commands", MenuItemTickListener::getDenyCommands, List.of()),
-            MenuItemTickListener::new
+            MenuCodecs.COMMANDS.fieldOf("commands",MenuItemTickListener::getCommands, List.of()),
+            MenuCodecs.COMMANDS.fieldOf("deny_commands", MenuItemTickListener::getDenyCommands, List.of())
     );
 
     private final @NotNull Requirements requirements;
@@ -30,26 +31,15 @@ public class MenuItemTickListener {
         this.denyCommands = denyCommands;
     }
 
-    public void tick(MenuItem menuItem, Menu menu, int tick) {
-        Placeholderable placeholder = new BiPlaceholder(menu, s -> s.replace("{tick}", String.valueOf(tick)));
-        if (requirements.test(menu, placeholder, menu.getViewer(), s -> executeCommand(s, menuItem, menu))) {
-            commands.forEach(command -> executeCommand(placeholder.replace(command), menuItem, menu));
+    public void tick(MenuItem menuItem, Menu menu) {
+        Placeholderable placeholder = new BiPlaceholder(menu, menuItem);
+        if (requirements.test(menu, placeholder, menu.getViewer(), s -> menuItem.executeCommand(s, menu))) {
+            commands.forEach(command -> menuItem.executeCommand(placeholder.replace(command), menu));
         } else {
-            denyCommands.forEach(command -> executeCommand(placeholder.replace(command), menuItem, menu));
+            denyCommands.forEach(command -> menuItem.executeCommand(placeholder.replace(command), menu));
         }
     }
 
-    public void executeCommand(String command, MenuItem menuItem, Menu menu) {
-        if (command.equalsIgnoreCase("[rebuild]")) {
-            menuItem.doRebuild();
-        } else if (command.equalsIgnoreCase("[die]")) {
-            menuItem.die();
-        } else if (command.equalsIgnoreCase("[update]")) {
-            menuItem.invalidateCash();
-        } else {
-            menu.executeCommand(command);
-        }
-    }
 
     public @NotNull Requirements getRequirements() {
         return requirements;

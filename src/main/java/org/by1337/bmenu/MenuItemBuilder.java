@@ -2,6 +2,8 @@ package org.by1337.bmenu;
 
 import dev.by1337.yaml.BukkitYamlCodecs;
 import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -13,7 +15,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.by1337.blib.chat.Placeholderable;
-import org.by1337.blib.chat.placeholder.BiPlaceholder;
 import org.by1337.blib.chat.placeholder.MultiPlaceholder;
 import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.util.Pair;
@@ -22,25 +23,26 @@ import org.by1337.bmenu.click.ClickHandlerImpl;
 import org.by1337.bmenu.click.MenuClickType;
 import org.by1337.bmenu.factory.ItemFactory;
 import org.by1337.bmenu.factory.MenuCodecs;
+import org.by1337.bmenu.factory.fixer.ItemFixer;
 import org.by1337.bmenu.item.MenuItemTickListener;
 import org.by1337.bmenu.requirement.Requirements;
 import org.by1337.bmenu.util.CachedComponent;
 import org.by1337.bmenu.util.ItemStackBuilder;
+import org.by1337.bmenu.util.MenuPlaceholders;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public static final YamlCodec<MenuItemBuilder> YAML_CODEC;
 
     private int[] slots = new int[]{-1};
-    private final List<CachedComponent> lore = new ArrayList<>();
-    private CachedComponent name;
+    private final List<String> lore = new ArrayList<>();
+    private String name;
     private Map<MenuClickType, ClickHandler> clicks = new HashMap<>();
     private String amount = "1";
     private String material = "STONE";
@@ -60,6 +62,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     private ItemStack staticInstance;
     private boolean hideTooltip;
     private ItemStackBuilder itemStackBuilder;
+    private MenuPlaceholders localArgs = new MenuPlaceholders(new LinkedHashMap<>(), false);
 
     public MenuItemBuilder() {
     }
@@ -91,16 +94,17 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
 
         if (staticItem) {
-            staticInstance = itemStackBuilder.build(itemStack, menu.loader.getMessage(), placeholder);
+            staticInstance = itemStackBuilder.build(itemStack, menu.loader.getMessage(), placeholder, null);
         }
 
         Supplier<@Nullable MenuItem> builder = () -> build(menu, itemStack, placeholderables);
         MenuItem item = new MenuItem(
                 slots,
-                (t) -> staticInstance != null ? staticInstance : itemStackBuilder.build(itemStack, menu.loader.getMessage(), new BiPlaceholder(placeholder, t)),
+                (t) -> staticInstance != null ? staticInstance : itemStackBuilder.build(itemStack, menu.loader.getMessage(), placeholder, t.getLocalArgs()),
                 clicks,
                 tickListener,
-                builder
+                builder,
+                localArgs.copy()
         );
         item.setTickSpeed(tickSpeed);
         return item;
@@ -144,7 +148,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public void setName(String name) {
-        this.name = new CachedComponent(name);
+        this.name = name;
     }
 
     public void setColor(Color color) {
@@ -202,7 +206,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public String getName() {
-        return name.getSource();
+        return name;
     }
 
 
@@ -212,16 +216,16 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
             s = s.replace("\\n", "\n");
             if (s.contains("\n")) {
                 for (String string : s.split("\n")) {
-                    this.lore.add(new CachedComponent(string));
+                    this.lore.add(string);
                 }
             } else {
-                this.lore.add(new CachedComponent(s));
+                this.lore.add(s);
             }
         }
     }
 
     public void addLore(String lore) {
-        this.lore.add(new CachedComponent(lore));
+        this.lore.add(lore);
     }
 
     public void setSlots(int[] slots) {
@@ -316,9 +320,9 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     public static class ViewRequirement {
         private static final ViewRequirement EMPTY = new ViewRequirement(Requirements.EMPTY, Collections.emptyList());
         public static YamlCodec<ViewRequirement> CODEC = RecordYamlCodecBuilder.mapOf(
+                ViewRequirement::new,
                 Requirements.CODEC.fieldOf("requirements", ViewRequirement::getRequirement, Requirements.EMPTY),
-                YamlCodec.STRINGS.fieldOf("deny_commands", ViewRequirement::getDenyCommands, List.of()),
-                ViewRequirement::new
+                MenuCodecs.COMMANDS.fieldOf("deny_commands", ViewRequirement::getDenyCommands, List.of())
         );
 
         private final Requirements requirement;
@@ -347,11 +351,11 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public List<String> lore() {
-        return lore.stream().map(CachedComponent::getSource).toList();
+        return lore;
     }
 
     public String name() {
-        return name.getSource();
+        return name;
     }
 
     public Map<MenuClickType, ClickHandler> clicks() {
@@ -433,20 +437,20 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return itemFlags.size() == ItemFlag.values().length;
     }
 
-    public CachedComponent getCashedName() {
-        return name;
-    }
-
-    public List<CachedComponent> getCashedLore() {
-        return lore;
-    }
-
     public MenuItemTickListener getTickListener() {
         return tickListener;
     }
 
     public void setTickListener(MenuItemTickListener tickListener) {
         this.tickListener = tickListener;
+    }
+
+    public MenuPlaceholders getLocalArgs() {
+        return localArgs;
+    }
+
+    public void setLocalArgs(MenuPlaceholders localArgs) {
+        this.localArgs = localArgs;
     }
 
     static {
@@ -456,11 +460,12 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 .field(YamlCodec.STRING.schema(s -> s.or(SchemaTypes.INT)), "amount", MenuItemBuilder::amount, MenuItemBuilder::setAmount, "1")
                 .strings("lore", MenuItemBuilder::lore, MenuItemBuilder::setLore, List.of())
                 .field(MenuCodecs.ARGS_CODEC, "args", MenuItemBuilder::args, MenuItemBuilder::setArgs, Map.of())
+                .field(MenuPlaceholders.CODEC, "local_args", MenuItemBuilder::getLocalArgs, MenuItemBuilder::setLocalArgs)
                 .bool("unbreakable", MenuItemBuilder::unbreakable, MenuItemBuilder::setUnbreakable, false)
-                //.bool("ticking", MenuItemBuilder::ticking, MenuItemBuilder::setTicking, false)
                 .field(MenuItemTickListener.CODEC, "on_tick", MenuItemBuilder::getTickListener, MenuItemBuilder::setTickListener)
                 .bool("static", MenuItemBuilder::isStaticItem, MenuItemBuilder::setStaticItem, false)
                 .bool("all_flags", MenuItemBuilder::isAllItemFlags, MenuItemBuilder::setAllItemFlags, false)
+                .bool("hide_tooltip", MenuItemBuilder::hideTooltip, MenuItemBuilder::setHideTooltip, false)
                 .integer("model_data", MenuItemBuilder::modelData, MenuItemBuilder::setModelData, 0)
                 .integer("priority", MenuItemBuilder::priority, MenuItemBuilder::setPriority, 0)
                 .string("damage", MenuItemBuilder::damage, MenuItemBuilder::setDamage, null)
@@ -468,13 +473,32 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 .field(BukkitYamlCodecs.COLOR, "color", MenuItemBuilder::color, MenuItemBuilder::setColor)
                 .listOf(BukkitYamlCodecs.ITEM_FLAG, "item_flags", MenuItemBuilder::getItemFlags, MenuItemBuilder::setItemFlags, List.of())
                 .field(ItemFactory.SLOTS_YAML_CODEC, "slot", MenuItemBuilder::slots, MenuItemBuilder::setSlots, new int[]{-1})
-                .listOf(MenuCodecs.ENCHANTMENT_YAML_CODEC, "enchantments", MenuItemBuilder::enchantments, MenuItemBuilder::setEnchantments, List.of())
-                .listOf(MenuCodecs.POTION_EFFECT_YAML_CODEC, "potion_effects", MenuItemBuilder::potionEffects, MenuItemBuilder::setPotionEffects, List.of())
+                .field(MenuCodecs.MODERN_ENCHANTMENT_YAML_CODEC, "enchantments", MenuItemBuilder::enchantments, MenuItemBuilder::setEnchantments, List.of())
+                .field(MenuCodecs.MODERN_POTION_EFFECT_YAML_CODEC, "potion_effects", MenuItemBuilder::potionEffects, MenuItemBuilder::setPotionEffects, List.of())
                 .field(ViewRequirement.CODEC, "view_requirement", MenuItemBuilder::viewRequirement, MenuItemBuilder::setViewRequirement);
         for (MenuClickType value : MenuClickType.values()) {
             String key = value.getConfigKeyClick();
             builder.field(ClickHandlerImpl.CODEC, key, m -> m.getClickHandlerImplOrNull(value), (m, v) -> m.addClickListener(value, v));
         }
-        YAML_CODEC = builder.build();
+        final var codec = builder.build();
+
+        YAML_CODEC = new YamlCodec<>() {
+
+            @Override
+            public DataResult<MenuItemBuilder> decode(YamlValue yamlValue) {
+                ItemFixer.fixItem(yamlValue.asYamlMap().getOrThrow());
+                return codec.decode(yamlValue);
+            }
+
+            @Override
+            public YamlValue encode(MenuItemBuilder menuItemBuilder) {
+                return codec.encode(menuItemBuilder);
+            }
+
+            @Override
+            public @NotNull SchemaType schema() {
+                return codec.schema();
+            }
+        };
     }
 }

@@ -15,118 +15,204 @@ import org.bukkit.potion.PotionEffect;
 import org.by1337.blib.BLib;
 import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.util.Message;
-import org.by1337.blib.inventory.ItemStackUtil;
+import org.by1337.blib.inventory.FastItemMutator;
+import org.by1337.blib.inventory.LegacyFastItemMutator;
+import org.by1337.blib.nbt.NBT;
+import org.by1337.blib.nbt.NbtType;
+import org.by1337.blib.nbt.impl.CompoundTag;
+import org.by1337.blib.nbt.impl.StringNBT;
 import org.by1337.blib.util.Version;
 import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.hook.ItemStackCreator;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class ItemStackBuilder {
-    private static final ItemStackUtil UNSAFE_ITEM = BLib.getApi().getUnsafe().getItemStackUtil();
+    private static final boolean IS_LEGACY = Version.is1_20_4orOlder();
+    private static final LegacyFastItemMutator LEGACY_MUTATOR = BLib.getApi().getUnsafe().getLegacyFastItemMutator();
+    private static final FastItemMutator MUTATOR = BLib.getApi().getUnsafe().getFastItemMutator();
 
     private final MenuItemBuilder builder;
 
     private Object cached;
     private boolean fullCached;
     private boolean displayCached;
+    private final CachedComponents cachedComponents;
 
     public ItemStackBuilder(MenuItemBuilder builder) {
         this.builder = builder;
+        cachedComponents = new CachedComponents();
         if (canBeCached(builder.material())) {
             ItemStack itemStack = ItemStackCreator.getItem(builder.material());
             buildBase(itemStack);
-            cached = BLib.getApi().getUnsafe().getItemStackUtil().asNMSCopyItemStack(itemStack);
+            cached = toNms(itemStack);
+            buildNMS(cached);
             if (isDisplayCashed()) {
-                setDisplay(cached, s -> s, BLib.getApi().getMessage());
+                setDisplay(cached, s -> s, BLib.getApi().getMessage(), builder.lore(), builder.name(), s -> s);
                 displayCached = true;
-                if (canBeCached(builder.amount()) && canBeCached(builder.damage())) {
-                    setAmountAndDamage(cached, s -> s);
+                if (itemStack.hasItemMeta() && canBeCached(builder.amount()) && canBeCached(builder.damage())) {
+                    setAmountAndDamage(cached, s -> s, s -> s);
                     fullCached = true;
                 }
             }
         }
     }
 
-    public ItemStack build(@Nullable ItemStack i, Message message, Placeholderable placeholderable) {
-        if (i == null && fullCached) return UNSAFE_ITEM.asBukkitMirror(cached);
-        Object itemStack;
-        if (i != null) {
-            var item = i.clone();
-            buildBase(item);
-            itemStack = UNSAFE_ITEM.asNMSCopyItemStack(item);
-        } else if (cached != null) {
-            itemStack = UNSAFE_ITEM.copyNMSItemStack(cached);
-        } else {
-            var item = ItemStackCreator.getItem(placeholderable.replace(builder.material()));
-            buildBase(item);
-            itemStack = UNSAFE_ITEM.asNMSCopyItemStack(item);
+    private static Object toNms(ItemStack itemStack) {
+        if (IS_LEGACY) {
+            return LEGACY_MUTATOR.asNMSCopyItemStack(itemStack);
         }
-        if (!displayCached) setDisplay(itemStack, placeholderable, message);
-        setAmountAndDamage(itemStack, placeholderable);
-        return UNSAFE_ITEM.asBukkitMirror(itemStack);
+        return MUTATOR.asNMSCopyItemStack(itemStack);
     }
 
-    private void setAmountAndDamage(Object item, Placeholderable placeholderable) {
-        if (builder.amount() != null) {
-            UNSAFE_ITEM.setCount(Integer.parseInt(placeholderable.replace(builder.amount())), item);
+    private static ItemStack asBukkitMirror(Object itemStack) {
+        if (IS_LEGACY) {
+            return LEGACY_MUTATOR.asBukkitMirror(itemStack);
         }
-        if (builder.damage() != null) {
-            UNSAFE_ITEM.setDamage(Integer.parseInt(placeholderable.replace(builder.damage())), item);
+        return MUTATOR.asBukkitMirror(itemStack);
+    }
+
+    private static Object cloneNms(Object itemStack) {
+        if (IS_LEGACY) {
+            return LEGACY_MUTATOR.cloneNMSItemStack(itemStack);
+        }
+        return MUTATOR.cloneNMSItemStack(itemStack);
+    }
+
+    private static void setCount(Object itemStack, int count) {
+        if (IS_LEGACY) {
+            LEGACY_MUTATOR.setCount(count, itemStack);
+        }else {
+            MUTATOR.setCount(count, itemStack);
+        }
+    }
+
+    private static void setDamage(Object itemStack, int count) {
+        if (IS_LEGACY) {
+            LEGACY_MUTATOR.setDamage(count, itemStack);
+        }else {
+            MUTATOR.setInt(FastItemMutator.DAMAGE, count, itemStack);
         }
     }
 
     private boolean isDisplayCashed() {
-        if (builder.getCashedName() != null && !builder.getCashedName().isCached()) {
+        if (builder.name() != null && !canBeCached(builder.name())) {
             return false;
         }
-        return builder.getCashedLore().stream().allMatch(CachedComponent::isCached);
+        return builder.lore().stream().allMatch(ItemStackBuilder::canBeCached);
     }
 
-    private void setDisplay(Object item, Placeholderable placeholderable, Message message) {
-        CachedComponent name = builder.getCashedName();
-        if (name != null) {
-            if (name.getCachedJson() != null) {
-                UNSAFE_ITEM.setDisplayName(name.getCachedJson(), item);
-            } else if (name.getCached() != null) {
-                UNSAFE_ITEM.setDisplayName(name.getCached(), item);
-            } else {
-                UNSAFE_ITEM.setDisplayName(
-                        message.componentBuilder(placeholderable.replace(name.getSource())).decoration(TextDecoration.ITALIC, false),
-                        item
-                );
-            }
-        }
-        if (UNSAFE_ITEM.isJsonSupport()) {
-            List<String> lore = UNSAFE_ITEM.getJsonLore(item);
-            for (CachedComponent cachedComponent : builder.getCashedLore()) {
-                if (cachedComponent.getCachedJson() != null) {
-                    lore.add(cachedComponent.getCachedJson());
-                } else {
-                    loreBuilder(placeholderable.replace(cachedComponent.getSource()),
-                            s -> lore.add(
-                                    GsonComponentSerializer.gson().serialize(
-                                            message.componentBuilder(s).decoration(TextDecoration.ITALIC, false)
-                                    )
-                            )
-                    );
-                }
-            }
-            UNSAFE_ITEM.setLoreJson(lore, item);
+    public ItemStack build(@Nullable ItemStack i, Message message, Placeholderable placeholderable, @Nullable MenuPlaceholders placeholders) {
+        if (i == null && fullCached) return asBukkitMirror(cached);
+        Object itemStack;
+        if (i != null) {
+            ItemStack item = i.clone();
+            buildBase(item);
+            itemStack = toNms(item);
+        } else if (cached != null) {
+            itemStack = cloneNms(cached);
         } else {
-            List<Component> lore = UNSAFE_ITEM.getLore(item);
-            for (CachedComponent cachedComponent : builder.getCashedLore()) {
-                if (cachedComponent.isCached()) {
-                    lore.add(cachedComponent.getCached());
+            ItemStack item = ItemStackCreator.getItem(placeholderable.replace(builder.material()));
+            buildBase(item);
+            itemStack = toNms(item);
+        }
+        if (!displayCached)
+            setDisplay(itemStack, placeholderable, message, builder.lore(), builder.name(), placeholders == null ? s -> s : placeholders);
+        setAmountAndDamage(itemStack, placeholderable, placeholders == null ? s -> s : placeholders);
+        buildNMS(itemStack);
+
+        return asBukkitMirror(itemStack);
+    }
+
+    private void setAmountAndDamage(Object item, Placeholderable placeholderable, Placeholderable prePlaceholder) {
+        if (builder.amount() != null) {
+            setCount(item, Integer.parseInt(placeholderable.replace(prePlaceholder.replace(builder.amount()))));
+        }
+        if (builder.damage() != null) {
+            setDamage(item, Integer.parseInt(placeholderable.replace(prePlaceholder.replace(builder.damage()))));
+        }
+    }
+
+    private static CompoundTag getLegacyDisplay(Object item) {
+        NBT nbt = LEGACY_MUTATOR.getNBT(item, LegacyFastItemMutator.DISPLAY);
+        return nbt instanceof CompoundTag ? (CompoundTag) nbt : new CompoundTag();
+    }
+
+    private void setDisplay(Object item, Placeholderable placeholderable, Message message, List<String> lore, @Nullable String name, Placeholderable prePlaceholder) {
+        if (IS_LEGACY) {
+            CompoundTag display = getLegacyDisplay(item);
+            if (name != null) {
+                String name0 = prePlaceholder.replace(name);
+                CachedComponent cached = cachedComponents.getCached(name0);
+                if (cached != null) {
+                    display.putString(LegacyFastItemMutator.NAME, cached.getCachedJson());
                 } else {
-                    loreBuilder(placeholderable.replace(cachedComponent.getSource()),
-                            s -> lore.add(message.componentBuilder(s).decoration(TextDecoration.ITALIC, false))
-                    );
+                    String json = GsonComponentSerializer.gson().serialize(message.componentBuilder(placeholderable.replace(name0)).decoration(TextDecoration.ITALIC, false));
+                    display.putString(LegacyFastItemMutator.NAME, json);
                 }
             }
-            UNSAFE_ITEM.setLore(lore, item);
+            List<String> lore0;
+            if (display.has(LegacyFastItemMutator.LORE, NbtType.LIST)) {
+                lore0 = display.getAsList(LegacyFastItemMutator.LORE, StringNBT.class, StringNBT::getValue);
+            } else {
+                lore0 = new ArrayList<>();
+            }
+            for (String s : lore) {
+                String line = prePlaceholder.replace(s);
+                loreBuilder(line, line1 -> {
+                    CachedComponent cached = cachedComponents.getCached(line1);
+                    if (cached != null) {
+                        lore0.add(cached.getCachedJson());
+                    } else {
+                        loreBuilder(placeholderable.replace(line1),
+                                s1 -> lore0.add(
+                                        GsonComponentSerializer.gson().serialize(
+                                                message.componentBuilder(s1).decoration(TextDecoration.ITALIC, false)
+                                        )
+                                )
+                        );
+                    }
+                });
+            }
+            display.putList(LegacyFastItemMutator.LORE, lore0, StringNBT::new);
+            LEGACY_MUTATOR.setNBT(item, LegacyFastItemMutator.DISPLAY, display);
+        } else {
+            if (name != null) {
+                String name0 = prePlaceholder.replace(name);
+                CachedComponent cached = cachedComponents.getCached(name0);
+                if (cached != null) {
+                    MUTATOR.setComponent(FastItemMutator.CUSTOM_NAME, cached.getCached(), item);
+                } else {
+                    var c = message.componentBuilder(placeholderable.replace(name0)).decoration(TextDecoration.ITALIC, false);
+                    MUTATOR.setComponent(FastItemMutator.CUSTOM_NAME, c, item);
+                }
+            }
+            List<Component> lore0 = new ArrayList<>();
+            if (MUTATOR.has(FastItemMutator.LORE, item)) {
+                var l = MUTATOR.getItemLore(FastItemMutator.LORE, item);
+                lore0.addAll(l);
+            }
+            for (String s : lore) {
+                String line = prePlaceholder.replace(s);
+                loreBuilder(line, line1 -> {
+                    CachedComponent cached = cachedComponents.getCached(line1);
+                    if (cached != null) {
+                        lore0.add(cached.getCached());
+                    } else {
+                        loreBuilder(placeholderable.replace(line1),
+                                s1 -> lore0.add(
+                                        message.componentBuilder(s1).decoration(TextDecoration.ITALIC, false)
+                                )
+                        );
+                    }
+                });
+            }
+            MUTATOR.setItemLore(FastItemMutator.LORE, lore0, item);
         }
     }
 
@@ -186,8 +272,22 @@ public class ItemStackBuilder {
 
         result.setItemMeta(im);
     }
+    private void buildNMS(Object item){
+        if (!IS_LEGACY && builder.hideTooltip()) {
+            MUTATOR.setUnit(FastItemMutator.HIDE_TOOLTIP, item);
+        }
+    }
 
     private static boolean canBeCached(String s) {
         return s == null || (!s.contains("{") && !s.contains("%"));
+    }
+
+    public static class CachedComponents {
+        private final Map<String, CachedComponent> textToComponent = new HashMap<>();
+
+        public @Nullable CachedComponent getCached(String text) {
+            if (!canBeCached(text) || text.contains("\n")) return null;
+            return textToComponent.computeIfAbsent(text, k -> new CachedComponent("&7<cached>" + text));
+        }
     }
 }

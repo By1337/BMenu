@@ -6,6 +6,7 @@ import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.by1337.blib.random.WeightedItem;
 import org.by1337.blib.random.WeightedItemSelector;
+import org.by1337.bmenu.factory.MenuCodecs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -54,9 +55,9 @@ public class CommandList {
 
     public static class Commands implements WeightedItem<List<String>> {
         public static final YamlCodec<Commands> CODEC = RecordYamlCodecBuilder.mapOf(
+                Commands::new,
                 YamlCodec.DOUBLE.fieldOf("weight", Commands::weight, 1D),
-                YamlCodec.STRINGS.fieldOf("commands", Commands::commands, List.of()),
-                Commands::new
+                MenuCodecs.COMMANDS.fieldOf("commands", Commands::commands, List.of())
         );
         private static final Commands EMPTY = new Commands(0D, null);
         private final double weight;
@@ -65,11 +66,6 @@ public class CommandList {
         public Commands(double weight, List<String> commands) {
             this.weight = weight;
             this.commands = commands;
-        }
-
-        public Commands(YamlMap ctx) {
-            weight = ctx.get("weight").getAsDouble(1D);
-            commands = ctx.get("commands").decode(YamlCodec.STRINGS, List.of());
         }
 
         @Override

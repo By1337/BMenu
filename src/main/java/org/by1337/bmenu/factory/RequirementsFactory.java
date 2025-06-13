@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 public class RequirementsFactory {
-
+    private static final YamlCodec<Map<String, YamlMap>> STRING_TO_YAML_MAP_CODEC = YamlCodec.mapOf(YamlCodec.STRING, YamlCodec.YAML_MAP);
     @Deprecated
     public static Requirements readLegacy(YamlValue data) {
         List<Requirement> requirements = new ArrayList<>();
-        Map<String, YamlMap> map = data.decode(YamlCodec.STRING_TO_YAML_MAP);
+        Map<String, YamlMap> map = data.decode(STRING_TO_YAML_MAP_CODEC).getOrThrow();
         for (YamlMap value : map.values()) {
-            String type = value.get("type").getAsString();
+            String type = value.get("type").decode(YamlCodec.STRING).getOrThrow();
             RequirementType requirementType = RequirementType.byName(type);
             if (requirementType == null) {
                 throw new IllegalArgumentException("unknown requirement type: " + type);
@@ -30,6 +30,6 @@ public class RequirementsFactory {
 
     @Deprecated(forRemoval = true)
     public static Requirements read(org.by1337.blib.configuration.YamlValue ctx) {
-        return Requirements.CODEC.decode(MenuFilePostprocessor.fromBLib(ctx));
+        return Requirements.CODEC.decode(MenuFilePostprocessor.fromBLib(ctx)).getOrThrow();
     }
 }

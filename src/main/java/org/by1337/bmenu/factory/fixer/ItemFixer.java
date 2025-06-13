@@ -16,15 +16,15 @@ public class ItemFixer {
 
     public static void fixItem(YamlMap map) {
         if (map.has("$fixed")) return;
-        map.setRaw("$fixed", true);
+        map.set("$fixed", true);
         rename(map, "tick-speed", "tick_speed");
         rename(map, "slots", "slot");
         rename(map, "display_name", "name");
         rename(map, "view_req", "view_requirement");
 
         replacePlaceholders(map);
-        map.setRaw("name", fixDisplay(map.getRaw("name")));
-        map.setRaw("lore", fixDisplay(map.getRaw("lore")));
+        map.set("name", fixDisplay(map.getRaw("name")));
+        map.set("lore", fixDisplay(map.getRaw("lore")));
 
         if (map.getRaw("static") == null &&
                 hasNoPlaceholders(map.getRaw("name")) &&
@@ -33,16 +33,16 @@ public class ItemFixer {
                 hasNoPlaceholders(map.getRaw("damage")) &&
                 hasNoPlaceholders(map.getRaw("amount"))
         ) {
-            map.setRaw("static", true);
-            map.setRaw("$synthetic-static", true);
+            map.set("static", true);
+            map.set("$synthetic-static", true);
         }
         if (Objects.equals(map.getRaw("ticking"), true)) {
             if (map.has("on_tick")) {
-                map.setRaw("$fixed-ticking", false);
-                map.setRaw("$fixed-ticking-failed", "item already has on_tick!");
+                map.set("$fixed-ticking", false);
+                map.set("$fixed-ticking-failed", "item already has on_tick!");
             } else {
-                map.setRaw("$fixed-ticking", true);
-                map.set("on_tick", REPLACE_TICKING);
+                map.set("$fixed-ticking", true);
+                map.set("on_tick", REPLACE_TICKING.getValue());
             }
         }
     }
@@ -50,7 +50,7 @@ public class ItemFixer {
     private static void rename(YamlMap map, String from, String to) {
         if (map.has(from)) {
             map.getRaw().put(to, map.getRaw().remove(from));
-            map.setRaw("$rename-" + from, to);
+            map.set("$rename-" + from, to);
         }
     }
 
@@ -89,16 +89,22 @@ public class ItemFixer {
 
     @SuppressWarnings("unchecked")
     private static void replacePlaceholders(YamlMap item) {
-        if (!item.has("args")) return;
-        Map<String, Object> rawArgs = (Map<String, Object>) MenuFilePostprocessor.deepCopy(item.getRaw("args"));
+        if (item.has("args")){
+            Map<String, Object> rawArgs = (Map<String, Object>) MenuFilePostprocessor.deepCopy(item.getRaw("args"));
 
-        Map<String, String> args = argsPostProcessor(rawArgs);
-        Placeholder placeholder = new Placeholder();
-        args.forEach((key, value) -> placeholder.registerPlaceholder("${" + key + "}", () -> value));
-        Map<String, Object> result = (Map<String, Object>) replacePlaceholders(item.getRaw(), placeholder);
-        item.getRaw().clear();
-        item.getRaw().putAll(result);
-        item.setRaw("args", args);
+            Map<String, String> args = argsPostProcessor(rawArgs);
+            Placeholder placeholder = new Placeholder();
+            args.forEach((key, value) -> placeholder.registerPlaceholder("${" + key + "}", () -> value));
+            Map<String, Object> result = (Map<String, Object>) replacePlaceholders(item.getRaw(), placeholder);
+            item.getRaw().clear();
+            item.getRaw().putAll(result);
+            item.set("args", args);
+        }
+        if (item.has("local_args")){
+            Map<String, Object> rawArgs = (Map<String, Object>) MenuFilePostprocessor.deepCopy(item.getRaw("local_args"));
+            Map<String, String> args = argsPostProcessor(rawArgs);
+            item.set("local_args", args);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -128,7 +134,7 @@ public class ItemFixer {
         Placeholder placeholder = new Placeholder();
 
         for (String key : rawArgs.keySet()) {
-            String param = YamlCodec.MULTI_LINE_STRING.decode(YamlValue.wrap(rawArgs.get(key)));
+            String param = YamlCodec.MULTI_LINE_STRING.decode(YamlValue.wrap(rawArgs.get(key))).getOrThrow();
             param = placeholder.replace(param);
             if (hasNoPlaceholders(param)) {
                 param = MathReplacer.safeReplace(param);

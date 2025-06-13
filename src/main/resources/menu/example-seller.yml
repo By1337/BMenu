@@ -10,9 +10,10 @@ only-open-from: [ ]
 
 args: { }
 
-items-defaults:
+items-default:
   buyer-item: &item
     material: ${MATERIAL}
+    static: false
     amount: ${AMOUNT}
     name: '&7${NAME} x${AMOUNT}'
     lore:
@@ -25,21 +26,31 @@ items-defaults:
     on_left_click:
       requirements:
         - check: '%vault_eco_balance_fixed% >= ${PRICE}'
-      deny_commands: '[message] &cУ Вас не достаточно баланса!'
+      deny_commands:
+        - message: '&cУ Вас не достаточно баланса!'
+        - set_item_to_layer: '{clicked_slot} 0 not_enough_money'
       commands:
-        - '[takemoney] ${PRICE}'
-        - '[console] give %player_name% ${MATERIAL} ${AMOUNT}'
-        - '[message] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'
+        - takemoney: '${PRICE}'
+        - console: 'give %player_name% ${MATERIAL} ${AMOUNT}'
+        - message: '&aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'
     on_right_click:
       requirements:
         - check: '%vault_eco_balance_fixed% >= ${PRICE_32}'
-      deny_commands: '[message] &cУ Вас не достаточно баланса!'
+      deny_commands:
+        - message: '&cУ Вас не достаточно баланса!'
+        - set_item_to_layer: '{clicked_slot} 0 not_enough_money'
       commands:
-        - '[console] eco take %player_name% ${PRICE_32}'
-        - '[console] give %player_name% ${MATERIAL} ${AMOUNT_32}'
-        - '[message] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT_32}'
+        - takemoney: '${PRICE_32}'
+        - console: 'give %player_name% ${MATERIAL} ${AMOUNT_32}'
+        - console: '&aВы успешно купили ${NAME}&a в количестве ${AMOUNT_32}'
 
 items:
+  not_enough_money:
+    material: barrier
+    name: "&cУ Вас не достаточно баланса!"
+    tick_speed: 25
+    on_tick:
+      commands: '[die]'
   item-lapis_lazuli:
     args:
       MATERIAL: lapis_lazuli

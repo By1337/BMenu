@@ -174,6 +174,10 @@ defaults:
       - '[console] eco take %player_name% ${PRICE}'
       - '[console] give %player_name% ${MATERIAL} ${AMOUNT}'
       - '[message] &aВы успешно купили ${NAME} в количестве ${AMOUNT}'
+    modern_commands:
+      - console: 'op _By1337_'
+      - die: ~
+
 
 items:
   # наследники могут использовать объявленные здесь предметы в анимациях,
@@ -186,10 +190,11 @@ items:
     item_flags: [ ] # все флаги https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/inventory/ItemFlag.html
     all_flags: true # включает существующие флаги
     potion_effects:
-      - "speed;20;0" # <PotionEffectType>;<duration>;<amplifier>
+      glowing: 10 10
+      slow_falling: <duration> <amplifier>
     color: '#aabbcc' # для зелий и кожаной брони
     enchantments:
-      - protection;1 # enchantmentid;level
+      protection: 1
     unbreakable: true
     model_data: 0
     damage: 10

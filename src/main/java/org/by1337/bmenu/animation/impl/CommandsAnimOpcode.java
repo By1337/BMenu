@@ -1,20 +1,19 @@
 package org.by1337.bmenu.animation.impl;
 
 
-import dev.by1337.yaml.YamlValue;
-import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
 import org.by1337.bmenu.animation.FrameOpcodes;
+import org.by1337.bmenu.factory.MenuCodecs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class CommandsAnimOpcode implements FrameOpcode {
-    public static final YamlCodec<CommandsAnimOpcode> CODEC = YamlCodec.STRINGS.map(CommandsAnimOpcode::new, v -> v.commands);
+    public static final YamlCodec<CommandsAnimOpcode> CODEC = MenuCodecs.COMMANDS.map(CommandsAnimOpcode::new, v -> v.commands);
 
     private final List<String> commands;
 

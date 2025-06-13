@@ -2,6 +2,7 @@ package org.by1337.bmenu.requirement;
 
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
@@ -10,9 +11,11 @@ import org.by1337.blib.chat.Placeholderable;
 import org.by1337.bmenu.CommandRunner;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
+import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.factory.RequirementsFactory;
 import org.jetbrains.annotations.NotNull;
 
+import javax.xml.crypto.Data;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,33 +25,33 @@ public class Requirements {
         private final SchemaType schemaType = SchemaTypes.OBJECT
                 .asBuilder()
                 .properties("check", SchemaTypes.STRING)
-                .properties("commands", SchemaTypes.STRINGS)
-                .properties("deny_commands", SchemaTypes.STRINGS)
+                .properties("commands", MenuCodecs.COMMANDS.schema())
+                .properties("deny_commands", MenuCodecs.COMMANDS.schema())
                 .additionalProperties(false)
                 .required("check")
                 .build();
 
         @Override
-        public Requirement decode(YamlValue yamlValue) {
-            YamlMap yaml = yamlValue.getAsYamlMap();
-            String check = yaml.get("check").getAsString();
-            List<String> commands = yaml.get("commands").decode(YamlCodec.STRINGS, List.of());
-            List<String> denyCommands = yaml.get("deny_commands").decode(YamlCodec.STRINGS, List.of());
+        public DataResult<Requirement> decode(YamlValue yamlValue) {
+            YamlMap yaml = yamlValue.asYamlMap().getOrThrow();
+            String check = yaml.get("check").decode(YamlCodec.STRING).getOrThrow();
+            List<String> commands = yaml.get("commands").decode(MenuCodecs.COMMANDS, List.of()).getOrThrow();
+            List<String> denyCommands = yaml.get("deny_commands").decode(MenuCodecs.COMMANDS, List.of()).getOrThrow();
             if (check.startsWith("has") || check.startsWith("!has")) {
-                yaml.setRaw("$check-type", "has permission");
-                return new HasPermissionRequirement(
+                yaml.set("$check-type", "has permission");
+                return DataResult.success(new HasPermissionRequirement(
                         check.split(" ")[1],
                         check.startsWith("!"),
                         commands,
                         denyCommands
-                );
+                ));
             } else if (check.startsWith("nearby") || check.startsWith("!nearby")) {
                 String[] args = check.split(" ");
                 if (args.length != 6) {
                     throw new IllegalArgumentException("The condition expected 'nearby <world> <x> <y> <z> <radius>' but got '" + check + "'.");
                 }
-                yaml.setRaw("$check-type", "nearby");
-                return new NearbyRequirement(
+                yaml.set("$check-type", "nearby");
+                return DataResult.success(new NearbyRequirement(
                         args[1],
                         Integer.parseInt(args[2]),
                         Integer.parseInt(args[3]),
@@ -57,65 +60,65 @@ public class Requirements {
                         check.startsWith("!"),
                         commands,
                         denyCommands
-                );
+                ));
             } else {
                 String[] args = check.split(" ");
                 if (args.length == 3) {
                     String operator = args[1];
                     switch (operator) {
                         case "has", "!has" -> {
-                            yaml.setRaw("$check-type", "string contains");
-                            return new StringContainsRequirement(
+                            yaml.set("$check-type", "string contains");
+                            return DataResult.success(new StringContainsRequirement(
                                     args[0],
                                     args[2],
                                     operator.startsWith("!"),
                                     commands,
                                     denyCommands
-                            );
+                            ));
                         }
                         case "HAS", "!HAS" -> {
-                            yaml.setRaw("$check-type", "string equals ignorecase");
-                            return new StringEqualsIgnoreCaseRequirement(
+                            yaml.set("$check-type", "string equals ignorecase");
+                            return DataResult.success(new StringEqualsIgnoreCaseRequirement(
                                     args[0],
                                     args[2],
                                     operator.startsWith("!"),
                                     commands,
                                     denyCommands
-                            );
+                            ));
                         }
                         case "==", "!=" -> {
-                            yaml.setRaw("$check-type", "string equals");
-                            return new StringEqualsRequirement(
+                            yaml.set("$check-type", "string equals");
+                            return DataResult.success(new StringEqualsRequirement(
                                     args[0],
                                     args[2],
                                     operator.startsWith("!"),
                                     commands,
                                     denyCommands
-                            );
+                            ));
                         }
                         default -> {
-                            yaml.setRaw("$check-type", "math");
-                            return new MathRequirement(
+                            yaml.set("$check-type", "math");
+                            return DataResult.success(new MathRequirement(
                                     check,
                                     commands,
                                     denyCommands
-                            );
+                            ));
                         }
                     }
                 } else {
-                    yaml.setRaw("$check-type", "math");
-                    return new MathRequirement(
+                    yaml.set("$check-type", "math");
+                    return DataResult.success(new MathRequirement(
                             check,
                             commands,
                             denyCommands
-                    );
+                    ));
                 }
             }
         }
 
         @Override
         public YamlValue encode(Requirement requirement) {
-            return YamlValue.wrap("unsupported"); //todo
+            return YamlValue.wrap("unsupported");//todo
         }
 
         @Override
@@ -129,9 +132,9 @@ public class Requirements {
         final YamlCodec<List<Requirement>> LIST_CODEC = REQUIREMENT_CODEC.listOf();
 
         @Override
-        public Requirements decode(YamlValue yamlValue) {
-            if (yamlValue.isMap()) return RequirementsFactory.readLegacy(yamlValue);
-            return new Requirements(yamlValue.decode(LIST_CODEC));
+        public DataResult<Requirements> decode(YamlValue yamlValue) {
+            if (yamlValue.isMap()) return DataResult.success(RequirementsFactory.readLegacy(yamlValue));
+            return yamlValue.decode(LIST_CODEC).mapValue(Requirements::new);
         }
 
         @Override
