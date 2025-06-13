@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.by1337.bmenu</groupId>
     <artifactId>BMenu</artifactId>
-    <version>1.6</version>
+    <version>1.7</version>
 
     <properties>
         <java.version>16</java.version>
@@ -107,12 +107,6 @@
             <artifactId>paper-api</artifactId>
             <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>dev.by1337.yaml</groupId>
-            <artifactId>byaml-bukkit</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.MilkBowl</groupId>

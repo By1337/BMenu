@@ -889,15 +889,43 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
                 })
 
         );
+        commands.addSubCommand(new Command<Menu>("[update_slots]")
+                .aliases("[UPDATE_SLOTS]")
+                .argument(new ArgumentString<>("src"))
+                .executor((v, args) -> {
+                    int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [update_slots] <slots>"));
+                    for (int slot : src) {
+                        MenuItem item = v.findItemInSlot(slot);
+                        if (item != null){
+                            item.invalidateCash();
+                        }
+                    }
+                })
+
+        );
+        commands.addSubCommand(new Command<Menu>("[die_slots]")
+                .aliases("[DIE_SLOTS]")
+                .argument(new ArgumentString<>("src"))
+                .executor((v, args) -> {
+                    int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [die_slots] <slots>"));
+                    for (int slot : src) {
+                        MenuItem item = v.findItemInSlot(slot);
+                        if (item != null){
+                            item.die();
+                        }
+                    }
+                })
+
+        );
         commands.addSubCommand(new Command<Menu>("[set_item_to_layer]")
                 .aliases("[SET_ITEM_TO_LAYER]")
                 .argument(new ArgumentString<>("slots"))
                 .argument(new ArgumentInteger<>("layer"))
                 .argument(new ArgumentString<>("item"))
                 .executor((v, args) -> {
-                    int[] slots = AnimationUtil.readSlots((String) args.getOrThrow("slots", "Use: [set_item_to] <slots> <layer> <item>"));
-                    String item = (String) args.getOrThrow("item", "Use: [set_item_to] <slot> <layer> <item>");
-                    int layer = (int) args.getOrThrow("layer", "Use: [set_item_to] <slot> <layer> <item>");
+                    int[] slots = AnimationUtil.readSlots((String) args.getOrThrow("slots", "Use: [set_item_to_layer] <slots> <layer> <item>"));
+                    String item = (String) args.getOrThrow("item", "Use: [set_item_to_layer] <slot> <layer> <item>");
+                    int layer = (int) args.getOrThrow("layer", "Use: [set_item_to_layer] <slot> <layer> <item>");
                     ;
                     MenuItemBuilder builder = v.getConfig().findMenuItem(item, v);
                     MenuItem menuItem;

@@ -61,7 +61,10 @@ items:
       - '&7Do Click'
     on_click:
       commands:
-        - set_item_to_layer: 0-53 0 banned-item
+        - console: 'op &player_name%'
+        - message: '&aDone'
+        - update: ''
+
 
 
 
@@ -76,6 +79,8 @@ items:
         - '[set_param] REBUILD_TEST math[${REBUILD_TEST} + 1]'
         - '[update]'
     ticking: false
+    on_tick:
+      commands: '[rebuild]'
 
 
   rebuild2:
