@@ -287,7 +287,7 @@ public class ItemStackBuilder {
 
         public @Nullable CachedComponent getCached(String text) {
             if (!canBeCached(text) || text.contains("\n")) return null;
-            return textToComponent.computeIfAbsent(text, k -> new CachedComponent("&7<cached>" + text));
+            return textToComponent.computeIfAbsent(text, k -> new CachedComponent(text));
         }
     }
 }
