@@ -924,6 +924,15 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
                 })
 
         );
+        commands.addSubCommand(new Command<Menu>("[set_title]")
+                .aliases("[SET_TITLE]")
+                .argument(new ArgumentString<>("title"))
+                .executor((v, args) -> {
+                    String title = (String) args.getOrThrow("title", "Use: [set_title] <title>");
+                    v.setTitle(title);
+                })
+
+        );
     }
 
 }
