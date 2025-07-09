@@ -121,10 +121,11 @@ public class ItemStackBuilder {
             buildBase(item);
             itemStack = toNms(item);
         }
-        if (!displayCached)
-            setDisplay(itemStack, placeholderable, message, builder.lore(), builder.name(), placeholders == null ? s -> s : placeholders);
-        setAmountAndDamage(itemStack, placeholderable, placeholders == null ? s -> s : placeholders);
-        buildNMS(itemStack);
+        if (!displayCached || i != null)
+            setDisplay(itemStack, placeholderable, message, builder.lore(), builder.name(), placeholders == null ? s -> s : placeholders); //todo air check
+
+        setAmountAndDamage(itemStack, placeholderable, placeholders == null ? s -> s : placeholders); //todo air check
+        buildNMS(itemStack); //todo air check
 
         return asBukkitMirror(itemStack);
     }

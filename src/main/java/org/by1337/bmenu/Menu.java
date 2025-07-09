@@ -114,10 +114,11 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
             // что может нарушить отображение анимаций.
             INV_UTIL.disableAutoFlush(viewer);
 
-            onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
             if (animator == null && config.getAnimation() != null) {
                 animator = config.getAnimation().createAnimator();
             }
+            onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
+
             if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventory)) {
                 return;
             }

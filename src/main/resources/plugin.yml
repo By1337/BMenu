@@ -1,5 +1,5 @@
 name: BMenu
-author:
+author: By1337
 version: '${project.version}'
 main: org.by1337.bmenu.BMenu
 api-version: '1.16'

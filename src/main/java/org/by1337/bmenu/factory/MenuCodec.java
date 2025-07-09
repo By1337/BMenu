@@ -165,7 +165,9 @@ public class MenuCodec {
             builder.properties(field.name(), field.codec().schema());
         }
         builder.patternProperties("^items-", MenuItemBuilder.YAML_CODEC.schema().asMap());
+        builder.properties("include", SchemaTypes.STRING.listOf());
         builder.definitions(MenuCodecs.COMMANDS_SCHEMA_TYPE_REF_NAME, MenuCodecs.COMMANDS_SCHEMA_TYPE);
+        builder.additionalProperties(true);
         SCHEMA_TYPE = builder.build();
     }
 

@@ -150,7 +150,7 @@ public class MenuCodecs {
             return yamlValue.decode(STRING).flatMap(s -> {
                 String[] args0 = s.split(";");
                 if (args0.length != 2) {
-                    return DataResult.error("expected <Enchantment>;<duration> <amplifier>, got '" + s + "'");
+                    return DataResult.error("expected '<Enchantment>;<duration>', got '" + s + "'");
                 }
                 return BukkitYamlCodecs.NAMESPACED_KEY.decode(YamlValue.wrap(args0[0].toLowerCase(Locale.ENGLISH))).flatMap(key -> {
                     Enchantment type = Enchantment.getByKey(key);

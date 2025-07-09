@@ -93,14 +93,14 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         if (itemStackBuilder == null) itemStackBuilder = new ItemStackBuilder(this);
 
 
-        if (staticItem) {
-            staticInstance = itemStackBuilder.build(itemStack, menu.loader.getMessage(), placeholder, null);
+        if (staticItem && itemStack == null) {
+            staticInstance = itemStackBuilder.build(null, menu.loader.getMessage(), placeholder, null);
         }
 
         Supplier<@Nullable MenuItem> builder = () -> build(menu, itemStack, placeholderables);
         MenuItem item = new MenuItem(
                 slots,
-                (t) -> staticInstance != null ? staticInstance : itemStackBuilder.build(itemStack, menu.loader.getMessage(), placeholder, t.getLocalArgs()),
+                (t) -> staticInstance != null && itemStack == null ? staticInstance : itemStackBuilder.build(itemStack, menu.loader.getMessage(), placeholder, t.getLocalArgs()),
                 clicks,
                 tickListener,
                 builder,
