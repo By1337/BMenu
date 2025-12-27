@@ -9,6 +9,7 @@ import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.util.ObjectUtil;
+import org.by1337.bmenu.util.StringUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +44,7 @@ public class RegexMatchesRequirement implements Requirement {
     @Override
     public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
         Matcher m = pattern.matcher(placeholderable.replace(input));
-        return not ? !m.find() : m.find();
+        return not != m.find();
     }
 
     @Override
@@ -54,5 +55,16 @@ public class RegexMatchesRequirement implements Requirement {
     @Override
     public List<String> getDenyCommands() {
         return denyCommands;
+    }
+
+    @Override
+    public boolean state() {
+        Matcher m = pattern.matcher(input);
+        return not != m.find();
+    }
+
+    @Override
+    public boolean compilable() {
+        return StringUtil.hasNoPlaceholders(input);
     }
 }

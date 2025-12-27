@@ -27,10 +27,6 @@ public class MenuConfig implements MenuItemLookup {
     private final Set<SpacedNameKey> onlyOpenFrom;
     private final Map<String, String> args;
     private final Map<String, MenuItemBuilder> idToItems;
-    @Deprecated
-    private final RawYamlContext context;
-    @Deprecated
-    private final CashedYamlContext cashedContext;
     private final YamlMap yamlConfig;
     private final CashedYamlMap cashedYamlConfig;
     private final MenuLoader loader;
@@ -40,11 +36,12 @@ public class MenuConfig implements MenuItemLookup {
     private final CommandList commandList;
     private final Map<String, CommandRequirements> menuEventListeners;
     private Object data;
+    private final long clickCooldown;
 
     private final Map<String, Animator.AnimatorContext> animations;
     private final List<File> fromFiles;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, YamlMap context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, YamlMap context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, long clickCooldown, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
@@ -53,8 +50,7 @@ public class MenuConfig implements MenuItemLookup {
         this.onlyOpenFrom = new HashSet<>(onlyOpenFrom);
         this.args = args;
         this.idToItems = idToItems;
-        this.context = new RawYamlContext(context);
-        cashedContext = new CashedYamlContext(this.context);
+        this.clickCooldown = clickCooldown;
         yamlConfig = context;
         cashedYamlConfig = new CashedYamlMap(yamlConfig);
 
@@ -105,7 +101,6 @@ public class MenuConfig implements MenuItemLookup {
             superMenu.generate(menu);
         }
         MenuItem[] matrix = menu.matrix;
-        MenuItem[] animationMask = menu.animationMask;
         int invSize = menu.matrix.length;
 
         for (MenuItemBuilder builder : items) {
@@ -160,11 +155,6 @@ public class MenuConfig implements MenuItemLookup {
 
     public Map<String, CommandRequirements> getMenuEventListeners() {
         return menuEventListeners;
-    }
-
-    @Deprecated
-    public RawYamlContext getContext() {
-        return context;
     }
 
     public YamlMap getYamlConfig() {
@@ -243,16 +233,16 @@ public class MenuConfig implements MenuItemLookup {
         this.data = data;
     }
 
-    public CashedYamlContext getCashedContext() {
-        return cashedContext;
-    }
-
     public Map<String, Animator.AnimatorContext> getAnimations() {
         return animations;
     }
 
     public List<File> getFromFiles() {
         return fromFiles;
+    }
+
+    public long clickCooldown() {
+        return clickCooldown;
     }
 
     @Override

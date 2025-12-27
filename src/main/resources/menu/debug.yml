@@ -1,3 +1,11 @@
+# replace
+# {rand_10} -> {rand:10}
+# {rand_100} -> {rand:100}
+# {rand_1000} -> {rand:1000}
+# {rand_10000} -> {rand:10000}
+# {rand_100000} -> {rand:100000}
+# math[(.*?)] -> {math:(.*?)}
+# ${(.*?)} -> {(.*?)}
 id: debug:main
 provider: default
 type: chest
@@ -20,7 +28,46 @@ items-custom-section: # schema support
     material: dirt
     lore: '&7one line lore'
 
+
 items:
+  test2:
+    oneOf:
+      - slot: 10
+        material: gold_nugget
+        name: '&cУ Вас меньше 100 монет'
+        view_requirement:
+          requirements:
+            - check: '%vault_eco_balance_fixed% < 100'
+      - slot: 10
+        material: gold_ingot
+        name: '&cУ Вас меньше 1000 монет'
+        view_requirement:
+          requirements:
+            - check: '%vault_eco_balance_fixed% < 1000'
+      - slot: 10
+        material: gold_block
+        name: '&cУ Вас больше 1000 монет'
+
+  test:
+    oneOf:
+      test:
+        slot: 10
+        material: gold_nugget
+        name: '&cУ Вас меньше 100 монет'
+        view_requirement:
+          requirements:
+            - check: '%vault_eco_balance_fixed% < 100'
+      test2:
+        slot: 10
+        material: gold_ingot
+        name: '&cУ Вас меньше 1000 монет'
+        view_requirement:
+          requirements:
+            - check: '%vault_eco_balance_fixed% < 1000'
+      test3:
+        slot: 10
+        material: gold_block
+        name: '&cУ Вас больше 1000 монет'
   one-line-lore:
     slot: 0
     material: di
@@ -64,8 +111,6 @@ items:
         - console: 'op &player_name%'
         - message: '&aDone'
         - update: ''
-
-
 
 
   rebuild1:
@@ -145,6 +190,9 @@ items:
     on_click:
       commands:
         - '[set_item_to_layer] 20 0 banned-item'
+
+
+
 
   banned-item:
     args:

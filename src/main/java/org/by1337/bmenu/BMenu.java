@@ -8,6 +8,8 @@ import dev.by1337.yaml.codec.schema.SchemaHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -41,6 +43,7 @@ public class BMenu extends JavaPlugin {
 
     @Override
     public void onLoad() {
+
         if (!new File(getDataFolder(), "menu").exists()) {
             ResourceUtil.saveIfNotExist("menu/animation-54.yml", this);
             ResourceUtil.saveIfNotExist("menu/example-seller.yml", this);
@@ -123,7 +126,7 @@ public class BMenu extends JavaPlugin {
                                 }
 
                                 m.open();
-                            } catch (Throwable t) {
+                            } catch (Exception t) {
                                 player.sendMessage(
                                         Component.text("Меню не удалось открыть с ошибкой: ")
                                                 .append(Component.text(t.getMessage()))

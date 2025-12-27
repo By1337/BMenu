@@ -7,15 +7,13 @@ title: '&7Кикнуть игрока ${PLAYER}'
 args:
   PLAYER: 'null'
 
-on_open: &on_open
-  requirements:
-    - check: '${PLAYER} != null'
-      deny_commands:
-        - '[message] &cВы должны указать игрока!'
-        - '[close]'
-
 menu-events:
-  on_open: *on_open
+  on_open: &on_open
+    requirements:
+      - check: '${PLAYER} != null'
+        deny_commands:
+          - '[message] &cВы должны указать игрока!'
+          - '[close]'
   on_reopen: *on_open
 
 items:

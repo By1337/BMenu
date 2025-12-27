@@ -1,5 +1,8 @@
 package org.by1337.bmenu;
 
+import dev.by1337.plc.PapiResolver;
+import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.Placeholders;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -12,7 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.scheduler.BukkitTask;
 import org.by1337.blib.BLib;
-import org.by1337.blib.chat.placeholder.Placeholder;
+import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.command.Command;
 import org.by1337.blib.command.CommandException;
 import org.by1337.blib.command.StringReader;
@@ -31,20 +34,38 @@ import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.hook.VaultHook;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
 import org.by1337.bmenu.requirement.CommandRequirements;
-import org.by1337.bmenu.util.math.MathReplacer;
+import org.by1337.bmenu.util.math.FastExpressionParser;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.IntFunction;
 
-public abstract class Menu extends Placeholder implements InventoryHolder, CommandRunner {
-    private static InventoryUtil INV_UTIL = BLib.getApi().getInventoryUtil();
+public abstract class Menu implements InventoryHolder, CommandRunner, Placeholderable {
+    private static final InventoryUtil INV_UTIL = BLib.getApi().getInventoryUtil();
     private static final Command<Menu> commands;
     private static final Logger log = LoggerFactory.getLogger("BMenu");
+    private static final Random rand = new Random();
+    private static final DecimalFormat df = new DecimalFormat("#.##");
+    private static final PlaceholderResolver<Menu> MENU_PLACEHOLDERS = Placeholders.<Menu>create()
+            .withContext("has_back_menu", m -> m.previousMenu != null)
+            .withContext("clicked_slot", m -> m.lastClickedSlot)
+            .of("rand_bool", rand::nextBoolean)
+            .withParams("rand", v -> tryToInt(v, rand::nextInt))
+            .withParams("math", in -> {
+                try {
+                    return df.format(FastExpressionParser.parse(in));
+                } catch (FastExpressionParser.MathFormatException e) {
+                    log.error(e.getMessage(), e);
+                }
+                return null;
+            })
+            .and(PapiResolver.INSTANCE.map(m -> m.viewer));
+
 
     protected final MenuConfig config;
     protected final MenuLoader loader;
@@ -62,8 +83,14 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
     protected String lastTitle;
     protected final List<MenuItem[]> externalLayers;
     protected int lastClickedSlot = 0;
+    protected long clickCooldown;
+    protected final Placeholders<Menu> runtimePlaceholders;
+    private final PlaceholderResolver<Menu> placeholderResolver;
 
     public Menu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
+        runtimePlaceholders = new Placeholders<>();
+        placeholderResolver = MENU_PLACEHOLDERS.and(runtimePlaceholders);
+        clickCooldown = config.clickCooldown();
         this.config = config;
         loader = config.getLoader();
         this.viewer = viewer;
@@ -71,10 +98,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
         animationMask = newMatrix();
         args = new HashMap<>(config.getArgs());
         this.previousMenu = previousMenu;
-        registerPlaceholders(RandomPlaceholders.getInstance());
-        args.keySet().forEach(k -> registerPlaceholder("${" + k + "}", () -> args.get(k)));
-        registerPlaceholder("{has_back_menu}", () -> String.valueOf(previousMenu != null));
-        registerPlaceholder("{clicked_slot}", () -> lastClickedSlot);
+        args.keySet().forEach(k -> runtimePlaceholders.of(k, () -> args.get(k)));
         externalLayers = new ArrayList<>();
     }
 
@@ -268,6 +292,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
     }
 
     protected void createInventory(int size, Component title, InventoryType type) {
+
         if (type == InventoryType.CHEST) {
             inventory = Bukkit.createInventory(this, size, title);
         } else {
@@ -277,12 +302,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
 
     @Override
     public String replace(String string) {
-        try {
-            return MathReplacer.replace(loader.getMessage().setPlaceholders(viewer, super.replace(string)));
-        } catch (ParseException e) {
-            loader.getLogger().error("Failed to parse math", e);
-            return string;
-        }
+        return placeholderResolver.replace(string, this);
     }
 
     protected abstract boolean runCommand(String cmd) throws CommandException;
@@ -319,11 +339,16 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
     }
 
     public void onClick(InventoryDragEvent e) {
-        lastClickTime = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
+        if (now - lastClickTime < 100) return;
+        lastClickTime = now;
     }
 
     public void onClick(InventoryClickEvent e) {
-        lastClickTime = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
+        if (now - lastClickTime < 100) return;
+        lastClickTime = now;
+
         if (e.getCurrentItem() == null) {
             return;
         }
@@ -424,9 +449,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
 
     public void addArgument(String key, String value) {
         args.put(key, value);
-        String name = "${" + key + "}";
-        placeholders.remove(name);
-        registerPlaceholder(name, () -> args.get(key));
+        runtimePlaceholders.of(key, () -> args.get(key));
     }
 
     /**
@@ -451,7 +474,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
     public void onHotReload(@NotNull Menu oldMenu) {
         args.putAll(oldMenu.args);
         for (String param : args.keySet()) {
-            registerPlaceholder("${" + param + "}", () -> args.get(param));
+            runtimePlaceholders.of(param, () -> args.get(param));
         }
     }
 
@@ -491,6 +514,15 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
             } catch (Throwable t) {
                 loader.getLogger().error("Failed to parse commands {}", rawNBT, t);
             }
+        }
+    }
+
+    private static <R> @Nullable R tryToInt(String in, IntFunction<R> func) {
+        try {
+            double d = FastExpressionParser.parse(in);
+            return func.apply((int) d);
+        } catch (FastExpressionParser.MathFormatException e) {
+            return null;
         }
     }
 
@@ -676,9 +708,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
                 .executor((v, args) -> {
                             String param = (String) args.getOrThrow("param", "Use [SET_PARAM] <param> <value>");
                             String value = (String) args.getOrThrow("value", "Use [SET_PARAM] <param> <value>");
-                            if (v.args.put(param, value) == null) {
-                                v.registerPlaceholder("${" + param + "}", () -> v.args.get(param));
-                            }
+                            v.addArgument(param, value);
                         }
                 )
         );
@@ -692,7 +722,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
                                 throw new CommandException("No such item: '{}'. Command [IMPORT_PARAMS]", param);
                             }
                             v.args.putAll(builder.getArgs());
-                            v.args.keySet().forEach(k -> v.registerPlaceholder("${" + k + "}", () -> v.args.get(k)));
+                            v.args.keySet().forEach(k -> v.runtimePlaceholders.of(k, () -> v.args.get(k)));
                         }
                 )
         );
@@ -897,7 +927,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
                     int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [update_slots] <slots>"));
                     for (int slot : src) {
                         MenuItem item = v.findItemInSlot(slot);
-                        if (item != null){
+                        if (item != null) {
                             item.invalidateCash();
                         }
                     }
@@ -911,7 +941,7 @@ public abstract class Menu extends Placeholder implements InventoryHolder, Comma
                     int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [die_slots] <slots>"));
                     for (int slot : src) {
                         MenuItem item = v.findItemInSlot(slot);
-                        if (item != null){
+                        if (item != null) {
                             item.die();
                         }
                     }

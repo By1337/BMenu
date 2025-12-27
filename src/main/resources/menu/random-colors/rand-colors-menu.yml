@@ -134,7 +134,7 @@ items:
 animation:
   - tick: 0
     opcodes:
-      - set: ${COLOR} 4
+      - set: '{COLOR} 4'
   - tick: 1
     opcodes:
       - copy: 4 3-5

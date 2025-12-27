@@ -44,6 +44,7 @@ public class MenuCodec {
     private Map<String, Animator.AnimatorContext> animations = new HashMap<>();
     private CommandList commandList = new CommandList(new HashMap<>());
     private Map<String, CommandRequirements> menuEventListeners = new HashMap<>();
+    private long clickCooldown = 100;
     private final YamlCodec<List<MenuConfig>> other_configs_loader = new YamlCodec<List<MenuConfig>>() {
         @Override
         public DataResult<List<MenuConfig>> decode(YamlValue yamlValue) {
@@ -96,6 +97,7 @@ public class MenuCodec {
                 animator,
                 commandList,
                 menuEventListeners,
+                clickCooldown,
                 animations,
                 this.ctx.loadedFiles
         );
@@ -155,7 +157,7 @@ public class MenuCodec {
         FIELDS.add(YamlCodec.mapOf(YamlCodec.STRING, Animator.AnimatorContext.CODEC).fieldOf("animations", m -> m.animations, (m, v) -> m.animations = v));
         FIELDS.add(CommandList.CODEC.fieldOf("commands-list", m -> m.commandList, (m, v) -> m.commandList = v));
         FIELDS.add(YamlCodec.mapOf(YamlCodec.STRING, CommandRequirements.CODEC).fieldOf("menu-events", m -> m.menuEventListeners, (m, v) -> m.menuEventListeners = v));
-
+        FIELDS.add(YamlCodec.LONG.fieldOf("click_cooldown", m -> m.clickCooldown, (m, v) -> m.clickCooldown = v));
 
         var builder = JsonSchemaTypeBuilder
                 .create()

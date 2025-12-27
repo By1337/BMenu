@@ -127,7 +127,13 @@ public class MenuLoader implements Listener {
     }
 
     public void loadMenus() {
-        loadMenus0(homeDir).stream().filter(config -> config.getId() != null).forEach(this::registerMenu);
+        loadMenus0(homeDir).stream().filter(config -> config.getId() != null).forEach(m -> {
+            try {
+                registerMenu(m);
+            } catch (Exception e) {
+                logger.error("Failed to load menu {}! cuz {}", m.getId(), e.getMessage());
+            }
+        });
     }
 
     private List<MenuConfig> loadMenus0(File dir) {
@@ -139,7 +145,7 @@ public class MenuLoader implements Listener {
             if (file.getName().endsWith(".yml") || file.getName().endsWith(".yaml")) {
                 try {
                     result.add(MenuFactory.load(file, this));
-                } catch (Throwable t) {
+                } catch (Exception t) {
                     logger.error("Failed to load menu config File: {}", file.getPath(), t);
                 }
             }
@@ -225,7 +231,7 @@ public class MenuLoader implements Listener {
             throw new IllegalArgumentException("Can't register anonymous menu config");
         }
         if (menuRegistry.has(config.getId())) {
-            throw new IllegalArgumentException("Menu config already exists");
+            throw new IllegalArgumentException("Menu already exists");
         } else {
             menuRegistry.put(config.getId(), config);
         }
@@ -235,7 +241,6 @@ public class MenuLoader implements Listener {
     public void onClick(InventoryClickEvent event) {
         if (event.getInventory().getHolder() instanceof Menu menu && menu.getLoader() == this) {
             event.setCancelled(true);
-            if (System.currentTimeMillis() - menu.getLastClickTime() < 100) return;
             menu.onClick(event);
         }
     }
@@ -244,7 +249,6 @@ public class MenuLoader implements Listener {
     public void onClick(InventoryDragEvent event) {
         if (event.getInventory().getHolder() instanceof Menu menu && menu.getLoader() == this) {
             event.setCancelled(true);
-            if (System.currentTimeMillis() - menu.getLastClickTime() < 100) return;
             menu.onClick(event);
         }
     }

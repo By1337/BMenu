@@ -23,8 +23,8 @@ public abstract class MultiPageMenu<T> extends Menu {
     public MultiPageMenu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
         super(config, viewer, previousMenu);
         itemSlots = AnimationUtil.readSlots("0-9");
-        registerPlaceholder("{max_page}", () -> maxPage == 0 ? 1 : maxPage);
-        registerPlaceholder("{current_page}", () -> currentPage + 1);
+     //   registerPlaceholder("{max_page}", () -> maxPage == 0 ? 1 : maxPage);
+     //   registerPlaceholder("{current_page}", () -> currentPage + 1);
         buffer = new MenuItem[matrix.length];
     }
 

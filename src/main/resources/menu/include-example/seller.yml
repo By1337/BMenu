@@ -14,14 +14,14 @@ items-defaults:
     lore:
       - '&r '
       - '&r &7Нажмите лкм'
-      - '&r &7чтобы купить ${NAME}&7 за ${PRICE_FORMAT} монет'
+      - '&r &7чтобы купить {NAME}&7 за {PRICE_FORMAT} монет'
       - '&r '
     on_click:
       requirements:
-        - check: '%vault_eco_balance_fixed% >= ${PRICE}'
+        - check: '%vault_eco_balance_fixed% >= {PRICE}'
       deny_commands: '[MESSAGE] &cУ Вас не достаточно баланса!'
       commands: # используем [IMPORT_PARAMS] чтобы в меню example:prem-seller-confirm стали доступны плейсы текущего предмета
-        - '[OPEN] example:prem-seller-confirm ["[SET_PARAM] SELECTED_ITEM ${CURRENT_ITEM}", "[IMPORT_PARAMS] ${CURRENT_ITEM}"]'
+        - '[OPEN] example:prem-seller-confirm ["[SET_PARAM] SELECTED_ITEM {CURRENT_ITEM}", "[IMPORT_PARAMS] {CURRENT_ITEM}"]'
 items:
   gui-lime:
     material: lime_stained_glass_pane

@@ -1,18 +1,24 @@
 package org.by1337.bmenu.factory.fixer;
 
+import dev.by1337.plc.PlaceholderFormat;
+import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.Placeholders;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
-import dev.by1337.yaml.codec.YamlCodec;
-import org.by1337.blib.chat.placeholder.Placeholder;
-import org.by1337.bmenu.factory.MenuFilePostprocessor;
+import dev.by1337.yaml.codec.DataResult;
+import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.item.MenuItemTickListener;
-import org.by1337.bmenu.util.math.MathReplacer;
+import org.by1337.bmenu.util.math.FastExpressionParser;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class ItemFixer {
     public static final String STATIC_LORE_TAG = "<static>";
     private static final YamlValue REPLACE_TICKING = MenuItemTickListener.CODEC.encode(MenuItemTickListener.DEFAULT);
+    private static final Logger log = LoggerFactory.getLogger("BMenu");
 
     public static void fixItem(YamlMap map) {
         if (map.has("$fixed")) return;
@@ -89,26 +95,46 @@ public class ItemFixer {
 
     @SuppressWarnings("unchecked")
     private static void replacePlaceholders(YamlMap item) {
-        if (item.has("args")){
-            Map<String, Object> rawArgs = (Map<String, Object>) MenuFilePostprocessor.deepCopy(item.getRaw("args"));
+        PlaceholderResolver<Void> placeholders = mapToResolver("args", item)
+                .and(mapToResolver("local_args", item))
+                .and(new PlaceholderResolver<>() {
+                    @Override
+                    public boolean has(String key, PlaceholderFormat format) {
+                        return key.equals("math");
+                    }
 
-            Map<String, String> args = argsPostProcessor(rawArgs);
-            Placeholder placeholder = new Placeholder();
-            args.forEach((key, value) -> placeholder.registerPlaceholder("${" + key + "}", () -> value));
-            Map<String, Object> result = (Map<String, Object>) replacePlaceholders(item.getRaw(), placeholder);
-            item.getRaw().clear();
-            item.getRaw().putAll(result);
-            item.set("args", args);
-        }
-        if (item.has("local_args")){
-            Map<String, Object> rawArgs = (Map<String, Object>) MenuFilePostprocessor.deepCopy(item.getRaw("local_args"));
-            Map<String, String> args = argsPostProcessor(rawArgs);
-            item.set("local_args", args);
+                    @Override
+                    public @Nullable String replace(String key, String params, @Nullable Void ctx, PlaceholderFormat format) {
+                        if (params.contains("%") || params.contains("{"))
+                            return null; // сейчас не известны не которые плейсы
+                        try {
+                            return String.valueOf(FastExpressionParser.parse(params));
+                        } catch (FastExpressionParser.MathFormatException e) {
+                            log.error(e.getMessage(), e);
+                        }
+                        return null;
+                    }
+                });
+
+        Map<String, Object> copied = (Map<String, Object>) replacePlaceholders(item.getRaw(), placeholders);
+        item.getRaw().clear();
+        item.getRaw().putAll(copied);
+    }
+
+    private static PlaceholderResolver<Void> mapToResolver(String key, YamlMap map) {
+        DataResult<Map<String, String>> decoded = map.get(key).decode(MenuCodecs.ARGS_CODEC);
+        if (decoded.hasResult()) {
+            var result = decoded.result();
+            Placeholders<Void> placeholders = new Placeholders<>();
+            result.forEach(placeholders::of);
+            return placeholders;
+        } else {
+            return new Placeholders<>();
         }
     }
 
     @SuppressWarnings("unchecked")
-    private static Object replacePlaceholders(Object in, Placeholder argsReplacer) {
+    private static Object replacePlaceholders(Object in, PlaceholderResolver<Void> argsReplacer) {
         if (in instanceof Map<?, ?> m) {
             Map<String, Object> map = (Map<String, Object>) m;
             Map<String, Object> result = new LinkedHashMap<>();
@@ -123,26 +149,9 @@ public class ItemFixer {
             }
             return result;
         } else if (in instanceof String s) {
-            return argsReplacer.replace(s);
+            return argsReplacer.replace(s, null);
         } else {
             return in;
         }
-    }
-
-    private static Map<String, String> argsPostProcessor(Map<String, Object> rawArgs) {
-        Map<String, String> args = new LinkedHashMap<>();
-        Placeholder placeholder = new Placeholder();
-
-        for (String key : rawArgs.keySet()) {
-            String param = YamlCodec.MULTI_LINE_STRING.decode(YamlValue.wrap(rawArgs.get(key))).getOrThrow();
-            param = placeholder.replace(param);
-            if (hasNoPlaceholders(param)) {
-                param = MathReplacer.safeReplace(param);
-            }
-            args.put(key, param);
-            final String finalParam = param;
-            placeholder.registerPlaceholder("${" + key + "}", () -> finalParam);
-        }
-        return args;
     }
 }

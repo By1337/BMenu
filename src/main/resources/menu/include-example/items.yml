@@ -9,7 +9,7 @@ items-892138827564874687348:
       PRICE_FORMAT: '10,000'
       AMOUNT: 1
       NAME: '&6Тотем'
-    name: ${NAME}
+    name: '{NAME}'
     material: totem_of_undying
   item-elytra: &seller-elytra
     args:
@@ -18,7 +18,7 @@ items-892138827564874687348:
       PRICE: 20000
       AMOUNT: 1
       NAME: '&6Элитры'
-    name: ${NAME}
+    name: '{NAME}'
     material: elytra
   item-creeper: &seller-creeper
     args:
@@ -27,5 +27,5 @@ items-892138827564874687348:
       PRICE: 15000
       AMOUNT: 1
       NAME: '&6Яйцо призыва крипера'
-    name: ${NAME}
+    name: '{NAME}'
     material: creeper_spawn_egg

@@ -15,9 +15,41 @@ public class MenuFilePostprocessor {
 
     public static YamlMap apply(String data) throws InvalidMenuConfigException {
         YamlMap yamlMap = YamlMap.loadFromString(data);
-
+        fixPlaceholders(yamlMap.getRaw());
         process(yamlMap.getRaw(), "");
         return yamlMap;
+    }
+
+    //{rand_10} -> {rand:10}
+    //{rand_100} -> {rand:100}
+    //{rand_1000} -> {rand:1000}
+    //{rand_10000} -> {rand:10000}
+    //{rand_100000} -> {rand:100000}
+    //math[(.*?)] -> {math:(.*?)}
+    //${(.*?)} -> {(.*?)}
+    private static Object fixPlaceholders(Object o) {
+        if (o instanceof Map<?, ?> m) {
+            m.entrySet().forEach(entry -> {
+                Object value = entry.getValue();
+                ((Map.Entry)entry).setValue(fixPlaceholders(value));
+            });
+            return o;
+        } else if (o instanceof List<?>) {
+            ((List<Object>) o).replaceAll(v -> fixPlaceholders(v));
+            return o;
+        } else if (o instanceof String s) {
+            return s
+                    .replace("{rand_10}", "{rand:10}")
+                    .replace("{rand_100}", "{rand:100}")
+                    .replace("{rand_1000}", "{rand:1000}")
+                    .replace("{rand_10000}", "{rand:10000}")
+                    .replace("{rand_100000}", "{rand:100000}")
+                    .replaceAll("math\\[(.*?)]", "{math:$1}")
+                    .replaceAll("\\$\\{(.*?)}", "{$1}")
+                    ;
+        } else {
+            return o;
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -5,7 +5,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.by1337.blib.BLib;
 import org.by1337.blib.util.Version;
-import org.by1337.bmenu.util.math.MathReplacer;
+import org.by1337.bmenu.util.math.FastExpressionParser;
 import org.jetbrains.annotations.Nullable;
 
 public class CachedComponent {
@@ -17,10 +17,10 @@ public class CachedComponent {
     public CachedComponent(String source) {
         this.source = source;
         if (canBeCached(source)) {
-            cached = BLib.getApi().getMessage().componentBuilder(MathReplacer.safeReplace(source)).decoration(TextDecoration.ITALIC, false);
-            if (JSON_SUPPORT){
+            cached = BLib.getApi().getMessage().componentBuilder(FastExpressionParser.replacePlaceholders(source)).decoration(TextDecoration.ITALIC, false);
+            if (JSON_SUPPORT) {
                 cachedJson = GsonComponentSerializer.gson().serializer().toJson(cached);
-            }else {
+            } else {
                 cachedJson = null;
             }
         } else {
@@ -28,7 +28,8 @@ public class CachedComponent {
             cachedJson = null;
         }
     }
-    public boolean isCached(){
+
+    public boolean isCached() {
         return cached != null;
     }
 

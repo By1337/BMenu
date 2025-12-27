@@ -10,6 +10,7 @@ import org.by1337.blib.configuration.YamlContext;
 import org.by1337.blib.configuration.YamlValue;
 import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.util.ObjectUtil;
+import org.by1337.bmenu.util.StringUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,7 @@ public class StringEqualsRequirement implements Requirement {
     @Override
     public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
         boolean b = placeholderable.replace(input).equals(placeholderable.replace(output));
-        return not ? !b : b;
+        return not != b;
     }
 
     @Override
@@ -61,4 +62,13 @@ public class StringEqualsRequirement implements Requirement {
         return denyCommands;
     }
 
+    @Override
+    public boolean state() {
+        return not != input.equals(output);
+    }
+
+    @Override
+    public boolean compilable() {
+        return StringUtil.hasNoPlaceholders(input) && StringUtil.hasNoPlaceholders(output);
+    }
 }

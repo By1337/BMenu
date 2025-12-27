@@ -1,5 +1,6 @@
 package org.by1337.bmenu.factory;
 
+import blib.com.mojang.serialization.Codec;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import dev.by1337.yaml.BukkitYamlCodecs;
