@@ -55,6 +55,7 @@ public class MenuFilePreprocessor {
                         );
                     } else {
                         try {
+                            //todo
                             JsonParser parser = new JsonParser();
                             JsonArray array = parser.parse(line).getAsJsonArray();
                             List<String> filesList = new ArrayList<>();

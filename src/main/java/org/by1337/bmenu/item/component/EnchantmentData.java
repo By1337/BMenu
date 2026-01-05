@@ -2,5 +2,10 @@ package org.by1337.bmenu.item.component;
 
 import org.bukkit.enchantments.Enchantment;
 
+import java.util.Objects;
+
 public record EnchantmentData(Enchantment enchantment, int lvl) {
+    public EnchantmentData {
+        Objects.requireNonNull(enchantment, "enchantment");
+    }
 }

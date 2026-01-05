@@ -15,7 +15,7 @@ import java.util.Objects;
 
 public class BukkitInventory {
     private static final InventoryUtil INV_UTIL = BCore.getInventoryUtil();
-    private static final V1_16_5_ItemRenderer RENDERER = new V1_16_5_ItemRenderer();
+    private static final BukkitItemRenderer RENDERER = new BukkitItemRenderer();
 
     private final Inventory inventory;
     private final MenuItem[] seenItems;
@@ -71,7 +71,7 @@ public class BukkitInventory {
                 actual.setDirty(false);
             }
         }
-       // INV_UTIL.flushInv(player);
+        INV_UTIL.flushInv(player);
     }
 
     public void clear() {

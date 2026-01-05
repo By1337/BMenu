@@ -1,238 +1,93 @@
 package org.by1337.bmenu.factory;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import dev.by1337.cmd.Command;
-import dev.by1337.yaml.BukkitYamlCodecs;
+import dev.by1337.core.util.registry.LegacyRegistryBridge;
+import dev.by1337.yaml.BukkitCodecs;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
+import dev.by1337.yaml.codec.InlineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import org.bukkit.Registry;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.by1337.bmenu.item.component.EnchantmentData;
 import org.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MenuCodecs {
-    private static final Logger log = LoggerFactory.getLogger("BMenu");
 
     public static final YamlCodec<Map<String, String>> ARGS_CODEC =
             YamlCodec.mapOf(
                     YamlCodec.STRING,
                     YamlCodec.MULTI_LINE_STRING.schema(SchemaTypes.anyOf(SchemaTypes.STRING_OR_NUMBER, SchemaTypes.STRING_OR_NUMBER.listOf()))
             );
-    public static final YamlCodec<String> MATERIAL = YamlCodec.STRING.schema(s -> s.or(BukkitYamlCodecs.MATERIAL.schema()));
+    public static final YamlCodec<String> MATERIAL = YamlCodec.STRING.schema(s -> s.or(BukkitCodecs.material().schema()));
 
-    public static final YamlCodec<PotionEffect> POTION_EFFECT_YAML_CODEC = new YamlCodec<>() {
-        @Override
-        public DataResult<PotionEffect> decode(YamlValue yamlValue) {
-            return yamlValue.decode(STRING).flatMap(s -> {
-                String[] args0 = s.split(";");
-                if (args0.length != 3)
-                    return DataResult.error("expected <PotionEffectType>;<duration>;<amplifier>, got '" + s + "'");
-                PotionEffectType effect = PotionEffectType.getByName(args0[0].toLowerCase(Locale.ENGLISH));
-                if (effect == null) return DataResult.error("unknown potion effect '" + args0[0] + "'");
-                return INT.decode(YamlValue.wrap(args0[1]))
-                        .flatMap(duration -> INT.decode(YamlValue.wrap(args0[2]))
-                                .mapValue(amplifier -> new PotionEffect(effect, duration, amplifier))
-                        );
-            });
-        }
+    @Deprecated(since = "1.20.3")
+    private static final YamlCodec<PotionEffectType> LEGACY_POTION_EFFECT_TYPE_CODEC =
+            YamlCodec.lookup(Arrays.stream(PotionEffectType.values()).collect(Collectors.toMap(
+                    PotionEffectType::getName,
+                    v -> v
+            )));
 
-        @Override
-        public YamlValue encode(PotionEffect potionEffect) {
-            String sb = potionEffect.getType().getName() +
-                    ";" +
-                    potionEffect.getDuration() +
-                    ";" +
-                    potionEffect.getAmplifier();
-            return YamlValue.wrap(sb);
-        }
-
-        @Override
-        public @NotNull SchemaType schema() {
-            return SchemaTypes.STRING;
-        }
-    };
-
-    public static final YamlCodec<List<PotionEffect>> MODERN_POTION_EFFECT_YAML_CODEC = new YamlCodec<List<PotionEffect>>() {
-        private static final BiMap<String, PotionEffectType> POTION_EFFECTS;
-        private static final SchemaType SCHEMA_TYPE;
-
-        private static final YamlCodec<List<PotionEffect>> LEGACY_CODEC = POTION_EFFECT_YAML_CODEC.listOrSingle();
-
-        @Override
-        public DataResult<List<PotionEffect>> decode(YamlValue yamlValue) {
-            if (yamlValue.isPrimitive() || yamlValue.isCollection()) return LEGACY_CODEC.decode(yamlValue);
-            return YamlCodec.STRING_TO_STRING.decode(yamlValue).flatMap(map -> {
-                List<PotionEffect> result = new ArrayList<>();
-                StringBuilder error = new StringBuilder();
-                for (String s : map.keySet()) {
-                    PotionEffectType effect = POTION_EFFECTS.get(s);
-                    if (effect == null) {
-                        error.append("Unknown potion effect '").append(s).append("'").append("\n");
-                    } else {
-                        String value = map.get(s);
-                        String[] args = value.split(" ", 2);
-                        if (args.length != 2) {
-                            error.append("expected 'effect: <duration> <amplifier>', got '").append(s).append(": ").append(value).append("'").append("\n");
-                        } else {
-                            var res = INT.decode(YamlValue.wrap(args[0])).flatMap(duration ->
-                                    INT.decode(YamlValue.wrap(args[1])).mapValue(amplifier ->
-                                            new PotionEffect(effect, duration, amplifier))
-                            );
-                            if (res.hasError()) {
-                                error.append(res.error()).append("\n");
-                            }
-                            if (res.hasResult()) {
-                                result.add(res.result());
-                            }
-                        }
-                    }
-                }
-                if (!error.isEmpty()) {
-                    error.setLength(error.length() - 1);
-                    return DataResult.error(error.toString()).partial(result);
-                }
-                return DataResult.success(result);
-            });
-        }
-
-        @Override
-        public YamlValue encode(List<PotionEffect> potionEffects) {
-            Map<String, String> map = new HashMap<>();
-            for (PotionEffect potionEffect : potionEffects) {
-                var key = POTION_EFFECTS.inverse().get(potionEffect.getType());
-                if (key == null) {
-                    log.error("Failed to serialize potion effect: {}", potionEffect);
-                    continue;
-                }
-                map.put(key, potionEffect.getDuration() + " " + potionEffect.getAmplifier());
-            }
-            return YamlValue.wrap(map);
-        }
-
-        @Override
-        public @NotNull SchemaType schema() {
-            return SCHEMA_TYPE;
-        }
-
-        static {
-            POTION_EFFECTS = HashBiMap.create();
-            //todo
-          //  for (RegistryHelper.Holder<PotionEffectType> holder : RegistryHelper.MOB_EFFECT) {
-          //      var type = holder.value();
-          //      var key = holder.getKey();
-          //      POTION_EFFECTS.put(key.getKey(), type);
-          //  }
-            var builder = JsonSchemaTypeBuilder.create();
-            builder.type(SchemaTypes.Type.OBJECT);
-            builder.additionalProperties(false);
-            for (String enchantment : POTION_EFFECTS.keySet()) {
-                builder.properties(enchantment, SchemaTypes.STRING);
-            }
-            SCHEMA_TYPE = builder.build().or(LEGACY_CODEC.schema());
-        }
-    };
-
-    public static final YamlCodec<EnchantmentData> ENCHANTMENT_YAML_CODEC = new YamlCodec<>() {
-        @Override
-        public DataResult<EnchantmentData> decode(YamlValue yamlValue) {
-            return yamlValue.decode(STRING).flatMap(s -> {
-                String[] args0 = s.split(";");
-                if (args0.length != 2) {
-                    return DataResult.error("expected '<Enchantment>;<duration>', got '" + s + "'");
-                }
-                return BukkitYamlCodecs.NAMESPACED_KEY.decode(YamlValue.wrap(args0[0].toLowerCase(Locale.ENGLISH))).flatMap(key -> {
-                    Enchantment type = Enchantment.getByKey(key);
-                    if (type == null) return DataResult.error("Unknown enchantment '" + key + "'");
-                    return INT.decode(YamlValue.wrap(args0[1])).mapValue(level -> new EnchantmentData(type, level));
-                });
-
-            });
-        }
-
-        @Override
-        public YamlValue encode(EnchantmentData pair) {
-            return YamlValue.wrap(pair.enchantment().getKey().value() + ":" + pair.lvl());
-        }
-
-        @Override
-        public @NotNull SchemaType schema() {
-            return SchemaTypes.STRING;
-        }
-    };
+    public static final YamlCodec<PotionEffectType> POTION_EFFECT_TYPE_CODEC = anyCodec(
+            LegacyRegistryBridge.MOB_EFFECT.yamlCodec(),
+            LEGACY_POTION_EFFECT_TYPE_CODEC
+    );
 
 
-    public static final YamlCodec<List<EnchantmentData>> MODERN_ENCHANTMENT_YAML_CODEC = new YamlCodec<>() {
-        private static final Map<String, Enchantment> ENCHANTMENTS;
-        private static final SchemaType SCHEMA_TYPE;
+    public static final YamlCodec<int[]> TWO_INTS = YamlCodec.STRING.flatMap(
+            s -> {
+                String[] split = s.split(" ", 2);
+                if (split.length != 2) return DataResult.error("expected '<number> <number>', but got '{}'", s);
+                return YamlCodec.INT.decode(split[0]).flatMap(i1 ->
+                        YamlCodec.INT.decode(split[1]).mapValue(i2 -> new int[]{i1, i2})
+                );
 
-        private static final YamlCodec<List<EnchantmentData>> LEGACY_CODEC = ENCHANTMENT_YAML_CODEC.listOrSingle();
+            },
+            arr -> getByIndex(arr, 0) + " " + getByIndex(arr, 1)
+    );
 
-        @Override
-        public DataResult<List<EnchantmentData>> decode(YamlValue yamlValue) {
-            if (yamlValue.isPrimitive() || yamlValue.isCollection()) {
-                return LEGACY_CODEC.decode(yamlValue);
-            }
-            return YamlCodec.STRING_TO_INT.decode(yamlValue).flatMap(map -> {
-                List<EnchantmentData> result = new ArrayList<>();
-                StringBuilder error = new StringBuilder();
-                for (String key : map.keySet()) {
-                    DataResult<Enchantment> enchant = BukkitYamlCodecs.ENCHANTMENT.decode(YamlValue.wrap(key));
-                    if (enchant.hasError()) {
-                        error.append(enchant.error()).append("\n");
-                    }
-                    if (enchant.hasResult()) {
-                        result.add(new EnchantmentData(enchant.result(), map.get(key)));
-                    }
-                }
-                if (!error.isEmpty()) {
-                    error.setLength(error.length() - 1);
-                    return DataResult.error(error.toString()).partial(result);
-                }
-                return DataResult.success(result);
-            });
-        }
+    private static int getByIndex(int[] arr, int index) {
+        return arr.length > index ? arr[index] : 0;
+    }
 
-        @Override
-        public YamlValue encode(List<EnchantmentData> list) {
-            Map<String, Integer> map = new LinkedHashMap<>();
-            for (EnchantmentData enchantment : list) {
-                map.put(enchantment.enchantment().getKey().getKey(), enchantment.lvl());
-            }
-            return YamlValue.wrap(map);
-        }
+    public static final YamlCodec<List<PotionEffect>> POTION_EFFECT_LIST_CODEC =
+            YamlCodec.mapOf(LegacyRegistryBridge.MOB_EFFECT.yamlCodec(), TWO_INTS).map(
+                    map -> map.entrySet().stream().map(e -> new PotionEffect(e.getKey(), e.getValue()[0], e.getValue()[1])).toList(),
+                    list -> list.stream().collect(Collectors.toMap(
+                            PotionEffect::getType,
+                            v -> new int[]{v.getDuration(), v.getAmplifier()}
+                    ))
+            ).whenPrimitive(InlineYamlCodecBuilder.inline(
+                    ";",
+                    "<PotionEffectType>;<duration>;<amplifier>",
+                    PotionEffect::new,
+                    POTION_EFFECT_TYPE_CODEC.withGetter(PotionEffect::getType),
+                    YamlCodec.INT.withGetter(PotionEffect::getDuration),
+                    YamlCodec.INT.withGetter(PotionEffect::getAmplifier)
+            ).listOf());
 
-        @Override
-        public @NotNull SchemaType schema() {
-            return SCHEMA_TYPE;
-        }
+    public static final YamlCodec<List<EnchantmentData>> ENCHANTMENT_LIST_CODEC =
+            YamlCodec.mapOf(BukkitCodecs.enchantment(), YamlCodec.INT).map(
+                    map -> map.entrySet().stream().map(e -> new EnchantmentData(e.getKey(), e.getValue())).toList(),
+                    list -> list.stream().collect(Collectors.toMap(
+                            EnchantmentData::enchantment,
+                            EnchantmentData::lvl
+                    ))
+            ).whenPrimitive(InlineYamlCodecBuilder.inline(
+                    ";",
+                    "<enchantment>;<duration>",
+                    EnchantmentData::new,
+                    BukkitCodecs.enchantment().withGetter(EnchantmentData::enchantment),
+                    YamlCodec.INT.withGetter(EnchantmentData::lvl)
+            ).listOf());
 
-        static {
-            ENCHANTMENTS = new HashMap<>();
-            for (Enchantment enchantment : Registry.ENCHANTMENT) {
-                ENCHANTMENTS.put(enchantment.getKey().getKey(), enchantment);
-            }
-
-            var builder = JsonSchemaTypeBuilder.create();
-            builder.type(SchemaTypes.Type.OBJECT);
-            builder.additionalProperties(false);
-            for (String enchantment : ENCHANTMENTS.keySet()) {
-                builder.properties(enchantment, SchemaTypes.INT);
-            }
-            SCHEMA_TYPE = builder.build().or(LEGACY_CODEC.schema());
-        }
-    };
 
     public static final String COMMANDS_SCHEMA_TYPE_REF_NAME = "commands_ref";
     public static final SchemaType COMMANDS_SCHEMA_TYPE;
@@ -295,6 +150,27 @@ public class MenuCodecs {
             return SCHEMA_TYPE;
         }
     };
+
+    private static <T> YamlCodec<T> anyCodec(YamlCodec<T> first, YamlCodec<T> second){
+        return new  YamlCodec<T>() {
+            @Override
+            public DataResult<T> decode(YamlValue yamlValue) {
+                var v = first.decode(yamlValue);
+                if (v.hasResult()) return v;
+                return second.decode(yamlValue);
+            }
+
+            @Override
+            public YamlValue encode(T t) {
+                return first.encode(t);
+            }
+
+            @Override
+            public @NotNull SchemaType schema() {
+                return first.schema();
+            }
+        };
+    }
 
     static {
         var builder = JsonSchemaTypeBuilder.create();

@@ -6,7 +6,6 @@ import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.Color;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.potion.PotionEffect;
 import org.by1337.bmenu.factory.MenuCodecs;
@@ -71,9 +70,9 @@ public class ItemModel {
                 .field(MenuCodecs.MATERIAL.map(DataString::new, DataString::src), "material", m -> m.material, (m, v) -> m.material = v)
                 .field(CustomModelDataComponent.CODEC, "model_data", m -> m.customModelData, (m, v) -> m.customModelData = v)
                 .field(BukkitYamlCodecs.ITEM_FLAG.listOf().asSet(), "item_flags", m -> m.flags, (m, v) -> m.flags = v)
-                .field(MenuCodecs.MODERN_POTION_EFFECT_YAML_CODEC, "potion_effects", m -> m.potionEffects, (m, v) -> m.potionEffects = v)
+                .field(MenuCodecs.POTION_EFFECT_LIST_CODEC, "potion_effects", m -> m.potionEffects, (m, v) -> m.potionEffects = v)
                 .field(BukkitCodecs.color(), "color", m -> m.color, (m, v) -> m.color = v)
-                .field(MenuCodecs.MODERN_ENCHANTMENT_YAML_CODEC, "enchantments", m -> m.enchantments, (m, v) -> m.enchantments = v)
+                .field(MenuCodecs.ENCHANTMENT_LIST_CODEC, "enchantments", m -> m.enchantments, (m, v) -> m.enchantments = v)
                 .field(DataInt.CODEC, "damage", m -> m.damage, (m, v) -> m.damage = v)
                 .bool("hide_tooltip", m -> m.hideTooltip, (m, v) -> m.hideTooltip = v)
                 .bool("unbreakable", m -> m.unbreakable, (m, v) -> m.unbreakable = v)
