@@ -21,7 +21,7 @@ public enum FrameOpcodes {
     REMOVE(RemoveAnimOpcode.CODEC, "remove", "rm"),
     MOVE(MoveAnimOpcode.CODEC, "move", "mv"),
     SWAP(SwapAnimOpcode.CODEC, "swap", "sw"),
-    COPY(CopyAnimOpcode.CODEC, "copy", "cl"),
+    COPY(CopyAnimOpcode.CODEC, "copy", "cl", "cpy"),
     GOTO(GotoAnimOpcode.CODEC, "goto", "gt"),
     SOUND(SoundAnimOpcode.CODEC, "sound", "snd"),
     COMMANDS(CommandsAnimOpcode.CODEC, "commands", "cmd"),

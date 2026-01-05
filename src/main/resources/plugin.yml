@@ -3,7 +3,7 @@ author: By1337
 version: '${project.version}'
 main: org.by1337.bmenu.BMenu
 api-version: '1.16'
-depend: [ BLib, PlaceholderAPI ]
+depend: [ BDevCore, PlaceholderAPI ]
 authors: [ By1337 ]
 
 permissions:

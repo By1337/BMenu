@@ -4,9 +4,9 @@ import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
-import org.by1337.blib.random.WeightedItem;
-import org.by1337.blib.random.WeightedItemSelector;
 import org.by1337.bmenu.factory.MenuCodecs;
+import org.by1337.bmenu.random.WeightedItem;
+import org.by1337.bmenu.random.WeightedItemSelector;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

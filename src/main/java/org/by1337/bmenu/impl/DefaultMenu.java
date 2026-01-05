@@ -1,9 +1,9 @@
 package org.by1337.bmenu.impl;
 
+import dev.by1337.cmd.CommandMsgError;
 import org.bukkit.entity.Player;
-import org.by1337.blib.command.CommandException;
-import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuConfig;
+import org.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.Nullable;
 
 public class DefaultMenu extends Menu {
@@ -17,7 +17,7 @@ public class DefaultMenu extends Menu {
     }
 
     @Override
-    protected boolean runCommand(String cmd) throws CommandException {
+    protected boolean runCommand(String cmd) throws CommandMsgError {
         return false;
     }
 

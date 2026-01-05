@@ -1,14 +1,14 @@
 package org.by1337.bmenu.command.menu;
 
+import dev.by1337.cmd.Argument;
+import dev.by1337.cmd.Command;
+import dev.by1337.core.command.bcmd.CommandWrapper;
+import dev.by1337.core.command.bcmd.requires.RequiresPermission;
+import dev.by1337.yaml.YamlMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.by1337.blib.command.Command;
-import org.by1337.blib.command.CommandWrapper;
-import org.by1337.blib.command.argument.Argument;
-import org.by1337.blib.command.requires.RequiresPermission;
-import org.by1337.blib.configuration.YamlContext;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.MenuLoader;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,28 +18,29 @@ public class OpenCommands {
     private final MenuLoader loader;
     private final List<OpenCommand> openCommands;
 
-    public OpenCommands(MenuLoader loader, YamlContext config) {
+    public OpenCommands(MenuLoader loader, YamlMap config) {
         this.loader = loader;
         openCommands = new ArrayList<>();
-        Map<String, YamlContext> map = config.get("open_commands").getAsMap(YamlContext.class, Collections.emptyMap());
-        for (String string : map.keySet()) {
-            YamlContext ctx = map.get(string);
-            String menu = Objects.requireNonNull(ctx.get("menu").getAsString(), "menu is null! In: open_commands." + string);
-
-            List<Argument<CommandSender>> arguments = new ArrayList<>();
-            if (ctx.has("tab-completer")){
-                ctx.get("tab-completer").mapStream().forEach(pair -> {
-                    String name = pair.getLeft().getAsString();
-                    YamlContext data = pair.getRight().getAsYamlContext();
-                    CommandArgumentType argumentType = CommandArgumentType.valueOf(data.getAsString("type").toUpperCase(Locale.ENGLISH));
-                    arguments.add(argumentType.creator().create(data, name));
-                });
-            }
-            OpenCommand openCommand = new OpenCommand(string, menu, arguments, loader.getPlugin(), arguments);
-            openCommand.setAliases(ctx.getList("aliases", String.class, Collections.emptyList()));
-            openCommand.setPermission(ctx.getAsString("permission", null));
-            openCommands.add(openCommand);
-        }
+        //todo
+       // Map<String, YamlContext> map = config.get("open_commands").getAsMap(YamlContext.class, Collections.emptyMap());
+       // for (String string : map.keySet()) {
+       //     YamlContext ctx = map.get(string);
+       //     String menu = Objects.requireNonNull(ctx.get("menu").getAsString(), "menu is null! In: open_commands." + string);
+//
+       //     List<Argument<CommandSender>> arguments = new ArrayList<>();
+       //     if (ctx.has("tab-completer")){
+       //         ctx.get("tab-completer").mapStream().forEach(pair -> {
+       //             String name = pair.getLeft().getAsString();
+       //             YamlContext data = pair.getRight().getAsYamlContext();
+       //             CommandArgumentType argumentType = CommandArgumentType.valueOf(data.getAsString("type").toUpperCase(Locale.ENGLISH));
+       //             arguments.add(argumentType.creator().create(data, name));
+       //         });
+       //     }
+       //     OpenCommand openCommand = new OpenCommand(string, menu, arguments, loader.getPlugin(), arguments);
+       //     openCommand.setAliases(ctx.getList("aliases", String.class, Collections.emptyList()));
+       //     openCommand.setPermission(ctx.getAsString("permission", null));
+       //     openCommands.add(openCommand);
+       // }
     }
 
     public List<OpenCommand> openCommands() {
@@ -61,9 +62,9 @@ public class OpenCommands {
     public class OpenCommand extends Command<CommandSender> {
         private final String menuId;
         private final CommandWrapper wrapper;
-        private final List<Argument<CommandSender>> arguments;
+        private final List<Argument<CommandSender, ?>> arguments;
 
-        protected OpenCommand(@NotNull String name, String menuId, List<Argument<CommandSender>> arguments, Plugin plugin, List<Argument<CommandSender>> arguments1) {
+        protected OpenCommand(@NotNull String name, String menuId, List<Argument<CommandSender, ?>> arguments, Plugin plugin, List<Argument<CommandSender, ?>> arguments1) {
             super(name);
             this.menuId = menuId;
             this.arguments = arguments1;
@@ -71,8 +72,8 @@ public class OpenCommands {
             wrapper = new CommandWrapper(this, plugin);
             executor(((sender, args) -> {
                 if (sender instanceof Player player) {
-                    Menu menu = loader.findAndCreate(menuId, player, null);
-                    for (String s : args.keySet()) {
+                    Menu menu = loader.create(menuId, player, null);
+                    for (String s : args.keys()) {
                         Object obj = args.get(s);
                         menu.addArgument(s, obj instanceof Player pl ? pl.getName() : String.valueOf(obj));
                     }
@@ -106,7 +107,7 @@ public class OpenCommands {
             return menuId;
         }
 
-        public List<Argument<CommandSender>> arguments() {
+        public List<Argument<CommandSender, ?>> arguments() {
             return arguments;
         }
     }

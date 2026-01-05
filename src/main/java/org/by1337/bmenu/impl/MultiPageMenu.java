@@ -1,8 +1,9 @@
+/*
 package org.by1337.bmenu.impl;
 
 import org.bukkit.entity.Player;
 import org.by1337.blib.command.CommandException;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.MenuConfig;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.util.AnimationUtil;
@@ -76,7 +77,7 @@ public abstract class MultiPageMenu<T> extends Menu {
             if (slotsIterator.hasNext()) {
                 MenuItem menuItem = map(item);
                 if (menuItem == null) continue;
-                menuItem.setSlots(new int[]{slotsIterator.next()});
+              //  menuItem.setSlots(new int[]{slotsIterator.next()});
                 setItemToBuffer(menuItem);
             } else {
                 break;
@@ -124,3 +125,4 @@ public abstract class MultiPageMenu<T> extends Menu {
         }
     }
 }
+*/

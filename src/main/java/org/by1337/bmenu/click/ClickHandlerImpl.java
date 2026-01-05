@@ -1,11 +1,11 @@
 package org.by1337.bmenu.click;
 
+import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
-import org.by1337.blib.chat.Placeholderable;
 import org.by1337.bmenu.CommandRunner;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.requirement.Requirements;
 
@@ -30,13 +30,13 @@ public class ClickHandlerImpl implements ClickHandler {
     }
 
     @Override
-    public void onClick(Menu menu, Placeholderable placeholderable, Player player, CommandRunner commandRunner) {
-        if (requirement.test(menu, placeholderable, player, commandRunner)) {
+    public void onClick(Menu menu, PlaceholderResolver<Menu> placeholders, Player player, CommandRunner commandRunner) {
+        if (requirement.test(menu, placeholders, player, commandRunner)) {
             if (!commands.isEmpty())
-                commands.forEach(command -> commandRunner.executeCommand(placeholderable.replace(command)));
+                commands.forEach(command -> commandRunner.executeCommand(placeholders.replace(command, menu)));
         } else {
             if (!denyCommands.isEmpty())
-                denyCommands.forEach(command -> commandRunner.executeCommand(placeholderable.replace(command)));
+                denyCommands.forEach(command -> commandRunner.executeCommand(placeholders.replace(command, menu)));
         }
     }
 }

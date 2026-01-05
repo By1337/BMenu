@@ -9,8 +9,8 @@ import dev.by1337.yaml.codec.YamlField;
 import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryType;
-import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.MenuConfig;
 import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.MenuLoader;
@@ -33,11 +33,11 @@ public class MenuCodec {
     private final MenuLoadContext ctx;
     private List<MenuConfig> supers = new ArrayList<>();
     private String title;
-    private @Nullable SpacedNameKey id;
-    private @Nullable SpacedNameKey provider;
+    private @Nullable NamespacedKey id;
+    private @Nullable NamespacedKey provider;
     private InventoryType type;
     private int size;
-    private List<SpacedNameKey> onlyOpenFrom = new ArrayList<>();
+    private List<NamespacedKey> onlyOpenFrom = new ArrayList<>();
     private Map<String, String> args = new HashMap<>();
     private Map<String, MenuItemBuilder> items = new HashMap<>();
     private Animator.AnimatorContext animator;
@@ -147,7 +147,7 @@ public class MenuCodec {
         FIELDS.add(BukkitYamlCodecs.INVENTORY_TYPE.fieldOf("type", m -> m.type, (m, v) -> m.type = v, InventoryType.CHEST));
         FIELDS.add(YamlCodec.INT.fieldOf("size", m -> m.size, (m, v) -> m.size = v, 54));
         FIELDS.add(YamlCodec.STRINGS.fieldOf("only-open-from",
-                m -> m.onlyOpenFrom.stream().map(SpacedNameKey::toString).toList(),
+                m -> m.onlyOpenFrom.stream().map(NamespacedKey::toString).toList(),
                 (m, v) -> m.onlyOpenFrom = v.stream().map(m::asId).toList(),
                 List.of()
         ));
@@ -173,12 +173,12 @@ public class MenuCodec {
         SCHEMA_TYPE = builder.build();
     }
 
-    private SpacedNameKey asId(@Nullable String id) {
+    private NamespacedKey asId(@Nullable String id) {
         if (id == null) return null;
         if (id.contains(":")) {
-            return new SpacedNameKey(id);
+            return NamespacedKey.fromString(id);
         } else {
-            return new SpacedNameKey(loader.getPlugin().getName().toLowerCase(Locale.ROOT), id);
+            return new NamespacedKey(loader.getPlugin().getName().toLowerCase(Locale.ROOT), id);
         }
     }
 

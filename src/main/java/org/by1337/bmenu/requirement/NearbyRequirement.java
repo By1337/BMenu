@@ -1,23 +1,22 @@
 package org.by1337.bmenu.requirement;
 
+import dev.by1337.plc.PlaceholderResolver;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.by1337.blib.chat.Placeholderable;
-import org.by1337.blib.geom.Vec3d;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 
 import java.util.List;
 
 public class NearbyRequirement implements Requirement {
     private final String world;
-    private final int x;
-    private final int y;
-    private final int z;
+    private final double x;
+    private final double y;
+    private final double z;
     private final int radius;
     private final int radiusSq;
     private final boolean not;
     private final List<String> commands;
     private final List<String> denyCommands;
-    private final Vec3d pos;
 
     public NearbyRequirement(String world, int x, int y, int z, int radius, boolean not, List<String> commands, List<String> denyCommands) {
         this.world = world;
@@ -28,17 +27,24 @@ public class NearbyRequirement implements Requirement {
         this.not = not;
         this.commands = commands;
         this.denyCommands = denyCommands;
-        pos = new Vec3d(x, y, z);
         radiusSq = radius * radius;
     }
 
 
     @Override
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
+    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholderable, Player clicker) {
         if (!clicker.getWorld().getName().equals(world)) {
             return not;
         }
-        return not != (pos.distanceSquared(new Vec3d(clicker.getLocation())) < radiusSq);
+        return not != (distanceSquared(clicker.getLocation()) < radiusSq);
+    }
+
+    private double distanceSquared(Location loc) {
+        return square(x - loc.getX()) + square(y - loc.getY()) + square(z - loc.getZ());
+    }
+
+    private double square(double d) {
+        return d * d;
     }
 
     @Override

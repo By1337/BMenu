@@ -4,6 +4,8 @@ import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
+import java.util.EnumMap;
+
 public enum MenuClickType {
     LEFT(ClickType.LEFT, "on_left_click"),
     RIGHT(ClickType.RIGHT, "on_right_click"),
@@ -24,7 +26,9 @@ public enum MenuClickType {
     SWAP_OFFHAND(ClickType.SWAP_OFFHAND, "on_swap_offhand_click"),
     CONTROL_DROP(ClickType.CONTROL_DROP, "on_control_drop_click");
 
-    public static YamlCodec<MenuClickType> CODEC = YamlCodec.enumOf(MenuClickType.class);
+    public static YamlCodec<MenuClickType> CODEC = YamlCodec.fromEnum(MenuClickType.class);
+    private static final MenuClickType[] NUMBER_KEY = new MenuClickType[9];
+    private static final EnumMap<ClickType, MenuClickType> BUKKIT_TO_BMENU = new EnumMap<>(ClickType.class);
 
     private final ClickType clickType;
     private final String configKeyClick;
@@ -34,17 +38,15 @@ public enum MenuClickType {
         this.configKeyClick = configKeyClick;
     }
 
-
     public static MenuClickType getClickType(InventoryClickEvent e) {
-        if (e.getClick() == org.bukkit.event.inventory.ClickType.NUMBER_KEY) {
-            return MenuClickType.valueOf("NUMBER_KEY_" + e.getHotbarButton());
-        }
-        for (MenuClickType clickType1 : MenuClickType.values()) {
-            if (clickType1.clickType == e.getClick()) {
-                return clickType1;
+        if (e.getClick() == ClickType.NUMBER_KEY) {
+            int button = e.getHotbarButton();
+            if (button >= 0 && button < 9) {
+                return NUMBER_KEY[button];
             }
+            return ANY_CLICK;
         }
-        return ANY_CLICK;
+        return BUKKIT_TO_BMENU.getOrDefault(e.getClick(), ANY_CLICK);
     }
 
     public ClickType getClickType() {
@@ -55,5 +57,21 @@ public enum MenuClickType {
         return configKeyClick;
     }
 
+    static {
+        NUMBER_KEY[0] = NUMBER_KEY_0;
+        NUMBER_KEY[1] = NUMBER_KEY_1;
+        NUMBER_KEY[2] = NUMBER_KEY_2;
+        NUMBER_KEY[3] = NUMBER_KEY_3;
+        NUMBER_KEY[4] = NUMBER_KEY_4;
+        NUMBER_KEY[5] = NUMBER_KEY_5;
+        NUMBER_KEY[6] = NUMBER_KEY_6;
+        NUMBER_KEY[7] = NUMBER_KEY_7;
+        NUMBER_KEY[8] = NUMBER_KEY_8;
+        for (MenuClickType value : values()) {
+            if (value.clickType != null){
+                BUKKIT_TO_BMENU.put(value.clickType, value);
+            }
+        }
+    }
 
 }

@@ -1,15 +1,13 @@
 package org.by1337.bmenu.animation.impl;
 
-import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import org.by1337.blib.util.Pair;
-import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
 import org.by1337.bmenu.animation.FrameOpcodes;
 import org.by1337.bmenu.animation.util.AnimationUtil;
+import org.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.Nullable;
 
 public class MoveAnimOpcode implements FrameOpcode {
@@ -19,9 +17,9 @@ public class MoveAnimOpcode implements FrameOpcode {
     private final int[] to;
 
     public MoveAnimOpcode(String args) {
-        Pair<int[], int[]> pair = AnimationUtil.parsePairSlots(args);
-        from = pair.getLeft();
-        to = pair.getRight();
+        int[][] pair = AnimationUtil.parsePairSlots(args);
+        from = pair[0];
+        to = pair[1];
     }
 
     @Override
@@ -49,6 +47,7 @@ public class MoveAnimOpcode implements FrameOpcode {
     public int[] getTo() {
         return to;
     }
+
     @Override
     public @Nullable FrameOpcodes type() {
         return FrameOpcodes.MOVE;

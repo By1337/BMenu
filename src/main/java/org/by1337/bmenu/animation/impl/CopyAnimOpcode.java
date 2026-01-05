@@ -1,17 +1,14 @@
 package org.by1337.bmenu.animation.impl;
 
 
-import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import org.by1337.blib.util.Pair;
-import org.by1337.bmenu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
 import org.by1337.bmenu.animation.FrameOpcodes;
 import org.by1337.bmenu.animation.util.AnimationUtil;
+import org.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.Nullable;
 
 public class CopyAnimOpcode implements FrameOpcode {
@@ -21,9 +18,9 @@ public class CopyAnimOpcode implements FrameOpcode {
     private final int[] dest;
 
     public CopyAnimOpcode(String args) {
-        Pair<int[], int[]> pair = AnimationUtil.parsePairSlots(args);
-        src = pair.getLeft();
-        dest = pair.getRight();
+        int[][] pair = AnimationUtil.parsePairSlots(args);
+        src = pair[0];
+        dest = pair[1];
     }
 
     @Override
@@ -52,6 +49,7 @@ public class CopyAnimOpcode implements FrameOpcode {
     public int[] getDest() {
         return dest;
     }
+
     @Override
     public @Nullable FrameOpcodes type() {
         return FrameOpcodes.COPY;

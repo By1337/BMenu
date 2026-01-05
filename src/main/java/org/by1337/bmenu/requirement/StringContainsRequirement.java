@@ -1,13 +1,11 @@
 package org.by1337.bmenu.requirement;
 
+import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
-import org.by1337.blib.chat.Placeholderable;
-import org.by1337.blib.chat.placeholder.Placeholder;
-import org.by1337.blib.configuration.YamlContext;
-import org.by1337.blib.configuration.YamlValue;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.util.ObjectUtil;
 import org.by1337.bmenu.util.StringUtil;
 
@@ -36,20 +34,20 @@ public class StringContainsRequirement implements Requirement {
         not = context.get("type").decode(YamlCodec.STRING).getOrThrow().startsWith("!");
         commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> YamlValue.wrap(v).getAsString()).toList(),
+                        .map(v -> YamlValue.wrap(v).asString("")).toList(),
                 Collections.emptyList()
         );
         denyCommands = ObjectUtil.mapIfNotNullOrDefault(context.get("deny_commands").getValue(),
                 value -> ((List<?>) value).stream()
-                        .map(v -> YamlValue.wrap(v).getAsString()).toList(),
+                        .map(v -> YamlValue.wrap(v).asString("")).toList(),
                 Collections.emptyList()
         );
     }
 
 
     @Override
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
-        boolean b = placeholderable.replace(input).contains(placeholderable.replace(output));
+    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholderable, Player clicker) {
+        boolean b = placeholderable.replace(input, menu).contains(placeholderable.replace(output, menu));
         return not != b;
     }
 

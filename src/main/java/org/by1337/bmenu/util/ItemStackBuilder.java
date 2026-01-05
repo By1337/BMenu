@@ -1,5 +1,8 @@
+/*
 package org.by1337.bmenu.util;
 
+import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.Placeholders;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -13,7 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionEffect;
 import org.by1337.blib.BLib;
-import org.by1337.blib.chat.Placeholderable;
 import org.by1337.blib.chat.util.Message;
 import org.by1337.blib.inventory.FastItemMutator;
 import org.by1337.blib.inventory.LegacyFastItemMutator;
@@ -53,10 +55,10 @@ public class ItemStackBuilder {
             cached = toNms(itemStack);
             buildNMS(cached);
             if (isDisplayCashed()) {
-                setDisplay(cached, s -> s, BLib.getApi().getMessage(), builder.lore(), builder.name(), s -> s);
+                setDisplay(cached, new Placeholders<>(), BLib.getApi().getMessage(), builder.lore(), builder.name(), null);
                 displayCached = true;
                 if (itemStack.hasItemMeta() && canBeCached(builder.amount()) && canBeCached(builder.damage())) {
-                    setAmountAndDamage(cached, s -> s, s -> s);
+                    setAmountAndDamage(cached, new Placeholders<>(), null);
                     fullCached = true;
                 }
             }
@@ -87,7 +89,7 @@ public class ItemStackBuilder {
     private static void setCount(Object itemStack, int count) {
         if (IS_LEGACY) {
             LEGACY_MUTATOR.setCount(count, itemStack);
-        }else {
+        } else {
             MUTATOR.setCount(count, itemStack);
         }
     }
@@ -95,7 +97,7 @@ public class ItemStackBuilder {
     private static void setDamage(Object itemStack, int count) {
         if (IS_LEGACY) {
             LEGACY_MUTATOR.setDamage(count, itemStack);
-        }else {
+        } else {
             MUTATOR.setInt(FastItemMutator.DAMAGE, count, itemStack);
         }
     }
@@ -107,7 +109,7 @@ public class ItemStackBuilder {
         return builder.lore().stream().allMatch(ItemStackBuilder::canBeCached);
     }
 
-    public ItemStack build(@Nullable ItemStack i, Message message, Placeholderable placeholderable, @Nullable MenuPlaceholders placeholders) {
+    public <C> ItemStack build(@Nullable ItemStack i, Message message, PlaceholderResolver<C> placeholders, C ctx) {
         if (i == null && fullCached) return asBukkitMirror(cached);
         Object itemStack;
         if (i != null) {
@@ -117,25 +119,25 @@ public class ItemStackBuilder {
         } else if (cached != null) {
             itemStack = cloneNms(cached);
         } else {
-            ItemStack item = ItemStackCreator.getItem(placeholderable.replace(builder.material()));
+            ItemStack item = ItemStackCreator.getItem(placeholders.replace(builder.material(), ctx));
             buildBase(item);
             itemStack = toNms(item);
         }
         if (!displayCached || i != null)
-            setDisplay(itemStack, placeholderable, message, builder.lore(), builder.name(), placeholders == null ? s -> s : placeholders); //todo air check
+            setDisplay(itemStack, placeholders, message, builder.lore(), builder.name(), ctx); //todo air check
 
-        setAmountAndDamage(itemStack, placeholderable, placeholders == null ? s -> s : placeholders); //todo air check
+        setAmountAndDamage(itemStack, placeholders, ctx); //todo air check
         buildNMS(itemStack); //todo air check
 
         return asBukkitMirror(itemStack);
     }
 
-    private void setAmountAndDamage(Object item, Placeholderable placeholderable, Placeholderable prePlaceholder) {
+    private <C> void setAmountAndDamage(Object item, PlaceholderResolver<C> placeholders, C ctx) {
         if (builder.amount() != null) {
-            setCount(item, Integer.parseInt(placeholderable.replace(prePlaceholder.replace(builder.amount()))));
+            setCount(item, Integer.parseInt(placeholders.replace(builder.amount(), ctx)));
         }
         if (builder.damage() != null) {
-            setDamage(item, Integer.parseInt(placeholderable.replace(prePlaceholder.replace(builder.damage()))));
+            setDamage(item, Integer.parseInt(placeholders.replace(builder.damage(), ctx)));
         }
     }
 
@@ -144,16 +146,16 @@ public class ItemStackBuilder {
         return nbt instanceof CompoundTag ? (CompoundTag) nbt : new CompoundTag();
     }
 
-    private void setDisplay(Object item, Placeholderable placeholderable, Message message, List<String> lore, @Nullable String name, Placeholderable prePlaceholder) {
+    private <C> void setDisplay(Object item, PlaceholderResolver<C> placeholders, Message message, List<String> lore, @Nullable String name, C ctx) {
         if (IS_LEGACY) {
             CompoundTag display = getLegacyDisplay(item);
             if (name != null) {
-                String name0 = prePlaceholder.replace(name);
+                String name0 = placeholders.replace(name, ctx);
                 CachedComponent cached = cachedComponents.getCached(name0);
                 if (cached != null) {
                     display.putString(LegacyFastItemMutator.NAME, cached.getCachedJson());
                 } else {
-                    String json = GsonComponentSerializer.gson().serialize(message.componentBuilder(placeholderable.replace(name0)).decoration(TextDecoration.ITALIC, false));
+                    String json = GsonComponentSerializer.gson().serialize(message.componentBuilder(name0).decoration(TextDecoration.ITALIC, false));
                     display.putString(LegacyFastItemMutator.NAME, json);
                 }
             }
@@ -164,13 +166,13 @@ public class ItemStackBuilder {
                 lore0 = new ArrayList<>();
             }
             for (String s : lore) {
-                String line = prePlaceholder.replace(s);
+                String line = placeholders.replace(s, ctx);
                 loreBuilder(line, line1 -> {
                     CachedComponent cached = cachedComponents.getCached(line1);
                     if (cached != null) {
                         lore0.add(cached.getCachedJson());
                     } else {
-                        loreBuilder(placeholderable.replace(line1),
+                        loreBuilder(line1,
                                 s1 -> lore0.add(
                                         GsonComponentSerializer.gson().serialize(
                                                 message.componentBuilder(s1).decoration(TextDecoration.ITALIC, false)
@@ -184,12 +186,12 @@ public class ItemStackBuilder {
             LEGACY_MUTATOR.setNBT(item, LegacyFastItemMutator.DISPLAY, display);
         } else {
             if (name != null) {
-                String name0 = prePlaceholder.replace(name);
+                String name0 = placeholders.replace(name, ctx);
                 CachedComponent cached = cachedComponents.getCached(name0);
                 if (cached != null) {
                     MUTATOR.setComponent(FastItemMutator.CUSTOM_NAME, cached.getCached(), item);
                 } else {
-                    var c = message.componentBuilder(placeholderable.replace(name0)).decoration(TextDecoration.ITALIC, false);
+                    var c = message.componentBuilder(name0).decoration(TextDecoration.ITALIC, false);
                     MUTATOR.setComponent(FastItemMutator.CUSTOM_NAME, c, item);
                 }
             }
@@ -199,13 +201,13 @@ public class ItemStackBuilder {
                 lore0.addAll(l);
             }
             for (String s : lore) {
-                String line = prePlaceholder.replace(s);
+                String line = placeholders.replace(s, ctx);
                 loreBuilder(line, line1 -> {
                     CachedComponent cached = cachedComponents.getCached(line1);
                     if (cached != null) {
                         lore0.add(cached.getCached());
                     } else {
-                        loreBuilder(placeholderable.replace(line1),
+                        loreBuilder(line1,
                                 s1 -> lore0.add(
                                         message.componentBuilder(s1).decoration(TextDecoration.ITALIC, false)
                                 )
@@ -273,7 +275,8 @@ public class ItemStackBuilder {
 
         result.setItemMeta(im);
     }
-    private void buildNMS(Object item){
+
+    private void buildNMS(Object item) {
         if (!IS_LEGACY && builder.hideTooltip()) {
             MUTATOR.setUnit(FastItemMutator.HIDE_TOOLTIP, item);
         }
@@ -292,3 +295,4 @@ public class ItemStackBuilder {
         }
     }
 }
+*/

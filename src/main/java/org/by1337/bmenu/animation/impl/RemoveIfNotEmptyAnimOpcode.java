@@ -1,9 +1,8 @@
 package org.by1337.bmenu.animation.impl;
 
-import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
@@ -24,7 +23,7 @@ public class RemoveIfNotEmptyAnimOpcode implements FrameOpcode {
     public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
         for (int slot : slots) {
             var item = menu.getMatrix()[slot];
-            if (item != null && !item.getItemStack().getType().isAir()) {
+            if (item != null/* && !item.getItemStack().getType().isAir()*/) { //todo?
                 matrix[slot] = null;
             }
         }

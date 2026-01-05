@@ -1,9 +1,8 @@
 package org.by1337.bmenu.animation.impl;
 
-import org.by1337.blib.configuration.YamlValue;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class SwapAnimOpcodeTest {
     @Test

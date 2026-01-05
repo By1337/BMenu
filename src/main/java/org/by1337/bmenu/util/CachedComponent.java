@@ -1,15 +1,15 @@
 package org.by1337.bmenu.util;
 
+import dev.by1337.core.ServerVersion;
+import dev.by1337.core.util.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import org.by1337.blib.BLib;
-import org.by1337.blib.util.Version;
 import org.by1337.bmenu.util.math.FastExpressionParser;
 import org.jetbrains.annotations.Nullable;
 
 public class CachedComponent {
-    private static final boolean JSON_SUPPORT = Version.is1_20_4orOlder();
+    private static final boolean JSON_SUPPORT = ServerVersion.is1_20_4orOlder();
     private final String source;
     private final Component cached;
     private final String cachedJson;
@@ -17,7 +17,7 @@ public class CachedComponent {
     public CachedComponent(String source) {
         this.source = source;
         if (canBeCached(source)) {
-            cached = BLib.getApi().getMessage().componentBuilder(FastExpressionParser.replacePlaceholders(source)).decoration(TextDecoration.ITALIC, false);
+            cached = MiniMessage.deserialize(FastExpressionParser.replacePlaceholders(source)).decoration(TextDecoration.ITALIC, false);
             if (JSON_SUPPORT) {
                 cachedJson = GsonComponentSerializer.gson().serializer().toJson(cached);
             } else {

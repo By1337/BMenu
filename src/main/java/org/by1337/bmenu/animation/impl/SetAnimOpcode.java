@@ -1,17 +1,15 @@
 package org.by1337.bmenu.animation.impl;
 
 
-import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.MenuItemBuilder;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
 import org.by1337.bmenu.animation.FrameOpcodes;
 import org.by1337.bmenu.animation.util.AnimationUtil;
-import org.by1337.bmenu.hook.ItemStackCreator;
 import org.jetbrains.annotations.Nullable;
 
 public class SetAnimOpcode implements FrameOpcode {
@@ -30,7 +28,7 @@ public class SetAnimOpcode implements FrameOpcode {
     public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
         MenuItemBuilder builder = menu.getConfig().findMenuItem(menu.replace(item), menu);
         if (builder == null) {
-            AnimationUtil.set(new MenuItem(slots, ItemStackCreator.getItem(menu.replace(item))), matrix, slots);
+            AnimationUtil.set(MenuItem.ofMaterial(menu.replace(item)), matrix, slots);
         } else {
             MenuItem menuItem1 = builder.build(menu);
             if (menuItem1 != null) {

@@ -1,5 +1,6 @@
 package org.by1337.bmenu.requirement;
 
+import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
@@ -7,9 +8,8 @@ import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.entity.Player;
-import org.by1337.blib.chat.Placeholderable;
 import org.by1337.bmenu.CommandRunner;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.factory.RequirementsFactory;
 import org.jetbrains.annotations.NotNull;
@@ -182,21 +182,21 @@ public class Requirements {
     }
 
 
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
-        return test(menu, placeholderable, clicker, menu);
+    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholders, Player clicker) {
+        return test(menu, placeholders, clicker, menu);
     }
 
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker, CommandRunner commandRunner) {
+    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholders, Player clicker, CommandRunner commandRunner) {
         boolean result = true;
         for (Requirement requirement : requirements) {
             try {
-                if (!requirement.test(menu, placeholderable, clicker)) {
-                    if (runCommands(requirement.getDenyCommands(), placeholderable, commandRunner)) {
+                if (!requirement.test(menu, placeholders, clicker)) {
+                    if (runCommands(requirement.getDenyCommands(), placeholders, commandRunner, menu)) {
                         return false;
                     }
                     result = false;
                 } else {
-                    if (runCommands(requirement.getCommands(), placeholderable, commandRunner)) {
+                    if (runCommands(requirement.getCommands(), placeholders, commandRunner, menu)) {
                         return true;
                     }
                 }
@@ -207,10 +207,10 @@ public class Requirements {
         return result;
     }
 
-    private boolean runCommands(List<String> commands, Placeholderable placeholderable, CommandRunner commandRunner) {
+    private boolean runCommands(List<String> commands, PlaceholderResolver<Menu> placeholders, CommandRunner commandRunner, Menu menu) {
         for (String command : commands) {
             if (command.equals("[BREAK]") || command.equals("[break]")) return true;
-            commandRunner.executeCommand(placeholderable.replace(command));
+            commandRunner.executeCommand(placeholders.replace(command, menu));
         }
         return false;
     }

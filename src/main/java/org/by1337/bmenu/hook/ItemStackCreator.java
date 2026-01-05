@@ -37,7 +37,7 @@ public class ItemStackCreator {
                     ItemStack head = new ItemStack(Material.PLAYER_HEAD);
                     head.editMeta(m -> ((SkullMeta) (m)).setOwningPlayer(Bukkit.getOfflinePlayer(uuid)));
                     return head;
-                } catch (Throwable ignore) {
+                } catch (Exception ignore) {
                 }
             }
             Player player = Bukkit.getPlayer(value);

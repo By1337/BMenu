@@ -96,7 +96,7 @@ public class ItemFixer {
     @SuppressWarnings("unchecked")
     private static void replacePlaceholders(YamlMap item) {
         PlaceholderResolver<Void> placeholders = mapToResolver("args", item)
-                .and(mapToResolver("local_args", item))
+               // .and(mapToResolver("local_args", item))
                 .and(new PlaceholderResolver<>() {
                     @Override
                     public boolean has(String key, PlaceholderFormat format) {

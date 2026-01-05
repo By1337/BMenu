@@ -1,7 +1,9 @@
 package org.by1337.bmenu.util;
 
+import dev.by1337.plc.PlaceholderFormat;
+import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.yaml.codec.YamlCodec;
-import org.by1337.blib.chat.Placeholderable;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.factory.MenuCodecs;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class MenuPlaceholders implements Placeholderable {
+public class MenuPlaceholders implements PlaceholderResolver<Menu> {
     public static final YamlCodec<MenuPlaceholders> CODEC = MenuCodecs.ARGS_CODEC.map(MenuPlaceholders::new, MenuPlaceholders::asStringMap);
 
     private LinkedHashMap<String, Supplier<Object>> args;
@@ -29,6 +31,9 @@ public class MenuPlaceholders implements Placeholderable {
     public MenuPlaceholders(LinkedHashMap<String, Supplier<Object>> args, boolean copyOnWrite) {
         this.args = args;
         this.copyOnWrite = copyOnWrite;
+    }
+    public boolean isEmpty(){
+        return args.isEmpty();
     }
     public static MenuPlaceholders empty(){
         return new MenuPlaceholders(new LinkedHashMap<>(), false);
@@ -62,18 +67,15 @@ public class MenuPlaceholders implements Placeholderable {
     }
 
     @Override
-    public String replace(String string) {
-        StringBuilder sb = new StringBuilder(string);
-        for (Map.Entry<String, Supplier<Object>> entry : args.entrySet()) {
-            String placeholder = "${" + entry.getKey() + "}";
-            int len = placeholder.length();
-            int pos = sb.indexOf(placeholder);
-            while (pos != -1) {
-                var replaceTo = String.valueOf(entry.getValue().get());
-                sb.replace(pos, pos + len, replaceTo);
-                pos = sb.indexOf(placeholder, pos + replaceTo.length());
-            }
-        }
-        return sb.toString();
+    public boolean has(String key, PlaceholderFormat format) {
+        return format == PlaceholderFormat.BUKET &&  args.containsKey(key);
     }
+
+    @Override
+    public @Nullable String replace(String key, String params, @Nullable Menu ctx, PlaceholderFormat format) {
+        if (format != PlaceholderFormat.BUKET) return null;
+        var v = args.get(key);
+        return v == null ? null : String.valueOf(v.get());
+    }
+
 }

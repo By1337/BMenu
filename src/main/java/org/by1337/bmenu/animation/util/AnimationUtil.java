@@ -1,6 +1,5 @@
 package org.by1337.bmenu.animation.util;
 
-import org.by1337.blib.util.Pair;
 import org.by1337.bmenu.MenuItem;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +8,7 @@ import java.util.List;
 
 public class AnimationUtil {
 
-    public static Pair<int[], int[]> parsePairSlots(String input) {
+    public static int[][] parsePairSlots(String input) {
         int[] src;
         int[] dest;
         String[] args = input.split(" ");
@@ -29,7 +28,7 @@ public class AnimationUtil {
                 dest = src;
             }
         }
-        return Pair.of(src, dest);
+        return new int[][]{src, dest};
     }
 
     public static int[] readSlots(String str) {
@@ -75,13 +74,14 @@ public class AnimationUtil {
             to[inSlot] = who;
         }
     }
-    public static String slotsToString(int[] arr){
+
+    public static String slotsToString(int[] arr) {
         if (arr.length == 0) return "";
         StringBuilder sb = new StringBuilder();
         for (int i : arr) {
             sb.append(i).append(",");
         }
-        sb.setLength(sb.length() -1);
+        sb.setLength(sb.length() - 1);
         return sb.toString();
     }
 

@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class RequirementsFactory {
     private static final YamlCodec<Map<String, YamlMap>> STRING_TO_YAML_MAP_CODEC = YamlCodec.mapOf(YamlCodec.STRING, YamlCodec.YAML_MAP);
+
     @Deprecated
     public static Requirements readLegacy(YamlValue data) {
         List<Requirement> requirements = new ArrayList<>();
@@ -26,10 +27,5 @@ public class RequirementsFactory {
             requirements.add(requirementType.fromYaml.createRequirement(value));
         }
         return new Requirements(requirements);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Requirements read(org.by1337.blib.configuration.YamlValue ctx) {
-        return Requirements.CODEC.decode(MenuFilePostprocessor.fromBLib(ctx)).getOrThrow();
     }
 }

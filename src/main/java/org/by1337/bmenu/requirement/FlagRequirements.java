@@ -1,8 +1,8 @@
 package org.by1337.bmenu.requirement;
 
+import dev.by1337.plc.PlaceholderResolver;
 import org.bukkit.entity.Player;
-import org.by1337.blib.chat.Placeholderable;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class FlagRequirements implements Requirement {
     }
 
     @Override
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
+    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholderable, Player clicker) {
         return flag;
     }
 

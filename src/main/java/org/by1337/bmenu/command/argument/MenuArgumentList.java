@@ -1,3 +1,4 @@
+/*
 package org.by1337.bmenu.command.argument;
 
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -53,3 +54,4 @@ public class MenuArgumentList extends Argument<CommandSender> {
         return null;
     }
 }
+*/

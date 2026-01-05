@@ -1,45 +1,38 @@
 package org.by1337.bmenu;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
+import dev.by1337.cmd.Command;
+import dev.by1337.core.command.bcmd.CommandError;
+import dev.by1337.core.command.bcmd.CommandWrapper;
+import dev.by1337.core.command.bcmd.argument.ArgumentDynamicRegistry;
+import dev.by1337.core.command.bcmd.argument.ArgumentPlayers;
+import dev.by1337.core.command.bcmd.requires.RequiresPermission;
+import dev.by1337.core.util.io.ResourceUtil;
+import dev.by1337.core.util.text.minimessage.MiniMessage;
+import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.schema.SchemaHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.by1337.blib.command.Command;
-import org.by1337.blib.command.CommandSyntaxError;
-import org.by1337.blib.command.CommandWrapper;
-import org.by1337.blib.command.argument.ArgumentPlayer;
-import org.by1337.blib.command.argument.ArgumentSetList;
-import org.by1337.blib.command.requires.RequiresPermission;
-import org.by1337.blib.configuration.YamlContext;
-import org.by1337.blib.util.ResourceUtil;
-import org.by1337.blib.util.SpacedNameKey;
-import org.by1337.bmenu.command.argument.ArgumentChoiceMenu;
-import org.by1337.bmenu.command.argument.MenuArgumentList;
 import org.by1337.bmenu.command.menu.OpenCommands;
 import org.by1337.bmenu.factory.MenuCodec;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.metrics.Metrics;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.util.List;
 
 public class BMenu extends JavaPlugin {
     private MenuLoader loader;
     private CommandWrapper commandWrapper;
     private OpenCommands openCommands;
     private Metrics metrics;
-    private YamlContext config;
+    private YamlMap config;
 
     @Override
     public void onLoad() {
@@ -59,7 +52,7 @@ public class BMenu extends JavaPlugin {
         loader = new MenuLoader(
                 new File(getDataFolder(), "menu"),
                 this,
-                config.getAsBoolean("hot-reload", false)
+                config.get("hot-reload").asBool(false)
         );
         writeSchemas(this);
     }
@@ -91,80 +84,83 @@ public class BMenu extends JavaPlugin {
         Command<CommandSender> cmd = new Command<CommandSender>("bmenu")
                 .aliases("bm")
                 .requires(new RequiresPermission<>("bmenu.use"))
-                .addSubCommand(new Command<CommandSender>("reload")
+                .sub(new Command<CommandSender>("reload")
                         .requires(new RequiresPermission<>("bmenu.reload"))
                         .executor((sender, args) -> {
                             loader.reload();
                             openCommands.unregister();
                             openCommands = new OpenCommands(loader, ResourceUtil.load("config.yml", this));
                             openCommands.register();
-                            loader.getMessage().sendMsg(sender, "&aReloaded {} menus!", loader.getMenuCount());
+                            sender.sendMessage(MiniMessage.deserialize("&aReloaded " + loader.getMenuRegistry().size() + " menus!"));
                         })
                 )
-                .addSubCommand(new Command<CommandSender>("open")
+                .sub(new Command<CommandSender>("open")
                         .requires(new RequiresPermission<>("bmenu.open"))
-                        .argument(new ArgumentChoiceMenu<>("menu", () -> loader.getMenus().stream().map(SpacedNameKey::toString).toList()))
-                        .argument(new ArgumentPlayer<>("player"))
-                        .argument(new MenuArgumentList("custom", openCommands))
+                        .argument(new ArgumentDynamicRegistry<>("menu", () -> loader.getMenuRegistry()))
+                        .argument(new ArgumentPlayers<>("player"))
+                        //  .argument(new MenuArgumentList("custom", openCommands))
                         .executor((sender, args) -> {
-                            String menu = (String) args.getOrThrow("menu", "Use /bmenu open <menu> <player>");
-                            Player player = (Player) args.get("player");
-                            if (player == null) {
+                            MenuConfig menu = (MenuConfig) args.getOrThrow("menu", "Use /bmenu open <menu> <player>");
+                            List<Player> players = (List<Player>) args.get("player");
+                            if (players == null) {
                                 if (sender instanceof Player) {
-                                    player = (Player) sender;
+                                    players = List.of((Player) sender);
                                 } else {
-                                    throw new CommandSyntaxError("Use /bmenu open <menu> <player>");
+                                    throw new CommandError("Use /bmenu open <menu> <player>");
                                 }
                             }
-                            try {
-                                Menu m = loader.findAndCreate(new SpacedNameKey(menu), player, null);
+                            for (Player player : players) {
+                                try {
+                                    Menu m = loader.create(menu, player, null);
 
-                                for (String s : args.keySet()) {
-                                    if (s.equals("menu") || s.equals("player") || s.equals("custom")) continue;
-                                    Object obj = args.get(s);
-                                    m.addArgument(s, obj instanceof Player pl ? pl.getName() : String.valueOf(obj));
+                                    // for (String s : args.keySet()) {
+                                    //     if (s.equals("menu") || s.equals("player") || s.equals("custom")) continue;
+                                    //     Object obj = args.get(s);
+                                    //     m.addArgument(s, obj instanceof Player pl ? pl.getName() : String.valueOf(obj));
+                                    // }
+
+                                    m.open();
+                                } catch (Exception t) {
+                                    sender.sendMessage(
+                                            Component.text("Меню не удалось открыть с ошибкой: ")
+                                                    .append(Component.text(t.getMessage()))
+                                                    .color(TextColor.color(0xFF, 0x55, 0x55))
+                                    );
+                                    getSLF4JLogger().error("Failed to open menu {}", menu, t);
+                                    break;
                                 }
-
-                                m.open();
-                            } catch (Exception t) {
-                                player.sendMessage(
-                                        Component.text("Меню не удалось открыть с ошибкой: ")
-                                                .append(Component.text(t.getMessage()))
-                                                .color(TextColor.color(0xFF, 0x55, 0x55))
-                                );
-                                getSLF4JLogger().error("Failed to open menu {}", menu, t);
                             }
+
                         })
                 )
-                .addSubCommand(new Command<CommandSender>("dump")
+                .sub(new Command<CommandSender>("dump")
                         .requires(new RequiresPermission<>("bmenu.dump"))
-                        .addSubCommand(new Command<CommandSender>("menu")
+                        .sub(new Command<CommandSender>("menu")
                                 .requires(new RequiresPermission<>("bmenu.dump.menu"))
-                                .argument(new ArgumentSetList<>("menu", () -> loader.getMenus().stream().map(SpacedNameKey::toString).toList()))
+                                .argument(new ArgumentDynamicRegistry<>("menu", () -> loader.getMenuRegistry()))
                                 .executor((sender, args) -> {
-                                    String menu = (String) args.getOrThrow("menu", "Use /bmenu dump menu <menu>");
-                                    MenuConfig config = loader.findMenu(new SpacedNameKey(menu));
+                                    MenuConfig config = (MenuConfig) args.getOrThrow("menu", "Use /bmenu dump menu <menu>");
+
                                     File file = new File(getDataFolder(), "dump-" + System.currentTimeMillis());
                                     file.mkdirs();
                                     config.dump(file.toPath());
-                                    loader.getMessage().sendMsg(sender, "&aSaved to {}", file.getPath());
+                                    sender.sendMessage(MiniMessage.deserialize("&aSaved to " + file.getPath()));
                                 })
                         )
                 )
-                .addSubCommand(new Command<CommandSender>("test")
-
-                        .addSubCommand(new Command<CommandSender>("menu")
+                .sub(new Command<CommandSender>("test")
+                        .sub(new Command<CommandSender>("item")
                                 .executor((sender, args) -> {
-                                    JsonSchemaTypeBuilder builder = MenuCodec.schema().asBuilder();
-                                    builder.schema();
-                                    builder.title("BMenu item schema");
-                                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                                    String schema = gson.toJson(builder.build().buildJson());
-                                    try {
-                                        Files.writeString(getDataFolder().toPath().resolve("shema.json"), schema);
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
+                                    // LegacyItemLike legacyItemLike = new LegacyItemLike();
+                                    // legacyItemLike.setMaterial(Material.DIAMOND_AXE);
+                                    // legacyItemLike.setCount(64);
+                                    // legacyItemLike.setName(LegacyConvertor.convert0("<red>CustomName"));
+                                    // legacyItemLike.setLore(List.of(
+                                    //         LegacyConvertor.convert0("<red>Lore 1"),
+                                    //         LegacyConvertor.convert0("<red>Lore 2"),
+                                    //         LegacyConvertor.convert0("<red>Lore 3")
+                                    // ));
+                                    // getSLF4JLogger().info("Test Item {}", legacyItemLike.writeToString());
                                 })
                         )
                 )

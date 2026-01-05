@@ -2,9 +2,7 @@ package org.by1337.bmenu.item;
 
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
-import org.by1337.blib.chat.Placeholderable;
-import org.by1337.blib.chat.placeholder.BiPlaceholder;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.requirement.Requirements;
@@ -32,11 +30,11 @@ public class MenuItemTickListener {
     }
 
     public void tick(MenuItem menuItem, Menu menu) {
-        Placeholderable placeholder = new BiPlaceholder(menu, menuItem);
+        var placeholder = menu.getPlaceholderResolver().and(menuItem);
         if (requirements.test(menu, placeholder, menu.getViewer(), s -> menuItem.executeCommand(s, menu))) {
-            commands.forEach(command -> menuItem.executeCommand(placeholder.replace(command), menu));
+            commands.forEach(command -> menuItem.executeCommand(placeholder.replace(command, menu), menu));
         } else {
-            denyCommands.forEach(command -> menuItem.executeCommand(placeholder.replace(command), menu));
+            denyCommands.forEach(command -> menuItem.executeCommand(placeholder.replace(command, menu), menu));
         }
     }
 

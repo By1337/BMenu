@@ -1,3 +1,4 @@
+/*
 package org.by1337.bmenu.command.argument;
 
 
@@ -50,4 +51,4 @@ public class ArgumentChoiceMenu<T> extends Argument<T> {
         }
 
     }
-}
+}*/

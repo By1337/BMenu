@@ -1,8 +1,8 @@
 package org.by1337.bmenu.factory;
 
-import blib.com.mojang.serialization.Codec;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import dev.by1337.cmd.Command;
 import dev.by1337.yaml.BukkitYamlCodecs;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
@@ -14,10 +14,8 @@ import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.by1337.blib.RegistryHelper;
-import org.by1337.blib.command.Command;
-import org.by1337.blib.util.Pair;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.item.component.EnchantmentData;
+import org.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,11 +128,12 @@ public class MenuCodecs {
 
         static {
             POTION_EFFECTS = HashBiMap.create();
-            for (RegistryHelper.Holder<PotionEffectType> holder : RegistryHelper.MOB_EFFECT) {
-                var type = holder.value();
-                var key = holder.getKey();
-                POTION_EFFECTS.put(key.getKey(), type);
-            }
+            //todo
+          //  for (RegistryHelper.Holder<PotionEffectType> holder : RegistryHelper.MOB_EFFECT) {
+          //      var type = holder.value();
+          //      var key = holder.getKey();
+          //      POTION_EFFECTS.put(key.getKey(), type);
+          //  }
             var builder = JsonSchemaTypeBuilder.create();
             builder.type(SchemaTypes.Type.OBJECT);
             builder.additionalProperties(false);
@@ -145,9 +144,9 @@ public class MenuCodecs {
         }
     };
 
-    public static final YamlCodec<Pair<Enchantment, Integer>> ENCHANTMENT_YAML_CODEC = new YamlCodec<>() {
+    public static final YamlCodec<EnchantmentData> ENCHANTMENT_YAML_CODEC = new YamlCodec<>() {
         @Override
-        public DataResult<Pair<Enchantment, Integer>> decode(YamlValue yamlValue) {
+        public DataResult<EnchantmentData> decode(YamlValue yamlValue) {
             return yamlValue.decode(STRING).flatMap(s -> {
                 String[] args0 = s.split(";");
                 if (args0.length != 2) {
@@ -156,15 +155,15 @@ public class MenuCodecs {
                 return BukkitYamlCodecs.NAMESPACED_KEY.decode(YamlValue.wrap(args0[0].toLowerCase(Locale.ENGLISH))).flatMap(key -> {
                     Enchantment type = Enchantment.getByKey(key);
                     if (type == null) return DataResult.error("Unknown enchantment '" + key + "'");
-                    return INT.decode(YamlValue.wrap(args0[1])).mapValue(level -> Pair.of(type, level));
+                    return INT.decode(YamlValue.wrap(args0[1])).mapValue(level -> new EnchantmentData(type, level));
                 });
 
             });
         }
 
         @Override
-        public YamlValue encode(Pair<Enchantment, Integer> pair) {
-            return YamlValue.wrap(pair.getLeft().getKey().value() + ":" + pair.getRight());
+        public YamlValue encode(EnchantmentData pair) {
+            return YamlValue.wrap(pair.enchantment().getKey().value() + ":" + pair.lvl());
         }
 
         @Override
@@ -174,19 +173,19 @@ public class MenuCodecs {
     };
 
 
-    public static final YamlCodec<List<Pair<Enchantment, Integer>>> MODERN_ENCHANTMENT_YAML_CODEC = new YamlCodec<>() {
+    public static final YamlCodec<List<EnchantmentData>> MODERN_ENCHANTMENT_YAML_CODEC = new YamlCodec<>() {
         private static final Map<String, Enchantment> ENCHANTMENTS;
         private static final SchemaType SCHEMA_TYPE;
 
-        private static final YamlCodec<List<Pair<Enchantment, Integer>>> LEGACY_CODEC = ENCHANTMENT_YAML_CODEC.listOrSingle();
+        private static final YamlCodec<List<EnchantmentData>> LEGACY_CODEC = ENCHANTMENT_YAML_CODEC.listOrSingle();
 
         @Override
-        public DataResult<List<Pair<Enchantment, Integer>>> decode(YamlValue yamlValue) {
+        public DataResult<List<EnchantmentData>> decode(YamlValue yamlValue) {
             if (yamlValue.isPrimitive() || yamlValue.isCollection()) {
                 return LEGACY_CODEC.decode(yamlValue);
             }
             return YamlCodec.STRING_TO_INT.decode(yamlValue).flatMap(map -> {
-                List<Pair<Enchantment, Integer>> result = new ArrayList<>();
+                List<EnchantmentData> result = new ArrayList<>();
                 StringBuilder error = new StringBuilder();
                 for (String key : map.keySet()) {
                     DataResult<Enchantment> enchant = BukkitYamlCodecs.ENCHANTMENT.decode(YamlValue.wrap(key));
@@ -194,7 +193,7 @@ public class MenuCodecs {
                         error.append(enchant.error()).append("\n");
                     }
                     if (enchant.hasResult()) {
-                        result.add(Pair.of(enchant.result(), map.get(key)));
+                        result.add(new EnchantmentData(enchant.result(), map.get(key)));
                     }
                 }
                 if (!error.isEmpty()) {
@@ -206,10 +205,10 @@ public class MenuCodecs {
         }
 
         @Override
-        public YamlValue encode(List<Pair<Enchantment, Integer>> list) {
+        public YamlValue encode(List<EnchantmentData> list) {
             Map<String, Integer> map = new LinkedHashMap<>();
-            for (Pair<Enchantment, Integer> enchantment : list) {
-                map.put(enchantment.getLeft().getKey().getKey(), enchantment.getRight());
+            for (EnchantmentData enchantment : list) {
+                map.put(enchantment.enchantment().getKey().getKey(), enchantment.lvl());
             }
             return YamlValue.wrap(map);
         }
@@ -303,13 +302,13 @@ public class MenuCodecs {
         builder.additionalProperties(true);
 
         for (Command<Menu> value : Menu.getCommands().getSubcommands().values()) {
-            String cmd = value.getCommand().toLowerCase(Locale.ENGLISH);
+            String cmd = value.name().toLowerCase(Locale.ENGLISH);
             if (cmd.startsWith("[") && cmd.endsWith("]")) {
                 var subBuilder = JsonSchemaTypeBuilder.create();
                 subBuilder.type(SchemaTypes.Type.STRING);
                 StringBuilder sb = new StringBuilder();
-                for (var arg : value.getArguments()) {
-                    sb.append("<").append(arg.getName()).append("> ");
+                for (var arg : value.arguments()) {
+                    sb.append("<").append(arg.name()).append("> ");
                 }
                 if (!sb.isEmpty()) {
                     sb.setLength(sb.length() - 1);

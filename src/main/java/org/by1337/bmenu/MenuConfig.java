@@ -1,14 +1,15 @@
 package org.by1337.bmenu;
 
 import dev.by1337.yaml.YamlMap;
+import org.bukkit.Keyed;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryType;
-import org.by1337.blib.util.SpacedNameKey;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.command.CommandList;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.requirement.CommandRequirements;
-import org.by1337.bmenu.yaml.CashedYamlContext;
 import org.by1337.bmenu.yaml.CashedYamlMap;
-import org.by1337.bmenu.yaml.RawYamlContext;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -17,14 +18,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-public class MenuConfig implements MenuItemLookup {
-    private final Set<SpacedNameKey> supersId;
+public class MenuConfig implements MenuItemLookup, Keyed {
+    private final Set<NamespacedKey> supersId;
     private final List<MenuConfig> supers;
-    private final @Nullable SpacedNameKey id;
-    private final @Nullable SpacedNameKey provider;
+    private final @Nullable NamespacedKey id;
+    private final @Nullable NamespacedKey provider;
     private final InventoryType invType;
     private final int size;
-    private final Set<SpacedNameKey> onlyOpenFrom;
+    private final Set<NamespacedKey> onlyOpenFrom;
     private final Map<String, String> args;
     private final Map<String, MenuItemBuilder> idToItems;
     private final YamlMap yamlConfig;
@@ -41,7 +42,7 @@ public class MenuConfig implements MenuItemLookup {
     private final Map<String, Animator.AnimatorContext> animations;
     private final List<File> fromFiles;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable SpacedNameKey id, @Nullable SpacedNameKey provider, InventoryType invType, int size, List<SpacedNameKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, YamlMap context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, long clickCooldown, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable NamespacedKey id, @Nullable NamespacedKey provider, InventoryType invType, int size, List<NamespacedKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, YamlMap context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, long clickCooldown, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
@@ -90,7 +91,7 @@ public class MenuConfig implements MenuItemLookup {
         if (onlyOpenFrom.isEmpty()) return true;
         if (menu == null || menu.getConfig().id == null) return false;
         if (onlyOpenFrom.contains(menu.getConfig().id)) return true;
-        for (SpacedNameKey spacedNameKey : menu.getConfig().supersId) {
+        for (NamespacedKey spacedNameKey : menu.getConfig().supersId) {
             if (supersId.contains(spacedNameKey)) return true;
         }
         return false;
@@ -100,8 +101,8 @@ public class MenuConfig implements MenuItemLookup {
         for (MenuConfig superMenu : supers) {
             superMenu.generate(menu);
         }
-        MenuItem[] matrix = menu.matrix;
-        int invSize = menu.matrix.length;
+        MenuItem[] matrix = menu.getMatrix();
+        int invSize = matrix.length;
 
         for (MenuItemBuilder builder : items) {
             MenuItem menuItem = null;
@@ -150,7 +151,7 @@ public class MenuConfig implements MenuItemLookup {
     }
 
     public String getSaveName() {
-        return id == null ? "anonymous" : id.getSpace().getName() + "_" + id.getName().getName();
+        return id == null ? "anonymous" : id.getNamespace() + "_" + id.getKey();
     }
 
     public Map<String, CommandRequirements> getMenuEventListeners() {
@@ -165,7 +166,7 @@ public class MenuConfig implements MenuItemLookup {
         return cashedYamlConfig;
     }
 
-    public Set<SpacedNameKey> getSupersId() {
+    public Set<NamespacedKey> getSupersId() {
         return supersId;
     }
 
@@ -173,11 +174,11 @@ public class MenuConfig implements MenuItemLookup {
         return supers;
     }
 
-    public @Nullable SpacedNameKey getId() {
+    public @Nullable NamespacedKey getId() {
         return id;
     }
 
-    public @Nullable SpacedNameKey getProvider() {
+    public @Nullable NamespacedKey getProvider() {
         return provider;
     }
 
@@ -189,7 +190,7 @@ public class MenuConfig implements MenuItemLookup {
         return size;
     }
 
-    public Set<SpacedNameKey> getOnlyOpenFrom() {
+    public Set<NamespacedKey> getOnlyOpenFrom() {
         return onlyOpenFrom;
     }
 
@@ -251,5 +252,10 @@ public class MenuConfig implements MenuItemLookup {
                 "id=" + id +
                 ", supers=" + supers +
                 '}';
+    }
+
+    @Override
+    public @NotNull NamespacedKey getKey() {
+        return id;
     }
 }

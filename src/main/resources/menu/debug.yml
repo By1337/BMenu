@@ -4,8 +4,12 @@
 # {rand_1000} -> {rand:1000}
 # {rand_10000} -> {rand:10000}
 # {rand_100000} -> {rand:100000}
-# math[(.*?)] -> {math:(.*?)}
-# ${(.*?)} -> {(.*?)}
+# math[<>] -> {math:<>}
+# ${<>} -> {<>}
+# "[set_item_to_layer] <slots> <layer> <item>" -> "[layer] <layer+2> [set] <item> <slots>"
+# "[clear_layer] <layer>" -> "[layer] <layer+2> [clear]"
+
+#
 id: debug:main
 provider: default
 type: chest

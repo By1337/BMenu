@@ -1,10 +1,26 @@
-package org.by1337.bmenu;
+package org.by1337.bmenu.menu;
 
+import dev.by1337.cmd.Command;
+import dev.by1337.cmd.CommandMsgError;
+import dev.by1337.cmd.argument.ArgumentString;
+import dev.by1337.cmd.argument.ArgumentStrings;
+import dev.by1337.core.command.bcmd.CommandError;
+import dev.by1337.core.command.bcmd.argument.ArgumentComponents;
+import dev.by1337.core.command.bcmd.argument.ArgumentDouble;
+import dev.by1337.core.command.bcmd.argument.ArgumentInt;
+import dev.by1337.core.command.bcmd.argument.ArgumentRegistry;
+import dev.by1337.core.util.text.MessageFormatter;
+import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.plc.PapiResolver;
 import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.Placeholderable;
 import dev.by1337.plc.Placeholders;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.util.Ticks;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -14,24 +30,12 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.scheduler.BukkitTask;
-import org.by1337.blib.BLib;
-import org.by1337.blib.chat.Placeholderable;
-import org.by1337.blib.command.Command;
-import org.by1337.blib.command.CommandException;
-import org.by1337.blib.command.StringReader;
-import org.by1337.blib.command.argument.*;
-import org.by1337.blib.inventory.InventoryUtil;
-import org.by1337.blib.nbt.NBT;
-import org.by1337.blib.nbt.NBTParser;
-import org.by1337.blib.nbt.impl.ListNBT;
-import org.by1337.blib.nbt.impl.StringNBT;
-import org.by1337.blib.text.MessageFormatter;
-import org.by1337.blib.util.SpacedNameKey;
+import org.by1337.bmenu.*;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.util.AnimationUtil;
 import org.by1337.bmenu.click.MenuClickType;
-import org.by1337.bmenu.hook.ItemStackCreator;
 import org.by1337.bmenu.hook.VaultHook;
+import org.by1337.bmenu.inventory.BukkitInventory;
 import org.by1337.bmenu.network.BungeeCordMessageSender;
 import org.by1337.bmenu.requirement.CommandRequirements;
 import org.by1337.bmenu.util.math.FastExpressionParser;
@@ -46,7 +50,6 @@ import java.util.*;
 import java.util.function.IntFunction;
 
 public abstract class Menu implements InventoryHolder, CommandRunner, Placeholderable {
-    private static final InventoryUtil INV_UTIL = BLib.getApi().getInventoryUtil();
     private static final Command<Menu> commands;
     private static final Logger log = LoggerFactory.getLogger("BMenu");
     private static final Random rand = new Random();
@@ -70,9 +73,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     protected final MenuConfig config;
     protected final MenuLoader loader;
     protected final Player viewer;
-    protected Inventory inventory;
-    protected final MenuItem[] matrix;
-    protected final MenuItem[] animationMask;
+    protected final MenuMatrix layers;
     protected final Map<String, String> args;
     @Nullable
     protected final Menu previousMenu;
@@ -81,11 +82,11 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     protected @Nullable MenuItem lastClickedItem;
     protected long lastClickTime;
     protected String lastTitle;
-    protected final List<MenuItem[]> externalLayers;
     protected int lastClickedSlot = 0;
     protected long clickCooldown;
     protected final Placeholders<Menu> runtimePlaceholders;
     private final PlaceholderResolver<Menu> placeholderResolver;
+    private BukkitInventory inventoryLike;
 
     public Menu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
         runtimePlaceholders = new Placeholders<>();
@@ -94,17 +95,15 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
         this.config = config;
         loader = config.getLoader();
         this.viewer = viewer;
-        matrix = newMatrix();
-        animationMask = newMatrix();
+        layers = new MenuMatrix(menuSize(), this);
         args = new HashMap<>(config.getArgs());
         this.previousMenu = previousMenu;
         args.keySet().forEach(k -> runtimePlaceholders.of(k, () -> args.get(k)));
-        externalLayers = new ArrayList<>();
     }
 
-    public MenuItem[] newMatrix() {
-        if (config.getInvType() == InventoryType.CHEST) return new MenuItem[config.getSize()];
-        return new MenuItem[config.getInvType().getDefaultSize()];
+    public int menuSize() {
+        if (config.getInvType() == InventoryType.CHEST) return config.getSize();
+        return config.getInvType().getDefaultSize();
     }
 
     public void open() {
@@ -125,31 +124,28 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
         if (!viewer.isOnline()) {
             throw new IllegalStateException("Player is not online");
         }
-        if (inventory == null) {
-            createInventory(config.getSize(), loader.getMessage().componentBuilder(replace(config.getTitle())), config.getInvType());
+        if (inventoryLike == null) {
+            inventoryLike = new BukkitInventory(
+                    createInventory(config.getSize(), MiniMessage.deserialize(replace(config.getTitle())), config.getInvType()),
+                    this
+            );
+
         }
         sync(() -> {
-            inventory.clear();
-            if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventory)) {
-                viewer.openInventory(inventory);
-            }
-            // Отключаем автоматическую синхронизацию инвентаря с клиентом,
-            // так как сервер может периодически отправлять обновления,
-            // что может нарушить отображение анимаций.
-            INV_UTIL.disableAutoFlush(viewer);
+            inventoryLike.clear();
+            inventoryLike.show(viewer);
 
             if (animator == null && config.getAnimation() != null) {
                 animator = config.getAnimation().createAnimator();
             }
             onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
 
-            if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventory)) {
+            if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventoryLike.getInventory())) {
                 return;
             }
-            Arrays.fill(matrix, null);
-            Arrays.fill(animationMask, null);
+            layers.clear();
             if (animator != null && !animator.isEnd()) {
-                animator.tick(animationMask, this);
+                animator.tick(layers.getAnimationLayer(), this);
             }
             generate0();
 
@@ -167,37 +163,10 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
 
     protected void tick() {
         if (animator != null && !animator.isEnd()) {
-            animator.tick(animationMask, this);
-            inventory.clear();
+            animator.tick(layers.getAnimationLayer(), this);
         }
-        doItemTick(matrix);
-        doItemTick(animationMask);
-        for (MenuItem[] externalLayer : externalLayers) {
-            doItemTick(externalLayer);
-        }
-        inventory.clear();
+        layers.doTick();
         flush();
-    }
-
-    private final Map<MenuItem, @Nullable MenuItem> cache = new IdentityHashMap<>();
-
-    private void doItemTick(MenuItem[] matrix) {
-        cache.clear();
-        for (int i = 0; i < matrix.length; i++) {
-            MenuItem item = matrix[i];
-            if (item != null && (item.isTicking() || item.shouldBeRebuild())) {
-                if (cache.containsKey(item)) {
-                    matrix[i] = cache.get(item);
-                } else {
-                    item.doTick(this);
-                    if (item.shouldBeRebuild()) {
-                        matrix[i] = cache.computeIfAbsent(item, k -> k.getBuilder().get());
-                    } else {
-                        cache.put(item, item);
-                    }
-                }
-            }
-        }
     }
 
     public void reopen() {
@@ -210,12 +179,10 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
         open(true);
     }
 
-    public void refresh() {
-        Map<MenuItem, MenuItem> cache = new IdentityHashMap<>();
-        for (int i = 0; i < animationMask.length; i++) {
-            MenuItem item = animationMask[i];
+    public void refresh() {//todo!
+        for (MenuItem item : layers.getAnimationLayer()) {
             if (item == null) continue;
-            animationMask[i] = cache.computeIfAbsent(item, k -> k.getBuilder().get());
+            item.setDirty(true);
         }
         generate0();
     }
@@ -223,10 +190,8 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     public void rebuildItemsInSlots(int[] slots) {
         for (int slot : slots) {
             MenuItem item;
-            if ((item = animationMask[slot]) != null) {
-                animationMask[slot] = item.getBuilder().get();
-            } else if ((item = matrix[slot]) != null) {
-                matrix[slot] = item.getBuilder().get();
+            if ((item = layers.getItemInSlot(slot)) != null) { //todo!
+                item.setDirty(true);
             }
         }
     }
@@ -234,12 +199,11 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     protected abstract void generate();
 
     protected void generate0() {
-        Arrays.fill(matrix, null);
+        Arrays.fill(layers.getBaseLayer(), null);
         config.generate(this);
         generate();
         onEvent(MenuEvents.ON_REFRESH);
         updateTitle();
-        inventory.clear();
         flush();
     }
 
@@ -248,55 +212,41 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     }
 
     protected void flush() {
-        setMatrix(matrix);
-        setMatrix(animationMask);
-        for (MenuItem[] externalLayer : externalLayers) {
-            setMatrix(externalLayer);
-        }
+        layers.flushTo(inventoryLike.getItems());
         syncItems();
     }
 
     protected void syncItems() {
-        INV_UTIL.flushInv(viewer);
+        inventoryLike.sync(viewer);
     }
 
     protected void setMatrix(MenuItem[] mask) {
         for (int i = 0; i < mask.length; i++) {
             MenuItem item = mask[i];
             if (item != null) {
-                INV_UTIL.setItemStackWithoutCopy(inventory, item.getItemStack(), i);
-                //inventory.setItem(i, item.getItemStack());
+                inventoryLike.setItem(i, item);
             }
         }
     }
 
-    public void setItems(List<MenuItem> item) {
-        for (MenuItem menuItem : item) {
-            setItem(menuItem, matrix);
-        }
+    public void setItem(MenuItem item, int slot) {
+        setItem(item, slot, layers.getBaseLayer());
     }
 
-    public void setItem(MenuItem item, MenuItem[] matrix) {
-        for (int slot : item.getSlots()) {
-            if (slot == -1) continue;
-            if (slot < 0 || matrix.length < slot) {
-                loader.getLogger().error("Slot {} is out of bounds! Menu: {}", slot, config.getId());
-            } else {
-                matrix[slot] = item;
-            }
-        }
-    }
-
-    public void setItem(MenuItem item) {
-        setItem(item, matrix);
-    }
-
-    protected void createInventory(int size, Component title, InventoryType type) {
-
-        if (type == InventoryType.CHEST) {
-            inventory = Bukkit.createInventory(this, size, title);
+    public void setItem(MenuItem item, int slot, MenuItem[] matrix) {
+        if (slot == -1) return;
+        if (slot < 0 || matrix.length < slot) {
+            loader.getLogger().error("Slot {} is out of bounds! Menu: {}", slot, config.getId());
         } else {
-            inventory = Bukkit.createInventory(this, type, title);
+            matrix[slot] = item;
+        }
+    }
+
+    protected Inventory createInventory(int size, Component title, InventoryType type) {
+        if (type == InventoryType.CHEST) {
+            return Bukkit.createInventory(this, size, title);
+        } else {
+            return Bukkit.createInventory(this, type, title);
         }
     }
 
@@ -305,7 +255,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
         return placeholderResolver.replace(string, this);
     }
 
-    protected abstract boolean runCommand(String cmd) throws CommandException;
+    protected abstract boolean runCommand(String cmd) throws CommandMsgError;
 
     @Override
     public void runCommands(List<String> commands) {
@@ -318,9 +268,9 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     public final void executeCommand(String command) {
         try {
             if (!runCommand(command)) {
-                Menu.commands.process(this, new StringReader(command));
+                Menu.commands.execute(this, command);
             }
-        } catch (CommandException e) {
+        } catch (Exception e) {
             loader.getLogger().error("Failed to run command: {}", command, e);
         }
     }
@@ -330,10 +280,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
             ticker.cancel();
             ticker = null;
         }
-        // Восстанавливаем автоматическую синхронизацию инвентаря с клиентом,
-        // так как пользователь закрыл кастомное меню, и ответственность за обновление
-        // инвентаря теперь возвращается серверу.
-        INV_UTIL.enableAutoFlush(viewer);
+        inventoryLike.onClose(viewer);
 
         onEvent(MenuEvents.ON_CLOSE);
     }
@@ -352,7 +299,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
         if (e.getCurrentItem() == null) {
             return;
         }
-        if (!Objects.equals(inventory, e.getClickedInventory())) return;
+        if (!Objects.equals(inventoryLike.getInventory(), e.getClickedInventory())) return;
         lastClickedSlot = e.getSlot();
         MenuItem item = findItemInSlot(e.getSlot());
         if (item == null) return;
@@ -363,18 +310,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
 
     @Nullable
     public MenuItem findItemInSlot(int slot) {
-        for (int i = externalLayers.size() - 1; i >= 0; i--) {
-            var matrix = externalLayers.get(i);
-            MenuItem item = findItemInSlot(slot, matrix);
-            if (item != null) return item;
-        }
-        MenuItem item = findItemInSlot(slot, animationMask);
-        return item == null ? findItemInSlot(slot, matrix) : item;
-    }
-
-    public MenuItem findItemInSlot(int slot, MenuItem[] matrix) {
-        if (slot >= matrix.length || slot < 0) return null;
-        return matrix[slot];
+        return layers.getItemInSlot(slot);
     }
 
     protected void sync(Runnable runnable) {
@@ -388,14 +324,14 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     }
 
     public void sendFakeTitle(String title) {
-        INV_UTIL.sendFakeTitle(inventory, loader.getMessage().componentBuilder(replace(title)));
+        inventoryLike.setTitle(MiniMessage.deserialize(replace(title)));
     }
 
     public void updateTitle() {
         String newTitle = replace(config.getTitle());
         if (!Objects.equals(lastTitle, newTitle)) {
             lastTitle = newTitle;
-            INV_UTIL.sendFakeTitle(inventory, loader.getMessage().componentBuilder(newTitle));
+            inventoryLike.setTitle(MiniMessage.deserialize(replace(newTitle)));
         }
     }
 
@@ -406,7 +342,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     public void onEvent(String event) {
         CommandRequirements commandRequirements = config.getMenuEventListeners().get(event);
         if (commandRequirements != null) {
-            commandRequirements.run(this, this, viewer);
+            commandRequirements.run(this, placeholderResolver, viewer);
         }
     }
 
@@ -419,16 +355,17 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     }
 
     @Override
+    @Deprecated
     public @NotNull Inventory getInventory() {
-        return inventory;
+        return inventoryLike.getInventory();
     }
 
     public MenuItem[] getMatrix() {
-        return matrix;
+        return layers.getBaseLayer();
     }
 
     public MenuItem[] getAnimationMask() {
-        return animationMask;
+        return layers.getAnimationLayer();
     }
 
     public MenuConfig getConfig() {
@@ -459,7 +396,6 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
      *
      * @return {@code true}, если меню поддерживает горячую перезагрузку, иначе {@code false}.
      */
-    @ApiStatus.Experimental
     public boolean isSupportsHotReload() {
         return false;
     }
@@ -470,7 +406,6 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
      *
      * @param oldMenu старый экземпляр меню, из которого можно перенести данные в новый.
      */
-    @ApiStatus.Experimental
     public void onHotReload(@NotNull Menu oldMenu) {
         args.putAll(oldMenu.args);
         for (String param : args.keySet()) {
@@ -478,15 +413,13 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
         }
     }
 
-    public List<MenuItem[]> getExternalLayers() {
-        return externalLayers;
+
+    public MenuItem[] getLayer(int index) {
+        return layers.getMatrix(index);
     }
 
-    public MenuItem[] getOrCreateExternalLayer(int index) {
-        while (externalLayers.size() <= index) {
-            externalLayers.add(newMatrix());
-        }
-        return externalLayers.get(index);
+    public PlaceholderResolver<Menu> getPlaceholderResolver() {
+        return placeholderResolver;
     }
 
     @Override
@@ -499,22 +432,23 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
     }
 
     private static void runIn(String rawNBT, Menu menu, MenuLoader loader) {
-        if (rawNBT != null && !rawNBT.isBlank()) {
-            try {
-                ListNBT listNBT = (ListNBT) NBTParser.parseList(rawNBT);
-                List<String> list = new ArrayList<>();
-                for (NBT nbt : listNBT) {
-                    if (nbt instanceof StringNBT stringNBT) {
-                        list.add(stringNBT.getValue());
-                    } else {
-                        throw new IllegalArgumentException(String.format("Input: '%s' expected StringNBT", nbt));
-                    }
-                }
-                menu.runCommands(list);
-            } catch (Throwable t) {
-                loader.getLogger().error("Failed to parse commands {}", rawNBT, t);
-            }
-        }
+        //todo!
+        // if (rawNBT != null && !rawNBT.isBlank()) {
+        //     try {
+        //         ListNBT listNBT = (ListNBT) NBTParser.parseList(rawNBT);
+        //         List<String> list = new ArrayList<>();
+        //         for (NBT nbt : listNBT) {
+        //             if (nbt instanceof StringNBT stringNBT) {
+        //                 list.add(stringNBT.getValue());
+        //             } else {
+        //                 throw new IllegalArgumentException(String.format("Input: '%s' expected StringNBT", nbt));
+        //             }
+        //         }
+        //         menu.runCommands(list);
+        //     } catch (Throwable t) {
+        //         loader.getLogger().error("Failed to parse commands {}", rawNBT, t);
+        //     }
+        // }
     }
 
     private static <R> @Nullable R tryToInt(String in, IntFunction<R> func) {
@@ -533,51 +467,52 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
 
     static {
         commands = new Command<>("root");
-        commands.addSubCommand(new Command<Menu>("[CONSOLE]")
+        commands.sub(new Command<Menu>("[CONSOLE]")
                 .aliases("[console]")
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
-                            String cmd = (String) args.getOrThrow("cmd");
+                            String cmd = (String) args.getOrThrow("cmd", "use: [console] <cmd>");
                             v.sync(() -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), cmd));
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[PLAYER]")
+        commands.sub(new Command<Menu>("[PLAYER]")
                 .aliases("[player]")
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
-                            String cmd = (String) args.getOrThrow("cmd");
+                            String cmd = (String) args.getOrThrow("cmd", "use: [player] <cmd>");
                             v.sync(() -> v.viewer.performCommand(cmd));
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[CHAT]")
+        commands.sub(new Command<Menu>("[CHAT]")
                 .aliases("[chat]")
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
-                            String cmd = (String) args.getOrThrow("cmd");
+                            String cmd = (String) args.getOrThrow("cmd", "use: [chat] <cmd>");
                             v.sync(() -> v.viewer.chat(cmd));
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[SOUND]")
+        commands.sub(new Command<Menu>("[SOUND]")
                 .aliases("[sound]")
-                .argument(new ArgumentSound<>("sound"))
-                .argument(new ArgumentFloat<>("volume"))
-                .argument(new ArgumentFloat<>("pitch"))
+                .argument(new ArgumentRegistry<>("sound", Registry.SOUNDS))
+                .argument(new ArgumentDouble<>("volume"))
+                .argument(new ArgumentDouble<>("pitch"))
                 .executor((v, args) -> {
-                            float volume = (float) args.getOrDefault("volume", 1F);
-                            float pitch = (float) args.getOrDefault("pitch", 1F);
-                            Sound sound = (Sound) args.getOrThrow("sound");
-                            v.loader.getMessage().sendSound(v.viewer, sound, volume, pitch);
+                            float volume = ((Double) args.getOrDefault("volume", 1F)).floatValue();
+                            float pitch = ((Double) args.getOrDefault("pitch", 1F)).floatValue();
+                            Sound sound = (Sound) args.getOrThrow("sound", "use [sound] <sound> <?volume> <?pitch>");
+                            Player reciver = v.viewer;
+                            reciver.playSound(reciver.getLocation(), sound, volume, pitch);
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[CLOSE]")
+        commands.sub(new Command<Menu>("[CLOSE]")
                 .aliases("[close]")
                 .executor((v, args) -> v.sync(v.viewer::closeInventory))
         );
-        commands.addSubCommand(new Command<Menu>("[BACK_OR_CLOSE]")
+        commands.sub(new Command<Menu>("[BACK_OR_CLOSE]")
                 .aliases("[back_or_close]")
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> v.sync(() -> {
@@ -590,19 +525,19 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
                     }
                 }))
         );
-        commands.addSubCommand(new Command<Menu>("[BACK_TO_OR_CLOSE]")
+        commands.sub(new Command<Menu>("[BACK_TO_OR_CLOSE]")
                 .aliases("[back_to_or_close]")
                 .argument(new ArgumentString<>("id"))
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
-                    String id = (String) args.getOrThrow("id", "Use: [BACK_TO_OR_CLOSE] <id>");
+                    String id = (String) args.getOrThrow("id", "Use: [back_to_or_close] <id>");
                     v.sync(() -> {
                         Menu m = v.previousMenu;
                         while (m != null) {
                             if (id.contains(":")) {
-                                if (Objects.equals(m.config.getId(), new SpacedNameKey(id))) break;
+                                if (Objects.equals(m.config.getId(), NamespacedKey.fromString(id))) break;
                             } else if (m.config.getId() != null) {
-                                if (Objects.equals(m.config.getId().getName().getName(), id)) break;
+                                if (Objects.equals(m.config.getId().getKey(), id)) break;
                             }
                             m = m.previousMenu;
                         }
@@ -616,7 +551,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
                     });
                 })
         );
-        commands.addSubCommand(new Command<Menu>("[BACK]")
+        commands.sub(new Command<Menu>("[BACK]")
                 .aliases("[back]")
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
@@ -626,140 +561,151 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
                     m.reopen();
                 })
         );
-        commands.addSubCommand(new Command<Menu>("[REFRESH]")
+        commands.sub(new Command<Menu>("[REFRESH]")
                 .aliases("[refresh]")
                 .executor((v, args) -> v.refresh())
         );
-        commands.addSubCommand(new Command<Menu>("[MESSAGE]")
+        commands.sub(new Command<Menu>("[MESSAGE]")
                 .aliases("[message]")
-                .argument(new ArgumentStrings<>("msg"))
+                .argument(new ArgumentComponents<>("msg"))
                 .executor((v, args) -> {
-                            String msg = (String) args.getOrThrow("msg", "Use [MESSAGE] <msg>");
-                            v.loader.getMessage().sendMsg(v.viewer, msg);
+                            Component msg = (Component) args.getOrDefault("msg", Component.empty());
+                            v.viewer.sendMessage(msg);
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[ACTION_BAR]")
+        commands.sub(new Command<Menu>("[ACTION_BAR]")
                 .aliases("[action_bar]")
-                .argument(new ArgumentStrings<>("msg"))
+                .argument(new ArgumentComponents<>("msg"))
                 .executor((v, args) -> {
-                            String msg = (String) args.getOrThrow("msg", "Use [ACTION_BAR] <msg>");
-                            v.loader.getMessage().sendActionBar(v.viewer, msg);
+                            Component msg = (Component) args.getOrDefault("msg", Component.empty());
+                            v.viewer.sendActionBar(msg);
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[ACTION_BAR_ALL]")
+        commands.sub(new Command<Menu>("[ACTION_BAR_ALL]")
                 .aliases("[action_bar_all]")
-                .argument(new ArgumentStrings<>("msg"))
+                .argument(new ArgumentComponents<>("msg"))
                 .executor((v, args) -> {
-                            String msg = (String) args.getOrThrow("msg", "Use [ACTION_BAR_ALL] <msg>");
-                            v.loader.getMessage().sendAllActionBar(msg);
+                            Component msg = (Component) args.getOrDefault("msg", Component.empty());
+                            Bukkit.getOnlinePlayers().forEach(player -> player.sendActionBar(msg));
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[TITLE]")
+        commands.sub(new Command<Menu>("[TITLE]")
                 .aliases("[title]")
                 .argument(new ArgumentString<>("msg"))
-                .argument(new ArgumentInteger<>("fadeIn"))
-                .argument(new ArgumentInteger<>("stay"))
-                .argument(new ArgumentInteger<>("fadeOut"))
+                .argument(new ArgumentInt<>("fadeIn"))
+                .argument(new ArgumentInt<>("stay"))
+                .argument(new ArgumentInt<>("fadeOut"))
 
                 .executor((v, args) -> {
+                            //todo хочу ArgumentComponent а тут \n
                             String msg = (String) args.getOrThrow("msg", "Use [TITLE] <\"Title\\nSubTitle\"> <?fadeIn> <?stay> <?fadeOut>");
                             int fadeIn = (int) args.getOrDefault("fadeIn", 10);
                             int stay = (int) args.getOrDefault("stay", 70);
                             int fadeOut = (int) args.getOrDefault("fadeOut", 20);
 
                             String[] arr = msg.split("\\\\n", 2);
-                            v.loader.getMessage().sendTitle(v.viewer, arr[0], arr.length == 2 ? arr[1] : "", fadeIn, stay, fadeOut);
+                            v.viewer.showTitle(Title.title(
+                                    MiniMessage.deserialize(arr[0]),
+                                    arr.length == 2 ? MiniMessage.deserialize(arr[1]) : Component.empty(),
+                                    Title.Times.of(
+                                            Ticks.duration(fadeIn),
+                                            Ticks.duration(stay),
+                                            Ticks.duration(fadeOut)
+                                    )
+                            ));
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[TITLE_ALL]")
+        commands.sub(new Command<Menu>("[TITLE_ALL]")
                 .aliases("[title_all]")
                 .argument(new ArgumentString<>("msg"))
-                .argument(new ArgumentInteger<>("fadeIn"))
-                .argument(new ArgumentInteger<>("stay"))
-                .argument(new ArgumentInteger<>("fadeOut"))
+                .argument(new ArgumentInt<>("fadeIn"))
+                .argument(new ArgumentInt<>("stay"))
+                .argument(new ArgumentInt<>("fadeOut"))
                 .executor((v, args) -> {
+                            //todo хочу ArgumentComponent а тут \n
                             String msg = (String) args.getOrThrow("msg", "Use [TITLE_ALL] <\"Title\\nSubTitle\"> <?fadeIn> <?stay> <?fadeOut>");
                             int fadeIn = (int) args.getOrDefault("fadeIn", 10);
                             int stay = (int) args.getOrDefault("stay", 70);
                             int fadeOut = (int) args.getOrDefault("fadeOut", 20);
 
                             String[] arr = msg.split("\\\\n", 2);
-                            Bukkit.getOnlinePlayers().forEach(player -> v.loader.getMessage().sendTitle(player, arr[0], arr.length == 2 ? arr[1] : "", fadeIn, stay, fadeOut));
+                            Title title = Title.title(
+                                    MiniMessage.deserialize(arr[0]),
+                                    arr.length == 2 ? MiniMessage.deserialize(arr[1]) : Component.empty(),
+                                    Title.Times.of(
+                                            Ticks.duration(fadeIn),
+                                            Ticks.duration(stay),
+                                            Ticks.duration(fadeOut)
+                                    )
+                            );
+                            Bukkit.getOnlinePlayers().forEach(player -> player.showTitle(title));
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[BROADCAST]")
+        commands.sub(new Command<Menu>("[BROADCAST]")
                 .aliases("[broadcast]")
-                .argument(new ArgumentStrings<>("msg"))
+                .argument(new ArgumentComponents<>("msg"))
                 .executor((v, args) -> {
-                            String msg = (String) args.getOrThrow("msg", "Use [BROADCAST] <msg>");
-                            v.loader.getMessage().sendAllMsg(msg);
+                            Component msg = (Component) args.getOrDefault("msg", Component.empty());
+                            Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(msg));
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[SET_PARAM]")
+        commands.sub(new Command<Menu>("[SET_PARAM]")
                 .aliases("[set_param]")
                 .argument(new ArgumentString<>("param"))
                 .argument(new ArgumentStrings<>("value"))
                 .executor((v, args) -> {
-                            String param = (String) args.getOrThrow("param", "Use [SET_PARAM] <param> <value>");
-                            String value = (String) args.getOrThrow("value", "Use [SET_PARAM] <param> <value>");
+                            String param = (String) args.getOrThrow("param", "Use [set_param] <param> <value>");
+                            String value = (String) args.getOrThrow("value", "Use [set_param] <param> <value>");
                             v.addArgument(param, value);
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[IMPORT_PARAMS]")
+        commands.sub(new Command<Menu>("[IMPORT_PARAMS]")
                 .aliases("[import_params]")
                 .argument(new ArgumentString<>("item"))
                 .executor((v, args) -> {
-                            String param = (String) args.getOrThrow("item", "Use [IMPORT_PARAMS] <item>");
+                            String param = (String) args.getOrThrow("item", "Use [import_params] <item>");
                             MenuItemBuilder builder = v.config.findMenuItem(param, v);
                             if (builder == null) {
-                                throw new CommandException("No such item: '{}'. Command [IMPORT_PARAMS]", param);
+                                throw new CommandError("No such item: '{}'. Command [import_params]", param);
                             }
                             v.args.putAll(builder.getArgs());
                             v.args.keySet().forEach(k -> v.runtimePlaceholders.of(k, () -> v.args.get(k)));
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[OPEN]")
+        commands.sub(new Command<Menu>("[OPEN]")
                 .aliases("[open]")
                 .argument(new ArgumentString<>("menu"))
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
-                            String menu = (String) args.getOrThrow("menu", "Use [OPEN] <menu id>");
-                            MenuConfig settings = v.loader.findMenu(menu);
-                            if (settings == null) {
-                                throw new CommandException("Unknown menu %s", menu);
-                            }
-                            Menu m = v.loader.findAndCreate(settings, v.viewer, v);
+                            String menu = (String) args.getOrThrow("menu", "Use [open] <menu id>");
+                            Menu m = v.loader.create(menu, v.viewer, v);
                             if (args.containsKey("commands"))
                                 runIn((String) args.get("commands"), m, v.loader);
                             m.open();
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[BACK_OR_OPEN]")
+        commands.sub(new Command<Menu>("[BACK_OR_OPEN]")
                 .aliases("[back_or_open]")
                 .argument(new ArgumentString<>("menu"))
                 .argument(new ArgumentStrings<>("commands"))
                 .executor((v, args) -> {
-                    String menu = (String) args.getOrThrow("menu", "Use [BACK_OR_OPEN] <menu id>");
-                    MenuConfig settings = v.loader.findMenu(menu);
-                    if (settings == null) {
-                        throw new CommandException("Unknown menu %s", menu);
-                    }
+                    String menu = (String) args.getOrThrow("menu", "Use [back_or_open] <menu id>");
                     v.sync(() -> {
                         if (v.previousMenu != null) {
                             if (args.containsKey("commands"))
                                 runIn((String) args.get("commands"), v.previousMenu, v.loader);
                             v.previousMenu.reopen();
                         } else {
-                            Menu m = v.loader.findAndCreate(settings, v.viewer, v);
+                            Menu m = v.loader.create(menu, v.viewer, v);
                             if (args.containsKey("commands"))
                                 runIn((String) args.get("commands"), m, v.loader);
                             m.open();
@@ -767,160 +713,160 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
                     });
                 })
         );
-        commands.addSubCommand(new Command<Menu>("[RUN_RAND]")
+        commands.sub(new Command<Menu>("[run_rand]")
                 .aliases("[run_rand]")
                 .executor((v, args) -> {
                             List<String> commands = v.config.getCommandList().getRandom();
                             if (commands == null) {
-                                throw new CommandException("commands-list не определён в конфиге!");
+                                throw new CommandError("commands-list не определён в конфиге!");
                             }
                             v.runCommands(commands);
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[RUN]")
+        commands.sub(new Command<Menu>("[RUN]")
                 .aliases("[run]")
                 .argument(new ArgumentString<>("name"))
                 .executor((v, args) -> {
-                            String name = (String) args.getOrThrow("name", "Use [RUN] <name>");
+                            String name = (String) args.getOrThrow("name", "Use [run] <name>");
                             List<String> commands = v.config.getCommandList().getByName(name);
                             if (commands == null) {
-                                throw new CommandException("В commands-list не пределён набор команд {}", name);
+                                throw new CommandError("В commands-list не пределён набор команд {}", name);
                             }
                             v.runCommands(commands);
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[REOPEN]")
+        commands.sub(new Command<Menu>("[REOPEN]")
                 .aliases("[reopen]")
                 .executor((v, args) -> v.reopen()
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[ANIMATION_FORCE_END]")
+        commands.sub(new Command<Menu>("[ANIMATION_FORCE_END]")
                 .aliases("[animation_force_end]")
                 .executor((v, args) -> {
                             if (v.animator != null) {
-                                v.animator.forceEnd(v.animationMask, v);
+                                v.animator.forceEnd(v.layers.getAnimationLayer(), v);
                             }
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[ANIMATION_TICK]")
+        commands.sub(new Command<Menu>("[ANIMATION_TICK]")
                 .aliases("[animation_tick]")
                 .executor((v, args) -> {
                             if (v.animator != null && !v.animator.isEnd()) {
-                                v.animator.tick(v.animationMask, v);
+                                v.animator.tick(v.layers.getAnimationLayer(), v);
                             }
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[FLUSH]")
+        commands.sub(new Command<Menu>("[FLUSH]")
                 .aliases("[flush]")
                 .executor((v, args) -> {
-                            v.inventory.clear();
                             v.flush();
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[CONNECT]")
+        commands.sub(new Command<Menu>("[CONNECT]")
                 .aliases("[connect]")
                 .argument(new ArgumentString<>("server"))
                 .executor((v, args) -> {
-                            String server = (String) args.getOrThrow("server", "Use [CONNECT] <server>");
+                            String server = (String) args.getOrThrow("server", "Use [connect] <server>");
                             BungeeCordMessageSender.connectPlayerToServer(v.viewer, server, v.loader.getPlugin());
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[SET_ANIMATION]")
+        commands.sub(new Command<Menu>("[SET_ANIMATION]")
                 .aliases("[set_animation]")
                 .argument(new ArgumentString<>("animation"))
                 .executor((v, args) -> {
-                            String animation = (String) args.getOrThrow("animation", "Use: [SET_ANIMATION] <animation>");
+                            String animation = (String) args.getOrThrow("animation", "Use: [set_animation] <animation>");
                             Animator.AnimatorContext ctx = v.config.getAnimations().get(animation);
                             if (ctx == null) {
-                                throw new CommandException("Неизвестная анимация {}", animation);
+                                throw new CommandError("Неизвестная анимация {}", animation);
                             }
                             if (v.animator != null) {
-                                v.animator.forceEnd(v.animationMask, v);
+                                v.animator.forceEnd(v.layers.getAnimationLayer(), v);
                             }
                             v.animator = ctx.createAnimator();
 
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[GIVEMONEY]")
+        commands.sub(new Command<Menu>("[GIVEMONEY]")
                 .aliases("[givemoney]")
-                .argument(new ArgumentFormattedDouble<>("count"))
+                .argument(new ArgumentDouble<>("count"))
                 .executor((v, args) -> {
-                            Double count = (Double) args.getOrThrow("count", "Use: [GIVEMONEY] <count>");
+                            Double count = (Double) args.getOrThrow("count", "Use: [givemoney] <count>");
                             if (!VaultHook.get().isAvailable()) {
-                                throw new CommandException("Economy not defined");
+                                throw new CommandError("Economy not defined");
                             }
                             VaultHook.get().depositPlayer(v.viewer, count);
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[TAKEMONEY]")
+        commands.sub(new Command<Menu>("[TAKEMONEY]")
                 .aliases("[takemoney]")
-                .argument(new ArgumentFormattedDouble<>("count"))
+                .argument(new ArgumentDouble<>("count"))
                 .executor((v, args) -> {
-                            Double count = (Double) args.getOrThrow("count", "Use: [TAKEMONEY] <count>");
+                            Double count = (Double) args.getOrThrow("count", "Use: [takemoney] <count>");
                             if (!VaultHook.get().isAvailable()) {
-                                throw new CommandException("Economy not defined");
+                                throw new CommandError("Economy not defined");
                             }
                             VaultHook.get().withdrawPlayer(v.viewer, count);
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[DELAY]")
+        commands.sub(new Command<Menu>("[DELAY]")
                 .aliases("[delay]")
-                .argument(new ArgumentInteger<>("delay"))
+                .argument(new ArgumentInt<>("delay"))
                 .argument(new ArgumentStrings<>("cmd"))
                 .executor((v, args) -> {
-                            int delay = (int) args.getOrThrow("delay", "Use: [DELAY] <delay> <command>");
-                            String cmd = (String) args.getOrThrow("cmd", "Use: [DELAY] <delay> <command>");
+                            int delay = (int) args.getOrThrow("delay", "Use: [delay] <delay> <command>");
+                            String cmd = (String) args.getOrThrow("cmd", "Use: [delay] <delay> <command>");
                             v.sync(() -> v.runCommands(List.of(cmd)), delay);
                         }
                 )
         );
-        commands.addSubCommand(new Command<Menu>("[COPY_FROM_PREVIOUS_MENU]")
-                .aliases("[copy_from_previous_menu]")
-                .argument(new ArgumentString<>("src"))
-                .argument(new ArgumentString<>("dest"))
-                .executor((v, args) -> {
-                            int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [COPY_FROM_PREVIOUS_MENU] <src> <dest>"));
-                            int[] dest = AnimationUtil.readSlots((String) args.getOrThrow("dest", "Use: [COPY_FROM_PREVIOUS_MENU] <src> <dest>"));
-                            if (v.previousMenu == null) {
-                                throw new CommandException("Failed to execute [COPY_FROM_PREVIOUS_MENU] because previousMenu is null!");
-                            }
+        commands.sub(new Command<Menu>("[COPY_FROM_PREVIOUS_MENU]")
+                        .aliases("[copy_from_previous_menu]")
+                        .argument(new ArgumentString<>("src"))
+                        .argument(new ArgumentString<>("dest"))
+                        .executor((v, args) -> {
+                                    int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [copy_from_previous_menu] <src> <dest>"));
+                                    int[] dest = AnimationUtil.readSlots((String) args.getOrThrow("dest", "Use: [copy_from_previous_menu] <src> <dest>"));
+                                    if (v.previousMenu == null) {
+                                        throw new CommandError("Failed to execute [copy_from_previous_menu] because previousMenu is null!");
+                                    }
 
-                            int srcIndex = 0;
-                            for (int toIndex : dest) {
-                                int fromIndex = src[srcIndex];
+                                    //todo
+                                    //  int srcIndex = 0;
+                                    //  for (int toIndex : dest) {
+                                    //      int fromIndex = src[srcIndex];
+//
+                                    //      if (fromIndex < 0 || fromIndex >= v.matrix.length || toIndex < 0 || toIndex >= v.matrix.length) {
+                                    //          throw new IndexOutOfBoundsException("Индексы 'from' или 'to' выходят за пределы меню.");
+                                    //      }
+//
+                                    //      v.animationMask[toIndex] = v.previousMenu.findItemInSlot(fromIndex);
+                                    //      if (srcIndex < src.length - 1) {
+                                    //          srcIndex++;
+                                    //      }
+                                    //  }
 
-                                if (fromIndex < 0 || fromIndex >= v.matrix.length || toIndex < 0 || toIndex >= v.matrix.length) {
-                                    throw new IndexOutOfBoundsException("Индексы 'from' или 'to' выходят за пределы меню.");
                                 }
-
-                                v.animationMask[toIndex] = v.previousMenu.findItemInSlot(fromIndex);
-                                if (srcIndex < src.length - 1) {
-                                    srcIndex++;
-                                }
-                            }
-
-                        }
-                )
+                        )
         );
-        commands.addSubCommand(new Command<Menu>("[REBUILD_SLOTS]")
+        commands.sub(new Command<Menu>("[REBUILD_SLOTS]")
                 .aliases("[rebuild_slots]")
                 .argument(new ArgumentString<>("src"))
                 .executor((v, args) -> {
-                    int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [REBUILD_SLOTS] <slots>"));
+                    int[] src = AnimationUtil.readSlots((String) args.getOrThrow("src", "Use: [rebuild_slots] <slots>"));
                     v.rebuildItemsInSlots(src);
                 })
 
         );
-        commands.addSubCommand(new Command<Menu>("[update_slots]")
+        commands.sub(new Command<Menu>("[update_slots]")
                 .aliases("[UPDATE_SLOTS]")
                 .argument(new ArgumentString<>("src"))
                 .executor((v, args) -> {
@@ -928,13 +874,13 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
                     for (int slot : src) {
                         MenuItem item = v.findItemInSlot(slot);
                         if (item != null) {
-                            item.invalidateCash();
+                            item.setDirty(true);
                         }
                     }
                 })
 
         );
-        commands.addSubCommand(new Command<Menu>("[die_slots]")
+        commands.sub(new Command<Menu>("[die_slots]")
                 .aliases("[DIE_SLOTS]")
                 .argument(new ArgumentString<>("src"))
                 .executor((v, args) -> {
@@ -948,42 +894,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
                 })
 
         );
-        commands.addSubCommand(new Command<Menu>("[set_item_to_layer]")
-                .aliases("[SET_ITEM_TO_LAYER]")
-                .argument(new ArgumentString<>("slots"))
-                .argument(new ArgumentInteger<>("layer"))
-                .argument(new ArgumentString<>("item"))
-                .executor((v, args) -> {
-                    int[] slots = AnimationUtil.readSlots((String) args.getOrThrow("slots", "Use: [set_item_to_layer] <slots> <layer> <item>"));
-                    String item = (String) args.getOrThrow("item", "Use: [set_item_to_layer] <slot> <layer> <item>");
-                    int layer = (int) args.getOrThrow("layer", "Use: [set_item_to_layer] <slot> <layer> <item>");
-                    ;
-                    MenuItemBuilder builder = v.getConfig().findMenuItem(item, v);
-                    MenuItem menuItem;
-                    if (builder == null) {
-                        menuItem = new MenuItem(slots, ItemStackCreator.getItem(item));
-                    } else {
-                        menuItem = builder.build(v);
-                    }
-                    if (menuItem != null) {
-                        menuItem.setSlots(slots);
-                        var matrix = v.getOrCreateExternalLayer(layer);
-                        v.setItem(menuItem, matrix);
-                    }
-                })
-
-        );
-        commands.addSubCommand(new Command<Menu>("[clear_layer]")
-                .aliases("[CLEAR_LAYER]")
-                .argument(new ArgumentInteger<>("layer"))
-                .executor((v, args) -> {
-                    int layer = (int) args.getOrThrow("layer", "Use: [clear_layer] <layer>");
-                    var matrix = v.getOrCreateExternalLayer(layer);
-                    Arrays.fill(matrix, null);
-                })
-
-        );
-        commands.addSubCommand(new Command<Menu>("[set_title]")
+        commands.sub(new Command<Menu>("[set_title]")
                 .aliases("[SET_TITLE]")
                 .argument(new ArgumentString<>("title"))
                 .executor((v, args) -> {
@@ -992,6 +903,86 @@ public abstract class Menu implements InventoryHolder, CommandRunner, Placeholde
                 })
 
         );
+
+        Command<Menu> layerCommands = new Command<Menu>("[layer]")
+                .aliases("[LAYER]");
+        for (int i = 0; i < 16; i++) { // костыль чтобы можно было писать [layer] 0 <под команда>
+            final int layerIndex = i;
+            layerCommands.sub(
+                    new Command<Menu>(Integer.toString(layerIndex))
+                            .sub(new Command<Menu>("[move]")
+                                    .argument(new ArgumentInt<>("layer2"))
+                                    .argument(new ArgumentString<>("from"))
+                                    .argument(new ArgumentString<>("to"))
+                                    .executor((v, args) -> {
+                                        int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> [move] <slots-from> <slots-to>");
+                                        int[] from = AnimationUtil.readSlots((String) args.getOrThrow("from", "Use: [layer] <layer> [move] <slots-from> <slots-to>"));
+                                        int[] to = AnimationUtil.readSlots((String) args.getOrThrow("to", "Use: [layer] <layer> [move] <slots-from> <slots-to>"));
+                                        MenuItem[] src = v.layers.getMatrix(layerIndex);
+                                        MenuItem[] dest = v.layers.getMatrix(layer2);
+                                        for (int idx = 0; idx < from.length; idx++) {
+                                            int fromIndex = from[idx];
+                                            int toIndex = to[idx];
+
+                                            if (fromIndex < 0 || fromIndex >= src.length || toIndex < 0 || toIndex >= dest.length) {
+                                                throw new IndexOutOfBoundsException("Индексы 'from' или 'to' выходят за пределы меню.");
+                                            }
+                                            dest[toIndex] = src[fromIndex];
+                                            src[fromIndex] = null;
+                                        }
+                                    })
+                            )
+                            .sub(new Command<Menu>("[copy]")
+                                    .argument(new ArgumentInt<>("layer2"))
+                                    .argument(new ArgumentString<>("from"))
+                                    .argument(new ArgumentString<>("to"))
+                                    .executor((v, args) -> {
+                                        int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> [copy] <slots-from> <slots-to>");
+                                        int[] from = AnimationUtil.readSlots((String) args.getOrThrow("from", "Use: [layer] <layer> [copy] <slots-from> <slots-to>"));
+                                        int[] to = AnimationUtil.readSlots((String) args.getOrThrow("to", "Use: [layer] <layer> [copy] <slots-from> <slots-to>"));
+                                        MenuItem[] src = v.layers.getMatrix(layerIndex);
+                                        MenuItem[] dest = v.layers.getMatrix(layer2);
+                                        for (int idx = 0; idx < from.length; idx++) {
+                                            int fromIndex = from[idx];
+                                            int toIndex = to[idx];
+
+                                            if (fromIndex < 0 || fromIndex >= src.length || toIndex < 0 || toIndex >= dest.length) {
+                                                throw new CommandError("Индексы 'from' или 'to' выходят за пределы меню.");
+                                            }
+                                            dest[toIndex] = src[fromIndex];
+                                        }
+                                    })
+                            ).sub(new Command<Menu>("[set]")
+                                    .argument(new ArgumentString<>("item"))
+                                    .argument(new ArgumentString<>("slots"))
+                                    .executor((v, args) -> {
+                                        String itemID = (String) args.getOrThrow("item", "Use: [layer] <layer> [set] <item> <slots>");
+                                        int[] slots = AnimationUtil.readSlots((String) args.getOrThrow("slots", "Use: [layer] <layer> [set] <item> <slots>"));
+                                        MenuItem[] src = v.layers.getMatrix(layerIndex);
+                                        MenuItemBuilder builder = v.config.findMenuItem(itemID, v);
+                                        MenuItem item;
+                                        if (builder != null) {
+                                            item = builder.build(v);
+                                        } else {
+                                            item = MenuItem.ofMaterial(itemID);
+                                        }
+                                        for (int slot : slots) {
+                                            if (slot < 0 || slot >= src.length) {
+                                                throw new CommandError("слот {} за пределами меню!", slot);
+                                            }
+                                            src[slot] = item;
+                                        }
+                                    })
+                            )
+                            .sub(new Command<Menu>("[clear]")
+                                    .executor((v, args) -> {
+                                        Arrays.fill(v.layers.getMatrix(layerIndex), null);
+                                    })
+                            )
+            );
+
+        }
+        commands.sub(layerCommands);
     }
 
 }

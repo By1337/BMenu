@@ -1,12 +1,10 @@
 package org.by1337.bmenu.factory;
 
+import dev.by1337.cmd.CommandReader;
 import dev.by1337.yaml.YamlMap;
-import dev.by1337.yaml.YamlValue;
 import org.bukkit.configuration.MemorySection;
-import org.by1337.blib.configuration.YamlContext;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MenuFilePostprocessor {
     private static final String SOFT_MERGE_TAG = "<<+";
@@ -31,25 +29,56 @@ public class MenuFilePostprocessor {
         if (o instanceof Map<?, ?> m) {
             m.entrySet().forEach(entry -> {
                 Object value = entry.getValue();
-                ((Map.Entry)entry).setValue(fixPlaceholders(value));
+                ((Map.Entry) entry).setValue(fixPlaceholders(value));
             });
             return o;
         } else if (o instanceof List<?>) {
             ((List<Object>) o).replaceAll(v -> fixPlaceholders(v));
             return o;
         } else if (o instanceof String s) {
-            return s
+            String fixed = s
                     .replace("{rand_10}", "{rand:10}")
                     .replace("{rand_100}", "{rand:100}")
                     .replace("{rand_1000}", "{rand:1000}")
                     .replace("{rand_10000}", "{rand:10000}")
                     .replace("{rand_100000}", "{rand:100000}")
                     .replaceAll("math\\[(.*?)]", "{math:$1}")
-                    .replaceAll("\\$\\{(.*?)}", "{$1}")
-                    ;
+                    .replaceAll("\\$\\{(.*?)}", "{$1}");
+            return fixCommands(fixed);
         } else {
             return o;
         }
+    }
+
+    //[set_item_to_layer] <slots> <layer> <item> -> [layer] <layer+2> [set] <item> <slots>
+    //[clear_layer] <layer> -> [layer] <layer+2> [clear]
+    private static String fixCommands(String src) {
+        if (src.startsWith("[set_item_to_layer] ") || src.startsWith("[SET_ITEM_TO_LAYER] ")) {
+            String args = src.substring("[set_item_to_layer] ".length());
+            //<slots> <layer> <item>
+            CommandReader reader = new CommandReader(args);
+            String slots = reader.readString();
+            reader.next();
+            String layer = reader.readString();
+            reader.next();
+            String item = reader.readString();
+            try {
+                int x = Integer.parseInt(layer);
+                return "[layer] " + (x + 2) + " [set] " + quoteAndEscape(item, false) + " " + quoteAndEscape(slots, false);
+            } catch (NumberFormatException e) {
+                return src;
+            }
+        } else if (src.startsWith("[clear_layer] ") || src.startsWith("[CLEAR_LAYER] ")) {
+            String layer = src.substring("[clear_layer] ".length());
+            try {
+                int x = Integer.parseInt(layer);
+                return "[layer] " + (x + 2) + " [clear]";
+            } catch (NumberFormatException e) {
+                return src;
+            }
+
+        }
+        return src;
     }
 
     @SuppressWarnings("unchecked")
@@ -86,55 +115,6 @@ public class MenuFilePostprocessor {
             return list;
         }
         return o;
-    }
-
-    @Deprecated
-    public static YamlValue fromBLib(org.by1337.blib.configuration.YamlValue yamlValue) {
-        Object raw = yamlValue.getValue();
-        if (raw instanceof YamlContext ctx) {
-            return YamlValue.wrap(toMap(ctx.getHandle()));
-        } else if (raw instanceof MemorySection ms) {
-            return YamlValue.wrap(toMap(ms));
-        } else if (raw instanceof Collection<?> c) {
-            List<Object> list = new ArrayList<>();
-            for (Object o : c) {
-                list.add(fromBLib(org.by1337.blib.configuration.YamlValue.wrap(o)).getValue());
-            }
-            return YamlValue.wrap(list);
-        } else if (raw instanceof Map<?, ?>) {
-            return YamlValue.wrap(
-                    yamlValue.mapStream().collect(Collectors.toMap(
-                            e -> fromBLib(e.getKey()).getValue(),
-                            e -> fromBLib(e.getValue()).getValue(),
-                            (v1, v2) -> v1,
-                            LinkedHashMap::new
-                    ))
-            );
-        }
-        return YamlValue.wrap(raw);
-    }
-
-    public static Map<?, ?> toMap(MemorySection memorySection) {
-        Map<Object, Object> result = new LinkedHashMap<>();
-        for (String key : memorySection.getKeys(false)) {
-            Object value = memorySection.get(key);
-            if (value instanceof MemorySection mem) {
-                result.put(key, toMap(mem));
-            } else if (value instanceof Collection<?> list) {
-                List<Object> listToAdd = new ArrayList<>();
-                for (Object o : list) {
-                    if (o instanceof MemorySection mem) {
-                        listToAdd.add(toMap(mem));
-                    } else {
-                        listToAdd.add(o);
-                    }
-                }
-                result.put(key, listToAdd);
-            } else {
-                result.put(key, value);
-            }
-        }
-        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -179,5 +159,54 @@ public class MenuFilePostprocessor {
         } else {
             return object;
         }
+    }
+
+    public static String quoteAndEscape(String raw, boolean json) {
+        StringBuilder result = new StringBuilder(" ");
+        int quoteChar = 0;
+        for (int i = 0; i < raw.length(); ++i) {
+            char currentChar = raw.charAt(i);
+            switch (currentChar) {
+                case '\\':
+                    result.append("\\\\");
+                    break;
+                case '\n':
+                    result.append("\\n");
+                    break;
+                case '\t':
+                    result.append("\\t");
+                    break;
+                case '\b':
+                    result.append("\\b");
+                    break;
+                case '\r':
+                    result.append("\\r");
+                    break;
+                case '\f':
+                    result.append("\\f");
+                    break;
+                case '\"':
+                case '\'':
+                    if (quoteChar == 0) {
+                        quoteChar = currentChar == '\"' ? '\'' : '\"';
+                    }
+                    if (json) {
+                        quoteChar = '\"';
+                    }
+                    if (quoteChar == currentChar) {
+                        result.append('\\');
+                    }
+                    result.append(currentChar);
+                    break;
+                default:
+                    result.append(currentChar);
+            }
+        }
+        if (quoteChar == 0) {
+            quoteChar = '\"';
+        }
+        result.setCharAt(0, (char) quoteChar);
+        result.append((char) quoteChar);
+        return result.toString();
     }
 }

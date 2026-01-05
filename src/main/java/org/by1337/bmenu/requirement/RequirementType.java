@@ -1,7 +1,6 @@
 package org.by1337.bmenu.requirement;
 
 import dev.by1337.yaml.YamlMap;
-import org.by1337.blib.configuration.YamlContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;

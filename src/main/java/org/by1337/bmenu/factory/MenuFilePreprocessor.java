@@ -1,13 +1,15 @@
 package org.by1337.bmenu.factory;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.by1337.blib.nbt.NBTParser;
-import org.by1337.blib.nbt.impl.ListNBT;
 import org.by1337.bmenu.MenuLoader;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,8 +55,14 @@ public class MenuFilePreprocessor {
                         );
                     } else {
                         try {
-                            ListNBT listNBT = (ListNBT) NBTParser.parseList(include.toString());
-                            List<String> filesList = listNBT.stream().map(n -> String.valueOf(n.getAsObject())).toList();
+                            JsonParser parser = new JsonParser();
+                            JsonArray array = parser.parse(line).getAsJsonArray();
+                            List<String> filesList = new ArrayList<>();
+                            for (JsonElement element : array) {
+                                if (element.isJsonPrimitive()) {
+                                    filesList.add(element.getAsString());
+                                }
+                            }
                             List<File> includes = FileUtil.findFiles(file, loader, filesList);
                             for (File includeFile : includes) {
                                 sb.append(readYamlAndApplyPreprocessor(includeFile, loader, loaded));

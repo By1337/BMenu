@@ -1,10 +1,10 @@
 package org.by1337.bmenu.requirement;
 
+import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
-import org.by1337.blib.chat.Placeholderable;
-import org.by1337.bmenu.Menu;
+import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.factory.MenuCodecs;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class CommandRequirements {
         this.commands = commands;
     }
 
-    public void run(Menu menu, Placeholderable placeholderable, Player clicker) {
+    public void run(Menu menu, PlaceholderResolver<Menu> placeholderable, Player clicker) {
         if (!test(menu, placeholderable, clicker)) {
             runCommands(denyCommands, menu, placeholderable);
         } else {
@@ -34,14 +34,14 @@ public class CommandRequirements {
         }
     }
 
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
+    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholderable, Player clicker) {
         return requirements.test(menu, placeholderable, clicker);
     }
 
-    private void runCommands(List<String> commands, Menu menu, Placeholderable placeholderable) {
+    private void runCommands(List<String> commands, Menu menu, PlaceholderResolver<Menu> placeholderable) {
         for (String command : commands) {
             if (command.equalsIgnoreCase("[break]")) return;
-            menu.executeCommand(placeholderable.replace(command));
+            menu.executeCommand(placeholderable.replace(command, menu));
         }
         return;
     }
