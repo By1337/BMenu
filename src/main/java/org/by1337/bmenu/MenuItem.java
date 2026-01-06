@@ -1,12 +1,16 @@
 package org.by1337.bmenu;
 
+import dev.by1337.cmd.Command;
+import dev.by1337.cmd.CompiledCommand;
+import dev.by1337.cmd.argument.ArgumentString;
 import dev.by1337.plc.PlaceholderFormat;
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.Placeholderable;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.MenuClickType;
+import org.by1337.bmenu.command.CommandRunner;
+import org.by1337.bmenu.command.ExecuteContext;
 import org.by1337.bmenu.item.ItemModel;
 import org.by1337.bmenu.item.MenuItemTickListener;
 import org.by1337.bmenu.menu.Menu;
@@ -15,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -40,7 +45,7 @@ public class MenuItem implements PlaceholderResolver<Menu> {
             this.localArgs = localArgs.copy();
         }
         if (tickListener != null) {
-            if (this.localArgs == null) this.localArgs = new MenuPlaceholders(new LinkedHashMap<>(), false);
+            if (this.localArgs == null) this.localArgs = new MenuPlaceholders(new HashMap<>(), false);
             this.localArgs.setPlaceholder("tick", () -> ticks / tickSpeed);
         }
     }
@@ -49,27 +54,7 @@ public class MenuItem implements PlaceholderResolver<Menu> {
                 ItemModel.ofMaterial(material),
                 Map.of(),
                 null,
-                null
-        );
-    }
-
-    public void executeCommand(String command, Menu menu) {
-        if (command.equalsIgnoreCase("[rebuild]")) {
-            dirty = true;//todo надо наверное сбросить локальные плейсы
-        } else if (command.equalsIgnoreCase("[die]")) {
-            die();
-        } else if (command.equalsIgnoreCase("[update]")) {
-            dirty = true;
-        } else if (command.startsWith("[set_local] ") || command.startsWith("[SET_LOCAL] ")) {
-            String[] args = command.split(" ", 3);
-            if (args.length != 3) {
-                log.error("Failed to execute command! expected [set_local] <param> <value> but got {}", command);
-                return;
-            }
-            setPlaceholder(args[1], () -> args[2]);
-        } else {
-            menu.executeCommand(command);
-        }
+                null);
     }
 
     public Placeholderable getPlaceholders(Menu menu){
@@ -77,10 +62,10 @@ public class MenuItem implements PlaceholderResolver<Menu> {
     }
 
     public void doClick(Menu menu, Player player, MenuClickType type) {
-        var resolver = menu.getPlaceholderResolver().and(this);
+        var resolver = menu.getPlaceholderResolver().and(this).bind(menu);
         ClickHandler handler = clicks.getOrDefault(type, clicks.get(MenuClickType.ANY_CLICK));
         if (handler != null) {
-            handler.onClick(menu, resolver, player, s -> executeCommand(s, menu));
+            handler.onClick(menu, resolver, player, ExecuteContext.of(menu, this));
         }
     }
 
@@ -162,5 +147,4 @@ public class MenuItem implements PlaceholderResolver<Menu> {
     public @Nullable String replace(String key, String params, @Nullable Menu ctx, PlaceholderFormat format) {
         return localArgs != null ? localArgs.replace(key, params, ctx, format) : null;
     }
-
 }

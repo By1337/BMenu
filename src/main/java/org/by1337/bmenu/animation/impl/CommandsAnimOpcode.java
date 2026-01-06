@@ -2,12 +2,13 @@ package org.by1337.bmenu.animation.impl;
 
 
 import dev.by1337.yaml.codec.YamlCodec;
-import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.MenuItem;
 import org.by1337.bmenu.animation.Animator;
 import org.by1337.bmenu.animation.FrameOpcode;
 import org.by1337.bmenu.animation.FrameOpcodes;
+import org.by1337.bmenu.command.ExecuteContext;
 import org.by1337.bmenu.factory.MenuCodecs;
+import org.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class CommandsAnimOpcode implements FrameOpcode {
 
     @Override
     public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
-        menu.runCommands(commands.stream().map(menu::replace).toList());
+        menu.runCommands(ExecuteContext.of(menu), commands.stream().map(menu::replace).toList());
     }
 
     @Override

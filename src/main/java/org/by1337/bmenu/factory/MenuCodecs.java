@@ -12,6 +12,7 @@ import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.by1337.bmenu.command.ExecuteContext;
 import org.by1337.bmenu.item.component.EnchantmentData;
 import org.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.NotNull;
@@ -30,10 +31,12 @@ public class MenuCodecs {
 
     @Deprecated(since = "1.20.3")
     private static final YamlCodec<PotionEffectType> LEGACY_POTION_EFFECT_TYPE_CODEC =
-            YamlCodec.lookup(Arrays.stream(PotionEffectType.values()).collect(Collectors.toMap(
-                    PotionEffectType::getName,
-                    v -> v
-            )));
+            YamlCodec.lookup(Arrays.stream(PotionEffectType.values())
+                    .filter(v -> v.getName() != null)
+                    .collect(Collectors.toMap(
+                            PotionEffectType::getName,
+                            v -> v
+                    )));
 
     public static final YamlCodec<PotionEffectType> POTION_EFFECT_TYPE_CODEC = anyCodec(
             LegacyRegistryBridge.MOB_EFFECT.yamlCodec(),
@@ -41,9 +44,9 @@ public class MenuCodecs {
     );
 
 
-    public static final YamlCodec<int[]> TWO_INTS = YamlCodec.STRING.flatMap(
+    private static final YamlCodec<int[]> TWO_INTS = YamlCodec.STRING.flatMap(
             s -> {
-                String[] split = s.split(" ", 2);
+                String[] split = s.split("\\s+", 2);
                 if (split.length != 2) return DataResult.error("expected '<number> <number>', but got '{}'", s);
                 return YamlCodec.INT.decode(split[0]).flatMap(i1 ->
                         YamlCodec.INT.decode(split[1]).mapValue(i2 -> new int[]{i1, i2})
@@ -82,12 +85,39 @@ public class MenuCodecs {
                     ))
             ).whenPrimitive(InlineYamlCodecBuilder.inline(
                     ";",
-                    "<enchantment>;<duration>",
+                    "<enchantment>;<lvl>",
                     EnchantmentData::new,
                     BukkitCodecs.enchantment().withGetter(EnchantmentData::enchantment),
                     YamlCodec.INT.withGetter(EnchantmentData::lvl)
             ).listOf());
 
+
+    public static final YamlCodec<List<String>> MAP_TO_LIST = new YamlCodec<List<String>>() {
+        @Override
+        public DataResult<List<String>> decode(YamlValue yamlValue) {
+            return YamlCodec.STRING_TO_STRING.decode(yamlValue).mapValue(map -> {
+                List<String> res = new ArrayList<>();
+                for (String key : map.keySet()) {
+                    String val = map.get(key);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("[").append(key).append("]");
+                    if (!val.isBlank()) sb.append(" ").append(val);
+                    res.add(sb.toString());
+                }
+                return res;
+            });
+        }
+
+        @Override
+        public YamlValue encode(List<String> list) {
+            return YamlValue.wrap(list);
+        }
+
+        @Override
+        public @NotNull SchemaType schema() {
+            return SchemaTypes.STRING.asMap();
+        }
+    };
 
     public static final String COMMANDS_SCHEMA_TYPE_REF_NAME = "commands_ref";
     public static final SchemaType COMMANDS_SCHEMA_TYPE;
@@ -151,8 +181,8 @@ public class MenuCodecs {
         }
     };
 
-    private static <T> YamlCodec<T> anyCodec(YamlCodec<T> first, YamlCodec<T> second){
-        return new  YamlCodec<T>() {
+    private static <T> YamlCodec<T> anyCodec(YamlCodec<T> first, YamlCodec<T> second) {
+        return new YamlCodec<T>() {
             @Override
             public DataResult<T> decode(YamlValue yamlValue) {
                 var v = first.decode(yamlValue);
@@ -177,7 +207,7 @@ public class MenuCodecs {
         builder.type(SchemaTypes.Type.OBJECT);
         builder.additionalProperties(true);
 
-        for (Command<Menu> value : Menu.getCommands().getSubcommands().values()) {
+        for (Command<ExecuteContext> value : Menu.getCommands().getSubcommands().values()) {
             String cmd = value.name().toLowerCase(Locale.ENGLISH);
             if (cmd.startsWith("[") && cmd.endsWith("]")) {
                 var subBuilder = JsonSchemaTypeBuilder.create();

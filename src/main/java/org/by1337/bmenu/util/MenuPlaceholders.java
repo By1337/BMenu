@@ -15,20 +15,20 @@ import java.util.function.Supplier;
 public class MenuPlaceholders implements PlaceholderResolver<Menu> {
     public static final YamlCodec<MenuPlaceholders> CODEC = MenuCodecs.ARGS_CODEC.map(MenuPlaceholders::new, MenuPlaceholders::asStringMap);
 
-    private LinkedHashMap<String, Supplier<Object>> args;
+    private HashMap<String, Supplier<Object>> args;
     private boolean copyOnWrite;
 
     public MenuPlaceholders(Map<String, String> map) {
-        args = new LinkedHashMap<>();
+        args = new HashMap<>();
         map.forEach((k, v) -> args.put(k, () -> v));
     }
 
-    public MenuPlaceholders(LinkedHashMap<String, String> map) {
-        args = new LinkedHashMap<>();
+    public MenuPlaceholders(HashMap<String, String> map) {
+        args = new HashMap<>();
         map.forEach((k, v) -> args.put(k, () -> v));
     }
 
-    public MenuPlaceholders(LinkedHashMap<String, Supplier<Object>> args, boolean copyOnWrite) {
+    public MenuPlaceholders(HashMap<String, Supplier<Object>> args, boolean copyOnWrite) {
         this.args = args;
         this.copyOnWrite = copyOnWrite;
     }

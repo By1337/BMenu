@@ -1,6 +1,6 @@
 package org.by1337.bmenu.requirement;
 
-import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.Placeholderable;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
@@ -8,7 +8,9 @@ import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.entity.Player;
-import org.by1337.bmenu.CommandRunner;
+import org.by1337.bmenu.command.CommandRunner;
+import org.by1337.bmenu.command.Commands;
+import org.by1337.bmenu.command.ExecuteContext;
 import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.factory.RequirementsFactory;
@@ -68,8 +70,8 @@ public class Requirements {
 
     private static Requirement readRequirement(YamlMap yaml) {
         String check = yaml.get("check").decode(YamlCodec.STRING).getOrThrow();
-        List<String> commands = yaml.get("commands").decode(MenuCodecs.COMMANDS, List.of()).getOrThrow();
-        List<String> denyCommands = yaml.get("deny_commands").decode(MenuCodecs.COMMANDS, List.of()).getOrThrow();
+        Commands commands = yaml.get("commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
+        Commands denyCommands = yaml.get("deny_commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
         if (check.equalsIgnoreCase("true") || check.equalsIgnoreCase("false")) {
             yaml.set("$check-type", "flag");
             return new FlagRequirements(Boolean.parseBoolean(check), commands, denyCommands);
@@ -181,38 +183,25 @@ public class Requirements {
         this.requirements = requirements.stream().filter(r -> !r.isNOP()).toList();
     }
 
-
-    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholders, Player clicker) {
-        return test(menu, placeholders, clicker, menu);
-    }
-
-    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholders, Player clicker, CommandRunner commandRunner) {
+    public boolean test(Menu menu, Placeholderable placeholders, Player clicker, ExecuteContext ctx) {
         boolean result = true;
         for (Requirement requirement : requirements) {
             try {
                 if (!requirement.test(menu, placeholders, clicker)) {
-                    if (runCommands(requirement.getDenyCommands(), placeholders, commandRunner, menu)) {
-                        return false;
-                    }
+                    Commands c = requirement.getDenyCommands();
+                    c.run(ctx, placeholders);
+                    if (c.isHasBreak()) return false;
                     result = false;
                 } else {
-                    if (runCommands(requirement.getCommands(), placeholders, commandRunner, menu)) {
-                        return true;
-                    }
+                    Commands c = requirement.getCommands();
+                    c.run(ctx, placeholders);
+                    if (c.isHasBreak()) return true;
                 }
             } catch (Exception e) {
                 menu.getLoader().getLogger().error("Failed to check requirement: {}", requirement, e);
             }
         }
         return result;
-    }
-
-    private boolean runCommands(List<String> commands, PlaceholderResolver<Menu> placeholders, CommandRunner commandRunner, Menu menu) {
-        for (String command : commands) {
-            if (command.equals("[BREAK]") || command.equals("[break]")) return true;
-            commandRunner.executeCommand(placeholders.replace(command, menu));
-        }
-        return false;
     }
 
     public List<Requirement> getRequirements() {

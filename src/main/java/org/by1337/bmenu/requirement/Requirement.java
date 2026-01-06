@@ -1,17 +1,19 @@
 package org.by1337.bmenu.requirement;
 
 import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.Placeholderable;
 import org.bukkit.entity.Player;
+import org.by1337.bmenu.command.Commands;
 import org.by1337.bmenu.menu.Menu;
 
 import java.util.List;
 
 public interface Requirement {
-    boolean test(Menu menu, PlaceholderResolver<Menu> placeholders, Player clicker);
+    boolean test(Menu menu, Placeholderable placeholders, Player clicker);
 
-    List<String> getCommands();
+    Commands getCommands();
 
-    List<String> getDenyCommands();
+    Commands getDenyCommands();
 
     default boolean compilable() {
         return false;
@@ -30,17 +32,17 @@ public interface Requirement {
         return new Requirement() {
             private final boolean state = sub.state();
             @Override
-            public boolean test(Menu menu, PlaceholderResolver<Menu> placeholders, Player clicker) {
+            public boolean test(Menu menu, Placeholderable placeholders, Player clicker) {
                 return state;
             }
 
             @Override
-            public List<String> getCommands() {
+            public Commands getCommands() {
                 return sub.getCommands();
             }
 
             @Override
-            public List<String> getDenyCommands() {
+            public Commands getDenyCommands() {
                 return sub.getDenyCommands();
             }
 

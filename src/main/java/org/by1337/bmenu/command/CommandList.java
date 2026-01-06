@@ -1,7 +1,5 @@
 package org.by1337.bmenu.command;
 
-import dev.by1337.yaml.YamlMap;
-import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.by1337.bmenu.factory.MenuCodecs;
@@ -16,17 +14,17 @@ import java.util.Map;
 
 public class CommandList {
     public static final YamlCodec<CommandList> CODEC =
-            YamlCodec.mapOf(YamlCodec.STRING, Commands.CODEC).map(CommandList::new, c -> c.commandByName);
-    private final List<Commands> commands;
-    private final Map<String, Commands> commandByName;
-    private WeightedItemSelector<List<String>> randSelector;
+            YamlCodec.mapOf(YamlCodec.STRING, WeightedCommands.CODEC).map(CommandList::new, c -> c.commandByName);
+    private final List<WeightedCommands> commands;
+    private final Map<String, WeightedCommands> commandByName;
+    private WeightedItemSelector<Commands> randSelector;
 
-    public CommandList(Map<String, Commands> map) {
+    public CommandList(Map<String, WeightedCommands> map) {
         commands = new ArrayList<>();
         commandByName = new HashMap<>();
         if (map.isEmpty()) return;
         for (String string : map.keySet()) {
-            Commands commands1 = map.get(string);
+            WeightedCommands commands1 = map.get(string);
             commands.add(commands1);
             commandByName.put(string, commands1);
         }
@@ -44,32 +42,32 @@ public class CommandList {
     }
 
     @Nullable
-    public List<String> getRandom() {
+    public Commands getRandom() {
         return randSelector == null ? null : randSelector.getRandomItem();
     }
 
     @Nullable
-    public List<String> getByName(String name) {
-        return commandByName.getOrDefault(name, Commands.EMPTY).commands;
+    public Commands getByName(String name) {
+        return commandByName.getOrDefault(name, WeightedCommands.EMPTY).commands;
     }
 
-    public static class Commands implements WeightedItem<List<String>> {
-        public static final YamlCodec<Commands> CODEC = RecordYamlCodecBuilder.mapOf(
-                Commands::new,
-                YamlCodec.DOUBLE.fieldOf("weight", Commands::weight, 1D),
-                MenuCodecs.COMMANDS.fieldOf("commands", Commands::commands, List.of())
+    public static class WeightedCommands implements WeightedItem<Commands> {
+        public static final YamlCodec<WeightedCommands> CODEC = RecordYamlCodecBuilder.mapOf(
+                WeightedCommands::new,
+                YamlCodec.DOUBLE.fieldOf("weight", WeightedCommands::weight, 1D),
+                Commands.CODEC.fieldOf("commands", WeightedCommands::commands, Commands.EMPTY)
         );
-        private static final Commands EMPTY = new Commands(0D, null);
+        private static final WeightedCommands EMPTY = new WeightedCommands(0D, null);
         private final double weight;
-        private final List<String> commands;
+        private final Commands commands;
 
-        public Commands(double weight, List<String> commands) {
+        public WeightedCommands(double weight, Commands commands) {
             this.weight = weight;
             this.commands = commands;
         }
 
         @Override
-        public List<String> value() {
+        public Commands value() {
             return commands;
         }
 
@@ -78,7 +76,7 @@ public class CommandList {
             return weight;
         }
 
-        public List<String> commands() {
+        public Commands commands() {
             return commands;
         }
     }

@@ -1,25 +1,21 @@
 package org.by1337.bmenu.requirement;
 
-import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.Placeholderable;
 import dev.by1337.yaml.YamlMap;
-import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
+import org.by1337.bmenu.command.Commands;
 import org.by1337.bmenu.menu.Menu;
-import org.by1337.bmenu.util.ObjectUtil;
 import org.by1337.bmenu.util.StringUtil;
 import org.by1337.bmenu.util.math.FastExpressionParser;
-
-import java.util.Collections;
-import java.util.List;
 
 public class MathRequirement implements Requirement {
     private final String expression;
     private final boolean not;
-    private final List<String> commands;
-    private final List<String> denyCommands;
+    private final Commands commands;
+    private final Commands denyCommands;
 
-    public MathRequirement(String expression, List<String> commands, List<String> denyCommands) {
+    public MathRequirement(String expression, Commands commands, Commands denyCommands) {
         this.expression = expression;
         this.commands = commands;
         not = false;
@@ -29,21 +25,13 @@ public class MathRequirement implements Requirement {
     public MathRequirement(YamlMap context) {
         expression = context.get("expression").decode(YamlCodec.STRING).getOrThrow();
         not = context.get("type").decode(YamlCodec.STRING).getOrThrow().startsWith("!");
-        commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
-                value -> ((List<?>) value).stream()
-                        .map(v -> YamlValue.wrap(v).asString("")).toList(),
-                Collections.emptyList()
-        );
-        denyCommands = ObjectUtil.mapIfNotNullOrDefault(context.get("deny_commands").getValue(),
-                value -> ((List<?>) value).stream()
-                        .map(v -> YamlValue.wrap(v).asString("")).toList(),
-                Collections.emptyList()
-        );
+        commands = context.get("commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
+        denyCommands = context.get("deny_commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
     }
 
     @Override
-    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholderable, Player clicker) {
-        String s = placeholderable.replace(expression, menu);
+    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
+        String s = placeholderable.replace(expression);
         try {
             var b = FastExpressionParser.parse(s) == 1D;
             return not != b;
@@ -58,12 +46,12 @@ public class MathRequirement implements Requirement {
     }
 
     @Override
-    public List<String> getCommands() {
+    public Commands getCommands() {
         return commands;
     }
 
     @Override
-    public List<String> getDenyCommands() {
+    public Commands getDenyCommands() {
         return denyCommands;
     }
 

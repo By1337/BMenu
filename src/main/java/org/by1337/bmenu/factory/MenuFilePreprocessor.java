@@ -3,11 +3,14 @@ package org.by1337.bmenu.factory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.by1337.bmenu.MenuLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,7 +41,7 @@ public class MenuFilePreprocessor {
                 String line = iterator.next();
                 if (line.startsWith("#")) continue;
                 if (line.trim().startsWith("include:")) {
-                    StringBuilder include = new StringBuilder(line.replace("include:", ""));
+                    StringBuilder include = new StringBuilder(line);
                     boolean closed = false;
                     while (iterator.hasNext()) {
                         line = iterator.next();
@@ -55,15 +58,8 @@ public class MenuFilePreprocessor {
                         );
                     } else {
                         try {
-                            //todo
-                            JsonParser parser = new JsonParser();
-                            JsonArray array = parser.parse(line).getAsJsonArray();
-                            List<String> filesList = new ArrayList<>();
-                            for (JsonElement element : array) {
-                                if (element.isJsonPrimitive()) {
-                                    filesList.add(element.getAsString());
-                                }
-                            }
+                            YamlMap yamlMap = YamlMap.loadFromString(include.toString());
+                            List<String> filesList = yamlMap.get("include").decode(YamlCodec.STRINGS).getOrThrow();
                             List<File> includes = FileUtil.findFiles(file, loader, filesList);
                             for (File includeFile : includes) {
                                 sb.append(readYamlAndApplyPreprocessor(includeFile, loader, loaded));

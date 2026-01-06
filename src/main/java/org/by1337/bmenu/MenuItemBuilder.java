@@ -14,6 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.by1337.bmenu.click.ClickHandler;
 import org.by1337.bmenu.click.ClickHandlerImpl;
 import org.by1337.bmenu.click.MenuClickType;
+import org.by1337.bmenu.command.Commands;
+import org.by1337.bmenu.command.ExecuteContext;
 import org.by1337.bmenu.factory.ItemFactory;
 import org.by1337.bmenu.factory.MenuCodecs;
 import org.by1337.bmenu.factory.fixer.ItemFixer;
@@ -56,10 +58,11 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     @Nullable
-    public MenuItem build(Menu menu, @Nullable final ItemStack itemStack, PlaceholderResolver<Menu> placeholders) {
-        PlaceholderResolver<Menu> plc = localArgs == null || localArgs.isEmpty() ? placeholders : placeholders.and(localArgs);
-        if (!viewRequirement.requirement.test(menu, plc, menu.getViewer())) {
-            menu.runCommands(viewRequirement.denyCommands);
+    public MenuItem build(Menu menu, @Nullable final ItemStack itemStack, PlaceholderResolver<Menu> resolver1) {
+        PlaceholderResolver<Menu> resolver = localArgs == null || localArgs.isEmpty() ? resolver1 : resolver1.and(localArgs);
+        var placeholders = resolver.bind(menu);
+        if (!viewRequirement.requirement.test(menu, placeholders, menu.getViewer(), ExecuteContext.of(menu))) {
+            viewRequirement.denyCommands.run(ExecuteContext.of(menu), placeholders);
             return null;
         }
 
@@ -72,8 +75,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 itemModel,
                 clicks,
                 tickListener,
-                localArgs
-        );
+                localArgs);
         item.setTickSpeed(tickSpeed);
         return item;
     }
@@ -100,7 +102,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
 
-    public void setViewRequirement(Requirements requirement, List<String> denyCommands) {
+    public void setViewRequirement(Requirements requirement, Commands denyCommands) {
         this.viewRequirement = new ViewRequirement(requirement, denyCommands);
     }
 
@@ -168,17 +170,17 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
     }
 
     public static class ViewRequirement {
-        private static final ViewRequirement EMPTY = new ViewRequirement(Requirements.EMPTY, Collections.emptyList());
+        private static final ViewRequirement EMPTY = new ViewRequirement(Requirements.EMPTY, Commands.EMPTY);
         public static YamlCodec<ViewRequirement> CODEC = RecordYamlCodecBuilder.mapOf(
                 ViewRequirement::new,
                 Requirements.CODEC.fieldOf("requirements", ViewRequirement::getRequirement, Requirements.EMPTY),
-                MenuCodecs.COMMANDS.fieldOf("deny_commands", ViewRequirement::getDenyCommands, List.of())
+                Commands.CODEC.fieldOf("deny_commands", ViewRequirement::getDenyCommands, Commands.EMPTY)
         );
 
         private final Requirements requirement;
-        private final List<String> denyCommands;
+        private final Commands denyCommands;
 
-        public ViewRequirement(Requirements requirement, List<String> denyCommands) {
+        public ViewRequirement(Requirements requirement, Commands denyCommands) {
             this.requirement = requirement;
             this.denyCommands = denyCommands;
         }
@@ -187,7 +189,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
             return requirement;
         }
 
-        public List<String> getDenyCommands() {
+        public Commands getDenyCommands() {
             return denyCommands;
         }
 

@@ -1,8 +1,9 @@
 package org.by1337.bmenu.requirement;
 
-import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.Placeholderable;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.by1337.bmenu.command.Commands;
 import org.by1337.bmenu.menu.Menu;
 
 import java.util.List;
@@ -15,10 +16,10 @@ public class NearbyRequirement implements Requirement {
     private final int radius;
     private final int radiusSq;
     private final boolean not;
-    private final List<String> commands;
-    private final List<String> denyCommands;
+    private final Commands commands;
+    private final Commands denyCommands;
 
-    public NearbyRequirement(String world, int x, int y, int z, int radius, boolean not, List<String> commands, List<String> denyCommands) {
+    public NearbyRequirement(String world, int x, int y, int z, int radius, boolean not, Commands commands, Commands denyCommands) {
         this.world = world;
         this.x = x;
         this.y = y;
@@ -32,7 +33,7 @@ public class NearbyRequirement implements Requirement {
 
 
     @Override
-    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholderable, Player clicker) {
+    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
         if (!clicker.getWorld().getName().equals(world)) {
             return not;
         }
@@ -48,12 +49,12 @@ public class NearbyRequirement implements Requirement {
     }
 
     @Override
-    public List<String> getCommands() {
+    public Commands getCommands() {
         return commands;
     }
 
     @Override
-    public List<String> getDenyCommands() {
+    public Commands getDenyCommands() {
         return denyCommands;
     }
 }

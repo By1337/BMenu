@@ -1,10 +1,11 @@
 package org.by1337.bmenu.requirement;
 
-import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.Placeholderable;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
+import org.by1337.bmenu.command.Commands;
 import org.by1337.bmenu.menu.Menu;
 import org.by1337.bmenu.util.ObjectUtil;
 import org.by1337.bmenu.util.StringUtil;
@@ -16,11 +17,11 @@ public class StringContainsRequirement implements Requirement {
     private final String input;
     private final String output;
     private final boolean not;
-    private final List<String> commands;
-    private final List<String> denyCommands;
+    private final Commands commands;
+    private final Commands denyCommands;
 
 
-    public StringContainsRequirement(String input, String output, boolean not, List<String> commands, List<String> denyCommands) {
+    public StringContainsRequirement(String input, String output, boolean not, Commands commands, Commands denyCommands) {
         this.input = input;
         this.output = output;
         this.not = not;
@@ -32,32 +33,24 @@ public class StringContainsRequirement implements Requirement {
         input = context.get("input").decode(YamlCodec.STRING).getOrThrow();
         output = context.get("output").decode(YamlCodec.STRING).getOrThrow();
         not = context.get("type").decode(YamlCodec.STRING).getOrThrow().startsWith("!");
-        commands = ObjectUtil.mapIfNotNullOrDefault(context.get("commands").getValue(),
-                value -> ((List<?>) value).stream()
-                        .map(v -> YamlValue.wrap(v).asString("")).toList(),
-                Collections.emptyList()
-        );
-        denyCommands = ObjectUtil.mapIfNotNullOrDefault(context.get("deny_commands").getValue(),
-                value -> ((List<?>) value).stream()
-                        .map(v -> YamlValue.wrap(v).asString("")).toList(),
-                Collections.emptyList()
-        );
+        commands = context.get("commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
+        denyCommands = context.get("deny_commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
     }
 
 
     @Override
-    public boolean test(Menu menu, PlaceholderResolver<Menu> placeholderable, Player clicker) {
-        boolean b = placeholderable.replace(input, menu).contains(placeholderable.replace(output, menu));
+    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
+        boolean b = placeholderable.replace(input).contains(placeholderable.replace(output));
         return not != b;
     }
 
     @Override
-    public List<String> getCommands() {
+    public Commands getCommands() {
         return commands;
     }
 
     @Override
-    public List<String> getDenyCommands() {
+    public Commands getDenyCommands() {
         return denyCommands;
     }
 
