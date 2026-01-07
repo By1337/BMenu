@@ -12,7 +12,7 @@ import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryType;
 import dev.by1337.bmenu.MenuConfig;
-import dev.by1337.bmenu.MenuItemBuilder;
+import dev.by1337.bmenu.item.MenuItemBuilder;
 import dev.by1337.bmenu.MenuLoader;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.command.CommandList;

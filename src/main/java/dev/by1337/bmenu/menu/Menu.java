@@ -1,5 +1,7 @@
 package dev.by1337.bmenu.menu;
 
+import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.MenuItemBuilder;
 import dev.by1337.cmd.Command;
 import dev.by1337.cmd.CommandMsgError;
 import dev.by1337.cmd.CompiledCommand;
@@ -36,7 +38,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.scheduler.BukkitTask;
 import dev.by1337.bmenu.*;
 import dev.by1337.bmenu.animation.Animator;
-import dev.by1337.bmenu.animation.util.AnimationUtil;
 import dev.by1337.bmenu.click.MenuClickType;
 import dev.by1337.bmenu.command.CommandRunner;
 import dev.by1337.bmenu.command.Commands;

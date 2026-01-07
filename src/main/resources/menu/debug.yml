@@ -8,7 +8,7 @@
 # ${<>} -> {<>}
 # "[set_item_to_layer] <slots> <layer> <item>" -> "[layer] <layer+2> [set] <item> <slots>"
 # "[clear_layer] <layer>" -> "[layer] <layer+2> [clear]"
-
+# view_requirement -> on_view
 #
 id: debug:main
 provider: default
@@ -33,21 +33,16 @@ items-custom-section: # schema support
     lore: '&7one line lore'
 
 
-items:
   test2:
     oneOf:
       - slot: 10
         material: gold_nugget
         name: '&cУ Вас меньше 100 монет'
-        view_requirement:
-          requirements:
-            - check: '%vault_eco_balance_fixed% < 100'
+        on_view: '%vault_eco_balance_fixed% < 100'
       - slot: 10
         material: gold_ingot
         name: '&cУ Вас меньше 1000 монет'
-        view_requirement:
-          requirements:
-            - check: '%vault_eco_balance_fixed% < 1000'
+        on_view: '%vault_eco_balance_fixed% < 1000'
       - slot: 10
         material: gold_block
         name: '&cУ Вас больше 1000 монет'
@@ -58,20 +53,32 @@ items:
         slot: 10
         material: gold_nugget
         name: '&cУ Вас меньше 100 монет'
-        view_requirement:
-          requirements:
-            - check: '%vault_eco_balance_fixed% < 100'
+        on_view:
+          requirements: '%vault_eco_balance_fixed% < 100'
       test2:
         slot: 10
         material: gold_ingot
         name: '&cУ Вас меньше 1000 монет'
-        view_requirement:
+        on_view:
           requirements:
             - check: '%vault_eco_balance_fixed% < 1000'
       test3:
         slot: 10
         material: gold_block
         name: '&cУ Вас больше 1000 монет'
+
+items:
+
+  on_view:
+    slot: 50
+    material: diamond
+    name: 'on_view test'
+    on_view: '{tick} % 2 == 0'
+    tick_speed: 3
+    on_tick:
+      commands: '[update]'
+
+
   one-line-lore:
     slot: 0
     material: di
@@ -257,3 +264,28 @@ items:
             - '[set_local] current_lore ${lore1}'
             - '[set_local] page 0'
             - '[update]'
+
+  potion_legacy:
+    material: potion
+    name: '&7potion test'
+    slot: 17
+    potion_effects:
+      - "fire_resistance;200;1"
+      - "regeneration;200;2"
+      - "DAMAGE_RESISTANCE;200;3"
+
+  end:
+    material: end_stone
+    slot: 28
+    enchantments:
+      silk_touch: 1
+      efficiency: 10
+      luck_of_the_sea: 127
+
+  end_legacy:
+    material: end_stone
+    slot: 29
+    enchantments:
+      - "silk_touch;1"
+      - "efficiency;10"
+      - "luck_of_the_sea;127"

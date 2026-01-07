@@ -1,5 +1,7 @@
 package dev.by1337.bmenu;
 
+import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.MenuItemBuilder;
 import dev.by1337.yaml.YamlMap;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;

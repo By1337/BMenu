@@ -24,7 +24,7 @@ import org.by1337.blib.nbt.NbtType;
 import org.by1337.blib.nbt.impl.CompoundTag;
 import org.by1337.blib.nbt.impl.StringNBT;
 import org.by1337.blib.util.Version;
-import dev.by1337.bmenu.MenuItemBuilder;
+import dev.by1337.bmenu.item.MenuItemBuilder;
 import dev.by1337.bmenu.hook.ItemStackCreator;
 import org.jetbrains.annotations.Nullable;
 

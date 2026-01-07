@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.by1337.blib.command.CommandException;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.MenuConfig;
-import dev.by1337.bmenu.MenuItem;
+import dev.by1337.bmenu.item.MenuItem;
 import dev.by1337.bmenu.animation.util.AnimationUtil;
 import org.jetbrains.annotations.Nullable;
 

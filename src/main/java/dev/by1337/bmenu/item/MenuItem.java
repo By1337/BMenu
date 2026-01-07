@@ -1,20 +1,14 @@
-package dev.by1337.bmenu;
+package dev.by1337.bmenu.item;
 
-import dev.by1337.cmd.Command;
-import dev.by1337.cmd.CompiledCommand;
-import dev.by1337.cmd.argument.ArgumentString;
+import dev.by1337.bmenu.click.ClickHandler;
+import dev.by1337.bmenu.click.MenuClickType;
+import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.util.MenuPlaceholders;
 import dev.by1337.plc.PlaceholderFormat;
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.Placeholderable;
 import org.bukkit.entity.Player;
-import dev.by1337.bmenu.click.ClickHandler;
-import dev.by1337.bmenu.click.MenuClickType;
-import dev.by1337.bmenu.command.CommandRunner;
-import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.item.ItemModel;
-import dev.by1337.bmenu.item.MenuItemTickListener;
-import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.util.MenuPlaceholders;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +21,7 @@ import java.util.function.Supplier;
 public class MenuItem implements PlaceholderResolver<Menu> {
     private static final Logger log = LoggerFactory.getLogger("BMenu");
     private final ItemModel itemModel;
+    private final ViewRequirement viewRequirement;
     private Map<MenuClickType, ClickHandler> clicks;
     private @Nullable Object data;
     private @Nullable MenuItemTickListener tickListener;
@@ -35,9 +30,11 @@ public class MenuItem implements PlaceholderResolver<Menu> {
     private boolean die = false;
     private boolean dirty;
     private @Nullable MenuPlaceholders localArgs;
+    private boolean visible = true;
 
-    public MenuItem(ItemModel itemModel, Map<MenuClickType, ClickHandler> clicks, @Nullable MenuItemTickListener tickListener, @Nullable MenuPlaceholders localArgs) {
+    public MenuItem(ItemModel itemModel, ViewRequirement viewRequirement, Map<MenuClickType, ClickHandler> clicks, @Nullable MenuItemTickListener tickListener, @Nullable MenuPlaceholders localArgs) {
         this.itemModel = itemModel;
+        this.viewRequirement = viewRequirement;
 
         this.clicks = clicks;
         this.tickListener = tickListener;
@@ -49,15 +46,17 @@ public class MenuItem implements PlaceholderResolver<Menu> {
             this.localArgs.setPlaceholder("tick", () -> ticks / tickSpeed);
         }
     }
-    public static MenuItem ofMaterial(String material){
+
+    public static MenuItem ofMaterial(String material) {
         return new MenuItem(
                 ItemModel.ofMaterial(material),
+                ViewRequirement.EMPTY,
                 Map.of(),
                 null,
                 null);
     }
 
-    public Placeholderable getPlaceholders(Menu menu){
+    public Placeholderable getPlaceholders(Menu menu) {
         return menu.getPlaceholderResolver().and(this).bind(menu);
     }
 
@@ -136,6 +135,25 @@ public class MenuItem implements PlaceholderResolver<Menu> {
 
     public ItemModel getItemModel() {
         return itemModel;
+    }
+
+    public boolean isVisible(Menu menu) {
+        if (dirty && viewRequirement != null && !viewRequirement.isEmpty()) {
+            var placeholedrs = getPlaceholders(menu);
+            var ctx = ExecuteContext.of(menu, this);
+            if (viewRequirement.requirement().test(menu, placeholedrs, menu.getViewer(), ctx)) {
+                visible = true;
+            } else {
+                visible = false;
+                viewRequirement.denyCommands().run(ctx, placeholedrs);
+            }
+           // System.out.println("isVisible test " + visible);
+        }
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 
     @Override

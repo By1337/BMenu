@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.menu;
 
-import dev.by1337.bmenu.MenuItem;
+import dev.by1337.bmenu.item.MenuItem;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,7 +49,7 @@ public final class MenuMatrix {
             if (layer == null) continue;
             for (int slot = 0; slot < size; slot++) {
                 var item = layer[slot];
-                if (item != null) {
+                if (item != null && item.isVisible(menu)) {
                     matrix[slot] = item;
                 }
             }

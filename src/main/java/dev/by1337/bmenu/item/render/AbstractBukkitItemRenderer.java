@@ -26,7 +26,7 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
 
     @Override
     public void render(Inventory ctx, int slot, ItemModel item, Menu menu, Placeholderable placeholders) {
-        log.info("{} update slot {}", menu.getConfig().getId(), slot);
+       // log.info("{} update slot {}", menu.getConfig().getId(), slot);
         if (item == null) {
             ctx.setItem(slot, AIR);
             return;

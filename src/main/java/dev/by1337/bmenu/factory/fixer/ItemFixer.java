@@ -27,6 +27,7 @@ public class ItemFixer {
         rename(map, "slots", "slot");
         rename(map, "display_name", "name");
         rename(map, "view_req", "view_requirement");
+        rename(map, "view_requirement", "on_view");
 
         replacePlaceholders(map);
         map.set("name", fixDisplay(map.getRaw("name")));

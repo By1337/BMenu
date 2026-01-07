@@ -1,5 +1,10 @@
 package dev.by1337.bmenu.requirement;
 
+import dev.by1337.bmenu.command.Commands;
+import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.factory.MenuCodecs;
+import dev.by1337.bmenu.factory.RequirementsFactory;
+import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.plc.Placeholderable;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
@@ -8,13 +13,8 @@ import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.entity.Player;
-import dev.by1337.bmenu.command.CommandRunner;
-import dev.by1337.bmenu.command.Commands;
-import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.factory.MenuCodecs;
-import dev.by1337.bmenu.factory.RequirementsFactory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,26 +28,24 @@ public class Requirements {
                 .properties("deny_commands", MenuCodecs.COMMANDS.schema())
                 .additionalProperties(false)
                 .required("check")
-                .build();
+                .build()
+                .or(SchemaTypes.STRING);
 
         @Override
         public DataResult<Requirement> decode(YamlValue yamlValue) {
-            YamlMap yaml = yamlValue.asYamlMap().getOrThrow();
+            @Nullable YamlMap yaml = null;
             try {
-                Requirement requirement = readRequirement(yaml);
+                Requirement requirement;
+                if (yamlValue.isMap()) {
+                    requirement = readRequirement(yaml = yamlValue.asYamlMap().getOrThrow());
+                } else {
+                    requirement = readRequirement(yamlValue.asString().getOrThrow(), Commands.EMPTY, Commands.EMPTY);
+                }
                 if (requirement.compilable()) {
                     requirement = requirement.compile();
                     boolean state = requirement.state();
-                    if (requirement.isNOP()) {
-                        yaml.getRaw().clear();
-                        yaml.set("check", "NOP");
-                    } else {
-                        yaml.set("check", state);
-                        if (state) {
-                            yaml.set("deny_commands", null);
-                        } else {
-                            yaml.set("commands", null);
-                        }
+                    if (yaml != null) {
+                        yaml.set("$state", state);
                     }
                 }
                 return DataResult.success(requirement);
@@ -72,12 +70,17 @@ public class Requirements {
         String check = yaml.get("check").decode(YamlCodec.STRING).getOrThrow();
         Commands commands = yaml.get("commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
         Commands denyCommands = yaml.get("deny_commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
+
+        Requirement requirement = readRequirement(check, commands, denyCommands);
+        yaml.set("$check-type", requirement.getClass().getSimpleName());
+        return requirement;
+    }
+
+    private static Requirement readRequirement(String check, Commands commands, Commands denyCommands) {
         if (check.equalsIgnoreCase("true") || check.equalsIgnoreCase("false")) {
-            yaml.set("$check-type", "flag");
             return new FlagRequirements(Boolean.parseBoolean(check), commands, denyCommands);
         }
         if (check.startsWith("has") || check.startsWith("!has")) {
-            yaml.set("$check-type", "has permission");
             return new HasPermissionRequirement(
                     check.split(" ")[1],
                     check.startsWith("!"),
@@ -89,7 +92,6 @@ public class Requirements {
             if (args.length != 6) {
                 throw new IllegalArgumentException("The condition expected 'nearby <world> <x> <y> <z> <radius>' but got '" + check + "'.");
             }
-            yaml.set("$check-type", "nearby");
             return new NearbyRequirement(
                     args[1],
                     Integer.parseInt(args[2]),
@@ -106,7 +108,6 @@ public class Requirements {
                 String operator = args[1];
                 switch (operator) {
                     case "has", "!has" -> {
-                        yaml.set("$check-type", "string contains");
                         return new StringContainsRequirement(
                                 args[0],
                                 args[2],
@@ -116,7 +117,6 @@ public class Requirements {
                         );
                     }
                     case "HAS", "!HAS" -> {
-                        yaml.set("$check-type", "string equals ignorecase");
                         return new StringEqualsIgnoreCaseRequirement(
                                 args[0],
                                 args[2],
@@ -126,7 +126,6 @@ public class Requirements {
                         );
                     }
                     case "==", "!=" -> {
-                        yaml.set("$check-type", "string equals");
                         return new StringEqualsRequirement(
                                 args[0],
                                 args[2],
@@ -136,7 +135,6 @@ public class Requirements {
                         );
                     }
                     default -> {
-                        yaml.set("$check-type", "math");
                         return new MathRequirement(
                                 check,
                                 commands,
@@ -145,7 +143,6 @@ public class Requirements {
                     }
                 }
             } else {
-                yaml.set("$check-type", "math");
                 return new MathRequirement(
                         check,
                         commands,
@@ -180,7 +177,7 @@ public class Requirements {
     private final List<Requirement> requirements;
 
     public Requirements(List<Requirement> requirements) {
-        this.requirements = requirements.stream().filter(r -> !r.isNOP()).toList();
+        this.requirements = requirements;
     }
 
     public boolean test(Menu menu, Placeholderable placeholders, Player clicker, ExecuteContext ctx) {
@@ -214,7 +211,7 @@ public class Requirements {
     }
 
     public boolean isEmpty() {
-        return requirements.isEmpty();
+        return this == EMPTY || requirements.isEmpty();
     }
 
 }

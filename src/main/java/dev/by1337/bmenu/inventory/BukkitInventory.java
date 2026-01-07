@@ -5,9 +5,8 @@ import dev.by1337.core.util.inventory.InventoryUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import dev.by1337.bmenu.item.render.experemental.V1_16_5_ItemRenderer;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.MenuItem;
+import dev.by1337.bmenu.item.MenuItem;
 import dev.by1337.bmenu.item.render.BukkitItemRenderer;
 
 import java.util.Arrays;

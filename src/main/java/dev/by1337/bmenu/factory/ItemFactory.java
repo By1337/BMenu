@@ -7,7 +7,7 @@ import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import dev.by1337.bmenu.MenuItemBuilder;
+import dev.by1337.bmenu.item.MenuItemBuilder;
 import dev.by1337.bmenu.animation.util.AnimationUtil;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;

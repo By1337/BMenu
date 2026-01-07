@@ -8,7 +8,7 @@ import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.MenuItem;
+import dev.by1337.bmenu.item.MenuItem;
 import dev.by1337.bmenu.animation.impl.GotoAnimOpcode;
 import dev.by1337.bmenu.animation.impl.SoundAnimOpcode;
 import org.jetbrains.annotations.NotNull;

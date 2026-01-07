@@ -1,4 +1,4 @@
-package dev.by1337.bmenu;
+package dev.by1337.bmenu.item;
 
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.Placeholders;
@@ -6,7 +6,6 @@ import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
-import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
@@ -19,8 +18,6 @@ import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.factory.ItemFactory;
 import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.factory.fixer.ItemFixer;
-import dev.by1337.bmenu.item.ItemModel;
-import dev.by1337.bmenu.item.MenuItemTickListener;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.requirement.Requirements;
 import dev.by1337.bmenu.util.MenuPlaceholders;
@@ -59,13 +56,14 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     @Nullable
     public MenuItem build(Menu menu, @Nullable final ItemStack itemStack, PlaceholderResolver<Menu> resolver1) {
-        PlaceholderResolver<Menu> resolver = localArgs == null || localArgs.isEmpty() ? resolver1 : resolver1.and(localArgs);
-        var placeholders = resolver.bind(menu);
-        if (!viewRequirement.requirement.test(menu, placeholders, menu.getViewer(), ExecuteContext.of(menu))) {
-            viewRequirement.denyCommands.run(ExecuteContext.of(menu), placeholders);
-            return null;
-        }
-
+       // PlaceholderResolver<Menu> resolver = localArgs == null || localArgs.isEmpty() ? resolver1 : resolver1.and(localArgs);
+       // var placeholders = resolver.bind(menu);
+     //   if (tickListener == null){
+     //       if (!viewRequirement.requirement().test(menu, placeholders, menu.getViewer(), ExecuteContext.of(menu))) {
+     //           viewRequirement.denyCommands().run(ExecuteContext.of(menu), placeholders);
+     //           return null;
+     //       }
+     //   }
 
         if (staticItem && itemStack == null) {
             //todo
@@ -73,6 +71,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
         MenuItem item = new MenuItem(
                 itemModel,
+                viewRequirement,
                 clicks,
                 tickListener,
                 localArgs);
@@ -124,11 +123,6 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         this.slots = slots;
     }
 
-    @Deprecated(forRemoval = true)
-    public void setTicking(boolean ticking) {
-        if (ticking && tickListener != null) tickListener = MenuItemTickListener.DEFAULT;
-    }
-
     public void setTickSpeed(int tickSpeed) {
         this.tickSpeed = tickSpeed;
     }
@@ -156,10 +150,6 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
         return priority;
     }
 
-    @Deprecated(forRemoval = true)
-    public boolean isTicking() {
-        return tickListener != null;
-    }
 
     public boolean isStaticItem() {
         return staticItem;
@@ -167,35 +157,6 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public void setStaticItem(boolean staticItem) {
         this.staticItem = staticItem;
-    }
-
-    public static class ViewRequirement {
-        private static final ViewRequirement EMPTY = new ViewRequirement(Requirements.EMPTY, Commands.EMPTY);
-        public static YamlCodec<ViewRequirement> CODEC = RecordYamlCodecBuilder.mapOf(
-                ViewRequirement::new,
-                Requirements.CODEC.fieldOf("requirements", ViewRequirement::getRequirement, Requirements.EMPTY),
-                Commands.CODEC.fieldOf("deny_commands", ViewRequirement::getDenyCommands, Commands.EMPTY)
-        );
-
-        private final Requirements requirement;
-        private final Commands denyCommands;
-
-        public ViewRequirement(Requirements requirement, Commands denyCommands) {
-            this.requirement = requirement;
-            this.denyCommands = denyCommands;
-        }
-
-        public Requirements getRequirement() {
-            return requirement;
-        }
-
-        public Commands getDenyCommands() {
-            return denyCommands;
-        }
-
-        public boolean isEmpty() {
-            return requirement.isEmpty();
-        }
     }
 
     public int[] slots() {
@@ -218,11 +179,6 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
 
     public Map<String, String> args() {
         return args;
-    }
-
-    @Deprecated(forRemoval = true)
-    public boolean ticking() {
-        return isTicking();
     }
 
     public int tickSpeed() {
@@ -255,7 +211,7 @@ public final class MenuItemBuilder implements Comparable<MenuItemBuilder> {
                 .integer("priority", MenuItemBuilder::priority, MenuItemBuilder::setPriority, 0)
                 .field(YamlCodec.INT.schema(s -> s.or(SchemaTypes.pattern("^\\$\\{[^}]+\\}$"))), "tick_speed", MenuItemBuilder::tickSpeed, MenuItemBuilder::setTickSpeed, 1)
                 .field(ItemFactory.SLOTS_YAML_CODEC, "slot", MenuItemBuilder::slots, MenuItemBuilder::setSlots, new int[]{-1})
-                .field(ViewRequirement.CODEC, "view_requirement", MenuItemBuilder::viewRequirement, MenuItemBuilder::setViewRequirement);
+                .field(ViewRequirement.CODEC, "on_view", MenuItemBuilder::viewRequirement, MenuItemBuilder::setViewRequirement);
         for (MenuClickType value : MenuClickType.values()) {
             String key = value.getConfigKeyClick();
             builder.field(ClickHandlerImpl.CODEC, key, m -> m.getClickHandlerImplOrNull(value), (m, v) -> m.addClickListener(value, v));

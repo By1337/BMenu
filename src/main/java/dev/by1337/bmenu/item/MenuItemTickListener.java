@@ -2,7 +2,6 @@ package dev.by1337.bmenu.item;
 
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.bmenu.MenuItem;
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.menu.Menu;

@@ -8,7 +8,7 @@ import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.MenuItem;
+import dev.by1337.bmenu.item.MenuItem;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.animation.FrameOpcode;
 import dev.by1337.bmenu.animation.FrameOpcodes;
