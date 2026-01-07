@@ -1,4 +1,4 @@
-package org.by1337.bmenu.factory;
+package dev.by1337.bmenu.factory;
 
 class MenuFilePostprocessorTest {
 /*

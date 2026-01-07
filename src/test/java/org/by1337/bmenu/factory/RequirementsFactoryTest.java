@@ -1,4 +1,4 @@
-package org.by1337.bmenu.factory;
+package dev.by1337.bmenu.factory;
 
 public class RequirementsFactoryTest {
    /* private static final String YAML = """

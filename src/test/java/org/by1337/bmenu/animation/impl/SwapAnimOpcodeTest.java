@@ -1,4 +1,4 @@
-package org.by1337.bmenu.animation.impl;
+package dev.by1337.bmenu.animation.impl;
 
 import org.junit.jupiter.api.Test;
 
