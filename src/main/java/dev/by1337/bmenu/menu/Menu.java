@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.menu;
 
-import dev.by1337.bmenu.item.MenuItem;
-import dev.by1337.bmenu.item.MenuItemBuilder;
+import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.item.SlotFactory;
 import dev.by1337.cmd.Command;
 import dev.by1337.cmd.CommandMsgError;
 import dev.by1337.cmd.CompiledCommand;
@@ -88,7 +88,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     protected final Menu previousMenu;
     protected BukkitTask ticker;
     protected Animator animator;
-    protected @Nullable MenuItem lastClickedItem;
+    protected @Nullable SlotContent lastClickedItem;
     protected long lastClickTime;
     protected String lastTitle;
     protected int lastClickedSlot = 0;
@@ -189,7 +189,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     public void refresh() {//todo!
-        for (MenuItem item : layers.getAnimationLayer()) {
+        for (SlotContent item : layers.getAnimationLayer()) {
             if (item == null) continue;
             item.setDirty(true);
         }
@@ -198,7 +198,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
 
     public void rebuildItemsInSlots(int[] slots) {
         for (int slot : slots) {
-            MenuItem item;
+            SlotContent item;
             if ((item = layers.getItemInSlot(slot)) != null) { //todo!
                 item.setDirty(true);
             }
@@ -229,20 +229,20 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         inventoryLike.sync(viewer);
     }
 
-    protected void setMatrix(MenuItem[] mask) {
+    protected void setMatrix(SlotContent[] mask) {
         for (int i = 0; i < mask.length; i++) {
-            MenuItem item = mask[i];
+            SlotContent item = mask[i];
             if (item != null) {
                 inventoryLike.setItem(i, item);
             }
         }
     }
 
-    public void setItem(MenuItem item, int slot) {
+    public void setItem(SlotContent item, int slot) {
         setItem(item, slot, layers.getBaseLayer());
     }
 
-    public void setItem(MenuItem item, int slot, MenuItem[] matrix) {
+    public void setItem(SlotContent item, int slot, SlotContent[] matrix) {
         if (slot == -1) return;
         if (slot < 0 || matrix.length < slot) {
             loader.getLogger().error("Slot {} is out of bounds! Menu: {}", slot, config.getId());
@@ -340,7 +340,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         }
         if (!Objects.equals(inventoryLike.getInventory(), e.getClickedInventory())) return;
         lastClickedSlot = e.getSlot();
-        MenuItem item = findItemInSlot(e.getSlot());
+        SlotContent item = findItemInSlot(e.getSlot());
         if (item == null) return;
         lastClickedItem = item;
         MenuClickType type = MenuClickType.getClickType(e);
@@ -348,7 +348,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     @Nullable
-    public MenuItem findItemInSlot(int slot) {
+    public SlotContent findItemInSlot(int slot) {
         return layers.getItemInSlot(slot);
     }
 
@@ -399,11 +399,11 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         return inventoryLike.getInventory();
     }
 
-    public MenuItem[] getMatrix() {
+    public SlotContent[] getMatrix() {
         return layers.getBaseLayer();
     }
 
-    public MenuItem[] getAnimationMask() {
+    public SlotContent[] getAnimationMask() {
         return layers.getAnimationLayer();
     }
 
@@ -415,7 +415,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         return previousMenu;
     }
 
-    public @Nullable MenuItem getLastClickedItem() {
+    public @Nullable SlotContent getLastClickedItem() {
         return lastClickedItem;
     }
 
@@ -453,7 +453,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
 
-    public MenuItem[] getLayer(int index) {
+    public SlotContent[] getLayer(int index) {
         return layers.getMatrix(index);
     }
 
@@ -702,11 +702,11 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                 .argument(new ArgumentString<>("item"))
                 .executor((v, args) -> {
                             String param = (String) args.getOrThrow("item", "Use [import_params] <item>");
-                            MenuItemBuilder builder = v.menu.config.findMenuItem(param, v.menu);
+                            SlotFactory builder = v.menu.config.findMenuItem(param, v.menu);
                             if (builder == null) {
                                 throw new CommandError("No such item: '{}'. Command [import_params]", param);
                             }
-                            v.menu.args.putAll(builder.getArgs());
+                           // v.menu.args.putAll(builder.getArgs()); //todo
                             v.menu.args.keySet().forEach(k -> v.menu.runtimePlaceholders.of(k, () -> v.menu.args.get(k)));
                         }
                 )
@@ -903,7 +903,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                 .executor((v, args) -> {
                     int[] src = (int[]) args.getOrThrow("src", "Use: [update_slots] <slots>");
                     for (int slot : src) {
-                        MenuItem item = v.menu.findItemInSlot(slot);
+                        SlotContent item = v.menu.findItemInSlot(slot);
                         if (item != null) {
                             item.setDirty(true);
                         }
@@ -917,9 +917,9 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                 .executor((v, args) -> {
                     int[] src = (int[]) args.getOrThrow("src", "Use: [die_slots] <slots>");
                     for (int slot : src) {
-                        MenuItem item = v.menu.findItemInSlot(slot);
+                        SlotContent item = v.menu.findItemInSlot(slot);
                         if (item != null) {
-                            item.die();
+                            item.markRemoved();
                         }
                     }
                 })
@@ -953,7 +953,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         commands.sub(new Command<ExecuteContext>("[die]")
                 .executor((v, args) -> {
                     if (v.item != null) {
-                        v.item.die();
+                        v.item.markRemoved();
                     }
                 })
         );
@@ -977,16 +977,17 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
             final int layerIndex = i;
             layerCommands.sub(
                     new Command<ExecuteContext>(Integer.toString(layerIndex))
-                            .sub(new Command<ExecuteContext>("[move]")
+                            .sub(new Command<ExecuteContext>("move")
+                                    .aliases("mv")
                                     .argument(new ArgumentInt<>("layer2"))
                                     .argument(new ArgumentSlots<>("from"))
                                     .argument(new ArgumentSlots<>("to"))
                                     .executor((v, args) -> {
-                                        int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> [move] <slots-from> <slots-to>");
-                                        int[] from = (int[]) args.getOrThrow("from", "Use: [layer] <layer> [move] <slots-from> <slots-to>");
-                                        int[] to = (int[]) args.getOrThrow("to", "Use: [layer] <layer> [move] <slots-from> <slots-to>");
-                                        MenuItem[] src = v.menu.layers.getMatrix(layerIndex);
-                                        MenuItem[] dest = v.menu.layers.getMatrix(layer2);
+                                        int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> move <slots-from> <slots-to>");
+                                        int[] from = (int[]) args.getOrThrow("from", "Use: [layer] <layer> move <slots-from> <slots-to>");
+                                        int[] to = (int[]) args.getOrThrow("to", "Use: [layer] <layer> move <slots-from> <slots-to>");
+                                        SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
+                                        SlotContent[] dest = v.menu.layers.getMatrix(layer2);
                                         for (int idx = 0; idx < from.length; idx++) {
                                             int fromIndex = from[idx];
                                             int toIndex = to[idx];
@@ -999,16 +1000,17 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                                         }
                                     })
                             )
-                            .sub(new Command<ExecuteContext>("[copy]")
+                            .sub(new Command<ExecuteContext>("copy")
+                                    .aliases("cpy")
                                     .argument(new ArgumentInt<>("layer2"))
                                     .argument(new ArgumentSlots<>("from"))
                                     .argument(new ArgumentSlots<>("to"))
                                     .executor((v, args) -> {
-                                        int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> [copy] <slots-from> <slots-to>");
-                                        int[] from = (int[]) args.getOrThrow("from", "Use: [layer] <layer> [copy] <slots-from> <slots-to>");
-                                        int[] to = (int[]) args.getOrThrow("to", "Use: [layer] <layer> [copy] <slots-from> <slots-to>");
-                                        MenuItem[] src = v.menu.layers.getMatrix(layerIndex);
-                                        MenuItem[] dest = v.menu.layers.getMatrix(layer2);
+                                        int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> copy <slots-from> <slots-to>");
+                                        int[] from = (int[]) args.getOrThrow("from", "Use: [layer] <layer> copy <slots-from> <slots-to>");
+                                        int[] to = (int[]) args.getOrThrow("to", "Use: [layer] <layer> copy <slots-from> <slots-to>");
+                                        SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
+                                        SlotContent[] dest = v.menu.layers.getMatrix(layer2);
                                         for (int idx = 0; idx < from.length; idx++) {
                                             int fromIndex = from[idx];
                                             int toIndex = to[idx];
@@ -1019,19 +1021,20 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                                             dest[toIndex] = src[fromIndex];
                                         }
                                     })
-                            ).sub(new Command<ExecuteContext>("[set]")
+                            ).sub(new Command<ExecuteContext>("set")
+                                    .aliases("st")
                                     .argument(new ArgumentString<>("item"))
                                     .argument(new ArgumentSlots<>("slots"))
                                     .executor((v, args) -> {
-                                        String itemID = (String) args.getOrThrow("item", "Use: [layer] <layer> [set] <item> <slots>");
-                                        int[] slots = (int[]) args.getOrThrow("slots", "Use: [layer] <layer> [set] <item> <slots>");
-                                        MenuItem[] src = v.menu.layers.getMatrix(layerIndex);
-                                        MenuItemBuilder builder = v.menu.config.findMenuItem(itemID, v.menu);
-                                        MenuItem item;
+                                        String itemID = (String) args.getOrThrow("item", "Use: [layer] <layer> set <item> <slots>");
+                                        int[] slots = (int[]) args.getOrThrow("slots", "Use: [layer] <layer> set <item> <slots>");
+                                        SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
+                                        SlotFactory builder = v.menu.config.findMenuItem(itemID, v.menu);
+                                        SlotContent item;
                                         if (builder != null) {
                                             item = builder.build(v.menu);
                                         } else {
-                                            item = MenuItem.ofMaterial(itemID);
+                                            item = SlotContent.ofMaterial(itemID);
                                         }
                                         for (int slot : slots) {
                                             if (slot < 0 || slot >= src.length) {
@@ -1040,8 +1043,21 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                                             src[slot] = item;
                                         }
                                     })
+                            ).sub(new Command<ExecuteContext>("remove")
+                                    .aliases("rm")
+                                    .argument(new ArgumentSlots<>("slots"))
+                                    .executor((v, args) -> {
+                                        int[] slots = (int[]) args.getOrThrow("slots", "Use: [layer] <layer> remove <item> <slots>");
+                                        SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
+                                        for (int slot : slots) {
+                                            if (slot < 0 || slot >= src.length) {
+                                                throw new CommandError("слот {} за пределами меню!", slot);
+                                            }
+                                            src[slot] = null;
+                                        }
+                                    })
                             )
-                            .sub(new Command<ExecuteContext>("[clear]")
+                            .sub(new Command<ExecuteContext>("clear")
                                     .executor((v, args) -> {
                                         Arrays.fill(v.menu.layers.getMatrix(layerIndex), null);
                                     })

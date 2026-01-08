@@ -2,7 +2,7 @@ package dev.by1337.bmenu.animation.impl;
 
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.animation.FrameOpcode;
 import dev.by1337.bmenu.animation.FrameOpcodes;
@@ -26,8 +26,8 @@ public class CopyFromBaseAnimOpcode implements FrameOpcode {
     }
 
     @Override
-    public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
-        MenuItem[] base = menu.getMatrix();
+    public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
+        SlotContent[] base = menu.getMatrix();
         int srcIndex = 0;
         for (int toIndex : dest) {
             int fromIndex = src[srcIndex];

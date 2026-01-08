@@ -1,12 +1,10 @@
 package dev.by1337.bmenu.requirement;
 
+import dev.by1337.bmenu.command.Commands;
+import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.plc.Placeholderable;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import dev.by1337.bmenu.command.Commands;
-import dev.by1337.bmenu.menu.Menu;
-
-import java.util.List;
 
 public class NearbyRequirement implements Requirement {
     private final String world;

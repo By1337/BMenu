@@ -3,8 +3,8 @@ package dev.by1337.bmenu.animation.impl;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.item.MenuItem;
-import dev.by1337.bmenu.item.MenuItemBuilder;
+import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.item.SlotFactory;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.animation.FrameOpcode;
 import dev.by1337.bmenu.animation.FrameOpcodes;
@@ -23,15 +23,15 @@ public class FillAnimOpcode implements FrameOpcode {
     }
 
     @Override
-    public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
-        MenuItemBuilder builder = menu.getConfig().findMenuItem(menu.replace(item), menu);
-        MenuItem menuItem;
+    public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
+        SlotFactory builder = menu.getConfig().findMenuItem(menu.replace(item), menu);
+        SlotContent slotContent;
         if (builder == null) {
-            menuItem = MenuItem.ofMaterial(menu.replace(item));
+            slotContent = SlotContent.ofMaterial(menu.replace(item));
         } else {
-            menuItem = builder.build(menu);
+            slotContent = builder.build(menu);
         }
-        Arrays.fill(matrix, menuItem);
+        Arrays.fill(matrix, slotContent);
     }
     @Override
     public @Nullable FrameOpcodes type() {

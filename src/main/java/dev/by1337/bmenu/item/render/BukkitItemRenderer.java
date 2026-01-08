@@ -1,15 +1,15 @@
 package dev.by1337.bmenu.item.render;
 
+import dev.by1337.bmenu.item.item.ItemModel;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.plc.Placeholderable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.item.ItemModel;
 import dev.by1337.bmenu.text.RawTextComponent;
-import dev.by1337.bmenu.text.SourcedComponentLike;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,9 @@ public class BukkitItemRenderer extends AbstractBukkitItemRenderer {
         if (name != null) {
             im.displayName(toComponent(name, placeholders));
         }
-        var lore = item.lore();
-        if (lore != null) {
+        if (item.hasLore()) {
             List<Component> loreComponents = new ArrayList<>();
-            for (SourcedComponentLike componentLike : lore) {
-                applyComponent(componentLike, placeholders, loreComponents::add);
-            }
+            item.forEachLore(line -> applyComponent(line, placeholders, loreComponents::add));
             im.lore(loreComponents);
         }
         if (im instanceof Damageable damageable){
@@ -40,7 +37,7 @@ public class BukkitItemRenderer extends AbstractBukkitItemRenderer {
         return itemStack;
     }
 
-    private void applyComponent(SourcedComponentLike c, Placeholderable placeholders, Consumer<Component> processor) {
+    private void applyComponent(ComponentLike c, Placeholderable placeholders, Consumer<Component> processor) {
         if (c instanceof RawTextComponent raw) {
             String s = placeholders.replace(raw.source());
             for (String line : s.split("\n")) {
@@ -51,7 +48,7 @@ public class BukkitItemRenderer extends AbstractBukkitItemRenderer {
         }
     }
 
-    private Component toComponent(SourcedComponentLike c, Placeholderable placeholders) {
+    private Component toComponent(ComponentLike c, Placeholderable placeholders) {
         if (c instanceof RawTextComponent c1) {
             return c1.asComponent(placeholders);
         }

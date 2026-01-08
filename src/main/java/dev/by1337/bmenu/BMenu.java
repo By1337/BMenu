@@ -148,43 +148,7 @@ public class BMenu extends JavaPlugin {
                                 })
                         )
                 )
-                .sub(new Command<CommandSender>("test")
-                        .sub(new Command<CommandSender>("item")
-                                .executor((sender, args) -> {
-                                    // LegacyItemLike legacyItemLike = new LegacyItemLike();
-                                    // legacyItemLike.setMaterial(Material.DIAMOND_AXE);
-                                    // legacyItemLike.setCount(64);
-                                    // legacyItemLike.setName(LegacyConvertor.convert0("<red>CustomName"));
-                                    // legacyItemLike.setLore(List.of(
-                                    //         LegacyConvertor.convert0("<red>Lore 1"),
-                                    //         LegacyConvertor.convert0("<red>Lore 2"),
-                                    //         LegacyConvertor.convert0("<red>Lore 3")
-                                    // ));
-                                    // getSLF4JLogger().info("Test Item {}", legacyItemLike.writeToString());
-                                })
-                        )
-                )
-/*                .addSubCommand(new Command<CommandSender>("item")
-                        .requires(new RequiresPermission<>("bmenu.item"))
-                        .addSubCommand(new Command<CommandSender>("dump")
-                                .requires(new RequiresPermission<>("bmenu.item.dump"))
-                                .requires(sender -> sender instanceof Player)
-                                .executor((sender, args) -> {
-                                   Player player = (Player) sender;
-                                    ItemStack itemStack = player.getInventory().getItemInMainHand();
-                                    if (itemStack.getType().isAir()){
-                                        loader.getMessage().sendMsg(sender, "&cУ Вас в руке должен быть предмет");
-                                        return;
-                                    }
-                                    String item = BLib.getApi().getItemStackSerialize().serialize(itemStack);
-                                    player.sendMessage(
-                                            Component.text(item)
-                                                    .hoverEvent(Component.text("click to copy"))
-                                                    .clickEvent(ClickEvent.copyToClipboard(item))
-                                    );
-                                })
-                        )
-                )*/;
+;
 
         return cmd;
     }

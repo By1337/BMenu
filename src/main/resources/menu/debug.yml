@@ -6,9 +6,10 @@
 # {rand_100000} -> {rand:100000}
 # math[<>] -> {math:<>}
 # ${<>} -> {<>}
-# "[set_item_to_layer] <slots> <layer> <item>" -> "[layer] <layer+2> [set] <item> <slots>"
-# "[clear_layer] <layer>" -> "[layer] <layer+2> [clear]"
+# "[set_item_to_layer] <slots> <layer> <item>" -> "[layer] <layer+2> set <item> <slots>"
+# "[clear_layer] <layer>" -> "[layer] <layer+2> clear"
 # view_requirement -> on_view
+# tick_speed -> on_tick.tick_speed
 #
 id: debug:main
 provider: default
@@ -68,7 +69,6 @@ items-custom-section: # schema support
         name: '&cУ Вас больше 1000 монет'
 
 items:
-
   on_view:
     slot: 50
     material: diamond
@@ -77,6 +77,20 @@ items:
     tick_speed: 3
     on_tick:
       commands: '[update]'
+
+  test2:
+    oneOf:
+      - slot: 10
+        material: gold_nugget
+        name: '&cУ Вас меньше 100 монет'
+        on_view: '%vault_eco_balance_fixed% < 100'
+      - slot: 10
+        material: gold_ingot
+        name: '&cУ Вас меньше 1000 монет'
+        on_view: '%vault_eco_balance_fixed% < 1000'
+      - slot: 10
+        material: gold_block
+        name: '&cУ Вас больше 1000 монет'
 
 
   one-line-lore:

@@ -8,7 +8,7 @@ import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.animation.impl.GotoAnimOpcode;
 import dev.by1337.bmenu.animation.impl.SoundAnimOpcode;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,7 @@ public class Animator {
         this.context = context;
     }
 
-    public void tick(MenuItem[] matrix, Menu menu) {
+    public void tick(SlotContent[] matrix, Menu menu) {
         var list = context.framePosToFrames.get(pos++);
         if (list != null) {
             for (Frame frame : list) {
@@ -36,7 +36,7 @@ public class Animator {
         }
     }
 
-    public void forceEnd(MenuItem[] matrix, Menu menu) {
+    public void forceEnd(SlotContent[] matrix, Menu menu) {
         int pos0 = pos;
         while (pos0 < context.maxTick) {
             var list = context.framePosToFrames.get(pos0++);
@@ -165,13 +165,13 @@ public class Animator {
             this.opcodes = opcodes;
         }
 
-        public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
+        public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
             for (FrameOpcode opcode : opcodes) {
                 opcode.apply(matrix, menu, animator);
             }
         }
 
-        public void safeApply(MenuItem[] matrix, Menu menu, Animator animator) {
+        public void safeApply(SlotContent[] matrix, Menu menu, Animator animator) {
             for (FrameOpcode opcode : opcodes) {
                 if (opcode instanceof GotoAnimOpcode || opcode instanceof SoundAnimOpcode) continue;
                 opcode.apply(matrix, menu, animator);

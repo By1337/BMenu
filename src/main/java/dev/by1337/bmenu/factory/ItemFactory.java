@@ -7,7 +7,7 @@ import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import dev.by1337.bmenu.item.MenuItemBuilder;
+import dev.by1337.bmenu.item.SlotFactory;
 import dev.by1337.bmenu.animation.util.AnimationUtil;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -42,8 +42,8 @@ public class ItemFactory {
 
 
     @Deprecated
-    public static Map<String, MenuItemBuilder> readItems(Map<String, YamlMap> items) {
-        Map<String, MenuItemBuilder> itemMap = new HashMap<>();
+    public static Map<String, SlotFactory> readItems(Map<String, YamlMap> items) {
+        Map<String, SlotFactory> itemMap = new HashMap<>();
 
         for (String itemID : items.keySet()) {
             itemMap.put(itemID, readItem(items.get(itemID)));
@@ -52,8 +52,8 @@ public class ItemFactory {
     }
 
     @Deprecated
-    public static MenuItemBuilder readItem(YamlMap item) {
-        return item.get().decode(MenuItemBuilder.YAML_CODEC).getOrThrow();
+    public static SlotFactory readItem(YamlMap item) {
+        return item.get().decode(SlotFactory.YAML_CODEC).getOrThrow();
     }
 
 

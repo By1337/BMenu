@@ -1,5 +1,8 @@
 package dev.by1337.bmenu.item.render;
 
+import dev.by1337.bmenu.item.item.ItemModel;
+import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.util.ObjectUtil;
 import dev.by1337.core.ServerVersion;
 import dev.by1337.plc.Placeholderable;
 import org.bukkit.DyeColor;
@@ -12,11 +15,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
-import org.bukkit.potion.PotionEffect;
-import dev.by1337.bmenu.item.ItemModel;
-import dev.by1337.bmenu.item.component.EnchantmentData;
-import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.util.ObjectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +24,7 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
 
     @Override
     public void render(Inventory ctx, int slot, ItemModel item, Menu menu, Placeholderable placeholders) {
-       // log.info("{} update slot {}", menu.getConfig().getId(), slot);
+        // log.info("{} update slot {}", menu.getConfig().getId(), slot);
         if (item == null) {
             ctx.setItem(slot, AIR);
             return;
@@ -44,19 +42,15 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
             ctx.setItem(slot, AIR);
             return;
         }
-        var flags = item.flags();
-        if (flags != null) {
-            for (ItemFlag flag : flags) {
-                im.addItemFlags(flag);
-            }
-            if (flags.contains(ItemFlag.HIDE_ATTRIBUTES) && ServerVersion.is1_20_5orNewer()) {
+        if (item.hasItemFlags()) {
+            item.forEachItemFlags(im::addItemFlags);
+            if (ServerVersion.is1_20_5orNewer() && im.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
                 // https://github.com/PaperMC/Paper/issues/10655
                 im.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("123", 1, AttributeModifier.Operation.ADD_NUMBER));
             }
         }
-        var potion = item.potionEffects();
-        if (potion != null) {
-            for (PotionEffect potionEffect : potion) {
+        if (item.hasPotionEffects()) {
+            item.forEachPotionEffects(potionEffect -> {
                 if (im instanceof PotionMeta potionMeta) {
                     potionMeta.addCustomEffect(potionEffect, true);
                 } else if (im instanceof Arrow arrow) {
@@ -64,8 +58,9 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
                 } else if (im instanceof SuspiciousStewMeta m) {
                     m.addCustomEffect(potionEffect, true);
                 }
-            }
+            });
         }
+
         var color = item.color();
         if (color != null) {
             if (im instanceof TropicalFishBucketMeta buket) {
@@ -80,15 +75,39 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
                 effectMeta.setEffect(FireworkEffect.builder().withColor(color).build());
             }
         }
-        var enchantments = item.enchantments();
-        if (enchantments != null) {
-            for (EnchantmentData pair : enchantments) {
-                im.addEnchant(pair.enchantment(), pair.lvl(), true);
-            }
-        }
+        item.forEachEnchantments(pair -> im.addEnchant(pair.enchantment(), pair.lvl(), true));
+
         var modelData = item.customModelData();
         if (modelData != null) {
-            im.setCustomModelData(modelData.floats().get(0).intValue());//todo use 1.21.5 api if available
+            if (ServerVersion.is1_21_4orNewer()) {
+                var kringe = im.getCustomModelDataComponent();
+                kringe.setFloats(modelData.floats());
+                kringe.setFlags(modelData.flags());
+                kringe.setStrings(modelData.strings());
+                kringe.setColors(modelData.colors());
+                im.setCustomModelDataComponent(kringe);
+            } else {
+                im.setCustomModelData(modelData.floats().get(0).intValue());
+            }
+        }
+        if (ServerVersion.is1_20_5orNewer()) {
+            //JIT DCE?
+            Integer maxStackSize = item.getMaxStackSize();
+            if (maxStackSize != null) {
+                im.setMaxStackSize(maxStackSize);
+            }
+            if (item.hideTooltip()) {
+                im.setHideTooltip(true);
+            }
+        }
+        if (ServerVersion.is1_19_4orNewer()) {
+            //JIT DCE?
+            var armorTrim = item.getArmorTrim();
+            if (armorTrim != null && armorTrim.has()) {
+                if (im instanceof ArmorMeta armorMeta) {
+                    armorMeta.setTrim(armorTrim.armorTrim().get());
+                }
+            }
         }
         if (item.unbreakable()) {
             im.setUnbreakable(true);

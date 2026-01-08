@@ -63,7 +63,7 @@ public class MenuFilePostprocessor {
             String item = reader.readString();
             try {
                 int x = Integer.parseInt(layer);
-                return "[layer] " + (x + 2) + " [set] " + quoteAndEscape(item, false) + " " + quoteAndEscape(slots, false);
+                return "[layer] " + (x + 2) + " set " + quoteAndEscape(item, false) + " " + quoteAndEscape(slots, false);
             } catch (NumberFormatException e) {
                 return src;
             }
@@ -71,7 +71,7 @@ public class MenuFilePostprocessor {
             String layer = src.substring("[clear_layer] ".length());
             try {
                 int x = Integer.parseInt(layer);
-                return "[layer] " + (x + 2) + " [clear]";
+                return "[layer] " + (x + 2) + " clear";
             } catch (NumberFormatException e) {
                 return src;
             }

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class RegistryLike<T extends Keyed> implements Iterable<T>, Registry<T> {
+public class RegistryLike<T extends Keyed> implements Iterable<T> {
     private final Map<NamespacedKey, T> key2value = new HashMap<>();
     private final Map<String, List<T>> path2Value = new HashMap<>();
     private final Map<T, NamespacedKey> value2Key = new IdentityHashMap<>();
@@ -46,7 +46,7 @@ public class RegistryLike<T extends Keyed> implements Iterable<T>, Registry<T> {
         return key2value.values().iterator();
     }
 
-    @Override
+   // @Override
     public @Nullable T get(@NotNull NamespacedKey namespacedKey) {
         return key2value.get(namespacedKey);
     }

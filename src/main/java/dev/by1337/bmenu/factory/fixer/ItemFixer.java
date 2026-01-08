@@ -1,14 +1,15 @@
 package dev.by1337.bmenu.factory.fixer;
 
+import dev.by1337.bmenu.factory.MenuCodecs;
+import dev.by1337.bmenu.factory.MenuFilePostprocessor;
+import dev.by1337.bmenu.item.SlotTicker;
+import dev.by1337.bmenu.util.math.FastExpressionParser;
 import dev.by1337.plc.PlaceholderFormat;
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.Placeholders;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
-import dev.by1337.bmenu.factory.MenuCodecs;
-import dev.by1337.bmenu.item.MenuItemTickListener;
-import dev.by1337.bmenu.util.math.FastExpressionParser;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,14 @@ import java.util.*;
 
 public class ItemFixer {
     public static final String STATIC_LORE_TAG = "<static>";
-    private static final YamlValue REPLACE_TICKING = MenuItemTickListener.CODEC.encode(MenuItemTickListener.DEFAULT);
+    private static final YamlValue REPLACE_TICKING = SlotTicker.CODEC.encode(SlotTicker.DEFAULT);
     private static final Logger log = LoggerFactory.getLogger("BMenu");
 
     public static void fixItem(YamlMap map) {
+        fixItem(map, null);
+    }
+
+    public static void fixItem(YamlMap map, @Nullable YamlMap superItem) {
         if (map.has("$fixed")) return;
         map.set("$fixed", true);
         rename(map, "tick-speed", "tick_speed");
@@ -29,7 +34,7 @@ public class ItemFixer {
         rename(map, "view_req", "view_requirement");
         rename(map, "view_requirement", "on_view");
 
-        replacePlaceholders(map);
+        replacePlaceholders(map, superItem);
         map.set("name", fixDisplay(map.getRaw("name")));
         map.set("lore", fixDisplay(map.getRaw("lore")));
 
@@ -50,6 +55,50 @@ public class ItemFixer {
             } else {
                 map.set("$fixed-ticking", true);
                 map.set("on_tick", REPLACE_TICKING.getValue());
+            }
+        }
+        {// tick_speed -> on_tick.tick_speed
+            Object tick_speed = map.getRaw("tick_speed");
+            if (tick_speed != null) {
+                map.getRaw().remove("tick_speed");
+                map.set("$moved-tick_speed", tick_speed);
+                Object on_tick = map.getRaw("on_tick");
+                if (on_tick instanceof Map m) {
+                    if (m.containsKey("tick_speed")) {
+                        m.put("$moved-tick_speed", "Failed to move tick_speed -> on_tick.tick_speed");
+                    } else {
+                        m.put("tick_speed", tick_speed);
+                    }
+                } else {
+                    map.set("$moved-tick_speed1", "on_tick not a map!");
+                }
+            }
+        }
+
+
+        //last
+        if (map.has("oneOf")) {
+            Object oneOf = MenuFilePostprocessor.deepCopy(map.getRaw("oneOf"));
+            map.set("oneOf", oneOf);
+            if (oneOf instanceof Map<?, ?> m) {
+                for (Map.Entry<?, ?> entry : m.entrySet()) {
+                    //после deepCopy всегда LinkedHashMap
+                    if (entry.getValue() instanceof LinkedHashMap item) {
+                        YamlMap sub = new YamlMap(item);
+                        sub.set("$fix-oneOf", "true");
+                        fixItem(sub, map);
+                    }
+                }
+            } else if (oneOf instanceof Collection<?> collection) {
+                for (Object o : collection) {
+                    //после deepCopy всегда LinkedHashMap
+                    if (o instanceof LinkedHashMap item) {
+                        YamlMap sub = new YamlMap(item);
+                        sub.set("$fix-oneOf", "true");
+                        fixItem(sub, map);
+                    }
+
+                }
             }
         }
     }
@@ -95,9 +144,9 @@ public class ItemFixer {
     }
 
     @SuppressWarnings("unchecked")
-    private static void replacePlaceholders(YamlMap item) {
+    private static void replacePlaceholders(YamlMap item, @Nullable YamlMap superItem) {
         PlaceholderResolver<Void> placeholders = mapToResolver("args", item)
-               // .and(mapToResolver("local_args", item))
+                // .and(mapToResolver("local_args", item))
                 .and(new PlaceholderResolver<>() {
                     @Override
                     public boolean has(String key, PlaceholderFormat format) {
@@ -116,6 +165,10 @@ public class ItemFixer {
                         return null;
                     }
                 });
+
+        if (superItem != null) {
+            placeholders = placeholders.and(mapToResolver("args", superItem));
+        }
 
         Map<String, Object> copied = (Map<String, Object>) replacePlaceholders(item.getRaw(), placeholders);
         item.getRaw().clear();

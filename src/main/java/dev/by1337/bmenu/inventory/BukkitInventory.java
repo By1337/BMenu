@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.item.render.BukkitItemRenderer;
 
 import java.util.Arrays;
@@ -17,8 +17,8 @@ public class BukkitInventory {
     private static final BukkitItemRenderer RENDERER = new BukkitItemRenderer();
 
     private final Inventory inventory;
-    private final MenuItem[] seenItems;
-    private final MenuItem[] items;
+    private final SlotContent[] seenItems;
+    private final SlotContent[] items;
     private final int size;
     private final Menu menu;
 
@@ -26,8 +26,8 @@ public class BukkitInventory {
         this.inventory = inventory;
         size = inventory.getSize();
         this.menu = menu;
-        seenItems = new MenuItem[size];
-        items = new MenuItem[size];
+        seenItems = new SlotContent[size];
+        items = new SlotContent[size];
     }
 
     public void show(Player player) {
@@ -47,14 +47,14 @@ public class BukkitInventory {
         INV_UTIL.enableAutoFlush(player);
     }
 
-    public void setItem(int slot, MenuItem item) {
+    public void setItem(int slot, SlotContent item) {
         items[slot] = item;
     }
 
     public void sync(Player player) {
         for (int slot = 0; slot < size; slot++) {
-            MenuItem old = seenItems[slot];
-            MenuItem actual = items[slot];
+            SlotContent old = seenItems[slot];
+            SlotContent actual = items[slot];
             if (actual == null) {
                 inventory.setItem(slot, null);
                 seenItems[slot] = null;
@@ -79,7 +79,7 @@ public class BukkitInventory {
         inventory.clear();
     }
 
-    public MenuItem[] getItems() {
+    public SlotContent[] getItems() {
         return items;
     }
 

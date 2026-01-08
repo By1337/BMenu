@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.animation.util;
 
-import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.SlotContent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class AnimationUtil {
         }
     }
 
-    public static void set(@Nullable MenuItem who, MenuItem[] to, int[] inSlots) {
+    public static void set(@Nullable SlotContent who, SlotContent[] to, int[] inSlots) {
         for (int inSlot : inSlots) {
             to[inSlot] = who;
         }

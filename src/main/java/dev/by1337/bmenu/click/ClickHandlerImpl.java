@@ -1,15 +1,23 @@
 package dev.by1337.bmenu.click;
 
-import dev.by1337.plc.Placeholderable;
-import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
-import dev.by1337.yaml.codec.YamlCodec;
-import org.bukkit.entity.Player;
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.requirement.Requirements;
+import dev.by1337.bmenu.util.ObjectUtil;
+import dev.by1337.plc.Placeholderable;
+import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
+import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.codec.YamlCodec;
+import org.bukkit.entity.Player;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.function.Function;
 
 public class ClickHandlerImpl implements ClickHandler {
+
+
     public static YamlCodec<ClickHandlerImpl> CODEC = RecordYamlCodecBuilder.mapOf(
             ClickHandlerImpl::new,
             Commands.CODEC.fieldOf("deny_commands", v -> v.denyCommands, Commands.EMPTY),

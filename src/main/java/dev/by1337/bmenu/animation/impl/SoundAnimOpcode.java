@@ -8,7 +8,7 @@ import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.animation.FrameOpcode;
 import dev.by1337.bmenu.animation.FrameOpcodes;
@@ -56,7 +56,7 @@ public class SoundAnimOpcode implements FrameOpcode {
     }
 
     @Override
-    public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
+    public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
         Player viewer = menu.getViewer();
         viewer.playSound(viewer.getLocation(), sound, volume, pitch);
     }

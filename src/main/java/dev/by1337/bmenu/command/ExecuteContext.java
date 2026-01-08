@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.command;
 
 import dev.by1337.cmd.CompiledCommand;
-import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,13 +9,13 @@ import java.util.List;
 
 public class ExecuteContext {
     public final Menu menu;
-    public @Nullable MenuItem item;
+    public @Nullable SlotContent item;
 
     public ExecuteContext(Menu menu) {
         this.menu = menu;
     }
 
-    public ExecuteContext(Menu menu, @Nullable MenuItem item) {
+    public ExecuteContext(Menu menu, @Nullable SlotContent item) {
         this.menu = menu;
         this.item = item;
     }
@@ -23,7 +23,7 @@ public class ExecuteContext {
     public static ExecuteContext of(Menu menu) {
         return new ExecuteContext(menu);
     }
-    public static ExecuteContext of(Menu menu, @Nullable MenuItem item) {
+    public static ExecuteContext of(Menu menu, @Nullable SlotContent item) {
         return new ExecuteContext(menu, item);
     }
 

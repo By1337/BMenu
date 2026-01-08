@@ -2,7 +2,7 @@ package dev.by1337.bmenu.animation.impl;
 
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.animation.FrameOpcode;
 import dev.by1337.bmenu.animation.FrameOpcodes;
@@ -23,7 +23,7 @@ public class SwapAnimOpcode implements FrameOpcode {
     }
 
     @Override
-    public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
+    public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
         if (from.length != to.length) {
             throw new IllegalArgumentException("Количество слотов 'from' и 'to' должно совпадать.");
         }

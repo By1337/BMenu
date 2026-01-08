@@ -4,8 +4,8 @@ package dev.by1337.bmenu.animation.impl;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.item.MenuItem;
-import dev.by1337.bmenu.item.MenuItemBuilder;
+import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.item.SlotFactory;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.animation.FrameOpcode;
 import dev.by1337.bmenu.animation.FrameOpcodes;
@@ -25,14 +25,14 @@ public class SetAnimOpcode implements FrameOpcode {
     }
 
     @Override
-    public void apply(MenuItem[] matrix, Menu menu, Animator animator) {
-        MenuItemBuilder builder = menu.getConfig().findMenuItem(menu.replace(item), menu);
+    public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
+        SlotFactory builder = menu.getConfig().findMenuItem(menu.replace(item), menu);
         if (builder == null) {
-            AnimationUtil.set(MenuItem.ofMaterial(menu.replace(item)), matrix, slots);
+            AnimationUtil.set(SlotContent.ofMaterial(menu.replace(item)), matrix, slots);
         } else {
-            MenuItem menuItem1 = builder.build(menu);
-            if (menuItem1 != null) {
-                AnimationUtil.set(menuItem1, matrix, slots);
+            SlotContent slotContent1 = builder.build(menu);
+            if (slotContent1 != null) {
+                AnimationUtil.set(slotContent1, matrix, slots);
             }
         }
     }

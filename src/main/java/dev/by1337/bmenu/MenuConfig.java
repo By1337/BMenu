@@ -1,7 +1,7 @@
 package dev.by1337.bmenu;
 
-import dev.by1337.bmenu.item.MenuItem;
-import dev.by1337.bmenu.item.MenuItemBuilder;
+import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.item.SlotFactory;
 import dev.by1337.yaml.YamlMap;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
@@ -29,12 +29,12 @@ public class MenuConfig implements MenuItemLookup, Keyed {
     private final int size;
     private final Set<NamespacedKey> onlyOpenFrom;
     private final Map<String, String> args;
-    private final Map<String, MenuItemBuilder> idToItems;
+    private final Map<String, SlotFactory> idToItems;
     private final YamlMap yamlConfig;
     private final CashedYamlMap cashedYamlConfig;
     private final MenuLoader loader;
     private final String title;
-    private final List<MenuItemBuilder> items;
+    private final List<SlotFactory> items;
     private @Nullable Animator.AnimatorContext animation;
     private final CommandList commandList;
     private final Map<String, CommandRequirements> menuEventListeners;
@@ -44,7 +44,7 @@ public class MenuConfig implements MenuItemLookup, Keyed {
     private final Map<String, Animator.AnimatorContext> animations;
     private final List<File> fromFiles;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable NamespacedKey id, @Nullable NamespacedKey provider, InventoryType invType, int size, List<NamespacedKey> onlyOpenFrom, Map<String, String> args, Map<String, MenuItemBuilder> idToItems, YamlMap context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, long clickCooldown, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable NamespacedKey id, @Nullable NamespacedKey provider, InventoryType invType, int size, List<NamespacedKey> onlyOpenFrom, Map<String, String> args, Map<String, SlotFactory> idToItems, YamlMap context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, long clickCooldown, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
@@ -103,26 +103,26 @@ public class MenuConfig implements MenuItemLookup, Keyed {
         for (MenuConfig superMenu : supers) {
             superMenu.generate(menu);
         }
-        MenuItem[] matrix = menu.getMatrix();
+        SlotContent[] matrix = menu.getMatrix();
         int invSize = matrix.length;
 
-        for (MenuItemBuilder builder : items) {
-            MenuItem menuItem = null;
+        for (SlotFactory builder : items) {
+            SlotContent slotContent = null;
             var slots = builder.slots();
             for (int slot : slots) {
                 if (slot < 0 || slot >= invSize) continue;
-                if (menuItem == null) {
-                    menuItem = builder.build(menu);
-                    if (menuItem == null) break;
+                if (slotContent == null) {
+                    slotContent = builder.build(menu);
+                    if (slotContent == null) break;
                 }
-                matrix[slot] = menuItem;
+                matrix[slot] = slotContent;
             }
         }
     }
 
     @Override
-    public @Nullable MenuItemBuilder findMenuItem(String name, Menu menu) {
-        MenuItemBuilder item = idToItems.get(name);
+    public @Nullable SlotFactory findMenuItem(String name, Menu menu) {
+        SlotFactory item = idToItems.get(name);
         if (item != null) return item;
         for (MenuConfig superMenu : supers) {
             if ((item = superMenu.findMenuItem(name, menu)) != null) {
@@ -200,7 +200,7 @@ public class MenuConfig implements MenuItemLookup, Keyed {
         return args;
     }
 
-    public Map<String, MenuItemBuilder> getIdToItems() {
+    public Map<String, SlotFactory> getIdToItems() {
         return idToItems;
     }
 
@@ -212,7 +212,7 @@ public class MenuConfig implements MenuItemLookup, Keyed {
         return title;
     }
 
-    public List<MenuItemBuilder> getItems() {
+    public List<SlotFactory> getItems() {
         return items;
     }
 

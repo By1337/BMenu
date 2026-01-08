@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.menu;
 
-import dev.by1337.bmenu.item.MenuItem;
+import dev.by1337.bmenu.item.SlotContent;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,22 +8,22 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 
 public final class MenuMatrix {
-    private MenuItem[][] matrices;
+    private SlotContent[][] matrices;
     private final int size;
-    private final MenuItem[] baseLayer;
-    private final MenuItem[] animationLayer;
-    private final Set<MenuItem> ticked = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final SlotContent[] baseLayer;
+    private final SlotContent[] animationLayer;
+    private final Set<SlotContent> ticked = Collections.newSetFromMap(new IdentityHashMap<>());
     private final Menu menu;
 
     public MenuMatrix(int size, Menu menu) {
         this.size = size;
         this.menu = menu;
-        this.matrices = new MenuItem[3][];
+        this.matrices = new SlotContent[3][];
         baseLayer = getMatrix(0);
         animationLayer = getMatrix(1);
     }
 
-    public MenuItem getItemInSlot(int slot) {
+    public SlotContent getItemInSlot(int slot) {
         if (slot >= size || slot < 0) return null;
         for (int idx = matrices.length - 1; idx >= 0; idx--) {
             var layer = matrices[idx];
@@ -36,16 +36,16 @@ public final class MenuMatrix {
     }
 
     public void clear() {
-        this.matrices = new MenuItem[3][];
+        this.matrices = new SlotContent[3][];
         Arrays.fill(baseLayer, null);
         Arrays.fill(animationLayer, null);
         matrices[0] = baseLayer;
         matrices[1] = animationLayer;
     }
 
-    public void flushTo(MenuItem[] matrix) {
+    public void flushTo(SlotContent[] matrix) {
         Arrays.fill(matrix, null);
-        for (MenuItem[] layer : matrices) {
+        for (SlotContent[] layer : matrices) {
             if (layer == null) continue;
             for (int slot = 0; slot < size; slot++) {
                 var item = layer[slot];
@@ -58,32 +58,32 @@ public final class MenuMatrix {
 
     public void doTick() { //todo tick list?
         ticked.clear();
-        for (MenuItem[] layer : matrices) {
+        for (SlotContent[] layer : matrices) {
             if (layer == null) continue;
             for (int slot = 0; slot < size; slot++) {
-                MenuItem item = layer[slot];
+                SlotContent item = layer[slot];
                 if (item == null) continue;
                 if (item.isTicking() && ticked.add(item))
                     item.doTick(menu);
-                if (item.isDie())
+                if (item.isRemoved())
                     layer[slot] = null;
             }
         }
     }
 
-    public MenuItem[] getBaseLayer() {
+    public SlotContent[] getBaseLayer() {
         return baseLayer;
     }
 
-    public MenuItem[] getAnimationLayer() {
+    public SlotContent[] getAnimationLayer() {
         return animationLayer;
     }
 
-    public MenuItem[] getMatrix(int idx) {
+    public SlotContent[] getMatrix(int idx) {
         if (idx > 128) throw new IllegalArgumentException("Index out of range " + idx);
         ensureCapacity(idx + 1);
         var v = matrices[idx];
-        if (v == null) return matrices[idx] = new MenuItem[size];
+        if (v == null) return matrices[idx] = new SlotContent[size];
         return v;
     }
 

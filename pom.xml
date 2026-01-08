@@ -127,6 +127,13 @@
     <dependencies>
         <!-- server -->
         <dependency>
+            <groupId>io.paper</groupId>
+            <artifactId>paper-new</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/libs/result.jar</systemPath>
+        </dependency>
+        <dependency>
             <groupId>org.by1337.nms</groupId>
             <artifactId>paper-nms</artifactId>
             <version>1.16.5</version>
