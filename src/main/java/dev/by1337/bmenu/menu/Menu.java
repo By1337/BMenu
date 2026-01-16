@@ -17,7 +17,7 @@ import dev.by1337.core.util.text.MessageFormatter;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.plc.PapiResolver;
 import dev.by1337.plc.PlaceholderResolver;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.plc.Placeholders;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -58,7 +58,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.IntFunction;
 
-public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteContext>, Placeholderable {
+public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteContext>, PlaceholderApplier {
     private static final Command<ExecuteContext> commands;
     private static final Logger log = LoggerFactory.getLogger("BMenu");
     private static final Random rand = new Random();
@@ -135,7 +135,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         }
         if (inventoryLike == null) {
             inventoryLike = new BukkitInventory(
-                    createInventory(config.getSize(), MiniMessage.deserialize(replace(config.getTitle())), config.getInvType()),
+                    createInventory(config.getSize(), MiniMessage.deserialize(setPlaceholders(config.getTitle())), config.getInvType()),
                     this
             );
 
@@ -161,21 +161,23 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
             if (ticker != null && !ticker.isCancelled()) {
                 ticker.cancel();
             }
-            ticker = Bukkit.getScheduler().runTaskTimer(
-                    loader.getPlugin(),
-                    this::tick,
-                    1,
-                    1
-            );
+          //  ticker = Bukkit.getScheduler().runTaskTimer(
+          //          loader.getPlugin(),
+          //          this::tick,
+          //          1,
+          //          1
+          //  );
         });
     }
 
-    protected void tick() {
+    public void tick() {
+        //long nanos = System.nanoTime();
         if (animator != null && !animator.isEnd()) {
             animator.tick(layers.getAnimationLayer(), this);
         }
         layers.doTick();
         flush();
+       // System.out.println((System.nanoTime() - nanos) / 1_000D + "us");
     }
 
     public void reopen() {
@@ -260,8 +262,8 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     @Override
-    public String replace(String string) {
-        return placeholderResolver.replace(string, this);
+    public String setPlaceholders(String string) {
+        return placeholderResolver.setPlaceholders(string, this);
     }
 
     protected abstract boolean runCommand(String cmd) throws CommandMsgError;
@@ -269,7 +271,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     @Override
     public void runCommands(ExecuteContext ctx, List<String> commands) {
         for (String command : commands) {
-            executeCommand(ctx, replace(command));
+            executeCommand(ctx, setPlaceholders(command));
         }
     }
 
@@ -363,14 +365,14 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     public void sendFakeTitle(String title) {
-        inventoryLike.setTitle(MiniMessage.deserialize(replace(title)));
+        inventoryLike.setTitle(MiniMessage.deserialize(setPlaceholders(title)));
     }
 
     public void updateTitle() {
-        String newTitle = replace(config.getTitle());
+        String newTitle = setPlaceholders(config.getTitle());
         if (!Objects.equals(lastTitle, newTitle)) {
             lastTitle = newTitle;
-            inventoryLike.setTitle(MiniMessage.deserialize(replace(newTitle)));
+            inventoryLike.setTitle(MiniMessage.deserialize(setPlaceholders(newTitle)));
         }
     }
 

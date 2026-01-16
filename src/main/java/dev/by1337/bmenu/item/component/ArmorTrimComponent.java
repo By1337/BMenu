@@ -9,9 +9,10 @@ import org.bukkit.Registry;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.jetbrains.annotations.Nullable;
 
 public record ArmorTrimComponent(Holder<ArmorTrim> armorTrim) {
-    public static final YamlCodec<ArmorTrimComponent> CODEC;
+    public static final @Nullable YamlCodec<ArmorTrimComponent> CODEC;
 
     public ArmorTrimComponent(Holder<TrimMaterial> material, Holder<TrimPattern> pattern) {
         this(new Holder<>(new ArmorTrim(material.get(), pattern.get())));
@@ -29,9 +30,9 @@ public record ArmorTrimComponent(Holder<ArmorTrim> armorTrim) {
                             .fieldOf("material",
                                     v -> new Holder<>(v.armorTrim.get().getMaterial())
                             ),
-                    new KeyedYamlCodec<>(Registry.TRIM_PATTERN, "trim_material")
+                    new KeyedYamlCodec<>(Registry.TRIM_PATTERN, "trim_pattern")
                             .map(Holder::new, Holder::get)
-                            .fieldOf("material",
+                            .fieldOf("pattern",
                                     v -> new Holder<>(v.armorTrim.get().getPattern())
                             )
             );

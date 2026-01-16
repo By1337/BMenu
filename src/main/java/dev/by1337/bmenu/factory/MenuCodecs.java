@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.factory;
 
 import dev.by1337.cmd.Command;
-import dev.by1337.core.util.registry.LegacyRegistryBridge;
+import dev.by1337.core.bridge.registry.LegacyRegistryBridge;
 import dev.by1337.yaml.BukkitCodecs;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;

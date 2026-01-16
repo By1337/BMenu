@@ -34,11 +34,7 @@ public final class SlotFactory implements Comparable<SlotFactory> {
 
 
     public SlotFactory() {
-        //SlotContent
-        //SlotVariant
-        //SlotResolver
-        //SlotFactory
-        //ResolvedSlotContent
+
     }
 
     public static SlotFactory read(YamlMap yamlMap) {
@@ -114,15 +110,6 @@ public final class SlotFactory implements Comparable<SlotFactory> {
                 .integer("priority", SlotFactory::priority, SlotFactory::setPriority, 0)
                 .field(ItemFactory.SLOTS_YAML_CODEC, "slot", SlotFactory::slots, SlotFactory::setSlots, new int[]{-1});
         ;
-        var codec = builder
-                .copy()
-                .field(SlotVariant.CODEC, null, s -> s.variant, (f, s) -> f.variant = s)
-                .field(DynamicSlotContent.Data.CODEC, null, s -> s.variants, (f, s) -> {
-                    if (s.variants() != null) {
-                        f.variants = s;
-                    }
-                })
-                .build();
 
         var oneOf = builder
                 .copy()
@@ -156,14 +143,6 @@ public final class SlotFactory implements Comparable<SlotFactory> {
                     });
                 });
             }
-            //.preDecode(v -> {
-            //        if (v.isMap()) {
-            //            var map = v.asYamlMap().getOrThrow();
-            //            ItemFixer.fixItem(map);
-            //            return YamlValue.wrap(map);
-            //        }
-            //        return v;
-            //    })
 
             @Override
             public YamlValue encode(SlotFactory factory) {

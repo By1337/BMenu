@@ -5,7 +5,7 @@ import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.requirement.Requirements;
 import dev.by1337.bmenu.util.ObjectUtil;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -36,7 +36,7 @@ public class ClickHandlerImpl implements ClickHandler {
     }
 
     @Override
-    public void onClick(Menu menu, Placeholderable placeholders, Player player, ExecuteContext ctx) {
+    public void onClick(Menu menu, PlaceholderApplier placeholders, Player player, ExecuteContext ctx) {
         if (requirement.test(menu, placeholders, player, ctx)) {
             commands.run(ctx, placeholders);
         } else {

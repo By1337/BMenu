@@ -1,5 +1,9 @@
 package dev.by1337.bmenu;
 
+import dev.by1337.bmenu.factory.MenuFactory;
+import dev.by1337.bmenu.io.FileWatcher;
+import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.registry.RegistryLike;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -10,10 +14,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.plugin.Plugin;
-import dev.by1337.bmenu.factory.MenuFactory;
-import dev.by1337.bmenu.io.FileWatcher;
-import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.registry.RegistryLike;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ public class MenuLoader implements Listener {
     private RegistryLike<MenuConfig> menuRegistry;
     private final String defaultSpace;
     private final @Nullable FileWatcher fileWatcher;
+    private BukkitTask ticker;
 
     public MenuLoader(File homeDir, Plugin plugin) {
         this(homeDir, plugin, false);
@@ -53,6 +55,30 @@ public class MenuLoader implements Listener {
         registry = new MenuRegistry();
         registry.merge(MenuRegistry.DEFAULT_REGISTRY);
         menuRegistry = new RegistryLike<>();
+    }
+
+    public void startTicker() {
+        if (ticker != null && !ticker.isCancelled()) {
+            ticker.cancel();
+        }
+        ticker = Bukkit.getScheduler().runTaskTimer(
+                plugin,
+                this::tick,
+                1,
+                1
+        );
+    }
+
+    private void tick() {
+        long nanos = System.nanoTime();
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu menu) {
+                if (menu.getLoader() == this) {
+                    menu.tick();
+                }
+            }
+        });
+        System.out.println("Tick " + (System.nanoTime() - nanos) / 1_000_000D + " ms");
     }
 
     private void onFileChange(Path path) {

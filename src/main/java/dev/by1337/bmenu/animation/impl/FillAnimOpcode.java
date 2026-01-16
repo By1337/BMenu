@@ -24,10 +24,10 @@ public class FillAnimOpcode implements FrameOpcode {
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        SlotFactory builder = menu.getConfig().findMenuItem(menu.replace(item), menu);
+        SlotFactory builder = menu.getConfig().findMenuItem(menu.setPlaceholders(item), menu);
         SlotContent slotContent;
         if (builder == null) {
-            slotContent = SlotContent.ofMaterial(menu.replace(item));
+            slotContent = SlotContent.ofMaterial(menu.setPlaceholders(item));
         } else {
             slotContent = builder.build(menu);
         }

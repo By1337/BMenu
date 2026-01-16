@@ -3,6 +3,7 @@ package dev.by1337.bmenu.item.item;
 import dev.by1337.bmenu.item.component.ArmorTrimComponent;
 import dev.by1337.bmenu.item.component.CustomModelDataComponent;
 import dev.by1337.bmenu.item.component.EnchantmentData;
+import dev.by1337.bmenu.util.ColorHolder;
 import dev.by1337.bmenu.util.DataInt;
 import dev.by1337.bmenu.util.DataString;
 import net.kyori.adventure.text.ComponentLike;
@@ -41,7 +42,7 @@ public interface ItemModel {
 
     void forEachPotionEffects(Consumer<PotionEffect> consumer);
 
-    @Nullable Color color();
+    @Nullable ColorHolder color();
 
     boolean hasEnchantments();
 
@@ -57,7 +58,7 @@ public interface ItemModel {
     @Nullable Object getCache();
     void setCache(Object cache);
 
-    @Nullable ArmorTrimComponent getArmorTrim();
+    @Nullable ArmorTrimComponent getTrim();
 
     default ItemModel and(ItemModel i) {
         ItemModel i1 = this;
@@ -75,8 +76,8 @@ public interface ItemModel {
             }
 
             @Override
-            public @Nullable ArmorTrimComponent getArmorTrim() {
-                return i1.getArmorTrim();
+            public @Nullable ArmorTrimComponent getTrim() {
+                return i1.getTrim();
             }
 
             private <T> T any(T t, T t1) {
@@ -137,7 +138,7 @@ public interface ItemModel {
             }
 
             @Override
-            public @Nullable Color color() {
+            public @Nullable ColorHolder color() {
                 return any(i.color(), i1.color());
             }
 

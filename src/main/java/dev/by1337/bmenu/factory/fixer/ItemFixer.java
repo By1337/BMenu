@@ -4,8 +4,8 @@ import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.factory.MenuFilePostprocessor;
 import dev.by1337.bmenu.item.SlotTicker;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
-import dev.by1337.plc.PlaceholderFormat;
 import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.PlaceholderSyntax;
 import dev.by1337.plc.Placeholders;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
@@ -149,12 +149,12 @@ public class ItemFixer {
                 // .and(mapToResolver("local_args", item))
                 .and(new PlaceholderResolver<>() {
                     @Override
-                    public boolean has(String key, PlaceholderFormat format) {
+                    public boolean has(String key, PlaceholderSyntax format) {
                         return key.equals("math");
                     }
 
                     @Override
-                    public @Nullable String replace(String key, String params, @Nullable Void ctx, PlaceholderFormat format) {
+                    public @Nullable String resolve(String key, String params, @Nullable Void ctx, PlaceholderSyntax format) {
                         if (params.contains("%") || params.contains("{"))
                             return null; // сейчас не известны не которые плейсы
                         try {
@@ -203,7 +203,7 @@ public class ItemFixer {
             }
             return result;
         } else if (in instanceof String s) {
-            return argsReplacer.replace(s, null);
+            return argsReplacer.setPlaceholders(s, null);
         } else {
             return in;
         }

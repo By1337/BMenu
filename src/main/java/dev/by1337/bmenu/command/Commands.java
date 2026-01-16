@@ -4,7 +4,7 @@ package dev.by1337.bmenu.command;
 import dev.by1337.cmd.Command;
 import dev.by1337.cmd.CommandReader;
 import dev.by1337.cmd.CompiledCommand;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -109,7 +109,7 @@ public class Commands {
         }
     }
 
-    public void run(ExecuteContext menu, Placeholderable placeholders) {
+    public void run(ExecuteContext menu, PlaceholderApplier placeholders) {
         for (MenuCommand menuCommand : compiled) {
             menuCommand.run(menu, placeholders);
         }

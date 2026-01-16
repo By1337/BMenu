@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.command;
 
 import dev.by1337.cmd.CompiledCommand;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public class MenuCommand {
         canBeCompiled = !hasPlaceholders;
     }
 
-    public void run(ExecuteContext ctx, Placeholderable placeholders) {
+    public void run(ExecuteContext ctx, PlaceholderApplier placeholders) {
         if (compiled != null) {
             ctx.executeCommand(compiled);
         } else {
@@ -29,7 +29,7 @@ public class MenuCommand {
                 //log.info("Command {} compiled {}", source, compiled);
             } else {
                 if (hasPlaceholders) {
-                    ctx.executeCommand(placeholders.replace(source));
+                    ctx.executeCommand(placeholders.setPlaceholders(source));
                 } else {
                     ctx.executeCommand(source);
                 }

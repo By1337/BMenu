@@ -25,10 +25,10 @@ public class SetIfEmptyAnimOpcode implements FrameOpcode {
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        SlotFactory builder = menu.getConfig().findMenuItem(menu.replace(item), menu);
+        SlotFactory builder = menu.getConfig().findMenuItem(menu.setPlaceholders(item), menu);
         if (builder == null) {
 
-            setIfEmpty(SlotContent.ofMaterial(menu.replace(item)), matrix, slots);
+            setIfEmpty(SlotContent.ofMaterial(menu.setPlaceholders(item)), matrix, slots);
         } else {
             SlotContent slotContent1 = builder.build(menu);
             if (slotContent1 != null) {

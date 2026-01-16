@@ -33,7 +33,6 @@ items-custom-section: # schema support
     material: dirt
     lore: '&7one line lore'
 
-
   test2:
     oneOf:
       - slot: 10
@@ -68,6 +67,21 @@ items-custom-section: # schema support
         material: gold_block
         name: '&cУ Вас больше 1000 монет'
 
+test2:
+  slot: 51
+  oneOf:
+    - material: gold_nugget
+      name: '&cУ Вас меньше 100 монет'
+      on_view: '%vault_eco_balance_fixed% < 100'
+    #
+    - material: gold_ingot
+      name: '&cУ Вас меньше 1000 монет'
+      on_view: '%vault_eco_balance_fixed% < 1000'
+    #
+    - material: gold_block
+      name: '&cУ Вас больше 1000 монет'
+
+
 items:
   on_view:
     slot: 50
@@ -78,18 +92,18 @@ items:
     on_tick:
       commands: '[update]'
 
-  test2:
+  oneOf_example:
+    slot: 51
     oneOf:
-      - slot: 10
-        material: gold_nugget
+      - material: gold_nugget
         name: '&cУ Вас меньше 100 монет'
         on_view: '%vault_eco_balance_fixed% < 100'
-      - slot: 10
-        material: gold_ingot
+      #
+      - material: gold_ingot
         name: '&cУ Вас меньше 1000 монет'
         on_view: '%vault_eco_balance_fixed% < 1000'
-      - slot: 10
-        material: gold_block
+      #
+      - material: gold_block
         name: '&cУ Вас больше 1000 монет'
 
 

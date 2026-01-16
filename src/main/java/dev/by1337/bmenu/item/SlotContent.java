@@ -5,7 +5,7 @@ import dev.by1337.bmenu.item.item.ItemModel;
 import dev.by1337.bmenu.item.slot.SimpleSlotContent;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.plc.PlaceholderResolver;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ public interface SlotContent extends PlaceholderResolver<Menu> {
         );
     }
 
-    Placeholderable getPlaceholders(Menu menu);
+    PlaceholderApplier getPlaceholders(Menu menu);
 
     void doClick(Menu menu, Player player, MenuClickType type);
 

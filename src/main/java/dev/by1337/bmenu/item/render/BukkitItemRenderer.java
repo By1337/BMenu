@@ -2,7 +2,7 @@ package dev.by1337.bmenu.item.render;
 
 import dev.by1337.bmenu.item.item.ItemModel;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 public class BukkitItemRenderer extends AbstractBukkitItemRenderer {
 
     @Override
-    protected ItemStack applyDisplay(ItemStack itemStack, ItemModel item, Menu menu, Placeholderable placeholders) {
+    protected ItemStack applyDisplay(ItemStack itemStack, ItemModel item, Menu menu, PlaceholderApplier placeholders) {
         ItemMeta im = itemStack.getItemMeta();
         var name = item.name();
         if (name != null) {
@@ -37,9 +37,9 @@ public class BukkitItemRenderer extends AbstractBukkitItemRenderer {
         return itemStack;
     }
 
-    private void applyComponent(ComponentLike c, Placeholderable placeholders, Consumer<Component> processor) {
+    private void applyComponent(ComponentLike c, PlaceholderApplier placeholders, Consumer<Component> processor) {
         if (c instanceof RawTextComponent raw) {
-            String s = placeholders.replace(raw.source());
+            String s = placeholders.setPlaceholders(raw.source());
             for (String line : s.split("\n")) {
                 processor.accept(MiniMessage.deserialize(line));
             }
@@ -48,7 +48,7 @@ public class BukkitItemRenderer extends AbstractBukkitItemRenderer {
         }
     }
 
-    private Component toComponent(ComponentLike c, Placeholderable placeholders) {
+    private Component toComponent(ComponentLike c, PlaceholderApplier placeholders) {
         if (c instanceof RawTextComponent c1) {
             return c1.asComponent(placeholders);
         }

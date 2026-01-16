@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.requirement;
 
 import dev.by1337.plc.PlaceholderResolver;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import org.bukkit.entity.Player;
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.menu.Menu;
@@ -9,7 +9,7 @@ import dev.by1337.bmenu.menu.Menu;
 import java.util.List;
 
 public interface Requirement {
-    boolean test(Menu menu, Placeholderable placeholders, Player clicker);
+    boolean test(Menu menu, PlaceholderApplier placeholders, Player clicker);
 
     Commands getCommands();
 
@@ -32,7 +32,7 @@ public interface Requirement {
         return new Requirement() {
             private final boolean state = sub.state();
             @Override
-            public boolean test(Menu menu, Placeholderable placeholders, Player clicker) {
+            public boolean test(Menu menu, PlaceholderApplier placeholders, Player clicker) {
                 return state;
             }
 

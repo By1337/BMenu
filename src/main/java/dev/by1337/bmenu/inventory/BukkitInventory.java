@@ -1,20 +1,21 @@
 package dev.by1337.bmenu.inventory;
 
+import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.item.render.BukkitItemRenderer;
+import dev.by1337.bmenu.item.render.ItemRenderer;
+import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.core.BCore;
-import dev.by1337.core.util.inventory.InventoryUtil;
+import dev.by1337.core.bridge.inventory.InventoryUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.item.SlotContent;
-import dev.by1337.bmenu.item.render.BukkitItemRenderer;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 public class BukkitInventory {
     private static final InventoryUtil INV_UTIL = BCore.getInventoryUtil();
-    private static final BukkitItemRenderer RENDERER = new BukkitItemRenderer();
+    private static final ItemRenderer<Inventory> RENDERER = new BukkitItemRenderer();
 
     private final Inventory inventory;
     private final SlotContent[] seenItems;
@@ -70,7 +71,8 @@ public class BukkitInventory {
                 actual.setDirty(false);
             }
         }
-        INV_UTIL.flushInv(player);
+        RENDERER.flush(inventory, menu);
+        //  INV_UTIL.flushInv(player); //todo
     }
 
     public void clear() {

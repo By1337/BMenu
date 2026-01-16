@@ -61,6 +61,7 @@ public class BMenu extends JavaPlugin {
     public void onEnable() {
         BungeeCordMessageSender.registerChannel(this);
         openCommands = new OpenCommands(loader, config);
+        loader.startTicker();
         loader.loadMenus();
         loader.registerListeners();
         commandWrapper = new CommandWrapper(createCommand(), this);

@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.requirement;
 
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -38,8 +38,8 @@ public class StringEqualsIgnoreCaseRequirement implements Requirement {
 
 
     @Override
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
-        boolean b = placeholderable.replace(input).equalsIgnoreCase(placeholderable.replace(output));
+    public boolean test(Menu menu, PlaceholderApplier placeholder, Player clicker) {
+        boolean b = placeholder.setPlaceholders(input).equalsIgnoreCase(placeholder.setPlaceholders(output));
         return not != b;
     }
 

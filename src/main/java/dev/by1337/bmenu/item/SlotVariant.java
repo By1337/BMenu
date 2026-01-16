@@ -6,7 +6,7 @@ import dev.by1337.bmenu.factory.fixer.ItemFixer;
 import dev.by1337.bmenu.item.item.ItemModel;
 import dev.by1337.bmenu.item.item.ItemModelImpl;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;

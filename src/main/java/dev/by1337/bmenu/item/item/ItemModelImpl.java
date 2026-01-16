@@ -5,6 +5,7 @@ import dev.by1337.bmenu.item.component.ArmorTrimComponent;
 import dev.by1337.bmenu.item.component.CustomModelDataComponent;
 import dev.by1337.bmenu.item.component.EnchantmentData;
 import dev.by1337.bmenu.text.SourcedComponentLike;
+import dev.by1337.bmenu.util.ColorHolder;
 import dev.by1337.bmenu.util.DataInt;
 import dev.by1337.bmenu.util.DataString;
 import dev.by1337.bmenu.util.ObjectUtil;
@@ -37,11 +38,11 @@ public class ItemModelImpl implements ItemModel {
     private @Nullable CustomModelDataComponent customModelData;
     private @Nullable List<ItemFlag> flags;
     private @Nullable List<PotionEffect> potionEffects;
-    private @Nullable Color color;
+    private @Nullable ColorHolder color;
     private @Nullable List<EnchantmentData> enchantments;
     private @NotNull DataInt damage = new DataInt("0");
     private @Nullable Integer maxStackSize;
-    private @Nullable ArmorTrimComponent armorTrim;
+    private @Nullable ArmorTrimComponent trim;
     private boolean hideTooltip;
     private boolean unbreakable;
     private Object cache;
@@ -117,7 +118,7 @@ public class ItemModelImpl implements ItemModel {
     }
 
     @Override
-    public @Nullable Color color() {
+    public @Nullable ColorHolder color() {
         return color;
     }
 
@@ -163,8 +164,8 @@ public class ItemModelImpl implements ItemModel {
         return maxStackSize;
     }
 
-    public @Nullable ArmorTrimComponent getArmorTrim() {
-        return armorTrim;
+    public @Nullable ArmorTrimComponent getTrim() {
+        return trim;
     }
 
     static {
@@ -176,13 +177,13 @@ public class ItemModelImpl implements ItemModel {
                 .field(CustomModelDataComponent.CODEC, "model_data", m -> m.customModelData, (m, v) -> m.customModelData = v)
                 .field(BukkitYamlCodecs.ITEM_FLAG.listOf(), "item_flags", m -> m.flags, (m, v) -> m.flags = v)
                 .field(MenuCodecs.POTION_EFFECT_LIST_CODEC, "potion_effects", m -> m.potionEffects, (m, v) -> m.potionEffects = v)
-                .field(BukkitCodecs.color(), "color", m -> m.color, (m, v) -> m.color = v)
+                .field(ColorHolder.CODEC, "color", m -> m.color, (m, v) -> m.color = v)
                 .field(MenuCodecs.ENCHANTMENT_LIST_CODEC, "enchantments", m -> m.enchantments, (m, v) -> m.enchantments = v)
                 .field(DataInt.CODEC, "damage", m -> m.damage, (m, v) -> m.damage = v)
                 .bool("unbreakable", m -> m.unbreakable, (m, v) -> m.unbreakable = v)
                 ;
         if (ArmorTrimComponent.CODEC != null){
-            builder.field(ArmorTrimComponent.CODEC, "armor_trim", m -> m.armorTrim, (m, v) -> m.armorTrim = v);
+            builder.field(ArmorTrimComponent.CODEC, "trim", m -> m.trim, (m, v) -> m.trim = v);
         }
         if (ServerVersion.is1_20_5orNewer()){
             builder.bool("hide_tooltip", m -> m.hideTooltip, (m, v) -> m.hideTooltip = v);

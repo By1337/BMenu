@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.requirement;
 
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
@@ -30,8 +30,8 @@ public class MathRequirement implements Requirement {
     }
 
     @Override
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
-        String s = placeholderable.replace(expression);
+    public boolean test(Menu menu, PlaceholderApplier placeholder, Player clicker) {
+        String s = placeholder.setPlaceholders(expression);
         try {
             var b = FastExpressionParser.parse(s) == 1D;
             return not != b;

@@ -3,8 +3,10 @@ package dev.by1337.bmenu.item.render;
 import dev.by1337.bmenu.item.item.ItemModel;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.util.ObjectUtil;
+import dev.by1337.core.BCore;
 import dev.by1337.core.ServerVersion;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.core.bridge.inventory.InventoryUtil;
+import dev.by1337.plc.PlaceholderApplier;
 import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
@@ -19,11 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Inventory> {
+    private static final InventoryUtil INV_UTIL = BCore.getInventoryUtil();
     private static final ItemStack AIR = new ItemStack(Material.AIR);
     private static final Logger log = LoggerFactory.getLogger("BMenu");
 
     @Override
-    public void render(Inventory ctx, int slot, ItemModel item, Menu menu, Placeholderable placeholders) {
+    public void render(Inventory ctx, int slot, ItemModel item, Menu menu, PlaceholderApplier placeholders) {
         // log.info("{} update slot {}", menu.getConfig().getId(), slot);
         if (item == null) {
             ctx.setItem(slot, AIR);
@@ -61,8 +64,9 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
             });
         }
 
-        var color = item.color();
-        if (color != null) {
+        var color0 = item.color();
+        if (color0 != null) {
+            var color = color0.toBukkit();
             if (im instanceof TropicalFishBucketMeta buket) {
                 ObjectUtil.applyIfNotNull(DyeColor.getByColor(color), buket::setBodyColor);
             } else if (im instanceof PotionMeta pm) {
@@ -102,7 +106,7 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
         }
         if (ServerVersion.is1_19_4orNewer()) {
             //JIT DCE?
-            var armorTrim = item.getArmorTrim();
+            var armorTrim = item.getTrim();
             if (armorTrim != null && armorTrim.has()) {
                 if (im instanceof ArmorMeta armorMeta) {
                     armorMeta.setTrim(armorTrim.armorTrim().get());
@@ -117,5 +121,10 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
         ctx.setItem(slot, result);
     }
 
-    protected abstract ItemStack applyDisplay(ItemStack itemStack, ItemModel item, Menu menu, Placeholderable placeholders);
+    protected abstract ItemStack applyDisplay(ItemStack itemStack, ItemModel item, Menu menu, PlaceholderApplier placeholders);
+
+    @Override
+    public void flush(Inventory ctx, Menu menu) {
+        INV_UTIL.flushInv(menu.getViewer());
+    }
 }

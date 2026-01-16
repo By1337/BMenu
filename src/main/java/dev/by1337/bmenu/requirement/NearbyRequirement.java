@@ -2,7 +2,7 @@ package dev.by1337.bmenu.requirement;
 
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -31,7 +31,7 @@ public class NearbyRequirement implements Requirement {
 
 
     @Override
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
+    public boolean test(Menu menu, PlaceholderApplier placeholder, Player clicker) {
         if (!clicker.getWorld().getName().equals(world)) {
             return not;
         }

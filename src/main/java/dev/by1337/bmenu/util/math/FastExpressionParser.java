@@ -1,8 +1,7 @@
 package dev.by1337.bmenu.util.math;
 
-import dev.by1337.plc.PlaceholderFormat;
 import dev.by1337.plc.PlaceholderResolver;
-import org.jetbrains.annotations.NotNull;
+import dev.by1337.plc.PlaceholderSyntax;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +12,13 @@ public class FastExpressionParser {
     private static final Logger log = LoggerFactory.getLogger("BMenu");
     public static final PlaceholderResolver<Void> PLACEHOLDER = new PlaceholderResolver<>() {
         @Override
-        public boolean has(String key, PlaceholderFormat format) {
+        public boolean has(String key, PlaceholderSyntax format) {
             return key.equals("math");
         }
 
         @Override
-        public @Nullable String replace(String key, String params, @Nullable Void ctx, PlaceholderFormat format) {
+        public @Nullable String resolve(String key, String params, @Nullable Void ctx, PlaceholderSyntax format) {
+            if (format != PlaceholderSyntax.BRACKET) return null;
             try {
                 return String.valueOf(FastExpressionParser.parse(params));
             } catch (FastExpressionParser.MathFormatException e) {
@@ -30,9 +30,10 @@ public class FastExpressionParser {
     private static final double TRUE = 1.0;
     private static final double FALSE = 0.0;
 
-    public static String replacePlaceholders(String input)  {
-        return PLACEHOLDER.replace(input, null);
+    public static String replacePlaceholders(String input) {
+        return PLACEHOLDER.setPlaceholders(input, null);
     }
+
     public static double parse(String input) throws MathFormatException {
         ExpReader reader = new ExpReader(input);
         double d = logical(reader);

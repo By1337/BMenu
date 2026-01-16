@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.requirement;
 
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -34,8 +34,8 @@ public class HasPermissionRequirement implements Requirement {
     }
 
     @Override
-    public boolean test(Menu menu, Placeholderable placeholderable, Player clicker) {
-        return not ? !clicker.hasPermission(placeholderable.replace(permission)) : clicker.hasPermission(placeholderable.replace(permission));
+    public boolean test(Menu menu, PlaceholderApplier placeholder, Player clicker) {
+        return not ? !clicker.hasPermission(placeholder.setPlaceholders(permission)) : clicker.hasPermission(placeholder.setPlaceholders(permission));
     }
 
     @Override

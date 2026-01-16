@@ -24,7 +24,7 @@ public class CommandsAnimOpcode implements FrameOpcode {
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        menu.runCommands(ExecuteContext.of(menu), commands.stream().map(menu::replace).toList());
+        menu.runCommands(ExecuteContext.of(menu), commands.stream().map(menu::setPlaceholders).toList());
     }
 
     @Override

@@ -134,9 +134,20 @@
             <systemPath>${basedir}/libs/result.jar</systemPath>
         </dependency>
         <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-server</artifactId>
+            <version>1.21.11-R0.1-SNAPSHOT</version>
+        </dependency>
+<!--        <dependency>
             <groupId>org.by1337.nms</groupId>
             <artifactId>paper-nms</artifactId>
             <version>1.16.5</version>
+            <scope>provided</scope>
+        </dependency>-->
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+            <version>8.5.15</version>
             <scope>provided</scope>
         </dependency>
 
@@ -149,11 +160,10 @@
 
         <dependency>
             <groupId>dev.by1337.core</groupId>
-            <artifactId>BDevCore</artifactId>
-            <version>1.1</version>
+            <artifactId>BLibV2</artifactId>
+            <version>1.2</version>
             <scope>provided</scope>
         </dependency>
-
 
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
@@ -238,12 +248,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.16</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>it.unimi.dsi</groupId>
-            <artifactId>fastutil</artifactId>
-            <version>8.5.15</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

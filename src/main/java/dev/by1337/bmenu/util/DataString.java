@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.util;
 
 import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 
 public class DataString {
     public static YamlCodec<DataString> CODEC = YamlCodec.STRING.map(
@@ -18,9 +18,9 @@ public class DataString {
         }
     }
 
-    public String get(Placeholderable placeholderable) {
+    public String get(PlaceholderApplier placeholder) {
         if (value != null) return value;
-        return placeholderable.replace(src);
+        return placeholder.setPlaceholders(src);
     }
 
     public String src() {

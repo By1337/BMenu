@@ -3,8 +3,8 @@ package dev.by1337.bmenu.item.slot;
 import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.placeholder.SlotPlaceholders;
-import dev.by1337.plc.PlaceholderFormat;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
+import dev.by1337.plc.PlaceholderSyntax;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
@@ -59,7 +59,7 @@ public abstract class BaseSlotContent implements SlotContent {
     }
 
     @Override
-    public Placeholderable getPlaceholders(Menu menu) {
+    public PlaceholderApplier getPlaceholders(Menu menu) {
         return menu.getPlaceholderResolver().and(this).bind(menu);
     }
 
@@ -69,12 +69,12 @@ public abstract class BaseSlotContent implements SlotContent {
     }
 
     @Override
-    public boolean has(String key, PlaceholderFormat format) {
+    public boolean has(String key, PlaceholderSyntax format) {
         return localArgs.has(key, format);
     }
 
     @Override
-    public @Nullable String replace(String key, String params, @Nullable Menu ctx, PlaceholderFormat format) {
-        return localArgs.replace(key, params, ctx, format);
+    public @Nullable String resolve(String key, String params, @Nullable Menu ctx, PlaceholderSyntax format) {
+        return localArgs.resolve(key, params, ctx, format);
     }
 }

@@ -3,8 +3,8 @@ package dev.by1337.bmenu.placeholder;
 import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.util.map.HashMapLike;
-import dev.by1337.plc.PlaceholderFormat;
 import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.PlaceholderSyntax;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,13 +40,13 @@ public class SlotPlaceholders implements PlaceholderResolver<Menu> {
     }
 
     @Override
-    public boolean has(String s, PlaceholderFormat placeholderFormat) {
-        return PlaceholderFormat.BUKET == placeholderFormat && map.containsKey(s);
+    public boolean has(String s, PlaceholderSyntax placeholderFormat) {
+        return PlaceholderSyntax.BRACKET == placeholderFormat && map.containsKey(s);
     }
 
     @Override
-    public @Nullable String replace(String key, String params, @Nullable Menu ctx, PlaceholderFormat format) {
-        if (format != PlaceholderFormat.BUKET) return null;
+    public @Nullable String resolve(String key, String params, @Nullable Menu ctx, PlaceholderSyntax format) {
+        if (format != PlaceholderSyntax.BRACKET) return null;
         var v = map.get(key);
         return v == null ? null : String.valueOf(v.get());
     }

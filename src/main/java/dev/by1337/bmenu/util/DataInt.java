@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.util;
 
 import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +28,10 @@ public class DataInt {
         }
     }
 
-    public int getOrDefault(Placeholderable placeholderable, int def) {
+    public int getOrDefault(PlaceholderApplier placeholder, int def) {
         if (cashed) return value;
         try {
-            return Integer.parseInt(placeholderable.replace(src));
+            return Integer.parseInt(placeholder.setPlaceholders(src));
         } catch (NumberFormatException e) {
             log.error(e.getMessage());
         }

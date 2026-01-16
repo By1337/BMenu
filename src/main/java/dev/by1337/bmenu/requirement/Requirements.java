@@ -5,7 +5,7 @@ import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.factory.RequirementsFactory;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.plc.Placeholderable;
+import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
@@ -180,7 +180,7 @@ public class Requirements {
         this.requirements = requirements;
     }
 
-    public boolean test(Menu menu, Placeholderable placeholders, Player clicker, ExecuteContext ctx) {
+    public boolean test(Menu menu, PlaceholderApplier placeholders, Player clicker, ExecuteContext ctx) {
         boolean result = true;
         for (Requirement requirement : requirements) {
             try {

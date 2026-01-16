@@ -20,7 +20,7 @@ public class SetTitleOpcode implements FrameOpcode {
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        menu.setTitle(menu.replace(title));
+        menu.setTitle(menu.setPlaceholders(title));
     }
     @Override
     public @Nullable FrameOpcodes type() {
