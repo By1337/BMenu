@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.item.slot;
 
 import dev.by1337.bmenu.click.MenuClickType;
-import dev.by1337.bmenu.item.item.ItemModel;
+import dev.by1337.bmenu.item.ItemModel;
 import dev.by1337.bmenu.menu.Menu;
 import org.bukkit.entity.Player;
 

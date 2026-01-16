@@ -4,7 +4,7 @@ import dev.by1337.bmenu.click.MenuClickType;
 import dev.by1337.bmenu.item.SlotTicker;
 import dev.by1337.bmenu.item.SlotVariant;
 import dev.by1337.bmenu.item.ViewRequirement;
-import dev.by1337.bmenu.item.item.ItemModel;
+import dev.by1337.bmenu.item.ItemModel;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.placeholder.SlotPlaceholders;
 import org.bukkit.entity.Player;

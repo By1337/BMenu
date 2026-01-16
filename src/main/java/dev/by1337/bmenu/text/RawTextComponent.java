@@ -3,6 +3,7 @@ package dev.by1337.bmenu.text;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.plc.PlaceholderApplier;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class RawTextComponent implements SourcedComponentLike {
@@ -13,7 +14,7 @@ public class RawTextComponent implements SourcedComponentLike {
     }
 
     public @NonNull Component asComponent(PlaceholderApplier placeholders) {
-        return MiniMessage.deserialize(placeholders.setPlaceholders(source));
+        return MiniMessage.deserialize(placeholders.setPlaceholders(source)).decoration(TextDecoration.ITALIC, false);
     }
 
     @Override

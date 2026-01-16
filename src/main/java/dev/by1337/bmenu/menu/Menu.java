@@ -171,13 +171,11 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     public void tick() {
-        //long nanos = System.nanoTime();
         if (animator != null && !animator.isEnd()) {
             animator.tick(layers.getAnimationLayer(), this);
         }
         layers.doTick();
         flush();
-       // System.out.println((System.nanoTime() - nanos) / 1_000D + "us");
     }
 
     public void reopen() {

@@ -1,6 +1,8 @@
 package dev.by1337.bmenu.item.render;
 
-import dev.by1337.bmenu.item.item.ItemModel;
+import dev.by1337.bmenu.item.ItemModel;
+import dev.by1337.bmenu.item.component.ItemDataComponents;
+import dev.by1337.bmenu.util.DataInt;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.plc.PlaceholderApplier;
 import net.kyori.adventure.text.Component;
@@ -20,20 +22,22 @@ public class BukkitItemRenderer extends AbstractBukkitItemRenderer {
     @Override
     protected ItemStack applyDisplay(ItemStack itemStack, ItemModel item, Menu menu, PlaceholderApplier placeholders) {
         ItemMeta im = itemStack.getItemMeta();
-        var name = item.name();
+
+        var name = item.get(ItemDataComponents.NAME);
         if (name != null) {
             im.displayName(toComponent(name, placeholders));
         }
-        if (item.hasLore()) {
+        var lore = item.get(ItemDataComponents.LORE);
+        if (lore != null) {
             List<Component> loreComponents = new ArrayList<>();
-            item.forEachLore(line -> applyComponent(line, placeholders, loreComponents::add));
+            lore.forEachLore(line -> applyComponent(line, placeholders, loreComponents::add));
             im.lore(loreComponents);
         }
         if (im instanceof Damageable damageable){
-            damageable.setDamage(item.damage().getOrDefault(placeholders, 0));
+            damageable.setDamage(item.get(ItemDataComponents.DAMAGE, DataInt.ZERO).getOrDefault(placeholders, 0));
         }
         itemStack.setItemMeta(im);
-        itemStack.setAmount(item.amount().getOrDefault(placeholders, 1));
+        itemStack.setAmount(item.get(ItemDataComponents.AMOUNT, DataInt.ONE).getOrDefault(placeholders, 1));
         return itemStack;
     }
 

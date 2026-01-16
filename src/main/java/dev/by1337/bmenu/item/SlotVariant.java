@@ -2,12 +2,7 @@ package dev.by1337.bmenu.item;
 
 import dev.by1337.bmenu.click.ClickMap;
 import dev.by1337.bmenu.click.MenuClickType;
-import dev.by1337.bmenu.factory.fixer.ItemFixer;
-import dev.by1337.bmenu.item.item.ItemModel;
-import dev.by1337.bmenu.item.item.ItemModelImpl;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.plc.PlaceholderApplier;
-import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
@@ -16,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 public class SlotVariant {
     public static final YamlCodec<SlotVariant> CODEC = RecordYamlCodecBuilder.mapOf(
             SlotVariant::new,
-            ItemModelImpl.CODEC.fieldOf(null, SlotVariant::itemModelImplOrNull, ItemModelImpl.AIR),
+            ItemModel.CODEC.fieldOf(null, SlotVariant::itemModel, ItemModel.AIR),
             ViewRequirement.CODEC.fieldOf("on_view", SlotVariant::viewRequirement,ViewRequirement.EMPTY),
             ClickMap.CODEC.fieldOf(null, SlotVariant::clicks, ClickMap.EMPTY),
             SlotTicker.CODEC.fieldOf("on_tick", SlotVariant::itemTicker)
@@ -60,10 +55,6 @@ public class SlotVariant {
     }
     public boolean doClick(Menu menu, Player player, MenuClickType type, SlotContent item) {
         return clicks.doClick(menu, player, type, item.getPlaceholders(menu), item);
-    }
-
-    public ItemModelImpl itemModelImplOrNull() {
-        return itemModel instanceof ItemModelImpl ? (ItemModelImpl) itemModel : null;
     }
 
     public ItemModel itemModel() {

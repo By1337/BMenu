@@ -10,8 +10,8 @@ import java.util.Set;
 public final class MenuMatrix {
     private SlotContent[][] matrices;
     private final int size;
-    private final SlotContent[] baseLayer;
-    private final SlotContent[] animationLayer;
+    private SlotContent[] baseLayer;
+    private SlotContent[] animationLayer;
     private final Set<SlotContent> ticked = Collections.newSetFromMap(new IdentityHashMap<>());
     private final Menu menu;
 
@@ -37,10 +37,8 @@ public final class MenuMatrix {
 
     public void clear() {
         this.matrices = new SlotContent[3][];
-        Arrays.fill(baseLayer, null);
-        Arrays.fill(animationLayer, null);
-        matrices[0] = baseLayer;
-        matrices[1] = animationLayer;
+        baseLayer = getMatrix(0);
+        animationLayer = getMatrix(1);
     }
 
     public void flushTo(SlotContent[] matrix) {

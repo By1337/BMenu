@@ -5,16 +5,13 @@ import dev.by1337.bmenu.click.MenuClickType;
 import dev.by1337.bmenu.item.SlotTicker;
 import dev.by1337.bmenu.item.SlotVariantList;
 import dev.by1337.bmenu.item.ViewRequirement;
-import dev.by1337.bmenu.item.item.ItemModel;
-import dev.by1337.bmenu.item.item.ItemModelImpl;
+import dev.by1337.bmenu.item.ItemModel;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.placeholder.SlotPlaceholders;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
 
 public final class DynamicSlotContent extends BaseSlotContent {
     private final Data data;
@@ -71,7 +68,7 @@ public final class DynamicSlotContent extends BaseSlotContent {
 
     @Override
     public ItemModel getItemModel() {
-        if (activeModel == null) return ItemModelImpl.AIR;
+        if (activeModel == null) return ItemModel.AIR;
         return activeModel;
     }
 

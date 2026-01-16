@@ -1,10 +1,7 @@
 package dev.by1337.bmenu.item;
 
 import dev.by1337.bmenu.factory.ItemFactory;
-import dev.by1337.bmenu.factory.MenuCodec;
-import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.factory.fixer.ItemFixer;
-import dev.by1337.bmenu.item.item.ItemModel;
 import dev.by1337.bmenu.item.slot.DynamicSlotContent;
 import dev.by1337.bmenu.item.slot.SingleSlotContent;
 import dev.by1337.bmenu.menu.Menu;
@@ -18,9 +15,6 @@ import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public final class SlotFactory implements Comparable<SlotFactory> {
 
@@ -70,13 +64,6 @@ public final class SlotFactory implements Comparable<SlotFactory> {
 
     public void setSlots(int[] slots) {
         this.slots = slots;
-    }
-
-    public void addSlot(final int slot) {
-        int[] newSlots = new int[slots.length + 1];
-        System.arraycopy(slots, 0, newSlots, 0, slots.length);
-        newSlots[slots.length] = slot;
-        slots = newSlots;
     }
 
     public int[] getSlots() {
@@ -164,14 +151,5 @@ public final class SlotFactory implements Comparable<SlotFactory> {
                 return schemaType;
             }
         };
-    }
-    private static void mergeArgs(Map<String, String> args, Object val){
-        if (val instanceof Map m){
-            Map<Object, Object> newArgs = new HashMap<>(args);
-            if (m.get("args") instanceof Map m1){
-                newArgs.putAll(m1);
-            }
-            m.put("args", newArgs);
-        }
     }
 }

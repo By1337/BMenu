@@ -1,4 +1,4 @@
-package dev.by1337.bmenu.item.component;
+package dev.by1337.bmenu.item.component.impl;
 
 import dev.by1337.bmenu.util.Holder;
 import dev.by1337.core.ServerVersion;

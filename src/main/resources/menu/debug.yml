@@ -10,7 +10,7 @@
 # "[clear_layer] <layer>" -> "[layer] <layer+2> clear"
 # view_requirement -> on_view
 # tick_speed -> on_tick.tick_speed
-#
+# potion_effects -> potion_contents
 id: debug:main
 provider: default
 type: chest

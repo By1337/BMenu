@@ -1,8 +1,10 @@
+/*
 package dev.by1337.bmenu.item.item;
 
 import dev.by1337.bmenu.factory.MenuCodecs;
-import dev.by1337.bmenu.item.component.ArmorTrimComponent;
-import dev.by1337.bmenu.item.component.CustomModelDataComponent;
+import dev.by1337.bmenu.item.ItemModel;
+import dev.by1337.bmenu.item.component.impl.ArmorTrimComponent;
+import dev.by1337.bmenu.item.component.impl.CustomModelDataComponent;
 import dev.by1337.bmenu.item.component.EnchantmentData;
 import dev.by1337.bmenu.text.SourcedComponentLike;
 import dev.by1337.bmenu.util.ColorHolder;
@@ -10,12 +12,10 @@ import dev.by1337.bmenu.util.DataInt;
 import dev.by1337.bmenu.util.DataString;
 import dev.by1337.bmenu.util.ObjectUtil;
 import dev.by1337.core.ServerVersion;
-import dev.by1337.yaml.BukkitCodecs;
 import dev.by1337.yaml.BukkitYamlCodecs;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import net.kyori.adventure.text.ComponentLike;
-import org.bukkit.Color;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ItemModelImpl implements ItemModel {
+public class ItemModelImpl  {
     public static final ItemModelImpl AIR = ObjectUtil.make(() -> {
         ItemModelImpl model = new ItemModelImpl();
         model.material = new DataString("AIR");
@@ -192,3 +192,4 @@ public class ItemModelImpl implements ItemModel {
         CODEC = builder.build();
     }
 }
+*/

@@ -1,7 +1,6 @@
-package dev.by1337.bmenu.item.component;
+package dev.by1337.bmenu.item.component.impl;
 
 import dev.by1337.bmenu.util.ColorHolder;
-import dev.by1337.yaml.BukkitCodecs;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.Color;

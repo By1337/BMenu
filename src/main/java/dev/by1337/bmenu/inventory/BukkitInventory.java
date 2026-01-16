@@ -72,7 +72,6 @@ public class BukkitInventory {
             }
         }
         RENDERER.flush(inventory, menu);
-        //  INV_UTIL.flushInv(player); //todo
     }
 
     public void clear() {

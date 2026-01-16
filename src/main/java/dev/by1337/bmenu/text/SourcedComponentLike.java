@@ -9,5 +9,7 @@ public interface SourcedComponentLike extends ComponentLike {
                     SourcedComponentFactory::create,
                     SourcedComponentLike::source
             );
+    YamlCodec<ComponentLike> COMPONENT_LIKE_CODEC = CODEC
+            .map(s -> s, SourcedComponentFactory::of);
     String source();
 }

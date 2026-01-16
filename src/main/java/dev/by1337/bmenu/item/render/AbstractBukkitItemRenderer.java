@@ -1,24 +1,34 @@
 package dev.by1337.bmenu.item.render;
 
-import dev.by1337.bmenu.item.item.ItemModel;
+import dev.by1337.bmenu.item.ItemModel;
+import dev.by1337.bmenu.item.component.EnchantmentData;
+import dev.by1337.bmenu.item.component.ItemDataComponents;
 import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.text.RawTextComponent;
+import dev.by1337.bmenu.util.DataInt;
+import dev.by1337.bmenu.util.DataString;
 import dev.by1337.bmenu.util.ObjectUtil;
 import dev.by1337.core.BCore;
 import dev.by1337.core.ServerVersion;
 import dev.by1337.core.bridge.inventory.InventoryUtil;
+import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.plc.PlaceholderApplier;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Arrow;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
+import org.bukkit.potion.PotionEffect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Inventory> {
     private static final InventoryUtil INV_UTIL = BCore.getInventoryUtil();
@@ -32,7 +42,8 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
             ctx.setItem(slot, AIR);
             return;
         }
-        String material = item.material().get(placeholders).toUpperCase();
+        //todo
+        String material = item.get(ItemDataComponents.MATERIAL, new DataString("dirt")).get(placeholders).toUpperCase();
         ItemStack itemStack = new ItemStack(Material.DIRT);
         try {
             itemStack = new ItemStack(Material.valueOf(material));//todo skulls
@@ -45,15 +56,17 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
             ctx.setItem(slot, AIR);
             return;
         }
-        if (item.hasItemFlags()) {
-            item.forEachItemFlags(im::addItemFlags);
-            if (ServerVersion.is1_20_5orNewer() && im.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
-                // https://github.com/PaperMC/Paper/issues/10655
-                im.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("123", 1, AttributeModifier.Operation.ADD_NUMBER));
-            }
-        }
-        if (item.hasPotionEffects()) {
-            item.forEachPotionEffects(potionEffect -> {
+        //todo
+        // if (item.hasItemFlags()) {
+        //     item.forEachItemFlags(im::addItemFlags);
+        //     if (ServerVersion.is1_20_5orNewer() && im.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
+        //         // https://github.com/PaperMC/Paper/issues/10655
+        //         im.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("123", 1, AttributeModifier.Operation.ADD_NUMBER));
+        //     }
+        // }
+        var potionContents = item.get(ItemDataComponents.POTION_CONTENTS);
+        if (potionContents != null) {
+            for (PotionEffect potionEffect : potionContents) {
                 if (im instanceof PotionMeta potionMeta) {
                     potionMeta.addCustomEffect(potionEffect, true);
                 } else if (im instanceof Arrow arrow) {
@@ -61,10 +74,11 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
                 } else if (im instanceof SuspiciousStewMeta m) {
                     m.addCustomEffect(potionEffect, true);
                 }
-            });
+
+            }
         }
 
-        var color0 = item.color();
+        var color0 = item.get(ItemDataComponents.COLOR);
         if (color0 != null) {
             var color = color0.toBukkit();
             if (im instanceof TropicalFishBucketMeta buket) {
@@ -79,9 +93,14 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
                 effectMeta.setEffect(FireworkEffect.builder().withColor(color).build());
             }
         }
-        item.forEachEnchantments(pair -> im.addEnchant(pair.enchantment(), pair.lvl(), true));
+        var enchantments = item.get(ItemDataComponents.ENCHANTMENTS);
+        if (enchantments != null) {
+            for (EnchantmentData pair : enchantments) {
+                im.addEnchant(pair.enchantment(), pair.lvl(), true);
+            }
+        }
 
-        var modelData = item.customModelData();
+        var modelData = item.get(ItemDataComponents.MODEL_DATA);
         if (modelData != null) {
             if (ServerVersion.is1_21_4orNewer()) {
                 var kringe = im.getCustomModelDataComponent();
@@ -96,29 +115,45 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
         }
         if (ServerVersion.is1_20_5orNewer()) {
             //JIT DCE?
-            Integer maxStackSize = item.getMaxStackSize();
+            Integer maxStackSize = item.get(ItemDataComponents.MAX_STACK_SIZE);
             if (maxStackSize != null) {
                 im.setMaxStackSize(maxStackSize);
             }
-            if (item.hideTooltip()) {
+            if (item.getBool(ItemDataComponents.HIDE_TOOLTIP)) {
                 im.setHideTooltip(true);
             }
         }
         if (ServerVersion.is1_19_4orNewer()) {
             //JIT DCE?
-            var armorTrim = item.getTrim();
+            var armorTrim = item.get(ItemDataComponents.TRIM);
             if (armorTrim != null && armorTrim.has()) {
                 if (im instanceof ArmorMeta armorMeta) {
                     armorMeta.setTrim(armorTrim.armorTrim().get());
                 }
             }
         }
-        if (item.unbreakable()) {
+        if (item.getBool(ItemDataComponents.UNBREAKABLE)) {
             im.setUnbreakable(true);
         }
+
+        var name = item.get(ItemDataComponents.NAME);
+        if (name != null) {
+            im.displayName(toComponent(name, placeholders));
+        }
+        var lore = item.get(ItemDataComponents.LORE);
+        if (lore != null) {
+            List<Component> loreComponents = new ArrayList<>();
+            lore.forEachLore(line -> applyComponent(line, placeholders, loreComponents::add));
+            im.lore(loreComponents);
+        }
+        if (im instanceof Damageable damageable){
+            damageable.setDamage(item.get(ItemDataComponents.DAMAGE, DataInt.ZERO).getOrDefault(placeholders, 0));
+        }
+
         itemStack.setItemMeta(im);
-        var result = applyDisplay(itemStack, item, menu, placeholders);
-        ctx.setItem(slot, result);
+        itemStack.setAmount(item.get(ItemDataComponents.AMOUNT, DataInt.ONE).getOrDefault(placeholders, 1));
+      //  var result = applyDisplay(itemStack, item, menu, placeholders);
+        ctx.setItem(slot, itemStack);
     }
 
     protected abstract ItemStack applyDisplay(ItemStack itemStack, ItemModel item, Menu menu, PlaceholderApplier placeholders);
@@ -126,5 +161,23 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
     @Override
     public void flush(Inventory ctx, Menu menu) {
         INV_UTIL.flushInv(menu.getViewer());
+    }
+
+    private void applyComponent(ComponentLike c, PlaceholderApplier placeholders, Consumer<Component> processor) {
+        if (c instanceof RawTextComponent raw) {
+            String s = placeholders.setPlaceholders(raw.source());
+            for (String line : s.split("\n")) {
+                processor.accept(MiniMessage.deserialize(line));
+            }
+        } else {
+            processor.accept(c.asComponent());
+        }
+    }
+
+    private Component toComponent(ComponentLike c, PlaceholderApplier placeholders) {
+        if (c instanceof RawTextComponent c1) {
+            return c1.asComponent(placeholders);
+        }
+        return c.asComponent();
     }
 }

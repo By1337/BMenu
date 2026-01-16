@@ -8,10 +8,13 @@ import org.slf4j.LoggerFactory;
 import java.util.OptionalInt;
 
 public class DataInt {
-    public static YamlCodec<DataInt> CODEC = YamlCodec.STRING.map(
+    public static final YamlCodec<DataInt> CODEC = YamlCodec.STRING.map(
             DataInt::new,
             DataInt::src
     );
+    public static final DataInt ZERO = new DataInt("0");
+    public static final DataInt ONE = new DataInt("1");
+
     private static final Logger log = LoggerFactory.getLogger(DataInt.class);
     private final String src;
     private int value;

@@ -1,7 +1,6 @@
 package dev.by1337.bmenu.item;
 
 import dev.by1337.bmenu.click.MenuClickType;
-import dev.by1337.bmenu.item.item.ItemModel;
 import dev.by1337.bmenu.item.slot.SimpleSlotContent;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.plc.PlaceholderResolver;

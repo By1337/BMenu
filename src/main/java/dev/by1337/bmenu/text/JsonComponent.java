@@ -3,6 +3,7 @@ package dev.by1337.bmenu.text;
 
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import dev.by1337.bmenu.util.LazyLoad;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -14,7 +15,9 @@ public class JsonComponent implements SourcedComponentLike {
 
     public JsonComponent(String source) {
         this.source = source;
-        this.json = GsonComponentSerializer.gson().serialize(MiniMessage.deserialize(source));
+        this.json = GsonComponentSerializer.gson().serialize(
+                MiniMessage.deserialize(source).decoration(TextDecoration.ITALIC, false)
+        );
         component = new LazyLoad<>(() -> GsonComponentSerializer.gson().deserialize(json));
     }
 

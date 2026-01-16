@@ -33,6 +33,7 @@ public class ItemFixer {
         rename(map, "display_name", "name");
         rename(map, "view_req", "view_requirement");
         rename(map, "view_requirement", "on_view");
+        rename(map, "potion_effects", "potion_contents");
 
         replacePlaceholders(map, superItem);
         map.set("name", fixDisplay(map.getRaw("name")));
