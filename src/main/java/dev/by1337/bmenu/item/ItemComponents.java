@@ -20,19 +20,19 @@ public class ItemComponents {
         this.components = components;
     }
 
-    public boolean getBool(ItemDataComponent<Boolean> type) {
+    public boolean getBool(@Nullable ItemDataComponent<Boolean> type) {
         return get(type, false);
     }
 
     @Nullable
-    public <T> T get(ItemDataComponent<T> type) {
+    public <T> T get(@Nullable ItemDataComponent<T> type) {
         if (type == null) return null;
         return (T) components[type.id()];
     }
 
     @Nullable
     @Contract(pure = true, value = "_, !null -> !null")
-    public <T> T get(ItemDataComponent<T> type, T def) {
+    public <T> T get(@Nullable ItemDataComponent<T> type, T def) {
         if (type == null) return def;
         var o = components[type.id()];
         return o == null ? def : (T) o;
@@ -64,6 +64,6 @@ public class ItemComponents {
     }
 
     private <T extends MergeableComponent<T>> T merge(T t, T t2) {
-        return t.merge(t2);
+        return t.and(t2);
     }
 }

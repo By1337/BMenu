@@ -2,21 +2,21 @@ package dev.by1337.bmenu.item.component;
 
 import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.item.ItemComponents;
-import dev.by1337.bmenu.item.ItemModel;
-import dev.by1337.bmenu.item.component.impl.ArmorTrimComponent;
-import dev.by1337.bmenu.item.component.impl.CustomModelDataComponent;
-import dev.by1337.bmenu.item.component.impl.ItemLoreComponent;
+import dev.by1337.bmenu.item.component.impl.*;
 import dev.by1337.bmenu.text.SourcedComponentLike;
 import dev.by1337.bmenu.util.ColorHolder;
 import dev.by1337.bmenu.util.DataInt;
 import dev.by1337.bmenu.util.DataString;
 import dev.by1337.core.ServerVersion;
+import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import net.kyori.adventure.text.ComponentLike;
 import net.minecraft.core.component.DataComponents;
-import org.bukkit.Registry;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
+import net.minecraft.world.item.component.ItemContainerContents;
+import org.bukkit.World;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,10 +33,11 @@ public class ItemDataComponents {
     public static final ItemDataComponent<DataInt> DAMAGE = register("damage", DataInt.CODEC);
     public static final ItemDataComponent<DataString> MATERIAL = register("material", MenuCodecs.MATERIAL.map(DataString::new, DataString::src));
     public static final ItemDataComponent<CustomModelDataComponent> MODEL_DATA = register("model_data", CustomModelDataComponent.CODEC);
-    public static final ItemDataComponent<List<PotionEffect>> POTION_CONTENTS = register("potion_contents", MenuCodecs.POTION_EFFECT_LIST_CODEC);
+    public static final ItemDataComponent<PotionContentsComponent> POTION_CONTENTS = register("potion_contents", PotionContentsComponent.CODEC);
     public static final ItemDataComponent<ColorHolder> COLOR = register("color", ColorHolder.CODEC);
-    public static final ItemDataComponent<List<EnchantmentData>> ENCHANTMENTS = register("enchantments", MenuCodecs.ENCHANTMENT_LIST_CODEC);
+    public static final ItemDataComponent<EnchantmentsComponent> ENCHANTMENTS = register("enchantments", EnchantmentsComponent.CODEC);
     public static final ItemDataComponent<Boolean> UNBREAKABLE = register("unbreakable", YamlCodec.BOOL);
+    public static final ItemDataComponent<ContainerComponent> CONTAINER = register("container", ContainerComponent.CODEC);
     //1.19.4+
     @Nullable
     public static final ItemDataComponent<ArmorTrimComponent> TRIM = register("trim", ArmorTrimComponent.CODEC, ArmorTrimComponent.CODEC != null);
@@ -51,6 +52,7 @@ public class ItemDataComponents {
     @Nullable
     public static final ItemDataComponent<Boolean> GLIDER = register("glider", YamlCodec.BOOL, ServerVersion.is1_21_3orNewer());
     //ItemContainerContents?
+    public static final YamlCodec<ItemComponents> COMPONENTS_CODEC;
 
     @Nullable
     private static <T> ItemDataComponent<T> register(String name, YamlCodec<T> codec, boolean supplier) {
@@ -75,4 +77,14 @@ public class ItemDataComponents {
         return Collections.unmodifiableList(COMPONENTS);
     }
 
+    static {
+        var builder = PipelineYamlCodecBuilder.of(ItemComponents::new);
+        for (ItemDataComponent component : COMPONENTS) {
+            builder.field(component.codec(), component.name(),
+                    v -> v.get(component),
+                    (v, c) -> v.set(component, c)
+            );
+        }
+        COMPONENTS_CODEC = builder.build();
+    }
 }

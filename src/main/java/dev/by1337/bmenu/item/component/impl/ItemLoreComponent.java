@@ -1,7 +1,6 @@
 package dev.by1337.bmenu.item.component.impl;
 
 import dev.by1337.bmenu.item.component.MergeableComponent;
-import dev.by1337.bmenu.text.SourcedComponentFactory;
 import dev.by1337.bmenu.text.SourcedComponentLike;
 import dev.by1337.yaml.codec.YamlCodec;
 import net.kyori.adventure.text.ComponentLike;
@@ -23,7 +22,7 @@ public record ItemLoreComponent(List<ComponentLike> lore) implements MergeableCo
     }
 
     @Override
-    public ItemLoreComponent merge(ItemLoreComponent t1) {
+    public ItemLoreComponent and(ItemLoreComponent t1) {
         List<ComponentLike> list = new ArrayList<>(lore);
         list.addAll(t1.lore);
         return new ItemLoreComponent(list);

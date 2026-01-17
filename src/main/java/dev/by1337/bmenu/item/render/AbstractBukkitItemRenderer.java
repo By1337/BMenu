@@ -3,6 +3,7 @@ package dev.by1337.bmenu.item.render;
 import dev.by1337.bmenu.item.ItemModel;
 import dev.by1337.bmenu.item.component.EnchantmentData;
 import dev.by1337.bmenu.item.component.ItemDataComponents;
+import dev.by1337.bmenu.item.component.impl.ContainerComponent;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.text.RawTextComponent;
 import dev.by1337.bmenu.util.DataInt;
@@ -13,11 +14,14 @@ import dev.by1337.core.ServerVersion;
 import dev.by1337.core.bridge.inventory.InventoryUtil;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.plc.PlaceholderApplier;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Arrow;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +46,37 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
             ctx.setItem(slot, AIR);
             return;
         }
-        //todo
+
+        ItemStack itemStack = build(item, placeholders);
+        ctx.setItem(slot, itemStack);
+    }
+
+    protected abstract ItemStack applyDisplay(ItemStack itemStack, ItemModel item, Menu menu, PlaceholderApplier placeholders);
+
+    @Override
+    public void flush(Inventory ctx, Menu menu) {
+        INV_UTIL.flushInv(menu.getViewer());
+    }
+
+    private void applyComponent(ComponentLike c, PlaceholderApplier placeholders, Consumer<Component> processor) {
+        if (c instanceof RawTextComponent raw) {
+            String s = placeholders.setPlaceholders(raw.source());
+            for (String line : s.split("\n")) {
+                processor.accept(MiniMessage.deserialize(line));
+            }
+        } else {
+            processor.accept(c.asComponent());
+        }
+    }
+
+    private Component toComponent(ComponentLike c, PlaceholderApplier placeholders) {
+        if (c instanceof RawTextComponent c1) {
+            return c1.asComponent(placeholders);
+        }
+        return c.asComponent();
+    }
+
+    private ItemStack build(ItemModel item, PlaceholderApplier placeholders) {
         String material = item.get(ItemDataComponents.MATERIAL, new DataString("dirt")).get(placeholders).toUpperCase();
         ItemStack itemStack = new ItemStack(Material.DIRT);
         try {
@@ -53,8 +87,7 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
 
         ItemMeta im = itemStack.getItemMeta();
         if (im == null) {
-            ctx.setItem(slot, AIR);
-            return;
+            return AIR;
         }
         //todo
         // if (item.hasItemFlags()) {
@@ -64,9 +97,9 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
         //         im.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("123", 1, AttributeModifier.Operation.ADD_NUMBER));
         //     }
         // }
-        var potionContents = item.get(ItemDataComponents.POTION_CONTENTS);
-        if (potionContents != null) {
-            for (PotionEffect potionEffect : potionContents) {
+        var potion = item.get(ItemDataComponents.POTION_CONTENTS);
+        if (potion != null) {
+            for (PotionEffect potionEffect : potion.contents()) {
                 if (im instanceof PotionMeta potionMeta) {
                     potionMeta.addCustomEffect(potionEffect, true);
                 } else if (im instanceof Arrow arrow) {
@@ -74,7 +107,6 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
                 } else if (im instanceof SuspiciousStewMeta m) {
                     m.addCustomEffect(potionEffect, true);
                 }
-
             }
         }
 
@@ -95,8 +127,8 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
         }
         var enchantments = item.get(ItemDataComponents.ENCHANTMENTS);
         if (enchantments != null) {
-            for (EnchantmentData pair : enchantments) {
-                im.addEnchant(pair.enchantment(), pair.lvl(), true);
+            for (var entry : enchantments.enchantments()) {
+                im.addEnchant(entry.enchantment(), entry.lvl(), true);
             }
         }
 
@@ -146,38 +178,24 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
             lore.forEachLore(line -> applyComponent(line, placeholders, loreComponents::add));
             im.lore(loreComponents);
         }
-        if (im instanceof Damageable damageable){
+        if (im instanceof Damageable damageable) {
             damageable.setDamage(item.get(ItemDataComponents.DAMAGE, DataInt.ZERO).getOrDefault(placeholders, 0));
+        }
+        if (im instanceof BlockStateMeta bsm) {
+            BlockState state = bsm.getBlockState();
+            if (state instanceof Container container) {
+                ContainerComponent c = item.get(ItemDataComponents.CONTAINER);
+                if (c != null) {
+                    for (Int2ObjectMap.Entry<ItemModel> entry : c.items().int2ObjectEntrySet()) {
+                        container.getInventory().setItem(entry.getIntKey(), build(entry.getValue(), placeholders));
+                    }
+                }
+                bsm.setBlockState(container);
+            }
         }
 
         itemStack.setItemMeta(im);
         itemStack.setAmount(item.get(ItemDataComponents.AMOUNT, DataInt.ONE).getOrDefault(placeholders, 1));
-      //  var result = applyDisplay(itemStack, item, menu, placeholders);
-        ctx.setItem(slot, itemStack);
-    }
-
-    protected abstract ItemStack applyDisplay(ItemStack itemStack, ItemModel item, Menu menu, PlaceholderApplier placeholders);
-
-    @Override
-    public void flush(Inventory ctx, Menu menu) {
-        INV_UTIL.flushInv(menu.getViewer());
-    }
-
-    private void applyComponent(ComponentLike c, PlaceholderApplier placeholders, Consumer<Component> processor) {
-        if (c instanceof RawTextComponent raw) {
-            String s = placeholders.setPlaceholders(raw.source());
-            for (String line : s.split("\n")) {
-                processor.accept(MiniMessage.deserialize(line));
-            }
-        } else {
-            processor.accept(c.asComponent());
-        }
-    }
-
-    private Component toComponent(ComponentLike c, PlaceholderApplier placeholders) {
-        if (c instanceof RawTextComponent c1) {
-            return c1.asComponent(placeholders);
-        }
-        return c.asComponent();
+        return itemStack;
     }
 }
