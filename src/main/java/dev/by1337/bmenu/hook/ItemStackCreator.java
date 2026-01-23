@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -62,7 +63,7 @@ public class ItemStackCreator {
         public static ItemStack getSkull(@NotNull String skinUrl) {
             ItemStack head = new ItemStack(Material.PLAYER_HEAD);
             head.editMeta(m -> {
-                PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID());
+                PlayerProfile profile = Bukkit.createProfile(UUID.nameUUIDFromBytes(skinUrl.getBytes(StandardCharsets.UTF_8)));
                 profile.setProperty(new ProfileProperty("textures", skinUrl));
                 ((SkullMeta) (m)).setPlayerProfile(
                         profile

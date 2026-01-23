@@ -1,13 +1,21 @@
 package dev.by1337.bmenu;
 
 
+import dev.by1337.bmenu.command.menu.OpenCommands;
+import dev.by1337.bmenu.factory.MenuCodec;
+import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.metrics.Metrics;
+import dev.by1337.bmenu.network.BungeeCordMessageSender;
 import dev.by1337.cmd.Command;
+import dev.by1337.cmd.argument.ArgumentStrings;
 import dev.by1337.core.command.bcmd.CommandError;
 import dev.by1337.core.command.bcmd.CommandWrapper;
 import dev.by1337.core.command.bcmd.argument.ArgumentDynamicRegistry;
 import dev.by1337.core.command.bcmd.argument.ArgumentPlayers;
 import dev.by1337.core.command.bcmd.requires.RequiresPermission;
+import dev.by1337.core.util.RepositoryUtil;
 import dev.by1337.core.util.io.ResourceUtil;
+import dev.by1337.core.util.reflect.ClasspathUtil;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.schema.SchemaHolder;
@@ -18,32 +26,37 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import dev.by1337.bmenu.command.menu.OpenCommands;
-import dev.by1337.bmenu.factory.MenuCodec;
-import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.metrics.Metrics;
-import dev.by1337.bmenu.network.BungeeCordMessageSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 public class BMenu extends JavaPlugin {
+    private static final Logger log = LoggerFactory.getLogger("BMenu");
     private MenuLoader loader;
     private CommandWrapper commandWrapper;
     private OpenCommands openCommands;
     private Metrics metrics;
     private YamlMap config;
 
+    public BMenu() {
+        Path libraries = getDataFolder().toPath().resolve(".libraries");
+        try {
+            ClasspathUtil.addUrl(this, RepositoryUtil.download(RepositoryUtil.BDEV_REPO, "org.by1337.bmenu:BMenu:1.7+legacy", libraries));
+        } catch (Exception e) {
+            log.warn("Failed to load legacy bmenu", e);
+        }
+    }
+
     @Override
     public void onLoad() {
-
         if (!new File(getDataFolder(), "menu").exists()) {
             ResourceUtil.saveIfNotExist("menu/animation-54.yml", this);
             ResourceUtil.saveIfNotExist("menu/example-seller.yml", this);
             ResourceUtil.saveIfNotExist("menu-shem.yml", this);
             ResourceUtil.saveIfNotExist("menu/include-example/confirm.yml", this);
-            ResourceUtil.saveIfNotExist("menu/include-example/items.yml", this);
-            ResourceUtil.saveIfNotExist("menu/include-example/readme.txt", this);
             ResourceUtil.saveIfNotExist("menu/include-example/seller.yml", this);
             ResourceUtil.saveIfNotExist("menu/random-colors/rand-colors-menu.yml", this);
             ResourceUtil.saveIfNotExist("menu/admin/kick.yml", this);
@@ -97,12 +110,13 @@ public class BMenu extends JavaPlugin {
                 )
                 .sub(new Command<CommandSender>("open")
                         .requires(new RequiresPermission<>("bmenu.open"))
-                        .argument(new ArgumentDynamicRegistry<>("menu", () -> loader.getMenuRegistry()))
-                        .argument(new ArgumentPlayers<>("player"))
-                        //  .argument(new MenuArgumentList("custom", openCommands))
+                        .argument(new ArgumentDynamicRegistry<>("$menu", () -> loader.getMenuRegistry()))
+                        .argument(new ArgumentPlayers<>("$player"))
+                        .argument(new ArgumentStrings<>("$custom"))
+                        //  .argument(new MenuArgumentList("$custom", openCommands))
                         .executor((sender, args) -> {
-                            MenuConfig menu = (MenuConfig) args.getOrThrow("menu", "Use /bmenu open <menu> <player>");
-                            List<Player> players = (List<Player>) args.get("player");
+                            MenuConfig menu = (MenuConfig) args.getOrThrow("$menu", "Use /bmenu open <menu> <player>");
+                            List<Player> players = (List<Player>) args.get("$player");
                             if (players == null) {
                                 if (sender instanceof Player) {
                                     players = List.of((Player) sender);
@@ -112,15 +126,18 @@ public class BMenu extends JavaPlugin {
                             }
                             for (Player player : players) {
                                 try {
-                                    Menu m = loader.create(menu, player, null);
-
-                                    // for (String s : args.keySet()) {
-                                    //     if (s.equals("menu") || s.equals("player") || s.equals("custom")) continue;
-                                    //     Object obj = args.get(s);
-                                    //     m.addArgument(s, obj instanceof Player pl ? pl.getName() : String.valueOf(obj));
-                                    // }
-
-                                    m.open();
+                                    String openArgs = (String) args.get("$custom");
+                                    if (openArgs != null) {
+                                        for (OpenCommands.OpenCommand command : openCommands.openCommands()) {
+                                            if (command.menuId().equals(menu.getId().asString())) {
+                                                command.execute(player, openArgs);
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        Menu m = loader.create(menu, player, null);
+                                        m.open();
+                                    }
                                 } catch (Exception t) {
                                     sender.sendMessage(
                                             Component.text("Меню не удалось открыть с ошибкой: ")
@@ -148,8 +165,7 @@ public class BMenu extends JavaPlugin {
                                     sender.sendMessage(MiniMessage.deserialize("&aSaved to " + file.getPath()));
                                 })
                         )
-                )
-;
+                );
 
         return cmd;
     }

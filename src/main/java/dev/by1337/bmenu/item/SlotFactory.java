@@ -2,10 +2,11 @@ package dev.by1337.bmenu.item;
 
 import dev.by1337.bmenu.factory.ItemFactory;
 import dev.by1337.bmenu.factory.fixer.ItemFixer;
+import dev.by1337.bmenu.item.slot.BaseSlotContent;
 import dev.by1337.bmenu.item.slot.DynamicSlotContent;
 import dev.by1337.bmenu.item.slot.SingleSlotContent;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.placeholder.SlotPlaceholders;
+import dev.by1337.bmenu.placeholder.SimplePlaceholders;
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
@@ -21,7 +22,7 @@ public final class SlotFactory implements Comparable<SlotFactory> {
     public static final YamlCodec<SlotFactory> YAML_CODEC;
 
     private int[] slots = new int[]{-1};
-    private SlotPlaceholders localArgs = new SlotPlaceholders();
+    private SimplePlaceholders localArgs = new SimplePlaceholders();
     private SlotVariant variant;
     private DynamicSlotContent.Data variants;
     private int priority;
@@ -40,21 +41,24 @@ public final class SlotFactory implements Comparable<SlotFactory> {
         return build(menu, null, null);
     }
 
-    @Nullable
-    public SlotContent build(Menu menu, @Nullable final ItemModel base, PlaceholderResolver<Menu> resolver1) {
+
+    public SlotContent build(Menu menu, @Nullable final ItemModel base, PlaceholderResolver<Menu> custom) {
+        BaseSlotContent result;
         if (variants != null) {
-            return new DynamicSlotContent(
+            result = new DynamicSlotContent(
                     localArgs.copy(),
                     variants,
                     base
             );
         } else {
-            return new SingleSlotContent(
+            result = new SingleSlotContent(
                     localArgs.copy(),
                     variant,
                     base
             );
         }
+        result.addCustomResolver(custom);
+        return result;
     }
 
     @Override
@@ -74,11 +78,11 @@ public final class SlotFactory implements Comparable<SlotFactory> {
         return slots;
     }
 
-    public SlotPlaceholders getLocalArgs() {
+    public SimplePlaceholders getLocalArgs() {
         return localArgs;
     }
 
-    public void setLocalArgs(SlotPlaceholders localArgs) {
+    public void setLocalArgs(SimplePlaceholders localArgs) {
         this.localArgs = localArgs;
     }
 
@@ -93,7 +97,7 @@ public final class SlotFactory implements Comparable<SlotFactory> {
 
     static {
         PipelineYamlCodecBuilder<SlotFactory> builder = PipelineYamlCodecBuilder.of(SlotFactory::new)
-                .field(SlotPlaceholders.CODEC, "local_args", SlotFactory::getLocalArgs, SlotFactory::setLocalArgs)
+                .field(SimplePlaceholders.CODEC, "local_args", SlotFactory::getLocalArgs, SlotFactory::setLocalArgs)
                 .integer("priority", SlotFactory::priority, SlotFactory::setPriority, 0)
                 .field(ItemFactory.SLOTS_YAML_CODEC, "slot", SlotFactory::slots, SlotFactory::setSlots, new int[]{-1});
         ;

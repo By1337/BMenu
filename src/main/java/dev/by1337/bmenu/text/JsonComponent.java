@@ -15,10 +15,8 @@ public class JsonComponent implements SourcedComponentLike {
 
     public JsonComponent(String source) {
         this.source = source;
-        this.json = GsonComponentSerializer.gson().serialize(
-                MiniMessage.deserialize(source).decoration(TextDecoration.ITALIC, false)
-        );
-        component = new LazyLoad<>(() -> GsonComponentSerializer.gson().deserialize(json));
+        component = new LazyLoad<>(() -> MiniMessage.deserialize(source).decoration(TextDecoration.ITALIC, false));
+        this.json = GsonComponentSerializer.gson().serialize(component.get());
     }
 
     public String json() {

@@ -6,7 +6,7 @@ import dev.by1337.bmenu.item.SlotVariant;
 import dev.by1337.bmenu.item.ViewRequirement;
 import dev.by1337.bmenu.item.ItemModel;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.placeholder.SlotPlaceholders;
+import dev.by1337.bmenu.placeholder.SimplePlaceholders;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,11 +20,11 @@ public final class SingleSlotContent extends BaseSlotContent {
     private int ticksCount;
     private boolean visible = true;
 
-    public SingleSlotContent(SlotPlaceholders localArgs, SlotVariant variant) {
+    public SingleSlotContent(SimplePlaceholders localArgs, SlotVariant variant) {
         this(localArgs, variant, null);
     }
 
-    public SingleSlotContent(SlotPlaceholders localArgs, SlotVariant variant, @Nullable ItemModel itemModel) {
+    public SingleSlotContent(SimplePlaceholders localArgs, SlotVariant variant, @Nullable ItemModel itemModel) {
         super(localArgs);
         this.itemModel = itemModel == null ? variant.itemModel() : variant.itemModel().and(itemModel);
         this.variant = variant;
@@ -38,7 +38,7 @@ public final class SingleSlotContent extends BaseSlotContent {
 
     @Override
     public void doClick(Menu menu, Player player, MenuClickType type) {
-        variant.doClick(menu, player, type, this);
+        variant.doClick(menu, type, this);
     }
 
     @Override

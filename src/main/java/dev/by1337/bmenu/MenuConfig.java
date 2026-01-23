@@ -1,5 +1,6 @@
 package dev.by1337.bmenu;
 
+import dev.by1337.bmenu.event.MenuEventHandler;
 import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.item.SlotFactory;
 import dev.by1337.yaml.YamlMap;
@@ -9,7 +10,6 @@ import org.bukkit.event.inventory.InventoryType;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.command.CommandList;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.requirement.CommandRequirements;
 import dev.by1337.bmenu.yaml.CashedYamlMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,14 +37,14 @@ public class MenuConfig implements MenuItemLookup, Keyed {
     private final List<SlotFactory> items;
     private @Nullable Animator.AnimatorContext animation;
     private final CommandList commandList;
-    private final Map<String, CommandRequirements> menuEventListeners;
+    private final Map<String, MenuEventHandler> menuEventListeners;
     private Object data;
     private final long clickCooldown;
 
     private final Map<String, Animator.AnimatorContext> animations;
     private final List<File> fromFiles;
 
-    public MenuConfig(List<MenuConfig> supers, @Nullable NamespacedKey id, @Nullable NamespacedKey provider, InventoryType invType, int size, List<NamespacedKey> onlyOpenFrom, Map<String, String> args, Map<String, SlotFactory> idToItems, YamlMap context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, CommandRequirements> menuEventListeners, long clickCooldown, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
+    public MenuConfig(List<MenuConfig> supers, @Nullable NamespacedKey id, @Nullable NamespacedKey provider, InventoryType invType, int size, List<NamespacedKey> onlyOpenFrom, Map<String, String> args, Map<String, SlotFactory> idToItems, YamlMap context, MenuLoader loader, String title, @Nullable Animator.AnimatorContext animation, CommandList commandList, Map<String, MenuEventHandler> menuEventListeners, long clickCooldown, Map<String, Animator.AnimatorContext> animations, List<File> fromFiles) {
         this.supers = supers;
         this.id = id;
         this.provider = provider;
@@ -156,7 +156,7 @@ public class MenuConfig implements MenuItemLookup, Keyed {
         return id == null ? "anonymous" : id.getNamespace() + "_" + id.getKey();
     }
 
-    public Map<String, CommandRequirements> getMenuEventListeners() {
+    public Map<String, MenuEventHandler> getMenuEventListeners() {
         return menuEventListeners;
     }
 

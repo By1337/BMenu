@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class ExecuteContext {
-    public final Menu menu;
+    public Menu menu;
     public @Nullable SlotContent item;
 
     public ExecuteContext(Menu menu) {

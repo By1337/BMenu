@@ -1,7 +1,22 @@
 package dev.by1337.bmenu.menu;
 
+import dev.by1337.bmenu.MenuConfig;
+import dev.by1337.bmenu.MenuEvents;
+import dev.by1337.bmenu.MenuLoader;
+import dev.by1337.bmenu.animation.Animator;
+import dev.by1337.bmenu.click.MenuClickType;
+import dev.by1337.bmenu.command.CommandRunner;
+import dev.by1337.bmenu.command.Commands;
+import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.command.argument.ArgumentSlots;
+import dev.by1337.bmenu.event.MenuEventHandler;
+import dev.by1337.bmenu.hook.VaultHook;
+import dev.by1337.bmenu.inventory.BukkitInventory;
 import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.item.SlotFactory;
+import dev.by1337.bmenu.network.BungeeCordMessageSender;
+import dev.by1337.bmenu.placeholder.SimplePlaceholders;
+import dev.by1337.bmenu.util.math.FastExpressionParser;
 import dev.by1337.cmd.Command;
 import dev.by1337.cmd.CommandMsgError;
 import dev.by1337.cmd.CompiledCommand;
@@ -9,15 +24,12 @@ import dev.by1337.cmd.argument.ArgumentCommand;
 import dev.by1337.cmd.argument.ArgumentString;
 import dev.by1337.cmd.argument.ArgumentStrings;
 import dev.by1337.core.command.bcmd.CommandError;
-import dev.by1337.core.command.bcmd.argument.ArgumentComponents;
-import dev.by1337.core.command.bcmd.argument.ArgumentDouble;
-import dev.by1337.core.command.bcmd.argument.ArgumentInt;
-import dev.by1337.core.command.bcmd.argument.ArgumentRegistry;
+import dev.by1337.core.command.bcmd.argument.*;
 import dev.by1337.core.util.text.MessageFormatter;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.plc.PapiResolver;
-import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.PlaceholderApplier;
+import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.Placeholders;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -26,7 +38,6 @@ import net.kyori.adventure.title.Title;
 import net.kyori.adventure.util.Ticks;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -35,19 +46,6 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.scheduler.BukkitTask;
-import dev.by1337.bmenu.*;
-import dev.by1337.bmenu.animation.Animator;
-import dev.by1337.bmenu.click.MenuClickType;
-import dev.by1337.bmenu.command.CommandRunner;
-import dev.by1337.bmenu.command.Commands;
-import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.command.argument.ArgumentSlots;
-import dev.by1337.bmenu.hook.VaultHook;
-import dev.by1337.bmenu.inventory.BukkitInventory;
-import dev.by1337.bmenu.network.BungeeCordMessageSender;
-import dev.by1337.bmenu.requirement.CommandRequirements;
-import dev.by1337.bmenu.util.math.FastExpressionParser;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,6 +62,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     private static final Random rand = new Random();
     private static final DecimalFormat df = new DecimalFormat("#.##");
     private static final PlaceholderResolver<Menu> MENU_PLACEHOLDERS = Placeholders.<Menu>create()
+            .withContext("menu_id", m -> Objects.requireNonNullElse(m.config.getId(), NamespacedKey.minecraft("unnamed")))
             .withContext("has_back_menu", m -> m.previousMenu != null)
             .withContext("clicked_slot", m -> m.lastClickedSlot)
             .of("rand_bool", rand::nextBoolean)
@@ -86,31 +85,36 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     protected final Map<String, String> args;
     @Nullable
     protected final Menu previousMenu;
-    protected BukkitTask ticker;
+    @Nullable
+    protected Menu upperMenu;
     protected Animator animator;
     protected @Nullable SlotContent lastClickedItem;
     protected long lastClickTime;
     protected String lastTitle;
     protected int lastClickedSlot = 0;
     protected long clickCooldown;
-    protected final Placeholders<Menu> runtimePlaceholders;
-    private final PlaceholderResolver<Menu> placeholderResolver;
+    private final PlaceholderResolvers resolvers;
+    protected final SimplePlaceholders argsPlaceholders;
     private BukkitInventory inventoryLike;
+    protected String title;
 
     public Menu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
-        runtimePlaceholders = new Placeholders<>();
-        placeholderResolver = MENU_PLACEHOLDERS.and(runtimePlaceholders);
+        argsPlaceholders = new SimplePlaceholders();
+        resolvers = new PlaceholderResolvers();
+        resolvers.addResolver(MENU_PLACEHOLDERS);
+        resolvers.addResolver(argsPlaceholders);
         clickCooldown = config.clickCooldown();
         this.config = config;
+        title = config.getTitle();
         loader = config.getLoader();
         this.viewer = viewer;
         layers = new MenuMatrix(menuSize(), this);
         args = new HashMap<>(config.getArgs());
         this.previousMenu = previousMenu;
-        args.keySet().forEach(k -> runtimePlaceholders.of(k, () -> args.get(k)));
+        args.keySet().forEach(k -> argsPlaceholders.set(k, () -> args.get(k)));
     }
 
-    public int menuSize() {
+    private int menuSize() {
         if (config.getInvType() == InventoryType.CHEST) return config.getSize();
         return config.getInvType().getDefaultSize();
     }
@@ -147,26 +151,16 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
             if (animator == null && config.getAnimation() != null) {
                 animator = config.getAnimation().createAnimator();
             }
-            onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
+            layers.clear();
 
+            onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
             if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventoryLike.getInventory())) {
                 return;
             }
-            layers.clear();
             if (animator != null && !animator.isEnd()) {
                 animator.tick(layers.getAnimationLayer(), this);
             }
             generate0();
-
-            if (ticker != null && !ticker.isCancelled()) {
-                ticker.cancel();
-            }
-          //  ticker = Bukkit.getScheduler().runTaskTimer(
-          //          loader.getPlugin(),
-          //          this::tick,
-          //          1,
-          //          1
-          //  );
         });
     }
 
@@ -179,16 +173,14 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     public void reopen() {
-        if (ticker != null && !ticker.isCancelled()) {
-            ticker.cancel();
-        }
         if (animator != null) {
             animator.setPos(0);
         }
         open(true);
     }
 
-    public void refresh() {//todo!
+
+    public void refresh() {
         for (SlotContent item : layers.getAnimationLayer()) {
             if (item == null) continue;
             item.setDirty(true);
@@ -199,7 +191,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     public void rebuildItemsInSlots(int[] slots) {
         for (int slot : slots) {
             SlotContent item;
-            if ((item = layers.getItemInSlot(slot)) != null) { //todo!
+            if ((item = layers.getItemInSlot(slot)) != null) {
                 item.setDirty(true);
             }
         }
@@ -251,7 +243,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         }
     }
 
-    protected Inventory createInventory(int size, Component title, InventoryType type) {
+    private Inventory createInventory(int size, Component title, InventoryType type) {
         if (type == InventoryType.CHEST) {
             return Bukkit.createInventory(this, size, title);
         } else {
@@ -261,10 +253,10 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
 
     @Override
     public String setPlaceholders(String string) {
-        return placeholderResolver.setPlaceholders(string, this);
+        return resolvers.setPlaceholders(string, this);
     }
 
-    protected abstract boolean runCommand(String cmd) throws CommandMsgError;
+    protected abstract boolean onCommandRun(String cmd) throws CommandMsgError;
 
     @Override
     public void runCommands(ExecuteContext ctx, List<String> commands) {
@@ -276,7 +268,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     @Override
     public @Nullable CompiledCommand<ExecuteContext> executeAndTryCompile(ExecuteContext ctx, String command) {
         try {
-            if (!runCommand(command)) {
+            if (!onCommandRun(command)) {
                 CompiledCommand<ExecuteContext> cmp = Menu.commands.compile(command);
                 if (cmp != null) {
                     cmp.execute(ctx);
@@ -295,7 +287,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     @Override
     public void executeCommand(ExecuteContext ctx, CompiledCommand<ExecuteContext> command) {
         try {
-           // log.info("run {} {}", command.getSource(), command);
+            // log.info("run {} {}", command.getSource(), command);
             command.execute(ctx);
         } catch (Exception e) {
             loader.getLogger().error("Failed to run command: {}", command.getSource(), e);
@@ -305,7 +297,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     @Override
     public final void executeCommand(ExecuteContext ctx, String command) {
         try {
-            if (!runCommand(command)) {
+            if (!onCommandRun(command)) {
                 // log.info("run {}", command);
                 Menu.commands.execute(ctx, command);
             }
@@ -315,24 +307,19 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     public void onClose(InventoryCloseEvent event) {
-        if (ticker != null) {
-            ticker.cancel();
-            ticker = null;
-        }
         inventoryLike.onClose(viewer);
-
         onEvent(MenuEvents.ON_CLOSE);
     }
 
     public void onClick(InventoryDragEvent e) {
         long now = System.currentTimeMillis();
-        if (now - lastClickTime < 100) return;
+        if (now - lastClickTime < clickCooldown) return;
         lastClickTime = now;
     }
 
     public void onClick(InventoryClickEvent e) {
         long now = System.currentTimeMillis();
-        if (now - lastClickTime < 100) return;
+        if (now - lastClickTime < clickCooldown) return;
         lastClickTime = now;
 
         if (e.getCurrentItem() == null) {
@@ -362,12 +349,8 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         else runnable.run();
     }
 
-    public void sendFakeTitle(String title) {
-        inventoryLike.setTitle(MiniMessage.deserialize(setPlaceholders(title)));
-    }
-
     public void updateTitle() {
-        String newTitle = setPlaceholders(config.getTitle());
+        String newTitle = setPlaceholders(title);
         if (!Objects.equals(lastTitle, newTitle)) {
             lastTitle = newTitle;
             inventoryLike.setTitle(MiniMessage.deserialize(setPlaceholders(newTitle)));
@@ -375,13 +358,14 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     public void setTitle(String title) {
-        sendFakeTitle(title);
+        this.title = title;
+        updateTitle();
     }
 
     public void onEvent(String event) {
-        CommandRequirements commandRequirements = config.getMenuEventListeners().get(event);
+        MenuEventHandler commandRequirements = config.getMenuEventListeners().get(event);
         if (commandRequirements != null) {
-            commandRequirements.run(this, this, viewer);
+            commandRequirements.run(ExecuteContext.of(this), this);
         }
     }
 
@@ -425,7 +409,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
 
     public void addArgument(String key, String value) {
         args.put(key, value);
-        runtimePlaceholders.of(key, () -> args.get(key));
+        argsPlaceholders.set(key, () -> args.get(key));
     }
 
     /**
@@ -448,7 +432,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     public void onHotReload(@NotNull Menu oldMenu) {
         args.putAll(oldMenu.args);
         for (String param : args.keySet()) {
-            runtimePlaceholders.of(param, () -> args.get(param));
+            argsPlaceholders.set(param, () -> args.get(param));
         }
     }
 
@@ -458,7 +442,11 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     public PlaceholderResolver<Menu> getPlaceholderResolver() {
-        return placeholderResolver;
+        return resolvers;
+    }
+
+    public void addPlaceholderResolver(PlaceholderResolver<Menu> resolver) {
+        resolvers.addResolver(resolver);
     }
 
     @Override
@@ -527,7 +515,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         );
         commands.sub(new Command<ExecuteContext>("[SOUND]")
                 .aliases("[sound]")
-                .argument(new ArgumentRegistry<>("sound", Registry.SOUNDS))
+                .argument(new ArgumentSound<>("sound"))
                 .argument(new ArgumentDouble<>("volume"))
                 .argument(new ArgumentDouble<>("pitch"))
                 .executor((v, args) -> {
@@ -706,8 +694,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                             if (builder == null) {
                                 throw new CommandError("No such item: '{}'. Command [import_params]", param);
                             }
-                           // v.menu.args.putAll(builder.getArgs()); //todo
-                            v.menu.args.keySet().forEach(k -> v.menu.runtimePlaceholders.of(k, () -> v.menu.args.get(k)));
+                            v.menu.args.keySet().forEach(k -> v.menu.argsPlaceholders.set(k, () -> v.menu.args.get(k)));
                         }
                 )
         );
@@ -720,6 +707,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                             Menu m = v.menu.loader.create(menu, v.menu.viewer, v.menu);
                             if (args.containsKey("commands"))
                                 runIn((String) args.get("commands"), m, v.menu.loader, v);
+                            v.menu.upperMenu = m;
                             m.open();
                         }
                 )
@@ -739,6 +727,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                             Menu m = v.menu.loader.create(menu, v.menu.viewer, v.menu);
                             if (args.containsKey("commands"))
                                 runIn((String) args.get("commands"), m, v.menu.loader, v);
+                            v.menu.upperMenu = m;
                             m.open();
                         }
                     });
@@ -967,105 +956,144 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                         v.item.setPlaceholder(param, () -> value);
                     }
                 })
-
+        );
+        commands.sub(new Command<ExecuteContext>("[up]")
+                .executor((v, args) -> {
+                    var m = v.menu.upperMenu;
+                    v.menu = Objects.requireNonNull(m, "has no up menu!");
+                })
+        );
+        commands.sub(new Command<ExecuteContext>("[down]")
+                .executor((v, args) -> {
+                    var m = v.menu.previousMenu;
+                    v.menu = Objects.requireNonNull(m, "has no down menu!");
+                })
+        );
+        commands.sub(new Command<ExecuteContext>("[import_from_down]")
+                .executor((v, args) -> {
+                    var m = v.menu.previousMenu;
+                    Objects.requireNonNull(m, "has no down menu!");
+                    v.menu.resolvers.addResolver(m.resolvers);
+                })
+        );
+        commands.sub(new Command<ExecuteContext>("[simulate]")
+                        .sub(new Command<ExecuteContext>("click")
+                                .argument(new ArgumentInt<>("slot"))
+                                .executor((v, args) -> {
+                                    int slot = (int) args.getOrThrow("slot", "use: [simulate] click <slot>");
+                                    var item = v.menu.findItemInSlot(slot);
+                                    if (item == null) throw new CommandError("has no item in slot {}", slot);
+                                    item.doClick(v.menu, v.menu.viewer, MenuClickType.ANY_CLICK);
+                                })
+                        )
         );
 
 
         Command<ExecuteContext> layerCommands = new Command<ExecuteContext>("[layer]")
                 .aliases("[LAYER]");
         for (int i = 0; i < 16; i++) { // костыль чтобы можно было писать [layer] 0 <под команда>
-            final int layerIndex = i;
-            layerCommands.sub(
-                    new Command<ExecuteContext>(Integer.toString(layerIndex))
-                            .sub(new Command<ExecuteContext>("move")
-                                    .aliases("mv")
-                                    .argument(new ArgumentInt<>("layer2"))
-                                    .argument(new ArgumentSlots<>("from"))
-                                    .argument(new ArgumentSlots<>("to"))
-                                    .executor((v, args) -> {
-                                        int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> move <slots-from> <slots-to>");
-                                        int[] from = (int[]) args.getOrThrow("from", "Use: [layer] <layer> move <slots-from> <slots-to>");
-                                        int[] to = (int[]) args.getOrThrow("to", "Use: [layer] <layer> move <slots-from> <slots-to>");
-                                        SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
-                                        SlotContent[] dest = v.menu.layers.getMatrix(layer2);
-                                        for (int idx = 0; idx < from.length; idx++) {
-                                            int fromIndex = from[idx];
-                                            int toIndex = to[idx];
-
-                                            if (fromIndex < 0 || fromIndex >= src.length || toIndex < 0 || toIndex >= dest.length) {
-                                                throw new IndexOutOfBoundsException("Индексы 'from' или 'to' выходят за пределы меню.");
-                                            }
-                                            dest[toIndex] = src[fromIndex];
-                                            src[fromIndex] = null;
-                                        }
-                                    })
-                            )
-                            .sub(new Command<ExecuteContext>("copy")
-                                    .aliases("cpy")
-                                    .argument(new ArgumentInt<>("layer2"))
-                                    .argument(new ArgumentSlots<>("from"))
-                                    .argument(new ArgumentSlots<>("to"))
-                                    .executor((v, args) -> {
-                                        int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> copy <slots-from> <slots-to>");
-                                        int[] from = (int[]) args.getOrThrow("from", "Use: [layer] <layer> copy <slots-from> <slots-to>");
-                                        int[] to = (int[]) args.getOrThrow("to", "Use: [layer] <layer> copy <slots-from> <slots-to>");
-                                        SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
-                                        SlotContent[] dest = v.menu.layers.getMatrix(layer2);
-                                        for (int idx = 0; idx < from.length; idx++) {
-                                            int fromIndex = from[idx];
-                                            int toIndex = to[idx];
-
-                                            if (fromIndex < 0 || fromIndex >= src.length || toIndex < 0 || toIndex >= dest.length) {
-                                                throw new CommandError("Индексы 'from' или 'to' выходят за пределы меню.");
-                                            }
-                                            dest[toIndex] = src[fromIndex];
-                                        }
-                                    })
-                            ).sub(new Command<ExecuteContext>("set")
-                                    .aliases("st")
-                                    .argument(new ArgumentString<>("item"))
-                                    .argument(new ArgumentSlots<>("slots"))
-                                    .executor((v, args) -> {
-                                        String itemID = (String) args.getOrThrow("item", "Use: [layer] <layer> set <item> <slots>");
-                                        int[] slots = (int[]) args.getOrThrow("slots", "Use: [layer] <layer> set <item> <slots>");
-                                        SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
-                                        SlotFactory builder = v.menu.config.findMenuItem(itemID, v.menu);
-                                        SlotContent item;
-                                        if (builder != null) {
-                                            item = builder.build(v.menu);
-                                        } else {
-                                            item = SlotContent.ofMaterial(itemID);
-                                        }
-                                        for (int slot : slots) {
-                                            if (slot < 0 || slot >= src.length) {
-                                                throw new CommandError("слот {} за пределами меню!", slot);
-                                            }
-                                            src[slot] = item;
-                                        }
-                                    })
-                            ).sub(new Command<ExecuteContext>("remove")
-                                    .aliases("rm")
-                                    .argument(new ArgumentSlots<>("slots"))
-                                    .executor((v, args) -> {
-                                        int[] slots = (int[]) args.getOrThrow("slots", "Use: [layer] <layer> remove <item> <slots>");
-                                        SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
-                                        for (int slot : slots) {
-                                            if (slot < 0 || slot >= src.length) {
-                                                throw new CommandError("слот {} за пределами меню!", slot);
-                                            }
-                                            src[slot] = null;
-                                        }
-                                    })
-                            )
-                            .sub(new Command<ExecuteContext>("clear")
-                                    .executor((v, args) -> {
-                                        Arrays.fill(v.menu.layers.getMatrix(layerIndex), null);
-                                    })
-                            )
-            );
-
+            layerCommands.sub(createLayerCommands(i));
         }
         commands.sub(layerCommands);
+    }
+
+    //[layer] l1 move l2 src dest
+    //[layer] l1 copy l2 src dest
+    //[layer] l1 set item dest
+    //[layer] l1 set -me dest
+    //[layer] l1 rm slots
+    //[layer] l1 clear
+    private static Command<ExecuteContext> createLayerCommands(int layerIndex) {
+        return new Command<ExecuteContext>(Integer.toString(layerIndex))
+                .sub(new Command<ExecuteContext>("move")
+                        .aliases("mv")
+                        .argument(new ArgumentInt<>("layer2"))
+                        .argument(new ArgumentSlots<>("from"))
+                        .argument(new ArgumentSlots<>("to"))
+                        .executor((v, args) -> {
+                            int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> move <slots-from> <slots-to>");
+                            int[] from = (int[]) args.getOrThrow("from", "Use: [layer] <layer> move <slots-from> <slots-to>");
+                            int[] to = (int[]) args.getOrThrow("to", "Use: [layer] <layer> move <slots-from> <slots-to>");
+                            SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
+                            SlotContent[] dest = v.menu.layers.getMatrix(layer2);
+                            for (int idx = 0; idx < from.length; idx++) {
+                                int fromIndex = from[idx];
+                                int toIndex = to[idx];
+
+                                if (fromIndex < 0 || fromIndex >= src.length || toIndex < 0 || toIndex >= dest.length) {
+                                    throw new IndexOutOfBoundsException("Индексы 'from' или 'to' выходят за пределы меню.");
+                                }
+                                dest[toIndex] = src[fromIndex];
+                                src[fromIndex] = null;
+                            }
+                        })
+                )
+                .sub(new Command<ExecuteContext>("copy")
+                        .aliases("cpy")
+                        .argument(new ArgumentInt<>("layer2"))
+                        .argument(new ArgumentSlots<>("from"))
+                        .argument(new ArgumentSlots<>("to"))
+                        .executor((v, args) -> {
+                            int layer2 = (int) args.getOrThrow("layer2", "Use: [layer] <layer> copy <slots-from> <slots-to>");
+                            int[] from = (int[]) args.getOrThrow("from", "Use: [layer] <layer> copy <slots-from> <slots-to>");
+                            int[] to = (int[]) args.getOrThrow("to", "Use: [layer] <layer> copy <slots-from> <slots-to>");
+                            SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
+                            SlotContent[] dest = v.menu.layers.getMatrix(layer2);
+                            for (int idx = 0; idx < from.length; idx++) {
+                                int fromIndex = from[idx];
+                                int toIndex = to[idx];
+
+                                if (fromIndex < 0 || fromIndex >= src.length || toIndex < 0 || toIndex >= dest.length) {
+                                    throw new CommandError("Индексы 'from' или 'to' выходят за пределы меню.");
+                                }
+                                dest[toIndex] = src[fromIndex];
+                            }
+                        })
+                ).sub(new Command<ExecuteContext>("set")
+                        .aliases("st")
+                        .argument(new ArgumentString<>("item"))
+                        .argument(new ArgumentSlots<>("slots"))
+                        .executor((v, args) -> {
+                            String itemID = (String) args.getOrThrow("item", "Use: [layer] <layer> set <item> <slots>");
+                            int[] slots = (int[]) args.getOrThrow("slots", "Use: [layer] <layer> set <item> <slots>");
+                            SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
+                            SlotContent item;
+                            if ("-me".equals(itemID)) {
+                                item = v.item;
+                            } else {
+                                SlotFactory builder = v.menu.config.findMenuItem(itemID, v.menu);
+                                if (builder != null) {
+                                    item = builder.build(v.menu);
+                                } else {
+                                    item = SlotContent.ofMaterial(itemID);
+                                }
+                            }
+                            for (int slot : slots) {
+                                if (slot < 0 || slot >= src.length) {
+                                    throw new CommandError("слот {} за пределами меню!", slot);
+                                }
+                                src[slot] = item;
+                            }
+                        })
+                ).sub(new Command<ExecuteContext>("remove")
+                        .aliases("rm")
+                        .argument(new ArgumentSlots<>("slots"))
+                        .executor((v, args) -> {
+                            int[] slots = (int[]) args.getOrThrow("slots", "Use: [layer] <layer> remove <item> <slots>");
+                            SlotContent[] src = v.menu.layers.getMatrix(layerIndex);
+                            for (int slot : slots) {
+                                if (slot < 0 || slot >= src.length) {
+                                    throw new CommandError("слот {} за пределами меню!", slot);
+                                }
+                                src[slot] = null;
+                            }
+                        })
+                )
+                .sub(new Command<ExecuteContext>("clear")
+                        .executor((v, args) -> {
+                            Arrays.fill(v.menu.layers.getMatrix(layerIndex), null);
+                        })
+                );
     }
 
 }

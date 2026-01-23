@@ -5,12 +5,15 @@ import dev.by1337.cmd.Command;
 import dev.by1337.core.command.bcmd.CommandWrapper;
 import dev.by1337.core.command.bcmd.requires.RequiresPermission;
 import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.MenuLoader;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -22,25 +25,23 @@ public class OpenCommands {
         this.loader = loader;
         openCommands = new ArrayList<>();
         //todo
-       // Map<String, YamlContext> map = config.get("open_commands").getAsMap(YamlContext.class, Collections.emptyMap());
-       // for (String string : map.keySet()) {
-       //     YamlContext ctx = map.get(string);
-       //     String menu = Objects.requireNonNull(ctx.get("menu").getAsString(), "menu is null! In: open_commands." + string);
-//
-       //     List<Argument<CommandSender>> arguments = new ArrayList<>();
-       //     if (ctx.has("tab-completer")){
-       //         ctx.get("tab-completer").mapStream().forEach(pair -> {
-       //             String name = pair.getLeft().getAsString();
-       //             YamlContext data = pair.getRight().getAsYamlContext();
-       //             CommandArgumentType argumentType = CommandArgumentType.valueOf(data.getAsString("type").toUpperCase(Locale.ENGLISH));
-       //             arguments.add(argumentType.creator().create(data, name));
-       //         });
-       //     }
-       //     OpenCommand openCommand = new OpenCommand(string, menu, arguments, loader.getPlugin(), arguments);
-       //     openCommand.setAliases(ctx.getList("aliases", String.class, Collections.emptyList()));
-       //     openCommand.setPermission(ctx.getAsString("permission", null));
-       //     openCommands.add(openCommand);
-       // }
+        Map<String, OpenCommandConfig> commands = config.get("open_commands")
+                .decode(YamlCodec.mapOf(YamlCodec.STRING, OpenCommandConfig.CODEC), Map.of()).getOrThrow();
+        for (String cmd : commands.keySet()) {
+            OpenCommandConfig cfg = commands.get(cmd);
+            List<Argument<CommandSender, ?>> arguments = new ArrayList<>();
+           if (cfg.suggestions != null){
+               for (String name : cfg.suggestions.keySet()) {
+                   YamlMap data = cfg.suggestions.get(name);
+                   CommandArgumentType argumentType = data.get("type").decode(CommandArgumentType.CODEC).getOrThrow();
+                   arguments.add(argumentType.creator().create(data, name));
+               }
+           }
+            OpenCommand openCommand = new OpenCommand(cmd, cfg.menu, arguments, loader.getPlugin());
+            openCommand.setAliases(cfg.aliases);
+            openCommand.setPermission(cfg.permission);
+            openCommands.add(openCommand);
+        }
     }
 
     public List<OpenCommand> openCommands() {
@@ -59,6 +60,25 @@ public class OpenCommands {
         }
     }
 
+    public record OpenCommandConfig(
+            String menu,
+            List<String> aliases,
+            @Nullable String permission,
+            @Nullable Map<String, YamlMap> suggestions
+    ) {
+        public static final YamlCodec<OpenCommandConfig> CODEC = RecordYamlCodecBuilder.mapOf(
+                OpenCommandConfig::new,
+                YamlCodec.STRING.fieldOf("menu", OpenCommandConfig::menu),
+                YamlCodec.STRINGS.fieldOf("aliases", OpenCommandConfig::aliases, List.of()),
+                YamlCodec.STRING.fieldOf("permission", OpenCommandConfig::permission),
+                YamlCodec.STRING_TO_YAML_MAP
+                        .fieldOf("tab-completer", OpenCommandConfig::suggestions)
+                );
+
+        public OpenCommandConfig {
+            Objects.requireNonNull(menu, "menu is null");
+        }
+    }
     public class OpenCommand extends Command<CommandSender> {
         private final String menuId;
         private final CommandWrapper wrapper;

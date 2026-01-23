@@ -2,12 +2,13 @@ package dev.by1337.bmenu.item.slot;
 
 import dev.by1337.bmenu.click.ClickMap;
 import dev.by1337.bmenu.click.MenuClickType;
+import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.item.SlotTicker;
 import dev.by1337.bmenu.item.SlotVariantList;
 import dev.by1337.bmenu.item.ViewRequirement;
 import dev.by1337.bmenu.item.ItemModel;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.placeholder.SlotPlaceholders;
+import dev.by1337.bmenu.placeholder.SimplePlaceholders;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
@@ -25,7 +26,7 @@ public final class DynamicSlotContent extends BaseSlotContent {
     private int ticksCount;
     private boolean visible = true;
 
-    public DynamicSlotContent(SlotPlaceholders localArgs, Data data, @Nullable ItemModel baseModel) {
+    public DynamicSlotContent(SimplePlaceholders localArgs, Data data, @Nullable ItemModel baseModel) {
         super(localArgs);
         this.data = data;
         this.baseModel = baseModel;
@@ -40,9 +41,11 @@ public final class DynamicSlotContent extends BaseSlotContent {
 
     @Override
     public void doClick(Menu menu, Player player, MenuClickType type) {
-        if (!data.clickMap.doClick(menu, player, type, this)) {
+        var pl = getPlaceholders(menu);
+        var ctx = ExecuteContext.of(menu, this);
+        if (!data.clickMap.doClick(type, ctx, pl)) {
             if (current != null) {
-                current.variant().clicks().doClick(menu, player, type, this);
+                current.variant().clicks().doClick(type, ctx, pl);
             }
         }
     }

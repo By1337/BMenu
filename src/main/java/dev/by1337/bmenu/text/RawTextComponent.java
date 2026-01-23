@@ -14,7 +14,8 @@ public class RawTextComponent implements SourcedComponentLike {
     }
 
     public @NonNull Component asComponent(PlaceholderApplier placeholders) {
-        return MiniMessage.deserialize(placeholders.setPlaceholders(source)).decoration(TextDecoration.ITALIC, false);
+        return MiniMessage.deserialize(placeholders.setPlaceholders(source))
+                .decoration(TextDecoration.ITALIC, false);
     }
 
     @Override

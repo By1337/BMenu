@@ -1,22 +1,22 @@
 hot-reload: false # автоматически перезагружать конфиги при изменениях
 
-modern_open_commands:
-  - menu: example:seller
-    command: bseller # or list
-    permission: ~
-    arguments: # подсказка при вводе команды
-      player: player
-      count: int
-      items:
-        type: choice
-        items:
-          - list
-          - list2
-  - menu: example:kick
-    command: bkick
-    permission: bmenu.kick
-    arguments:
-     player: player
+#modern_open_commands:
+#  - menu: example:seller
+#    command: bseller # or list
+#    permission: ~
+#    arguments: # подсказка при вводе команды
+#      player: player
+#      count: int
+#      items:
+#        type: choice
+#        items:
+#          - list
+#          - list2
+#  - menu: example:kick
+#    command: bkick
+#    permission: bmenu.kick
+#    arguments:
+#     player: player
 
 # Здесь можете назначить команды для открытия меню
 open_commands:

@@ -15,13 +15,39 @@ id: debug:main
 provider: default
 type: chest
 size: 54
-title: '&7Debug Menu'
+title: "123"
+
 
 args:
   REBUILD_TEST: 0
   DAMAGE_TEST: 0
   TEST:
     - 122
+123:
+  on_view1:
+    slot: 49
+    material: diamond_block
+    name: diamond_block
+    on_click:
+      - if:
+          - '{rand_bool} == true'
+          - 'has super.perm'
+          - '{rand:100} * 66 > 99'
+        do:
+          - console: 'say 123'
+          - |
+            <red>Message!
+            <red>Message 2!
+      - if: '{rand_bool} == true'
+        do:
+          if: '{rand_bool} == true'
+          do:
+            if: '{rand_bool} == true'
+            do: '<gold>4'
+            else: '<black>3'
+          else: '<green>2'
+        else: '<red>1'
+
 
 menu-events:
   on_refresh:
@@ -83,14 +109,61 @@ test2:
 
 
 items:
+
+  shulker:
+    slot: 54
+    material: shulker_box
+    name: "test"
+    container:
+      0:
+        material: diamond
+      1:
+        material: diamond
+      2:
+        material: diamond
+  on_view1:
+    slot: 49
+    material: diamond_block
+    name: diamond_block
+    on_click:
+      - if: '{rand_bool} == true'
+        do:
+          if: '{rand_bool} == true'
+          do:
+            if: '{rand_bool} == true'
+            do: '<gold>4'
+            else: '<black>3'
+          else: '<green>2'
+        else: '<red>1'
+
   on_view:
     slot: 50
     material: diamond
     name: 'on_view test'
-    on_view: '{tick} % 2 == 0'
-    tick_speed: 3
-    on_tick:
-      commands: '[update]'
+    on_left_click: '<red>One line!'
+    on_right_click: |
+      <green>Line 1
+      <green>Line 2
+      <green>Line 3
+      <green>Line 4
+    on_drop_click:
+      - console: 'say on_drop_click'
+      - |
+        <red>msg line 1
+        <red>msg line 2
+        <red>msg line 3
+    on_click:
+      commands:
+        - console: 'say 123'
+        - |
+          <red>msg line 1
+          msg line 2
+          <yellow>msg line 3
+        - console: 'say 321'
+        - message: |
+            <red>line 1
+            <green>line 2
+            <black>line 3
 
   oneOf_example:
     slot: 51
@@ -279,7 +352,16 @@ items:
       page: 0
     name: '${current_name}'
     lore: '${current_lore}'
+    on_click2:
+      - if: '{x} > 60'
+        do: '[message] 123'
+        else: '[message] 321'
+      - if: '{y} < 78'
+        do:
+          if: '{z} == 90'
+          do: '[console] say 42'
     on_click:
+
       requirements:
         - check: '${page} == 0'
           commands:

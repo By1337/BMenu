@@ -119,67 +119,31 @@ public class MenuCodecs {
         }
     };
 
-    public static final String COMMANDS_SCHEMA_TYPE_REF_NAME = "commands_ref";
-    public static final SchemaType COMMANDS_SCHEMA_TYPE;
+    //
+    // primitive
+    // map 2
 
-    public static final YamlCodec<List<String>> COMMANDS = new YamlCodec<>() {
-
-        private static final SchemaType SCHEMA_TYPE = new JsonSchemaTypeBuilder().ref("#/definitions/" + COMMANDS_SCHEMA_TYPE_REF_NAME).build();
-        private static final YamlCodec<List<YamlValue>> YAML_VALUES = YamlCodec.YAML_VALUE.listOf();
+    public static final YamlCodec<List<String>> COMMANDS2 = new YamlCodec<List<String>>() {
 
         @Override
-        public DataResult<List<String>> decode(YamlValue yamlValue) {
-            if (yamlValue.isPrimitive()) return YamlCodec.STRINGS.decode(yamlValue);
-            return YAML_VALUES.decode(yamlValue).flatMap(list -> {
-                List<String> result = new ArrayList<>(list.size());
-                StringBuilder error = new StringBuilder();
-                for (YamlValue value : list) {
-                    if (value.isMap()) {
-                        var dataResult = YamlCodec.STRING_TO_STRING.decode(value).flatMap(map -> {
-                            List<String> res = new ArrayList<>();
-                            for (String key : map.keySet()) {
-                                String val = map.get(key);
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("[").append(key).append("]");
-                                if (!val.isBlank()) sb.append(" ").append(val);
-                                res.add(sb.toString());
-                            }
-                            return DataResult.success(res);
-                        });
-                        if (dataResult.hasError()) {
-                            error.append(dataResult.error()).append("\n");
-                        }
-                        if (dataResult.hasResult()) {
-                            result.addAll(dataResult.result());
-                        }
-                    } else {
-                        var res = YamlCodec.STRING.decode(value);
-                        if (res.hasError()) {
-                            error.append(res.error()).append("\n");
-                        }
-                        if (res.hasResult()) {
-                            result.add(res.result());
-                        }
-                    }
-                }
-                if (!error.isEmpty()) {
-                    error.setLength(error.length() - 1);
-                    return DataResult.error(error.toString()).partial(result);
-                }
-                return DataResult.success(result);
-            });
+        public DataResult<List<String>> decode(YamlValue yaml) {
+            if (yaml.isPrimitive()) return STRINGS.decode(yaml);
+            return null;
         }
 
         @Override
-        public YamlValue encode(List<String> list) {
-            return YamlCodec.STRINGS.encode(list);
+        public YamlValue encode(List<String> strings) {
+            return YamlValue.wrap(strings);
         }
 
         @Override
         public @NotNull SchemaType schema() {
-            return SCHEMA_TYPE;
+            return SchemaTypes.ANY;
         }
     };
+
+
+    public static SchemaType COMMANDS_SCHEMA_TYPE = new SchemaType();
 
     private static <T> YamlCodec<T> anyCodec(YamlCodec<T> first, YamlCodec<T> second) {
         return new YamlCodec<T>() {
@@ -223,12 +187,15 @@ public class MenuCodecs {
                 builder.properties(cmd.substring(1, cmd.length() - 1), subBuilder.build());
             }
         }
+/*
         builder.properties("rebuild", JsonSchemaTypeBuilder.create().type(SchemaTypes.Type.STRING).examples("").build());
         builder.properties("die", JsonSchemaTypeBuilder.create().type(SchemaTypes.Type.STRING).examples("").build());
         builder.properties("update", JsonSchemaTypeBuilder.create().type(SchemaTypes.Type.STRING).examples("").build());
         builder.properties("set_local", JsonSchemaTypeBuilder.create().type(SchemaTypes.Type.STRING).examples("<param> <value>").build());
+*/
 
-        COMMANDS_SCHEMA_TYPE = builder.build().listOf().or(SchemaTypes.STRING, SchemaTypes.STRING.listOf());
+        COMMANDS_SCHEMA_TYPE = builder.build(COMMANDS_SCHEMA_TYPE.getRandName())
+                .listOf().or(SchemaTypes.STRING, SchemaTypes.STRING.listOf());
     }
 
 }

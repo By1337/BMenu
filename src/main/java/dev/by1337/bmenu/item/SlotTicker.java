@@ -35,7 +35,7 @@ public class SlotTicker {
     public void tick(SlotContent slotContent, Menu menu) {
         var placeholder = menu.getPlaceholderResolver().and(slotContent).bind(menu);
         ExecuteContext ctx = ExecuteContext.of(menu, slotContent);
-        if (requirements.test(menu, placeholder, menu.getViewer(), ctx)) {
+        if (requirements.test(menu, placeholder, ctx)) {
             commands.run(ctx, placeholder);
         } else {
             denyCommands.run(ctx, placeholder);

@@ -2,6 +2,7 @@ package dev.by1337.bmenu.item;
 
 import dev.by1337.bmenu.click.ClickMap;
 import dev.by1337.bmenu.click.MenuClickType;
+import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -53,8 +54,8 @@ public class SlotVariant {
                 null
         );
     }
-    public boolean doClick(Menu menu, Player player, MenuClickType type, SlotContent item) {
-        return clicks.doClick(menu, player, type, item.getPlaceholders(menu), item);
+    public boolean doClick(Menu menu, MenuClickType type, SlotContent item) {
+        return clicks.doClick(type, ExecuteContext.of(menu, item), item.getPlaceholders(menu));
     }
 
     public ItemModel itemModel() {

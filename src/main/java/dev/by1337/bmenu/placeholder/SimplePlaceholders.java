@@ -12,27 +12,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class SlotPlaceholders implements PlaceholderResolver<Menu> {
-    public static final YamlCodec<SlotPlaceholders> CODEC = MenuCodecs.ARGS_CODEC
-            .map(SlotPlaceholders::new, SlotPlaceholders::asStringMap);
+public class SimplePlaceholders implements PlaceholderResolver<Menu> {
+    public static final YamlCodec<SimplePlaceholders> CODEC = MenuCodecs.ARGS_CODEC
+            .map(SimplePlaceholders::new, SimplePlaceholders::asStringMap);
 
     private final HashMapLike<String, Supplier<Object>> map;
 
-    public SlotPlaceholders(Map<String, String> map) {
+    public SimplePlaceholders(Map<String, String> map) {
         this.map = new HashMapLike<>();
         map.forEach((k, v) -> this.map.put(k, () -> v));
     }
 
-    public SlotPlaceholders(HashMapLike<String, Supplier<Object>> map) {
+    public SimplePlaceholders(HashMapLike<String, Supplier<Object>> map) {
         this.map = map;
     }
 
-    public SlotPlaceholders() {
+    public SimplePlaceholders() {
         map = new HashMapLike<>();
     }
 
-    public SlotPlaceholders copy() {
-        return new SlotPlaceholders(map.copy());
+    public SimplePlaceholders copy() {
+        return new SimplePlaceholders(map.copy());
     }
 
     public void set(String key, Supplier<Object> supplier) {

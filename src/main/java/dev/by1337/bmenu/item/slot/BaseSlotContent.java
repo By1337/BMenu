@@ -2,25 +2,34 @@ package dev.by1337.bmenu.item.slot;
 
 import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.placeholder.SlotPlaceholders;
+import dev.by1337.bmenu.menu.PlaceholderResolvers;
+import dev.by1337.bmenu.placeholder.SimplePlaceholders;
 import dev.by1337.plc.PlaceholderApplier;
+import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.PlaceholderSyntax;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
 public abstract class BaseSlotContent implements SlotContent {
-    private final SlotPlaceholders localArgs;
+    private final SimplePlaceholders localArgs;
     private Object value;
     private boolean removed = false;
     protected boolean dirty = true;
+    protected @Nullable PlaceholderResolvers custom;
 
     public BaseSlotContent() {
-        this.localArgs = new SlotPlaceholders();
+        this.localArgs = new SimplePlaceholders();
     }
 
-    public BaseSlotContent(SlotPlaceholders localArgs) {
+    public BaseSlotContent(SimplePlaceholders localArgs) {
         this.localArgs = localArgs;
+    }
+
+    public void addCustomResolver(@Nullable PlaceholderResolver<Menu> custom) {
+        if (custom == null) return;
+        if (this.custom == null) this.custom = new PlaceholderResolvers();
+        this.custom.addResolver(custom);
     }
 
     @Override
@@ -70,11 +79,13 @@ public abstract class BaseSlotContent implements SlotContent {
 
     @Override
     public boolean has(String key, PlaceholderSyntax format) {
-        return localArgs.has(key, format);
+        return localArgs.has(key, format) || (custom != null && custom.has(key, format));
     }
 
     @Override
     public @Nullable String resolve(String key, String params, @Nullable Menu ctx, PlaceholderSyntax format) {
-        return localArgs.resolve(key, params, ctx, format);
+        var v = localArgs.resolve(key, params, ctx, format);
+        if (v == null && custom != null) return custom.resolve(key, params, ctx, format);
+        return v;
     }
 }

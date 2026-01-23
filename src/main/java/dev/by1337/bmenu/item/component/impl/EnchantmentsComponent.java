@@ -8,6 +8,7 @@ import org.bukkit.enchantments.Enchantment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,11 @@ public record EnchantmentsComponent(List<Entry> enchantments) implements Mergeab
         List<Entry> enchantments = new ArrayList<>(this.enchantments);
         enchantments.addAll(t1.enchantments);
         return new EnchantmentsComponent(enchantments);
+    }
+    public static EnchantmentsComponent fromMap(Map<Enchantment, Integer> map){
+        return new EnchantmentsComponent(map.entrySet().stream().map(
+                e -> new Entry(e.getKey(), e.getValue())
+        ).toList());
     }
 
     public record Entry(Enchantment enchantment, int lvl) {

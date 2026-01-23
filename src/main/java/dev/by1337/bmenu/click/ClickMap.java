@@ -1,6 +1,7 @@
 package dev.by1337.bmenu.click;
 
 import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.event.MenuEventHandler;
 import dev.by1337.bmenu.item.SlotContent;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.util.ObjectUtil;
@@ -13,17 +14,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
 
-public record ClickMap(Map<MenuClickType, ClickHandler> map) {
+public record ClickMap(Map<MenuClickType, MenuEventHandler> map) {
     public static final ClickMap EMPTY = new ClickMap(Map.of());
     public static final YamlCodec<ClickMap> CODEC = ObjectUtil.make(() -> {
-        var builder = PipelineYamlCodecBuilder.of(() -> new EnumMap<MenuClickType, ClickHandler>(MenuClickType.class));
+        var builder = PipelineYamlCodecBuilder.of(() -> new EnumMap<MenuClickType, MenuEventHandler>(MenuClickType.class));
         for (MenuClickType value : MenuClickType.values()) {
             String key = value.getConfigKeyClick();
-            builder.field(ClickHandlerImpl.CODEC, key,
-                    m -> {
-                        if (m.get(value) instanceof ClickHandlerImpl impl) return impl;
-                        return null;
-                    },
+            builder.field(MenuEventHandler.CODEC, key,
+                    m -> m.get(value),
                     (m, v) -> m.put(value, v)
             );
         }
@@ -36,21 +34,18 @@ public record ClickMap(Map<MenuClickType, ClickHandler> map) {
 
     });
 
-    public void setClick(MenuClickType type, ClickHandler click) {
+    public void setClick(MenuClickType type, MenuEventHandler click) {
         map.put(type, click);
     }
 
-    public @Nullable ClickHandler get(MenuClickType type) {
+    public @Nullable MenuEventHandler get(MenuClickType type) {
         return map.get(type);
     }
 
-    public boolean doClick(Menu menu, Player player, MenuClickType type, SlotContent item) {
-        return doClick(menu, player, type, item.getPlaceholders(menu), item);
-    }
-    public boolean doClick(Menu menu, Player player, MenuClickType type, PlaceholderApplier placeholders, SlotContent item) {
-        ClickHandler handler = ObjectUtil.requireNonNullElseGet(map.get(type), () -> map.get(MenuClickType.ANY_CLICK));
+    public boolean doClick(MenuClickType type,ExecuteContext ctx, PlaceholderApplier placeholders) {
+        MenuEventHandler handler = ObjectUtil.requireNonNullElseGet(map.get(type), () -> map.get(MenuClickType.ANY_CLICK));
         if (handler != null) {
-            handler.onClick(menu, placeholders, player, ExecuteContext.of(menu, item));
+            handler.run(ctx, placeholders);
             return true;
         }
         return false;

@@ -39,16 +39,6 @@ public class ItemFixer {
         map.set("name", fixDisplay(map.getRaw("name")));
         map.set("lore", fixDisplay(map.getRaw("lore")));
 
-        if (map.getRaw("static") == null &&
-                hasNoPlaceholders(map.getRaw("name")) &&
-                hasNoPlaceholders(map.getRaw("lore")) &&
-                hasNoPlaceholders(map.getRaw("name")) &&
-                hasNoPlaceholders(map.getRaw("damage")) &&
-                hasNoPlaceholders(map.getRaw("amount"))
-        ) {
-            map.set("static", true);
-            map.set("$synthetic-static", true);
-        }
         if (Objects.equals(map.getRaw("ticking"), true)) {
             if (map.has("on_tick")) {
                 map.set("$fixed-ticking", false);
@@ -128,22 +118,6 @@ public class ItemFixer {
         return o;
     }
 
-    private static boolean hasNoPlaceholders(String s) {
-        return !s.contains("{") && !s.contains("%");
-    }
-
-    private static boolean hasNoPlaceholders(Object o) {
-        if (o instanceof String s) {
-            return hasNoPlaceholders(s);
-        } else if (o instanceof Collection<?> c) {
-            for (Object object : c) {
-                if (!hasNoPlaceholders(String.valueOf(object))) return false;
-            }
-            return true;
-        }
-        return true;
-    }
-
     @SuppressWarnings("unchecked")
     private static void replacePlaceholders(YamlMap item, @Nullable YamlMap superItem) {
         PlaceholderResolver<Void> placeholders = mapToResolver("args", item)
@@ -156,8 +130,8 @@ public class ItemFixer {
 
                     @Override
                     public @Nullable String resolve(String key, String params, @Nullable Void ctx, PlaceholderSyntax format) {
-                        if (params.contains("%") || params.contains("{"))
-                            return null; // сейчас не известны не которые плейсы
+                        if (params.contains("%") || params.contains("{") || params.contains("(")) //( нужен так как существует rnd()
+                            return null; // сейчас не известны некоторые плейсы
                         try {
                             return String.valueOf(FastExpressionParser.parse(params));
                         } catch (FastExpressionParser.MathFormatException e) {

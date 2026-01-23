@@ -17,7 +17,7 @@ public class DefaultMenu extends Menu {
     }
 
     @Override
-    protected boolean runCommand(String cmd) throws CommandMsgError {
+    protected boolean onCommandRun(String cmd) throws CommandMsgError {
         return false;
     }
 

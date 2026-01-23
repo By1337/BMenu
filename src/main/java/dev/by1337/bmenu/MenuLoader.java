@@ -70,7 +70,7 @@ public class MenuLoader implements Listener {
     }
 
     private void tick() {
-        long nanos = System.nanoTime();
+       // long nanos = System.nanoTime();
         Bukkit.getOnlinePlayers().forEach(player -> {
             if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu menu) {
                 if (menu.getLoader() == this) {
@@ -78,7 +78,7 @@ public class MenuLoader implements Listener {
                 }
             }
         });
-        System.out.println("Tick " + (System.nanoTime() - nanos) / 1_000_000D + " ms");
+      //  System.out.println("Tick " + (System.nanoTime() - nanos) / 1_000_000D + " ms");
     }
 
     private void onFileChange(Path path) {

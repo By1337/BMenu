@@ -1,20 +1,11 @@
-# импортируем весь файл items.yml
-include: [
-  "./items.yml"
-]
-
 id: example:prem-seller-confirm
 provider: default
 type: chest
 size: 27
 title: '&7Подтверждение покупки'
 
-# Разрешаем открывать это меню только из меню example:prem-seller
 only-open-from:
   - example:prem-seller
-
-args:
-  SELECTED_ITEM: none
 
 items:
   confirm:
@@ -24,16 +15,8 @@ items:
       - '0-3'
       - '9-12'
       - '18-21'
-    on_left_click:
-      requirements:
-        - check: '%vault_eco_balance_fixed% >= {PRICE}' # Мы использовали [import_params] при открытии этого меню поэтому плейс {PRICE} доступен
-      deny_commands:
-        - '[message] &cУ Вас не достаточно баланса!'
-      commands:
-        - '[takemoney] {PRICE}'
-        - '[console] give %player_name% {MATERIAL} {AMOUNT}'
-        - '[message] &aВы успешно купили {NAME}'
-        - '[back]'
+    on_click:
+      commands: "[simulate] click 13" # симулируем клик по слоту 13
   reject:
     material: red_stained_glass_pane
     name: '&cОтменить'
@@ -52,18 +35,3 @@ items:
     slot:
       - 4
       - 22
-  none:
-    material: jigsaw
-    name: '&cПроизошла ошибка!'
-    static: true
-  totem:
-    <<: *seller-item-totem # это указатель на предмет который находится в файле items.yml
-  elytra:
-    <<: *seller-elytra # это указатель на предмет который находится в файле items.yml
-  creeper:
-    <<: *seller-creeper # это указатель на предмет который находится в файле items.yml
-
-animation:
-  - tick: 0
-    opcodes:
-      - set: '{SELECTED_ITEM} 13'

@@ -1,8 +1,3 @@
-# импортируем весь файл items.yml
-include: [
-  "./items.yml"
-]
-
 id: example:prem-seller
 provider: default
 type: chest
@@ -10,46 +5,96 @@ size: 45
 title: '&7Премиальный селлер'
 
 items-defaults:
-  item: &item
-    lore:
-      - '&r '
-      - '&r &7Нажмите лкм'
-      - '&r &7чтобы купить {NAME}&7 за {PRICE_FORMAT} монет'
-      - '&r '
-    on_click:
-      requirements:
-        - check: '%vault_eco_balance_fixed% >= {PRICE}'
-      deny_commands: '[MESSAGE] &cУ Вас не достаточно баланса!'
-      commands: # используем [IMPORT_PARAMS] чтобы в меню example:prem-seller-confirm стали доступны плейсы текущего предмета
-        - '[OPEN] example:prem-seller-confirm ["[SET_PARAM] SELECTED_ITEM {CURRENT_ITEM}", "[IMPORT_PARAMS] {CURRENT_ITEM}"]'
+  item2: &item
+    oneOf:
+      - material: '{MATERIAL}'
+        name: '{NAME}'
+        lore:
+          - '&r '
+          - '&r &7Нажмите лкм'
+          - '&r &7чтобы купить {NAME}&7 за {PRICE_FORMAT} монет'
+          - '&r '
+        on_view: '{menu_id} == example:prem-seller'
+        on_click:
+          - if: '%vault_eco_balance_fixed% >= {PRICE}'
+            do:
+              - open: 'example:prem-seller-confirm'
+              - up: '' # команды ниже будут выполняться в открывшемся меню.
+              - layer: '0 set -me 13' # устанавливаем текущий предмет в слот 13
+              - update: '' # обновим этот предмет чтобы ещё раз on_view проверить
+            else: '&cУ Вас не достаточно баланса!'
+
+      - material: '{MATERIAL}'
+        name: '{NAME}'
+        on_click:
+          - if: '%vault_eco_balance_fixed% >= {PRICE}'
+            do:
+              - takemoney: '{PRICE}'
+              - console: 'give %player_name% {MATERIAL} {AMOUNT}'
+              - '&aВы успешно купили {NAME}'
+            else: '&cУ Вас не достаточно баланса!'
+
+  item: &item_old
+    oneOf:
+      - material: '{MATERIAL}'
+        name: '{NAME}'
+        lore:
+          - '&r '
+          - '&r &7Нажмите лкм'
+          - '&r &7чтобы купить {NAME}&7 за {PRICE_FORMAT} монет'
+          - '&r '
+        on_view: '{menu_id} == example:prem-seller'
+        on_click:
+          requirements: '%vault_eco_balance_fixed% >= {PRICE}'
+          deny_commands: '&cУ Вас не достаточно баланса!'
+          commands:
+            - open: 'example:prem-seller-confirm'
+            - up: '' # команды ниже будут выполняться в открывшемся меню.
+            - layer: '0 set -me 13' # устанавливаем текущий предмет в слот 13
+            - update: '' # обновим этот предмет чтобы ещё раз on_view проверить
+
+      - material: '{MATERIAL}'
+        name: '{NAME}'
+        on_click:
+          requirements: '%vault_eco_balance_fixed% >= {PRICE}'
+          deny_commands: '&cУ Вас не достаточно баланса!'
+          commands:
+            - takemoney: '{PRICE}'
+            - console: 'give %player_name% {MATERIAL} {AMOUNT}'
+            - '&aВы успешно купили {NAME}'
+            - back: ''
 items:
   gui-lime:
     material: lime_stained_glass_pane
     name: ''
-    slot:
-      - '0-8'
-      - '9'
-      - '18'
-      - '27'
-      - '26'
-      - '36-44'
-      - '35'
-      - '26'
-      - '17'
+    slot: 0-8,9,18,27,26,36-44,35,17
+
   totem:
     args:
-      CURRENT_ITEM: totem
-    <<+: [ *item, *seller-item-totem ] # *seller-item-totem - это указатель на предмет который находится в файле items.yml
+      MATERIAL: totem_of_undying
+      PRICE: 10000
+      PRICE_FORMAT: '10,000'
+      AMOUNT: 1
+      NAME: '&6Тотем'
+    <<+: *item
     slot: 21
 
   elytra:
     args:
-      CURRENT_ITEM: elytra
-    <<+: [ *item, *seller-elytra ] # *seller-elytra - это указатель на предмет который находится в файле items.yml
+      MATERIAL: elytra
+      PRICE_FORMAT: '20,000'
+      PRICE: 20000
+      AMOUNT: 1
+      NAME: '&6Элитры'
+    <<+: *item
     slot: 23
 
   creeper:
     args:
-      CURRENT_ITEM: creeper
-    <<+: [ *item, *seller-creeper ] # *seller-creeper - это указатель на предмет который находится в файле items.yml
+      MATERIAL: creeper_spawn_egg
+      PRICE_FORMAT: '15,000'
+      PRICE: 15000
+      AMOUNT: 1
+      NAME: '&6Яйцо призыва крипера'
+    <<+: *item
     slot: 22

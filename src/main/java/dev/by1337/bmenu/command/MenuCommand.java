@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MenuCommand {
+public class MenuCommand implements CommandLike{
     private static final Logger log = LoggerFactory.getLogger(MenuCommand.class);
     private final String source;
     private @Nullable CompiledCommand<ExecuteContext> compiled;
@@ -35,5 +35,21 @@ public class MenuCommand {
                 }
             }
         }
+    }
+
+    public String source() {
+        return source;
+    }
+
+    public @Nullable CompiledCommand<ExecuteContext> compiled() {
+        return compiled;
+    }
+
+    public boolean canBeCompiled() {
+        return canBeCompiled;
+    }
+
+    public boolean hasPlaceholders() {
+        return hasPlaceholders;
     }
 }

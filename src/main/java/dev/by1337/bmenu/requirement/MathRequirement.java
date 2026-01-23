@@ -1,74 +1,44 @@
 package dev.by1337.bmenu.requirement;
 
-import dev.by1337.plc.PlaceholderApplier;
-import dev.by1337.yaml.YamlMap;
-import dev.by1337.yaml.codec.YamlCodec;
-import org.bukkit.entity.Player;
-import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.util.StringUtil;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
+import dev.by1337.plc.PlaceholderApplier;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class MathRequirement implements Requirement {
-    private final String expression;
-    private final boolean not;
-    private final Commands commands;
-    private final Commands denyCommands;
-
-    public MathRequirement(String expression, Commands commands, Commands denyCommands) {
-        this.expression = expression;
-        this.commands = commands;
-        not = false;
-        this.denyCommands = denyCommands;
-    }
-
-    public MathRequirement(YamlMap context) {
-        expression = context.get("expression").decode(YamlCodec.STRING).getOrThrow();
-        not = context.get("type").decode(YamlCodec.STRING).getOrThrow().startsWith("!");
-        commands = context.get("commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
-        denyCommands = context.get("deny_commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
-    }
+public record MathRequirement(String input) implements Requirement {
 
     @Override
-    public boolean test(Menu menu, PlaceholderApplier placeholder, Player clicker) {
-        String s = placeholder.setPlaceholders(expression);
+    public boolean test(Menu menu, PlaceholderApplier placeholders) {
+        String s = placeholders.setPlaceholders(input);
         try {
-            var b = FastExpressionParser.parse(s) == 1D;
-            return not != b;
+            return FastExpressionParser.parse(s) == 1D;
         } catch (FastExpressionParser.MathFormatException e) {
             menu.getLoader().getLogger().error(
                     "Failed to parse math requirement. expression: '{}' replaced expression: '{}'\n{}",
-                    expression, s,
+                    input, s,
                     e.getMessage()
             );
             return false;
         }
     }
 
-    @Override
-    public Commands getCommands() {
-        return commands;
+    public MathRequirement invert() {
+        return new MathRequirement("(" + input + ") == 0");
     }
 
-    @Override
-    public Commands getDenyCommands() {
-        return denyCommands;
-    }
-
-    @Override
-    public boolean state() {
+    public @Nullable Requirement compile() {
+        //rnd, irnd
+        if (input.contains("{") || input.contains("%") || input.contains("rnd")) return null;
         try {
-            var b = FastExpressionParser.parse(expression) == 1D;
-            return not != b;
+            return FastExpressionParser.parse(input) == 1D ? Requirement.TRUE : Requirement.FALSE;
         } catch (FastExpressionParser.MathFormatException e) {
-            e.printStackTrace();//todo
-            return false;
+            return null;
         }
     }
 
     @Override
-    public boolean compilable() {
-        return StringUtil.hasNoPlaceholders(expression);
+    public @NotNull String toString() {
+        return input;
     }
-
 }

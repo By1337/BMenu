@@ -11,13 +11,14 @@ import dev.by1337.yaml.codec.schema.SchemaTypes;
 public class ViewRequirement {
     public static final ViewRequirement EMPTY = new ViewRequirement(Requirements.EMPTY, Commands.EMPTY);
     public static YamlCodec<ViewRequirement> CODEC = RecordYamlCodecBuilder.mapOf(
-            ViewRequirement::new,
-            Requirements.CODEC.fieldOf("requirements", ViewRequirement::requirement, Requirements.EMPTY),
-            Commands.CODEC.fieldOf("deny_commands", ViewRequirement::denyCommands, Commands.EMPTY)
-    ).schema(s -> s.or(SchemaTypes.STRING)).whenPrimitive(Requirements.CODEC.map(
-            r -> new ViewRequirement(r, Commands.EMPTY),
-            v -> v.requirement
-    ));
+                    ViewRequirement::new,
+                    Requirements.CODEC.fieldOf("requirements", ViewRequirement::requirement, Requirements.EMPTY),
+                    Commands.CODEC.fieldOf("deny_commands", ViewRequirement::denyCommands, Commands.EMPTY)
+            ).schema(s -> s.or(SchemaTypes.STRING))
+            .whenPrimitive(Requirements.CODEC.map(
+                    r -> new ViewRequirement(r, Commands.EMPTY),
+                    v -> v.requirement
+            ));
 
     private final Requirements requirement;
     private final Commands denyCommands;
@@ -31,7 +32,7 @@ public class ViewRequirement {
         if (isEmpty()) return true;
         var placeholders = slotContent.getPlaceholders(menu);
         var ctx = ExecuteContext.of(menu, slotContent);
-        boolean bool = requirement.test(menu, placeholders, menu.getViewer(), ctx);
+        boolean bool = requirement.test(menu, placeholders, ctx);
         if (!bool) {
             denyCommands.run(ctx, placeholders);
         }

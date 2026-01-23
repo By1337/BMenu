@@ -7,6 +7,7 @@ import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.plc.PlaceholderApplier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -30,7 +31,8 @@ public class BukkitItemRenderer extends AbstractBukkitItemRenderer {
         var lore = item.get(ItemDataComponents.LORE);
         if (lore != null) {
             List<Component> loreComponents = new ArrayList<>();
-            lore.forEachLore(line -> applyComponent(line, placeholders, loreComponents::add));
+            lore.forEachLore(line ->
+                    applyComponent(line, placeholders, loreComponents::add));
             im.lore(loreComponents);
         }
         if (im instanceof Damageable damageable){
@@ -45,17 +47,17 @@ public class BukkitItemRenderer extends AbstractBukkitItemRenderer {
         if (c instanceof RawTextComponent raw) {
             String s = placeholders.setPlaceholders(raw.source());
             for (String line : s.split("\n")) {
-                processor.accept(MiniMessage.deserialize(line));
+                processor.accept(MiniMessage.deserialize(line).decoration(TextDecoration.ITALIC, false));
             }
         } else {
-            processor.accept(c.asComponent());
+            processor.accept(c.asComponent().decoration(TextDecoration.ITALIC, false));
         }
     }
 
     private Component toComponent(ComponentLike c, PlaceholderApplier placeholders) {
         if (c instanceof RawTextComponent c1) {
-            return c1.asComponent(placeholders);
+            return c1.asComponent(placeholders).decoration(TextDecoration.ITALIC, false);
         }
-        return c.asComponent();
+        return c.asComponent().decoration(TextDecoration.ITALIC, false);
     }
 }

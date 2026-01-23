@@ -1,126 +1,141 @@
 package dev.by1337.bmenu.command;
 
 
-import dev.by1337.cmd.Command;
-import dev.by1337.cmd.CommandReader;
-import dev.by1337.cmd.CompiledCommand;
+import dev.by1337.bmenu.event.MenuEventHandler;
+import dev.by1337.bmenu.requirement.LegacyRequirement;
+import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
+import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import dev.by1337.bmenu.factory.MenuCodecs;
-import dev.by1337.bmenu.menu.Menu;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.function.Supplier;
+import java.util.Map;
 
 
-public class Commands {
+public class Commands implements MenuEventHandler {
     public static final Commands EMPTY = new Commands(List.of());
-    public static final YamlCodec<Commands> CODEC = new YamlCodec<Commands>() {
-        private final SchemaType schemaType = make(() -> {
-            var builder = JsonSchemaTypeBuilder.create();
-            builder.type(SchemaTypes.Type.OBJECT);
-            builder.additionalProperties(true);
-            for (Command<ExecuteContext> value : Menu.getCommands().getSubcommands().values()) {
-                String cmd = value.name().toLowerCase(Locale.ENGLISH);
-                if (cmd.startsWith("[") && cmd.endsWith("]")) {
-                    var subBuilder = JsonSchemaTypeBuilder.create();
-                    subBuilder.type(SchemaTypes.Type.STRING);
-                    StringBuilder sb = new StringBuilder();
-                    for (var arg : value.arguments()) {
-                        sb.append("<").append(arg.name()).append("> ");
-                    }
-                    if (!sb.isEmpty()) {
-                        sb.setLength(sb.length() - 1);
-                    }
-                    subBuilder.examples(sb.toString());
-                    builder.properties(cmd.substring(1, cmd.length() - 1), subBuilder.build());
-                }
-            }
-            var strOrMap = SchemaTypes.anyOf(SchemaTypes.STRING, builder.build());
-            return SchemaTypes.anyOf(strOrMap, SchemaTypes.array(strOrMap));
-        });
-        private final YamlCodec<List<YamlValue>> OBJ_LIST = YamlCodec.YAML_VALUE.listOf();
+
+    public static final YamlCodec<Commands> CODEC = new YamlCodec<>() {
+        private final YamlCodec<List<Commands>> COMMANDS = YamlCodec.lazyLoad(() -> thisCodec().listOf());
+        private final YamlCodec<Map<String, String>> S2S_MAP = YamlCodec.mapOf(STRING, MULTI_LINE_STRING);
+        private final YamlCodec<Map<String, YamlValue>> S2OBJET_MAP = YamlCodec.mapOf(STRING, YAML_VALUE);
 
         @Override
-        public DataResult<Commands> decode(YamlValue yamlValue) {
-            if (yamlValue.isPrimitive())
-                return STRING.decode(yamlValue).mapValue(s -> {
-                    if (s.startsWith("[")) {
-                        return new Commands(List.of(s));
-                    } else {
-                        return new Commands(List.of("[message] " + s));
+        public DataResult<Commands> decode(YamlValue yaml) {
+            if (yaml.isPrimitive()) return STRING.decode(yaml).mapValue(s -> new Commands(List.of(fixCommand(s))));
+            if (yaml.isList()) {
+                return COMMANDS.decode(yaml).mapValue(Commands::fromCommandsList);
+            }
+            return S2OBJET_MAP.decode(yaml).flatMap(map -> {
+                if (map.containsKey("if")) {
+                    return allOf(
+                            LegacyRequirement::new,
+                            map.get("if").decode(Requirement.CODEC),
+                            YamlValue.wrap(map.get("do")).decode(CODEC, Commands.EMPTY),
+                            YamlValue.wrap(map.get("else")).decode(CODEC, Commands.EMPTY)
+                    ).mapValue(Commands::new);
+                } else {
+                    List<String> commands = new ArrayList<>();
+                    StringBuilder buffer = new StringBuilder();
+                    for (String cmd : map.keySet()) {
+                        buffer.append("[").append(cmd).append("]");
+                        var value = map.get(cmd).decode(MULTI_LINE_STRING).getOrThrow();
+                        if (!value.isBlank()) {
+                            buffer.append(" ").append(value.replace("\n", "<br><reset>"));
+                        }
+                        commands.add(buffer.toString());
+                        buffer.setLength(0);
                     }
-                });
-            if (yamlValue.isMap()) return MenuCodecs.MAP_TO_LIST.decode(yamlValue).mapValue(Commands::new);
-            return OBJ_LIST.decode(yamlValue).flatMap(list -> {
-                StringBuilder error = new StringBuilder();
-                List<String> result = new ArrayList<>();
-                for (YamlValue value : list) {
-                    var res = this.decode(value);
-                    if (res.hasError()) {
-                        error.append(res.error()).append("\n");
-                    }
-                    if (res.hasResult()) {
-                        Commands c = res.result();
-                        result.addAll(c.list);
-                    }
+                    return DataResult.success(new Commands(commands));
                 }
-                if (!error.isEmpty()) {
-                    error.setLength(error.length() - 1);
-                    return DataResult.error(error.toString()).partial(new Commands(result));
-                }
-                return DataResult.success(new Commands(result));
             });
+        }
+
+        private static YamlCodec<Commands> thisCodec() {
+            return CODEC;
+        }
+
+        private String fixCommand(String input) {
+            if (input.startsWith("[")) return input;
+            return "[message] " + input.replace("\n", "<br><reset>");
         }
 
         @Override
         public YamlValue encode(Commands commands) {
-            return YamlValue.wrap(commands.list);
+            List<Object> out = new ArrayList<>();
+            for (CommandLike command : commands.commands) {
+                if (command instanceof MenuCommand mc) {
+                    out.add(mc.source());
+                } else if (command instanceof LegacyRequirement r) {
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("if", r.requirement().encode().getRaw());
+                    if (!r.commands().isEmpty()) {
+                        map.put("do", encode(r.commands()).getRaw());
+                    }
+                    if (!r.denyCommands().isEmpty()) {
+                        map.put("do", encode(r.denyCommands()).getRaw());
+                    }
+                    out.add(map);
+                }
+            }
+            return YamlValue.wrap(out);
         }
 
         @Override
         public @NotNull SchemaType schema() {
-            return schemaType;
+            return SchemaTypes.ANY;
         }
     };
-    private static final Logger log = LoggerFactory.getLogger(Commands.class);
-    private final List<String> list;
-    private final List<MenuCommand> compiled = new ArrayList<>();
+    private final List<CommandLike> commands;
     private boolean hasBreak;
 
+    @ApiStatus.Experimental
+    public Commands(LegacyRequirement requirement) {
+        commands = List.of(requirement);
+    }
+
+    public Commands(List<CommandLike> commands, boolean hasBreak) {
+        this.commands = commands;
+        this.hasBreak = hasBreak;
+    }
+
     public Commands(List<String> list) {
-        this.list = list;
+        commands = new ArrayList<>();
         for (String s : list) {
             if (s.equalsIgnoreCase("[break]")) {
                 hasBreak = true;
                 break;
             }
-            compiled.add(new MenuCommand(s));
+            commands.add(new MenuCommand(s));
         }
     }
 
-    public void run(ExecuteContext menu, PlaceholderApplier placeholders) {
-        for (MenuCommand menuCommand : compiled) {
-            menuCommand.run(menu, placeholders);
+    @Override
+    public void run(ExecuteContext ctx, PlaceholderApplier placeholders) {
+        for (CommandLike like : commands) {
+            like.run(ctx, placeholders);
         }
     }
 
-    public List<String> list() {
-        return list;
-    }
-
-    private static <T> T make(Supplier<T> supplier) {
-        return supplier.get();
+    public static Commands fromCommandsList(List<Commands> list) {
+        List<CommandLike> result = new ArrayList<>();
+        boolean hasBreak = false;
+        for (Commands commands : list) {
+            result.addAll(commands.commands);
+            //noinspection all
+            if (hasBreak = commands.isHasBreak()) {
+                break;
+            }
+        }
+        return new Commands(result, hasBreak);
     }
 
     public boolean isHasBreak() {
@@ -128,6 +143,39 @@ public class Commands {
     }
 
     public boolean isEmpty() {
-        return compiled.isEmpty();
+        return commands.isEmpty();
+    }
+
+    private static <T, T1, T2, R> DataResult<R> allOf(RecordYamlCodecBuilder.Function3<T, T1, T2, R> f, DataResult<T> r, DataResult<T1> r1, DataResult<T2> r2) {
+        final T t;
+        final T1 t1;
+        final T2 t2;
+        if (r.hasResult()) {
+            t = r.result();
+          //  if (r.hasError()) err.append(r.error()).append("\n");
+        } else {
+            return (DataResult<R>) r;
+        }
+        if (r1.hasResult()) {
+            t1 = r1.result();
+           // if (r1.hasError()) err.append(r1.error()).append("\n");
+        } else {
+            return (DataResult<R>) r1;
+        }
+        if (r2.hasResult()) {
+            t2 = r2.result();
+          //  if (r2.hasError()) err.append(r2.error()).append("\n");
+        } else {
+            return (DataResult<R>) r2;
+        }
+        try {
+            R res = f.apply(t, t1, t2);
+            return DataResult.success(res);
+           // if (err.isEmpty()) return DataResult.success(res);
+           // err.setLength(err.length() - 1);
+           // return DataResult.error(err.toString()).partial(res);
+        } catch (Exception e) {
+            return DataResult.error(e);
+        }
     }
 }

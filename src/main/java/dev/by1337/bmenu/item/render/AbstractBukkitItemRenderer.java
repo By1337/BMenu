@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.item.render;
 
+import dev.by1337.bmenu.hook.ItemStackCreator;
 import dev.by1337.bmenu.item.ItemModel;
-import dev.by1337.bmenu.item.component.EnchantmentData;
 import dev.by1337.bmenu.item.component.ItemDataComponents;
 import dev.by1337.bmenu.item.component.impl.ContainerComponent;
 import dev.by1337.bmenu.menu.Menu;
@@ -17,13 +17,17 @@ import dev.by1337.plc.PlaceholderApplier;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Arrow;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionEffect;
@@ -62,41 +66,36 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
         if (c instanceof RawTextComponent raw) {
             String s = placeholders.setPlaceholders(raw.source());
             for (String line : s.split("\n")) {
-                processor.accept(MiniMessage.deserialize(line));
+                processor.accept(MiniMessage.deserialize(line).decoration(TextDecoration.ITALIC, false));
             }
         } else {
-            processor.accept(c.asComponent());
+            processor.accept(c.asComponent().decoration(TextDecoration.ITALIC, false));
         }
     }
 
     private Component toComponent(ComponentLike c, PlaceholderApplier placeholders) {
         if (c instanceof RawTextComponent c1) {
-            return c1.asComponent(placeholders);
+            return c1.asComponent(placeholders).decoration(TextDecoration.ITALIC, false);
         }
-        return c.asComponent();
+        return c.asComponent().decoration(TextDecoration.ITALIC, false);
     }
 
     private ItemStack build(ItemModel item, PlaceholderApplier placeholders) {
-        String material = item.get(ItemDataComponents.MATERIAL, new DataString("dirt")).get(placeholders).toUpperCase();
-        ItemStack itemStack = new ItemStack(Material.DIRT);
-        try {
-            itemStack = new ItemStack(Material.valueOf(material));//todo skulls
-        } catch (Exception e) {
-            log.error("Failed to create item {}", material);
-        }
+        String material = item.get(ItemDataComponents.MATERIAL, new DataString("dirt")).get(placeholders);
+        ItemStack itemStack = ItemStackCreator.getItem(material);
 
         ItemMeta im = itemStack.getItemMeta();
         if (im == null) {
             return AIR;
         }
-        //todo
-        // if (item.hasItemFlags()) {
-        //     item.forEachItemFlags(im::addItemFlags);
-        //     if (ServerVersion.is1_20_5orNewer() && im.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
-        //         // https://github.com/PaperMC/Paper/issues/10655
-        //         im.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("123", 1, AttributeModifier.Operation.ADD_NUMBER));
-        //     }
-        // }
+        var hide = item.get(ItemDataComponents.HIDE_FLAGS);
+        if (hide != null) {
+            hide.flags().forEach(im::addItemFlags);
+            if (ServerVersion.is1_20_5orNewer() && im.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
+                // https://github.com/PaperMC/Paper/issues/10655
+                im.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("123", 1, AttributeModifier.Operation.ADD_NUMBER));
+            }
+        }
         var potion = item.get(ItemDataComponents.POTION_CONTENTS);
         if (potion != null) {
             for (PotionEffect potionEffect : potion.contents()) {

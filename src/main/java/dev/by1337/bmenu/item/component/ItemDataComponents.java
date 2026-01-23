@@ -38,6 +38,7 @@ public class ItemDataComponents {
     public static final ItemDataComponent<EnchantmentsComponent> ENCHANTMENTS = register("enchantments", EnchantmentsComponent.CODEC);
     public static final ItemDataComponent<Boolean> UNBREAKABLE = register("unbreakable", YamlCodec.BOOL);
     public static final ItemDataComponent<ContainerComponent> CONTAINER = register("container", ContainerComponent.CODEC);
+    public static final ItemDataComponent<HideFlagsComponents> HIDE_FLAGS = register("item_flags", HideFlagsComponents.CODEC);
     //1.19.4+
     @Nullable
     public static final ItemDataComponent<ArmorTrimComponent> TRIM = register("trim", ArmorTrimComponent.CODEC, ArmorTrimComponent.CODEC != null);
@@ -51,7 +52,7 @@ public class ItemDataComponents {
     //1.21.3+
     @Nullable
     public static final ItemDataComponent<Boolean> GLIDER = register("glider", YamlCodec.BOOL, ServerVersion.is1_21_3orNewer());
-    //ItemContainerContents?
+
     public static final YamlCodec<ItemComponents> COMPONENTS_CODEC;
 
     @Nullable

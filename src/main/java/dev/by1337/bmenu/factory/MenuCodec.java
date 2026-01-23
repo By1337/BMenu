@@ -1,5 +1,6 @@
 package dev.by1337.bmenu.factory;
 
+import dev.by1337.bmenu.event.MenuEventHandler;
 import dev.by1337.yaml.BukkitYamlCodecs;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
@@ -16,7 +17,6 @@ import dev.by1337.bmenu.item.SlotFactory;
 import dev.by1337.bmenu.MenuLoader;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.command.CommandList;
-import dev.by1337.bmenu.requirement.CommandRequirements;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +43,7 @@ public class MenuCodec {
     private Animator.AnimatorContext animator;
     private Map<String, Animator.AnimatorContext> animations = new HashMap<>();
     private CommandList commandList = new CommandList(new HashMap<>());
-    private Map<String, CommandRequirements> menuEventListeners = new HashMap<>();
+    private Map<String, MenuEventHandler> menuEventListeners = new HashMap<>();
     private long clickCooldown = 100;
     private final YamlCodec<List<MenuConfig>> other_configs_loader = new YamlCodec<List<MenuConfig>>() {
         @Override
@@ -156,7 +156,7 @@ public class MenuCodec {
         FIELDS.add(Animator.AnimatorContext.CODEC.fieldOf("animation", m -> m.animator, (m, v) -> m.animator = v));
         FIELDS.add(YamlCodec.mapOf(YamlCodec.STRING, Animator.AnimatorContext.CODEC).fieldOf("animations", m -> m.animations, (m, v) -> m.animations = v));
         FIELDS.add(CommandList.CODEC.fieldOf("commands-list", m -> m.commandList, (m, v) -> m.commandList = v));
-        FIELDS.add(YamlCodec.mapOf(YamlCodec.STRING, CommandRequirements.CODEC).fieldOf("menu-events", m -> m.menuEventListeners, (m, v) -> m.menuEventListeners = v));
+        FIELDS.add(YamlCodec.mapOf(YamlCodec.STRING, MenuEventHandler.CODEC).fieldOf("menu-events", m -> m.menuEventListeners, (m, v) -> m.menuEventListeners = v));
         FIELDS.add(YamlCodec.LONG.fieldOf("click_cooldown", m -> m.clickCooldown, (m, v) -> m.clickCooldown = v));
 
         var builder = JsonSchemaTypeBuilder
@@ -168,9 +168,9 @@ public class MenuCodec {
         }
         builder.patternProperties("^items-", SlotFactory.YAML_CODEC.schema().asMap());
         builder.properties("include", SchemaTypes.STRING.listOf());
-        builder.definitions(MenuCodecs.COMMANDS_SCHEMA_TYPE_REF_NAME, MenuCodecs.COMMANDS_SCHEMA_TYPE);
+       // builder.definitions(MenuCodecs.COMMANDS_SCHEMA_TYPE_REF_NAME, MenuCodecs.COMMANDS_SCHEMA_TYPE);
         builder.additionalProperties(true);
-        SCHEMA_TYPE = builder.build();
+        SCHEMA_TYPE = builder.build(UUID.randomUUID());
     }
 
     private NamespacedKey asId(@Nullable String id) {

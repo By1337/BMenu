@@ -1,41 +1,49 @@
 package dev.by1337.bmenu.requirement;
 
-import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.plc.PlaceholderApplier;
+import dev.by1337.yaml.codec.InlineYamlCodecBuilder;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 public class NearbyRequirement implements Requirement {
+    public static YamlCodec<NearbyRequirement> CODEC = InlineYamlCodecBuilder.inline(
+            "\\s+",
+            "nearby <wolrd> <x> <y> <z> <radius>",
+            NearbyRequirement::new,
+            YamlCodec.STRING.fieldOf(null, v -> v.name),
+            YamlCodec.STRING.fieldOf(null, v -> v.world),
+            YamlCodec.DOUBLE.fieldOf(null, v -> v.x),
+            YamlCodec.DOUBLE.fieldOf(null, v -> v.y),
+            YamlCodec.DOUBLE.fieldOf(null, v -> v.z),
+            YamlCodec.INT.fieldOf(null, v -> v.radius)
+    );
+    private final String name;
     private final String world;
     private final double x;
     private final double y;
     private final double z;
     private final int radius;
     private final int radiusSq;
-    private final boolean not;
-    private final Commands commands;
-    private final Commands denyCommands;
+    private boolean not;
 
-    public NearbyRequirement(String world, int x, int y, int z, int radius, boolean not, Commands commands, Commands denyCommands) {
+    public NearbyRequirement(String name, String world, double x, double y, double z, int radius) {
+        this.name = name;
         this.world = world;
         this.x = x;
         this.y = y;
         this.z = z;
         this.radius = radius;
-        this.not = not;
-        this.commands = commands;
-        this.denyCommands = denyCommands;
-        radiusSq = radius * radius;
+        this.radiusSq = radius * radius;
+        not = name.startsWith("!");
     }
 
-
     @Override
-    public boolean test(Menu menu, PlaceholderApplier placeholder, Player clicker) {
-        if (!clicker.getWorld().getName().equals(world)) {
+    public boolean test(Menu menu, PlaceholderApplier placeholders) {
+        if (!menu.getViewer().getWorld().getName().equals(world)) {
             return not;
         }
-        return not != (distanceSquared(clicker.getLocation()) < radiusSq);
+        return not != (distanceSquared(menu.getViewer().getLocation()) < radiusSq);
     }
 
     private double distanceSquared(Location loc) {
@@ -47,12 +55,7 @@ public class NearbyRequirement implements Requirement {
     }
 
     @Override
-    public Commands getCommands() {
-        return commands;
-    }
-
-    @Override
-    public Commands getDenyCommands() {
-        return denyCommands;
+    public String toString() {
+        return name + " " + world + " " + x + " " + y + " " + z + " " + radius;
     }
 }

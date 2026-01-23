@@ -2,159 +2,23 @@ package dev.by1337.bmenu.requirement;
 
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.factory.MenuCodecs;
-import dev.by1337.bmenu.factory.RequirementsFactory;
+import dev.by1337.bmenu.event.MenuEventHandler;
+import dev.by1337.bmenu.requirement.legacy.RequirementsFactory;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.plc.PlaceholderApplier;
-import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
-import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 
 public class Requirements {
-    public static final YamlCodec<Requirement> REQUIREMENT_CODEC = new YamlCodec<Requirement>() {
-        private final SchemaType schemaType = SchemaTypes.OBJECT
-                .asBuilder()
-                .properties("check", SchemaTypes.STRING)
-                .properties("commands", MenuCodecs.COMMANDS.schema())
-                .properties("deny_commands", MenuCodecs.COMMANDS.schema())
-                .additionalProperties(false)
-                .required("check")
-                .build()
-                .or(SchemaTypes.STRING);
-
-        @Override
-        public DataResult<Requirement> decode(YamlValue yamlValue) {
-            @Nullable YamlMap yaml = null;
-            try {
-                Requirement requirement;
-                if (yamlValue.isMap()) {
-                    requirement = readRequirement(yaml = yamlValue.asYamlMap().getOrThrow());
-                } else {
-                    requirement = readRequirement(yamlValue.asString().getOrThrow(), Commands.EMPTY, Commands.EMPTY);
-                }
-                if (requirement.compilable()) {
-                    requirement = requirement.compile();
-                    boolean state = requirement.state();
-                    if (yaml != null) {
-                        yaml.set("$state", state);
-                    }
-                }
-                return DataResult.success(requirement);
-            } catch (Exception e) {
-                return DataResult.error(e.getMessage());
-            }
-
-        }
-
-        @Override
-        public YamlValue encode(Requirement requirement) {
-            return YamlValue.wrap("unsupported");//todo
-        }
-
-        @Override
-        public @NotNull SchemaType schema() {
-            return schemaType;
-        }
-    };
-
-    private static Requirement readRequirement(YamlMap yaml) {
-        String check = yaml.get("check").decode(YamlCodec.STRING).getOrThrow();
-        Commands commands = yaml.get("commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
-        Commands denyCommands = yaml.get("deny_commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
-
-        Requirement requirement = readRequirement(check, commands, denyCommands);
-        yaml.set("$check-type", requirement.getClass().getSimpleName());
-        return requirement;
-    }
-
-    private static Requirement readRequirement(String check, Commands commands, Commands denyCommands) {
-        if (check.equalsIgnoreCase("true") || check.equalsIgnoreCase("false")) {
-            return new FlagRequirements(Boolean.parseBoolean(check), commands, denyCommands);
-        }
-        if (check.startsWith("has") || check.startsWith("!has")) {
-            return new HasPermissionRequirement(
-                    check.split(" ")[1],
-                    check.startsWith("!"),
-                    commands,
-                    denyCommands
-            );
-        } else if (check.startsWith("nearby") || check.startsWith("!nearby")) {
-            String[] args = check.split(" ");
-            if (args.length != 6) {
-                throw new IllegalArgumentException("The condition expected 'nearby <world> <x> <y> <z> <radius>' but got '" + check + "'.");
-            }
-            return new NearbyRequirement(
-                    args[1],
-                    Integer.parseInt(args[2]),
-                    Integer.parseInt(args[3]),
-                    Integer.parseInt(args[4]),
-                    Integer.parseInt(args[5]),
-                    check.startsWith("!"),
-                    commands,
-                    denyCommands
-            );
-        } else {
-            String[] args = check.split(" ");
-            if (args.length == 3) {
-                String operator = args[1];
-                switch (operator) {
-                    case "has", "!has" -> {
-                        return new StringContainsRequirement(
-                                args[0],
-                                args[2],
-                                operator.startsWith("!"),
-                                commands,
-                                denyCommands
-                        );
-                    }
-                    case "HAS", "!HAS" -> {
-                        return new StringEqualsIgnoreCaseRequirement(
-                                args[0],
-                                args[2],
-                                operator.startsWith("!"),
-                                commands,
-                                denyCommands
-                        );
-                    }
-                    case "==", "!=" -> {
-                        return new StringEqualsRequirement(
-                                args[0],
-                                args[2],
-                                operator.startsWith("!"),
-                                commands,
-                                denyCommands
-                        );
-                    }
-                    default -> {
-                        return new MathRequirement(
-                                check,
-                                commands,
-                                denyCommands
-                        );
-                    }
-                }
-            } else {
-                return new MathRequirement(
-                        check,
-                        commands,
-                        denyCommands
-                );
-            }
-        }
-    }
-
     public static final YamlCodec<Requirements> CODEC = new YamlCodec<>() {
-        final SchemaType schemaType = REQUIREMENT_CODEC.schema().listOf();
-        final YamlCodec<List<Requirement>> LIST_CODEC = REQUIREMENT_CODEC.listOf();
+        final YamlCodec<List<LegacyRequirement>> LIST_CODEC = LegacyRequirement.CODEC.listOf();
 
         @Override
         public DataResult<Requirements> decode(YamlValue yamlValue) {
@@ -169,28 +33,28 @@ public class Requirements {
 
         @Override
         public @NotNull SchemaType schema() {
-            return schemaType;
+            return LIST_CODEC.schema();
         }
     };
 
     public static final Requirements EMPTY = new Requirements(Collections.emptyList());
-    private final List<Requirement> requirements;
+    private final List<LegacyRequirement> requirements;
 
-    public Requirements(List<Requirement> requirements) {
+    public Requirements(List<LegacyRequirement> requirements) {
         this.requirements = requirements;
     }
 
-    public boolean test(Menu menu, PlaceholderApplier placeholders, Player clicker, ExecuteContext ctx) {
+    public boolean test(Menu menu, PlaceholderApplier placeholders, ExecuteContext ctx) {
         boolean result = true;
-        for (Requirement requirement : requirements) {
+        for (LegacyRequirement requirement : requirements) {
             try {
-                if (!requirement.test(menu, placeholders, clicker)) {
-                    Commands c = requirement.getDenyCommands();
+                if (!requirement.test(menu, placeholders)) {
+                    Commands c = requirement.denyCommands();
                     c.run(ctx, placeholders);
                     if (c.isHasBreak()) return false;
                     result = false;
                 } else {
-                    Commands c = requirement.getCommands();
+                    Commands c = requirement.commands();
                     c.run(ctx, placeholders);
                     if (c.isHasBreak()) return true;
                 }
@@ -201,7 +65,7 @@ public class Requirements {
         return result;
     }
 
-    public List<Requirement> getRequirements() {
+    public List<LegacyRequirement> getRequirements() {
         return requirements;
     }
 
@@ -213,5 +77,4 @@ public class Requirements {
     public boolean isEmpty() {
         return this == EMPTY || requirements.isEmpty();
     }
-
 }

@@ -15,5 +15,5 @@ public record ContainerComponent(Int2ObjectOpenHashMap<ItemModel> items) {
                     map -> new ContainerComponent(new Int2ObjectOpenHashMap<>(map)),
                     map -> (Map<Integer, ItemModel>) map.items
             )
-    ).schema(SchemaTypes.ANY);
+    );
 }

@@ -3,6 +3,7 @@ package dev.by1337.bmenu.item.component.impl;
 import dev.by1337.bmenu.item.component.MergeableComponent;
 import dev.by1337.bmenu.text.SourcedComponentLike;
 import dev.by1337.yaml.codec.YamlCodec;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 
 import java.util.ArrayList;
