@@ -352,24 +352,17 @@ items:
       page: 0
     name: '${current_name}'
     lore: '${current_lore}'
-    on_click2:
-      - if: '{x} > 60'
-        do: '[message] 123'
-        else: '[message] 321'
-      - if: '{y} < 78'
-        do:
-          if: '{z} == 90'
-          do: '[console] say 42'
     on_click:
-
       requirements:
         - check: '${page} == 0'
           commands:
+            - '1'
             - '[set_local] current_name ${name2}'
             - '[set_local] current_lore ${lore2}'
             - '[set_local] page 1'
             - '[update]'
           deny_commands:
+            - '2'
             - '[set_local] current_name ${name1}'
             - '[set_local] current_lore ${lore1}'
             - '[set_local] page 0'

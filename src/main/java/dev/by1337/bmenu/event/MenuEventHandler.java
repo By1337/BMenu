@@ -14,7 +14,7 @@ public interface MenuEventHandler {
     YamlCodec<MenuEventHandler> CODEC = new YamlCodec<MenuEventHandler>() {
         @Override
         public DataResult<MenuEventHandler> decode(YamlValue yaml) {
-            if (yaml.isMap()) return LegacyRequirement.CODEC.decode(yaml)
+            if (yaml.isMap()) return LegacyHandler.CODEC.decode(yaml)
                     .mapValue(v -> v);
             return Commands.CODEC.decode(yaml)
                     .mapValue(v -> v);
@@ -22,7 +22,7 @@ public interface MenuEventHandler {
 
         @Override
         public YamlValue encode(MenuEventHandler handler) {
-            if (handler instanceof LegacyRequirement l) return LegacyRequirement.CODEC.encode(l);
+            if (handler instanceof LegacyHandler l) return LegacyHandler.CODEC.encode(l);
             if (handler instanceof Commands c) return Commands.CODEC.encode(c);
             return YamlValue.wrap(handler.toString());
         }

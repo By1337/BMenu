@@ -71,7 +71,7 @@ public class Commands implements MenuEventHandler {
         @Override
         public YamlValue encode(Commands commands) {
             List<Object> out = new ArrayList<>();
-            for (CommandLike command : commands.commands) {
+            for (MenuEventHandler command : commands.commands) {
                 if (command instanceof MenuCommand mc) {
                     out.add(mc.source());
                 } else if (command instanceof LegacyRequirement r) {
@@ -94,7 +94,7 @@ public class Commands implements MenuEventHandler {
             return SchemaTypes.ANY;
         }
     };
-    private final List<CommandLike> commands;
+    private final List<MenuEventHandler> commands;
     private boolean hasBreak;
 
     @ApiStatus.Experimental
@@ -102,7 +102,7 @@ public class Commands implements MenuEventHandler {
         commands = List.of(requirement);
     }
 
-    public Commands(List<CommandLike> commands, boolean hasBreak) {
+    public Commands(List<MenuEventHandler> commands, boolean hasBreak) {
         this.commands = commands;
         this.hasBreak = hasBreak;
     }
@@ -120,13 +120,13 @@ public class Commands implements MenuEventHandler {
 
     @Override
     public void run(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        for (CommandLike like : commands) {
+        for (MenuEventHandler like : commands) {
             like.run(ctx, placeholders);
         }
     }
 
     public static Commands fromCommandsList(List<Commands> list) {
-        List<CommandLike> result = new ArrayList<>();
+        List<MenuEventHandler> result = new ArrayList<>();
         boolean hasBreak = false;
         for (Commands commands : list) {
             result.addAll(commands.commands);

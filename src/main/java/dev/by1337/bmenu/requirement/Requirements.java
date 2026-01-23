@@ -48,7 +48,7 @@ public class Requirements {
         boolean result = true;
         for (LegacyRequirement requirement : requirements) {
             try {
-                if (!requirement.test(menu, placeholders)) {
+                if (!requirement.test(ctx, placeholders)) {
                     Commands c = requirement.denyCommands();
                     c.run(ctx, placeholders);
                     if (c.isHasBreak()) return false;

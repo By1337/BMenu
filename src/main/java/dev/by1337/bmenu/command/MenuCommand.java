@@ -1,12 +1,13 @@
 package dev.by1337.bmenu.command;
 
+import dev.by1337.bmenu.event.MenuEventHandler;
 import dev.by1337.cmd.CompiledCommand;
 import dev.by1337.plc.PlaceholderApplier;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MenuCommand implements CommandLike{
+public class MenuCommand implements MenuEventHandler {
     private static final Logger log = LoggerFactory.getLogger(MenuCommand.class);
     private final String source;
     private @Nullable CompiledCommand<ExecuteContext> compiled;
