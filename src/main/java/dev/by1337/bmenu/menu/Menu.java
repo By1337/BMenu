@@ -948,7 +948,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
         );
         commands.sub(new Command<ExecuteContext>("[set_local]")
                 .argument(new ArgumentString<>("param"))
-                .argument(new ArgumentString<>("value"))
+                .argument(new ArgumentStrings<>("value"))
                 .executor((v, args) -> {
                     String param = (String) args.getOrThrow("param", "Use: [set_local] <param> <value>");
                     String value = (String) args.getOrThrow("value", "Use: [set_local] <param> <value>");

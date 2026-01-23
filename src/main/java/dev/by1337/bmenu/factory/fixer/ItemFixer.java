@@ -37,7 +37,7 @@ public class ItemFixer {
 
         replacePlaceholders(map, superItem);
         map.set("name", fixDisplay(map.getRaw("name")));
-        map.set("lore", fixDisplay(map.getRaw("lore")));
+        map.set("lore", fixDisplay(map.getRaw("lore"), true));
 
         if (Objects.equals(map.getRaw("ticking"), true)) {
             if (map.has("on_tick")) {
@@ -102,6 +102,10 @@ public class ItemFixer {
     }
 
     private static Object fixDisplay(Object o) {
+        return fixDisplay(o, false);
+    }
+
+    private static Object fixDisplay(Object o, boolean toList) {
         if (o == null) return null;
         if (o instanceof Collection<?> c) {
             List<String> result = new ArrayList<>();
@@ -114,6 +118,9 @@ public class ItemFixer {
                 }
             }
             return result;
+        } else if (o instanceof String s && toList) {
+            if (s.contains("\n")) return Arrays.asList(s.split("\n"));
+            return s;
         }
         return o;
     }
@@ -130,8 +137,8 @@ public class ItemFixer {
 
                     @Override
                     public @Nullable String resolve(String key, String params, @Nullable Void ctx, PlaceholderSyntax format) {
-                        if (params.contains("%") || params.contains("{") || params.contains("(")) //( нужен так как существует rnd()
-                            return null; // сейчас не известны некоторые плейсы
+                        if (params.contains("%") || params.contains("{") || params.contains("rnd"))
+                            return null; // сейчас не известны некоторые плейсы или юзается рандом
                         try {
                             return String.valueOf(FastExpressionParser.parse(params));
                         } catch (FastExpressionParser.MathFormatException e) {
