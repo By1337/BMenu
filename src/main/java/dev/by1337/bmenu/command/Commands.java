@@ -1,8 +1,8 @@
 package dev.by1337.bmenu.command;
 
 
-import dev.by1337.bmenu.event.MenuEventHandler;
-import dev.by1337.bmenu.requirement.LegacyRequirement;
+import dev.by1337.bmenu.handler.MenuEventHandler;
+import dev.by1337.bmenu.requirement.legacy.LegacyRequirement;
 import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
@@ -146,6 +146,7 @@ public class Commands implements MenuEventHandler {
         return commands.isEmpty();
     }
 
+    @SuppressWarnings("unchecked")
     private static <T, T1, T2, R> DataResult<R> allOf(RecordYamlCodecBuilder.Function3<T, T1, T2, R> f, DataResult<T> r, DataResult<T1> r1, DataResult<T2> r2) {
         final T t;
         final T1 t1;

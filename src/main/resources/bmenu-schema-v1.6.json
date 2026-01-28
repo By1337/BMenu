@@ -1,0 +1,4258 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+    },
+    "id": {
+      "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+    },
+    "provider": {
+      "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+    },
+    "type": {
+      "$ref": "#/definitions/2ed6bf09-d3b7-45ed-bd01-8dc7e62d9ff6"
+    },
+    "size": {
+      "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+    },
+    "only-open-from": {
+      "$ref": "#/definitions/58fafc3c-6a08-4bab-8f69-998bd5a631c7"
+    },
+    "args": {
+      "$ref": "#/definitions/cf8be766-1abd-413c-b1df-db0083994808"
+    },
+    "items": {
+      "$ref": "#/definitions/4f9f7a79-b245-436c-af30-3766ed591964"
+    },
+    "animation": {
+      "$ref": "#/definitions/70c288af-33a5-4a24-9f6c-dc2440e03ae5"
+    },
+    "animations": {
+      "$ref": "#/definitions/10ed62b5-0876-4e09-96b6-3b8965ebd7c9"
+    },
+    "commands-list": {
+      "$ref": "#/definitions/8ccccc78-76a2-435e-a15a-c148969ab0cb"
+    },
+    "menu-events": {
+      "$ref": "#/definitions/e97071f6-3e9f-4a4c-8ef8-8ba46563a6fb"
+    },
+    "click_cooldown": {
+      "$ref": "#/definitions/5fcc7df1-2912-4bd4-8e68-952a3ad2cdcf"
+    },
+    "include": {
+      "$ref": "#/definitions/4ead1acf-0a8b-4246-8ed1-280290e0790f"
+    }
+  },
+  "definitions": {
+    "fb409170-4a66-4f71-a5ad-0d1d3f0d80b1": {
+      "type": "string"
+    },
+    "2ed6bf09-d3b7-45ed-bd01-8dc7e62d9ff6": {
+      "$ref": "#/definitions/dub_1"
+    },
+    "2a1f04f3-845a-449b-9059-0c55e02e7f98": {
+      "type": "integer"
+    },
+    "afede671-e2fe-4f7c-9086-7bd795d55482": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+      }
+    },
+    "58fafc3c-6a08-4bab-8f69-998bd5a631c7": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        {
+          "$ref": "#/definitions/afede671-e2fe-4f7c-9086-7bd795d55482"
+        }
+      ]
+    },
+    "faca62c4-fb38-4cf8-950d-2f47085bd332": {
+      "type": [
+        "number",
+        "string"
+      ]
+    },
+    "4482e8c3-7de4-470c-ab07-986287c3098e": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+      }
+    },
+    "417e8f0e-4426-4134-9ed3-fd93b159c196": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        {
+          "$ref": "#/definitions/4482e8c3-7de4-470c-ab07-986287c3098e"
+        }
+      ]
+    },
+    "cf8be766-1abd-413c-b1df-db0083994808": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/417e8f0e-4426-4134-9ed3-fd93b159c196"
+        }
+      }
+    },
+    "9e9edcbf-fb11-48e0-8cfd-fbc5cdb862cb": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+      }
+    },
+    "583b23c0-7dd4-425b-ab7b-3356442ad053": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        {
+          "$ref": "#/definitions/9e9edcbf-fb11-48e0-8cfd-fbc5cdb862cb"
+        }
+      ]
+    },
+    "7559cee4-5c98-4162-b797-6750dc302978": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+      }
+    },
+    "5d2a7d70-38b6-4002-93aa-b82d8a0dd20c": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        {
+          "$ref": "#/definitions/7559cee4-5c98-4162-b797-6750dc302978"
+        }
+      ]
+    },
+    "4af04510-675b-4730-9a10-1cbaec242535": {
+      "$ref": "#/definitions/dub_2"
+    },
+    "2212e912-4cc8-4dd4-b8fc-ea36d6a49fcd": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/4af04510-675b-4730-9a10-1cbaec242535"
+        },
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        }
+      ]
+    },
+    "5fcc7df1-2912-4bd4-8e68-952a3ad2cdcf": {
+      "type": "number"
+    },
+    "f2da3354-425c-4cbd-ab6b-38d885f74a39": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/5fcc7df1-2912-4bd4-8e68-952a3ad2cdcf"
+      }
+    },
+    "b25ad954-58e6-4b4a-be27-574163e5d0d9": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/5fcc7df1-2912-4bd4-8e68-952a3ad2cdcf"
+        },
+        {
+          "$ref": "#/definitions/f2da3354-425c-4cbd-ab6b-38d885f74a39"
+        }
+      ]
+    },
+    "46bb24a4-8ed1-41e4-a1e4-f19e056f7803": {
+      "type": "boolean"
+    },
+    "ba2daee0-6faa-483b-bacb-dfcec4591c47": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/46bb24a4-8ed1-41e4-a1e4-f19e056f7803"
+      }
+    },
+    "77bf61c5-eef0-4da6-8159-1aaba2e21a2f": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/46bb24a4-8ed1-41e4-a1e4-f19e056f7803"
+        },
+        {
+          "$ref": "#/definitions/ba2daee0-6faa-483b-bacb-dfcec4591c47"
+        }
+      ]
+    },
+    "5df84e6f-3f0f-4eb5-b00e-2ae31cea6e85": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+      }
+    },
+    "42b97116-db13-4d6d-a2e8-db70d0971378": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        {
+          "$ref": "#/definitions/5df84e6f-3f0f-4eb5-b00e-2ae31cea6e85"
+        }
+      ]
+    },
+    "a051daea-7644-4271-99da-c34e9f89a242": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+      }
+    },
+    "0a765925-4188-4dba-945b-130f365753fb": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        {
+          "$ref": "#/definitions/a051daea-7644-4271-99da-c34e9f89a242"
+        }
+      ]
+    },
+    "adb09ac3-113d-4522-8182-c5a62b896b50": {
+      "type": "object",
+      "properties": {
+        "floats": {
+          "$ref": "#/definitions/b25ad954-58e6-4b4a-be27-574163e5d0d9"
+        },
+        "flags": {
+          "$ref": "#/definitions/77bf61c5-eef0-4da6-8159-1aaba2e21a2f"
+        },
+        "strings": {
+          "$ref": "#/definitions/42b97116-db13-4d6d-a2e8-db70d0971378"
+        },
+        "colors": {
+          "$ref": "#/definitions/0a765925-4188-4dba-945b-130f365753fb"
+        }
+      },
+      "additionalProperties": false
+    },
+    "681a8b60-5d58-46c7-a368-f01f84fcecd8": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+        },
+        {
+          "$ref": "#/definitions/adb09ac3-113d-4522-8182-c5a62b896b50"
+        }
+      ]
+    },
+    "8d31ceac-144e-4d7e-9f79-13080e7874d6": {
+      "type": "string",
+      "examples": [
+        "<PotionEffectType>;<duration>;<amplifier>"
+      ]
+    },
+    "9bfc783b-bc6a-49f5-890a-fce03c0dc3b7": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/8d31ceac-144e-4d7e-9f79-13080e7874d6"
+      }
+    },
+    "a254febc-09e7-40da-8000-6feb6b9325a9": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/8d31ceac-144e-4d7e-9f79-13080e7874d6"
+        },
+        {
+          "$ref": "#/definitions/9bfc783b-bc6a-49f5-890a-fce03c0dc3b7"
+        }
+      ]
+    },
+    "98563231-4aa9-4736-9f5e-5972715e7065": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        }
+      }
+    },
+    "a137c395-95ea-42e1-8041-35507a53bc95": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/a254febc-09e7-40da-8000-6feb6b9325a9"
+        },
+        {
+          "$ref": "#/definitions/98563231-4aa9-4736-9f5e-5972715e7065"
+        }
+      ]
+    },
+    "92d53c02-9462-4998-9de7-2a79878faad3": {
+      "type": "string",
+      "examples": [
+        "<enchantment>;<lvl>"
+      ]
+    },
+    "2154b6b4-a3d3-4450-b814-69bed55eb71d": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/92d53c02-9462-4998-9de7-2a79878faad3"
+      }
+    },
+    "6e7ce858-e7af-4523-8dde-7ff8420066d9": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/92d53c02-9462-4998-9de7-2a79878faad3"
+        },
+        {
+          "$ref": "#/definitions/2154b6b4-a3d3-4450-b814-69bed55eb71d"
+        }
+      ]
+    },
+    "3ce215ec-a4d7-4a92-82b5-c9fffff72232": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+        }
+      }
+    },
+    "a6bbda88-bbcd-4366-bcc6-83523fd70a97": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/6e7ce858-e7af-4523-8dde-7ff8420066d9"
+        },
+        {
+          "$ref": "#/definitions/3ce215ec-a4d7-4a92-82b5-c9fffff72232"
+        }
+      ]
+    },
+    "eb209637-b28d-499e-8397-e423c5531307": {
+      "type": "object",
+      "properties": {
+        "lore": {
+          "$ref": "#/definitions/5d2a7d70-38b6-4002-93aa-b82d8a0dd20c"
+        },
+        "name": {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        "amount": {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        "damage": {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        "material": {
+          "$ref": "#/definitions/2212e912-4cc8-4dd4-b8fc-ea36d6a49fcd"
+        },
+        "model_data": {
+          "$ref": "#/definitions/681a8b60-5d58-46c7-a368-f01f84fcecd8"
+        },
+        "potion_contents": {
+          "$ref": "#/definitions/a137c395-95ea-42e1-8041-35507a53bc95"
+        },
+        "color": {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        "enchantments": {
+          "$ref": "#/definitions/a6bbda88-bbcd-4366-bcc6-83523fd70a97"
+        },
+        "unbreakable": {
+          "$ref": "#/definitions/46bb24a4-8ed1-41e4-a1e4-f19e056f7803"
+        },
+        "container": {
+          "$ref": "#/definitions/0913aa62-f698-480a-b8d8-ca14dc12c7eb"
+        }
+      },
+      "additionalProperties": false
+    },
+    "0913aa62-f698-480a-b8d8-ca14dc12c7eb": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/eb209637-b28d-499e-8397-e423c5531307"
+        }
+      }
+    },
+    "39afe501-7b04-4147-a6f0-b31973765e59": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+      }
+    },
+    "1e3c1e1b-fc22-4ca0-a619-59168e5b9f36": {
+      "type": "string",
+      "examples": [
+        "<commands>"
+      ]
+    },
+    "d763e4f0-1d5d-48ae-b103-73be38f0b5e1": {
+      "type": "string",
+      "examples": [
+        "<menu> <commands>"
+      ]
+    },
+    "bd3a6c2a-7617-405f-8507-978eb1ae4c7f": {
+      "type": "string",
+      "examples": [
+        "<msg> <fadeIn> <stay> <fadeOut>"
+      ]
+    },
+    "1e9c943a-0648-46ed-a6ed-102ba9d9f926": {
+      "type": "string",
+      "examples": [
+        "<item>"
+      ]
+    },
+    "277e29f6-2489-4078-954a-dc0157c57459": {
+      "type": "string",
+      "examples": [
+        "<name>"
+      ]
+    },
+    "025e9fa7-2791-4bc5-911b-915388a50a47": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "adac9ab7-7721-4ca6-90cb-67bf8f16fe9a": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "f6d1e898-8b7a-435a-98d2-5bd4f2d1d272": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "75588458-b1d0-48d9-8e7b-084b0119b7e5": {
+      "type": "string",
+      "examples": [
+        "<commands>"
+      ]
+    },
+    "96c73327-d067-44bc-a7a9-ec3f0ada5851": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "8d21103d-0986-4747-b26b-2acee495cef7": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "4a48b9a8-42cd-4bb6-bc9c-8dbb4729ada9": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "4d2b3ae3-ec73-413e-870f-122f2ef117f4": {
+      "type": "string",
+      "examples": [
+        "<sound> <volume> <pitch>"
+      ]
+    },
+    "b8387819-4acd-42cc-938e-aed56c0a2609": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "caa096be-3a4f-41e8-b662-ac8b4f537098": {
+      "type": "string",
+      "examples": [
+        "<animation>"
+      ]
+    },
+    "80019676-e9e3-414f-a022-28151bba56dd": {
+      "type": "string",
+      "examples": [
+        "<msg> <fadeIn> <stay> <fadeOut>"
+      ]
+    },
+    "66bb569a-b72f-40a8-ae32-a8f3445632ce": {
+      "type": "string",
+      "examples": [
+        "<menu> <commands>"
+      ]
+    },
+    "79878339-d626-4115-b059-7cf2fad68a2d": {
+      "type": "string",
+      "examples": [
+        "<server>"
+      ]
+    },
+    "4baafe3f-7309-4aee-b0e5-2a3a189bd3a2": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "20819e5f-3b57-43e8-9aaa-cdbb0d76b7b9": {
+      "type": "string",
+      "examples": [
+        "<delay> <cmd>"
+      ]
+    },
+    "2e1c96a2-41c6-41f9-8f6c-baef302dd447": {
+      "type": "string",
+      "examples": [
+        "<src> <dest>"
+      ]
+    },
+    "d9a283f1-6940-4db2-8360-90c435e6b5b2": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "7ccd3c97-69ab-4b48-8a6f-8201da7d41a5": {
+      "type": "string",
+      "examples": [
+        "<commands>"
+      ]
+    },
+    "c8851a55-0583-45bb-b052-c39a86e38e16": {
+      "type": "string",
+      "examples": [
+        "<title>"
+      ]
+    },
+    "8f60814a-7a30-46f9-9fa1-f6846939c855": {
+      "type": "string",
+      "examples": [
+        "<sound> <volume> <pitch>"
+      ]
+    },
+    "746256e0-50a9-4219-99fa-678ccad58d34": {
+      "type": "string",
+      "examples": [
+        "<count>"
+      ]
+    },
+    "c7ce2b5c-9c71-42df-87f7-94a91452caa2": {
+      "type": "string",
+      "examples": [
+        "<animation>"
+      ]
+    },
+    "65abbad8-367f-4c76-9e06-fa117b137c47": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "4ffad3f3-b479-41d5-9d57-241874428dda": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "3375497e-7a5c-4a4b-ad91-2e56cd476fd5": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "e50ae481-b669-4afa-a8b8-df44fd4b7e46": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "515d83f2-a24d-4057-abd2-87df514fb6f6": {
+      "type": "string",
+      "examples": [
+        "<menu> <commands>"
+      ]
+    },
+    "b4603f3e-7577-4f02-83a6-367515350a82": {
+      "type": "string",
+      "examples": [
+        "<name>"
+      ]
+    },
+    "802186b5-9cc9-4500-b4da-ddaf63fa86e5": {
+      "type": "string",
+      "examples": [
+        "<count>"
+      ]
+    },
+    "92788eb5-6203-41e7-b3ed-2d50a46a4a21": {
+      "type": "string",
+      "examples": [
+        "<src> <dest>"
+      ]
+    },
+    "0553cd5c-899a-46ef-bb4e-f50acb1716b0": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "edbf9251-4712-40e9-b500-f8498973283c": {
+      "type": "string",
+      "examples": [
+        "<param> <value>"
+      ]
+    },
+    "b142cb54-1079-43c8-98cf-edca023cb5ca": {
+      "type": "string",
+      "examples": [
+        "<title>"
+      ]
+    },
+    "9efd007a-edc4-4293-8d87-69e9b0345d05": {
+      "type": "string",
+      "examples": [
+        "<menu> <commands>"
+      ]
+    },
+    "a0f1a176-7861-4e71-848b-20832074991a": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "f87efe42-68e6-4dc7-abf5-2c6d7b5f83e9": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "1553854a-c2f7-437d-a7ce-3c43f34020cd": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "7753a093-eacf-488a-9cda-da73994dc4c6": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "3d41fb6e-cf03-4cdb-8722-83976b51fa68": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "cec7cfb0-e8a5-4a96-b1f2-6da2b4c72e1a": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "3aedc4c7-141b-4c78-86c3-146ff6652ddd": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "14408c2c-1853-4704-9a3c-727a8bbc109e": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "50b08eb9-816d-4961-820f-4031a152aad6": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "92b08457-d3e3-4e46-b90d-a3cbf8b0986f": {
+      "type": "string",
+      "examples": [
+        "<count>"
+      ]
+    },
+    "e701e884-c5dc-4693-9eda-09037e1ed55a": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "71e47508-184a-4154-a9f9-f886ec3a40a3": {
+      "type": "string",
+      "examples": [
+        "<commands>"
+      ]
+    },
+    "71c754d9-011a-4a6a-836f-61a8a85b75a9": {
+      "type": "string",
+      "examples": [
+        "<param> <value>"
+      ]
+    },
+    "9d21254a-8c70-4629-8f0c-df54997a383c": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "0a4ec8d8-d587-4915-aa82-177f8e68cbda": {
+      "type": "string",
+      "examples": [
+        "<id> <commands>"
+      ]
+    },
+    "d143546c-3fe6-4004-a9b8-2fac098d8423": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "9bf2c802-3092-409e-89a2-4fe0d51502f6": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "a77b4326-9782-4826-a62f-016182e33645": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "37c6c648-6afc-4b14-85ff-437beb7abf96": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "16e45ec0-5577-4dd6-9a4a-f435ca2fe948": {
+      "type": "string",
+      "examples": [
+        "<item>"
+      ]
+    },
+    "53b7962f-d3ae-47eb-9213-d9205aa3d76c": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "900d8eb9-5c75-4477-8ca3-ede12a8bebf5": {
+      "type": "string",
+      "examples": [
+        "<param> <value>"
+      ]
+    },
+    "ed8bdc6a-6fb0-43d3-8052-8390dad22b19": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "dc58fa4f-b008-4c94-b0b8-ec636cceee8c": {
+      "type": "string",
+      "examples": [
+        "<msg> <fadeIn> <stay> <fadeOut>"
+      ]
+    },
+    "9a428f24-6153-4a96-8632-177b2f6455fa": {
+      "type": "string",
+      "examples": [
+        "<delay> <cmd>"
+      ]
+    },
+    "988b9056-4041-4bbf-971c-8419e8789702": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "a4093553-b559-47f9-9f5b-1eccb2f1f113": {
+      "type": "string",
+      "examples": [
+        "<count>"
+      ]
+    },
+    "c447e18c-d6cc-4b3d-8612-2205c12b19f2": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "1ff2b72f-d6e1-455b-b0b0-a2029de6805d": {
+      "type": "string",
+      "examples": [
+        "<id> <commands>"
+      ]
+    },
+    "4e4ae238-dfc9-4cd0-9404-d52b47f423ff": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "d6762144-57b1-4572-a0bc-f58e99de00fa": {
+      "type": "string",
+      "examples": [
+        "<msg> <fadeIn> <stay> <fadeOut>"
+      ]
+    },
+    "4b55605c-d96c-44f7-8b8d-8ead9f4d7697": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "a1406e64-d36d-4d01-9c2a-8c4c11c14107": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "ff3eb60c-629c-42b8-8b85-2c0e571c2329": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "a785d550-1788-46c7-92b9-c7f508cb127d": {
+      "type": "string",
+      "examples": [
+        "<server>"
+      ]
+    },
+    "02a635dc-0cd2-4424-90f2-c9760cb2214e": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "fb32b7d8-58b7-4b05-a1e6-f89c284f5e30": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "ff0b71d0-6cf5-4571-94f7-1e51beaafbe9": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "864a685b-d560-4b82-85c8-b127d93d6650": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "c4f1bd89-9e3d-4894-9a92-c4a2cde57e32": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "36a82919-fffc-4af7-8673-90bef392b258": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "86be5adf-b6f4-4a4c-93c0-9457f90b863a": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "5112dabe-9669-4f9a-8582-49755c9dc9e4": {
+      "type": "string",
+      "examples": [
+        "<param> <value>"
+      ]
+    },
+    "e7d40ea6-e991-4c3f-aed0-a28f9497dc6c": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "back": {
+          "$ref": "#/definitions/71e47508-184a-4154-a9f9-f886ec3a40a3"
+        },
+        "back_or_open": {
+          "$ref": "#/definitions/515d83f2-a24d-4057-abd2-87df514fb6f6"
+        },
+        "title_all": {
+          "$ref": "#/definitions/d6762144-57b1-4572-a0bc-f58e99de00fa"
+        },
+        "import_params": {
+          "$ref": "#/definitions/16e45ec0-5577-4dd6-9a4a-f435ca2fe948"
+        },
+        "run": {
+          "$ref": "#/definitions/b4603f3e-7577-4f02-83a6-367515350a82"
+        },
+        "broadcast": {
+          "$ref": "#/definitions/e701e884-c5dc-4693-9eda-09037e1ed55a"
+        },
+        "die": {
+          "$ref": "#/definitions/36a82919-fffc-4af7-8673-90bef392b258"
+        },
+        "player": {
+          "$ref": "#/definitions/fb32b7d8-58b7-4b05-a1e6-f89c284f5e30"
+        },
+        "back_or_close": {
+          "$ref": "#/definitions/7ccd3c97-69ab-4b48-8a6f-8201da7d41a5"
+        },
+        "chat": {
+          "$ref": "#/definitions/ed8bdc6a-6fb0-43d3-8052-8390dad22b19"
+        },
+        "action_bar_all": {
+          "$ref": "#/definitions/14408c2c-1853-4704-9a3c-727a8bbc109e"
+        },
+        "animation_force_end": {
+          "$ref": "#/definitions/a1406e64-d36d-4d01-9c2a-8c4c11c14107"
+        },
+        "sound": {
+          "$ref": "#/definitions/8f60814a-7a30-46f9-9fa1-f6846939c855"
+        },
+        "animation_tick": {
+          "$ref": "#/definitions/a0f1a176-7861-4e71-848b-20832074991a"
+        },
+        "set_animation": {
+          "$ref": "#/definitions/c7ce2b5c-9c71-42df-87f7-94a91452caa2"
+        },
+        "title": {
+          "$ref": "#/definitions/dc58fa4f-b008-4c94-b0b8-ec636cceee8c"
+        },
+        "open": {
+          "$ref": "#/definitions/9efd007a-edc4-4293-8d87-69e9b0345d05"
+        },
+        "connect": {
+          "$ref": "#/definitions/a785d550-1788-46c7-92b9-c7f508cb127d"
+        },
+        "layer": {
+          "$ref": "#/definitions/4b55605c-d96c-44f7-8b8d-8ead9f4d7697"
+        },
+        "delay": {
+          "$ref": "#/definitions/9a428f24-6153-4a96-8632-177b2f6455fa"
+        },
+        "copy_from_previous_menu": {
+          "$ref": "#/definitions/92788eb5-6203-41e7-b3ed-2d50a46a4a21"
+        },
+        "die_slots": {
+          "$ref": "#/definitions/4ffad3f3-b479-41d5-9d57-241874428dda"
+        },
+        "set_title": {
+          "$ref": "#/definitions/b142cb54-1079-43c8-98cf-edca023cb5ca"
+        },
+        "takemoney": {
+          "$ref": "#/definitions/802186b5-9cc9-4500-b4da-ddaf63fa86e5"
+        },
+        "flush": {
+          "$ref": "#/definitions/ff3eb60c-629c-42b8-8b85-2c0e571c2329"
+        },
+        "rebuild": {
+          "$ref": "#/definitions/c4f1bd89-9e3d-4894-9a92-c4a2cde57e32"
+        },
+        "console": {
+          "$ref": "#/definitions/02a635dc-0cd2-4424-90f2-c9760cb2214e"
+        },
+        "simulate": {
+          "$ref": "#/definitions/0553cd5c-899a-46ef-bb4e-f50acb1716b0"
+        },
+        "set_local": {
+          "$ref": "#/definitions/5112dabe-9669-4f9a-8582-49755c9dc9e4"
+        },
+        "reopen": {
+          "$ref": "#/definitions/ff0b71d0-6cf5-4571-94f7-1e51beaafbe9"
+        },
+        "refresh": {
+          "$ref": "#/definitions/50b08eb9-816d-4961-820f-4031a152aad6"
+        },
+        "update_slots": {
+          "$ref": "#/definitions/4e4ae238-dfc9-4cd0-9404-d52b47f423ff"
+        },
+        "rebuild_slots": {
+          "$ref": "#/definitions/cec7cfb0-e8a5-4a96-b1f2-6da2b4c72e1a"
+        },
+        "up": {
+          "$ref": "#/definitions/3aedc4c7-141b-4c78-86c3-146ff6652ddd"
+        },
+        "givemoney": {
+          "$ref": "#/definitions/a4093553-b559-47f9-9f5b-1eccb2f1f113"
+        },
+        "set_param": {
+          "$ref": "#/definitions/900d8eb9-5c75-4477-8ca3-ede12a8bebf5"
+        },
+        "run_rand": {
+          "$ref": "#/definitions/9d21254a-8c70-4629-8f0c-df54997a383c"
+        },
+        "back_to_or_close": {
+          "$ref": "#/definitions/1ff2b72f-d6e1-455b-b0b0-a2029de6805d"
+        },
+        "message": {
+          "$ref": "#/definitions/37c6c648-6afc-4b14-85ff-437beb7abf96"
+        },
+        "action_bar": {
+          "$ref": "#/definitions/53b7962f-d3ae-47eb-9213-d9205aa3d76c"
+        },
+        "close": {
+          "$ref": "#/definitions/c447e18c-d6cc-4b3d-8612-2205c12b19f2"
+        },
+        "update": {
+          "$ref": "#/definitions/86be5adf-b6f4-4a4c-93c0-9457f90b863a"
+        },
+        "down": {
+          "$ref": "#/definitions/864a685b-d560-4b82-85c8-b127d93d6650"
+        }
+      }
+    },
+    "888306d9-7370-46f3-969b-a7a741d98ff9": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/e7d40ea6-e991-4c3f-aed0-a28f9497dc6c"
+      }
+    },
+    "4a42b91f-8ffc-43c9-bafb-7b1363dd2014": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        {
+          "$ref": "#/definitions/39afe501-7b04-4147-a6f0-b31973765e59"
+        },
+        {
+          "$ref": "#/definitions/888306d9-7370-46f3-969b-a7a741d98ff9"
+        }
+      ]
+    },
+    "b598f8b8-997e-45cb-8911-dbded2c7b88d": {
+      "type": "object",
+      "properties": {
+        "check": {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        "commands": {
+          "$ref": "#/definitions/4a42b91f-8ffc-43c9-bafb-7b1363dd2014"
+        },
+        "deny_commands": {
+          "$ref": "#/definitions/4a42b91f-8ffc-43c9-bafb-7b1363dd2014"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "check"
+      ]
+    },
+    "adb32341-e7c0-4c91-b4c9-c7ba2f5410ce": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        {
+          "$ref": "#/definitions/b598f8b8-997e-45cb-8911-dbded2c7b88d"
+        }
+      ]
+    },
+    "f9a00dca-c871-417f-916f-d440e53f098e": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/adb32341-e7c0-4c91-b4c9-c7ba2f5410ce"
+      }
+    },
+    "de95f1f1-ba81-4425-8707-ca2af5e840c2": {
+      "type": "string",
+      "examples": [
+        "<commands>"
+      ]
+    },
+    "99fea0ae-2acb-4d4c-a83a-808fea0877c3": {
+      "type": "string",
+      "examples": [
+        "<menu> <commands>"
+      ]
+    },
+    "4580c89c-ff58-4eec-aaf3-571edd927035": {
+      "type": "string",
+      "examples": [
+        "<msg> <fadeIn> <stay> <fadeOut>"
+      ]
+    },
+    "bad4ad8f-a4be-4167-84b2-d7f8cca7d634": {
+      "type": "string",
+      "examples": [
+        "<item>"
+      ]
+    },
+    "2b0a859d-c7b4-46aa-8292-12729d724280": {
+      "type": "string",
+      "examples": [
+        "<name>"
+      ]
+    },
+    "92f35f87-b80f-40a4-a580-cada55e5ea09": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "afa5bbd8-04fe-44a0-93e6-9f93dbc94896": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "d7c4a89e-8690-412e-85ab-dace8dd557e1": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "0d3c06c8-a7ed-4b96-9544-71a4c04d0839": {
+      "type": "string",
+      "examples": [
+        "<commands>"
+      ]
+    },
+    "39bd9c64-6526-48fe-9692-6d04c9665f6a": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "ceaaebb7-ce9d-47a8-82ce-9a4e266eea47": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "829d5bd7-3f69-456e-86f6-2703740d3409": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "91b17c53-a751-4e16-9d59-46cbff67ec28": {
+      "type": "string",
+      "examples": [
+        "<sound> <volume> <pitch>"
+      ]
+    },
+    "bf657c12-1d98-4b00-a57b-68715c1337d2": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "cb3a5572-8941-4c42-ac85-7f6653eebca7": {
+      "type": "string",
+      "examples": [
+        "<animation>"
+      ]
+    },
+    "c10be44f-1db5-4b81-9ba9-5fc39c9d557e": {
+      "type": "string",
+      "examples": [
+        "<msg> <fadeIn> <stay> <fadeOut>"
+      ]
+    },
+    "576c2137-11a5-4046-8927-0816fcf4aa36": {
+      "type": "string",
+      "examples": [
+        "<menu> <commands>"
+      ]
+    },
+    "0d86b6db-2c41-4d35-8e7a-c69067b8a87b": {
+      "type": "string",
+      "examples": [
+        "<server>"
+      ]
+    },
+    "5b100edd-ff45-4258-896e-17e6c4093d65": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "0beeeb4a-3799-43f9-b967-7446ccebff2b": {
+      "type": "string",
+      "examples": [
+        "<delay> <cmd>"
+      ]
+    },
+    "b185aace-25a1-475c-878d-ed5fef6c5cdf": {
+      "type": "string",
+      "examples": [
+        "<src> <dest>"
+      ]
+    },
+    "89fb1cc1-877f-47f7-b678-7ccf20ef6151": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "01e86414-a1f9-4404-9d32-365c1a68386a": {
+      "type": "string",
+      "examples": [
+        "<commands>"
+      ]
+    },
+    "7d816abf-c830-47a9-a15f-07761ea9f4be": {
+      "type": "string",
+      "examples": [
+        "<title>"
+      ]
+    },
+    "c19caea9-10d4-4e67-8aaa-f540e8344eaf": {
+      "type": "string",
+      "examples": [
+        "<sound> <volume> <pitch>"
+      ]
+    },
+    "8611bb00-06af-48ad-bc95-1402765967a6": {
+      "type": "string",
+      "examples": [
+        "<count>"
+      ]
+    },
+    "98da5c15-5677-4dd4-8dea-f52d8c2c3b16": {
+      "type": "string",
+      "examples": [
+        "<animation>"
+      ]
+    },
+    "ce696189-70c2-4570-9f37-67f4ed1f4247": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "b446d65f-cf10-4c39-916b-99a0ed0c23f4": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "a8445986-187b-4413-9d63-7bd80c8a25e1": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "58dc02ab-a25f-4220-bc0f-48ec382e914a": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "ce85009d-ad64-4e80-a775-9142a80707c8": {
+      "type": "string",
+      "examples": [
+        "<menu> <commands>"
+      ]
+    },
+    "c602695e-e7cd-49dd-9c82-9f2e9050a433": {
+      "type": "string",
+      "examples": [
+        "<name>"
+      ]
+    },
+    "5e496c1d-90e0-4d3d-9733-6eb84f4e19a4": {
+      "type": "string",
+      "examples": [
+        "<count>"
+      ]
+    },
+    "92b0983e-878a-4a8e-b1d7-155a9e9d2a74": {
+      "type": "string",
+      "examples": [
+        "<src> <dest>"
+      ]
+    },
+    "e17e1096-521b-4c71-96c8-463e9e0a7eb0": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "4c5e9ed9-40a5-4ad0-9a55-6616d24a8e4b": {
+      "type": "string",
+      "examples": [
+        "<param> <value>"
+      ]
+    },
+    "0307fae0-df7e-4deb-9e00-b47a4bd1095a": {
+      "type": "string",
+      "examples": [
+        "<title>"
+      ]
+    },
+    "213b4426-4679-42d4-b543-433452ff888d": {
+      "type": "string",
+      "examples": [
+        "<menu> <commands>"
+      ]
+    },
+    "a660ed4d-43f5-4a2f-8b03-c5011c82c662": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "13e4d48e-7824-4c62-884c-0e8820d4fd7a": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "d634c675-5e05-4d4c-b41b-a285a00eaa4c": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "b20c13fd-bef2-4d85-84df-b141b17959a2": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "cbf50195-a22c-4261-b74d-7729c9c94f5e": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "f65249ca-1002-47b3-bc02-b5a0cc986e3b": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "8041b0a6-096d-4ff1-a96e-7e8778f5766c": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "dcbc105f-ece1-4583-b681-e1c112ecc54e": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "816792c8-4533-4ee8-9973-6c3f2e0185f9": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "ba2615cf-80f4-4b49-b433-0ef27e5681e4": {
+      "type": "string",
+      "examples": [
+        "<count>"
+      ]
+    },
+    "4512114d-d319-4ab3-bcd0-92d87ca5b91e": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "76c369a5-dedf-4bdb-b8f5-8ad527db8282": {
+      "type": "string",
+      "examples": [
+        "<commands>"
+      ]
+    },
+    "e62c34ee-fd3e-45a1-ab01-d8fc21e1ea72": {
+      "type": "string",
+      "examples": [
+        "<param> <value>"
+      ]
+    },
+    "0852096c-408e-4a35-b9a2-3c8c5fc74156": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "17fac105-8acf-4a1e-a6ae-73291ee198c9": {
+      "type": "string",
+      "examples": [
+        "<id> <commands>"
+      ]
+    },
+    "6171f7ac-710a-4939-a5ba-38de6337712b": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "7e406887-909a-47fc-a864-43ae97d782d9": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "9cad0f65-21cf-442c-8414-309219a05c59": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "a4f6e97b-f451-483c-9fa5-74dbb0dd187b": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "01165661-97f1-4da2-ac62-72ef15e820d9": {
+      "type": "string",
+      "examples": [
+        "<item>"
+      ]
+    },
+    "e1fbd9e0-1d2b-4078-a6c5-31cc8a649a3e": {
+      "type": "string",
+      "examples": [
+        "<msg>"
+      ]
+    },
+    "8b254038-1b33-4321-83d7-73c98b44bc3d": {
+      "type": "string",
+      "examples": [
+        "<param> <value>"
+      ]
+    },
+    "97638276-e23d-42b2-9971-87e92f964a7b": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "9be808a0-32b8-476c-b8c1-136e32af4859": {
+      "type": "string",
+      "examples": [
+        "<msg> <fadeIn> <stay> <fadeOut>"
+      ]
+    },
+    "6d781df7-3c44-4161-a390-b5e414887795": {
+      "type": "string",
+      "examples": [
+        "<delay> <cmd>"
+      ]
+    },
+    "730ba8c0-4f12-4770-bc6b-7728bd7f7f7f": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "d90a15ae-cf4e-4bb4-a422-29473ef887f5": {
+      "type": "string",
+      "examples": [
+        "<count>"
+      ]
+    },
+    "1ea4c158-db19-432e-a9bc-e652a7a1c631": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "1b902503-bcc4-4891-856d-af2e3251e40b": {
+      "type": "string",
+      "examples": [
+        "<id> <commands>"
+      ]
+    },
+    "8fb4b79b-58ae-4db5-a08d-ad969eacf706": {
+      "type": "string",
+      "examples": [
+        "<src>"
+      ]
+    },
+    "7d8f1cfd-ed92-438b-8981-01da57588fbf": {
+      "type": "string",
+      "examples": [
+        "<msg> <fadeIn> <stay> <fadeOut>"
+      ]
+    },
+    "7f377450-114d-423b-8678-014a3e906f01": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "61aa8570-54b7-4d5e-aef0-1f984ad6ae75": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "57447ec7-ffd4-4810-8c43-6ab43f4f562f": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "da1bab0f-4480-42ff-b0e1-2bfde41f4b9d": {
+      "type": "string",
+      "examples": [
+        "<server>"
+      ]
+    },
+    "bda397d3-794a-4613-964e-3fd5da7a7950": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "08081f89-5c60-4f89-92eb-c22f97fdf0d9": {
+      "type": "string",
+      "examples": [
+        "<cmd>"
+      ]
+    },
+    "ae4f65aa-1b1b-4c89-a3a4-4915efcdf7ad": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "95394b77-4e6a-4117-91f6-736e95be954c": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "5aec9af8-2feb-4e15-894a-d273d840f575": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "back": {
+          "$ref": "#/definitions/76c369a5-dedf-4bdb-b8f5-8ad527db8282"
+        },
+        "back_or_open": {
+          "$ref": "#/definitions/ce85009d-ad64-4e80-a775-9142a80707c8"
+        },
+        "title_all": {
+          "$ref": "#/definitions/7d8f1cfd-ed92-438b-8981-01da57588fbf"
+        },
+        "import_params": {
+          "$ref": "#/definitions/01165661-97f1-4da2-ac62-72ef15e820d9"
+        },
+        "run": {
+          "$ref": "#/definitions/c602695e-e7cd-49dd-9c82-9f2e9050a433"
+        },
+        "broadcast": {
+          "$ref": "#/definitions/4512114d-d319-4ab3-bcd0-92d87ca5b91e"
+        },
+        "die": {
+          "$ref": "#/definitions/afa5bbd8-04fe-44a0-93e6-9f93dbc94896"
+        },
+        "player": {
+          "$ref": "#/definitions/08081f89-5c60-4f89-92eb-c22f97fdf0d9"
+        },
+        "back_or_close": {
+          "$ref": "#/definitions/01e86414-a1f9-4404-9d32-365c1a68386a"
+        },
+        "chat": {
+          "$ref": "#/definitions/97638276-e23d-42b2-9971-87e92f964a7b"
+        },
+        "action_bar_all": {
+          "$ref": "#/definitions/dcbc105f-ece1-4583-b681-e1c112ecc54e"
+        },
+        "animation_force_end": {
+          "$ref": "#/definitions/61aa8570-54b7-4d5e-aef0-1f984ad6ae75"
+        },
+        "sound": {
+          "$ref": "#/definitions/c19caea9-10d4-4e67-8aaa-f540e8344eaf"
+        },
+        "animation_tick": {
+          "$ref": "#/definitions/a660ed4d-43f5-4a2f-8b03-c5011c82c662"
+        },
+        "set_animation": {
+          "$ref": "#/definitions/98da5c15-5677-4dd4-8dea-f52d8c2c3b16"
+        },
+        "title": {
+          "$ref": "#/definitions/9be808a0-32b8-476c-b8c1-136e32af4859"
+        },
+        "open": {
+          "$ref": "#/definitions/213b4426-4679-42d4-b543-433452ff888d"
+        },
+        "connect": {
+          "$ref": "#/definitions/da1bab0f-4480-42ff-b0e1-2bfde41f4b9d"
+        },
+        "layer": {
+          "$ref": "#/definitions/7f377450-114d-423b-8678-014a3e906f01"
+        },
+        "delay": {
+          "$ref": "#/definitions/6d781df7-3c44-4161-a390-b5e414887795"
+        },
+        "copy_from_previous_menu": {
+          "$ref": "#/definitions/92b0983e-878a-4a8e-b1d7-155a9e9d2a74"
+        },
+        "die_slots": {
+          "$ref": "#/definitions/b446d65f-cf10-4c39-916b-99a0ed0c23f4"
+        },
+        "set_title": {
+          "$ref": "#/definitions/0307fae0-df7e-4deb-9e00-b47a4bd1095a"
+        },
+        "takemoney": {
+          "$ref": "#/definitions/5e496c1d-90e0-4d3d-9733-6eb84f4e19a4"
+        },
+        "flush": {
+          "$ref": "#/definitions/57447ec7-ffd4-4810-8c43-6ab43f4f562f"
+        },
+        "rebuild": {
+          "$ref": "#/definitions/a8445986-187b-4413-9d63-7bd80c8a25e1"
+        },
+        "console": {
+          "$ref": "#/definitions/bda397d3-794a-4613-964e-3fd5da7a7950"
+        },
+        "simulate": {
+          "$ref": "#/definitions/e17e1096-521b-4c71-96c8-463e9e0a7eb0"
+        },
+        "set_local": {
+          "$ref": "#/definitions/4c5e9ed9-40a5-4ad0-9a55-6616d24a8e4b"
+        },
+        "reopen": {
+          "$ref": "#/definitions/ae4f65aa-1b1b-4c89-a3a4-4915efcdf7ad"
+        },
+        "refresh": {
+          "$ref": "#/definitions/816792c8-4533-4ee8-9973-6c3f2e0185f9"
+        },
+        "update_slots": {
+          "$ref": "#/definitions/8fb4b79b-58ae-4db5-a08d-ad969eacf706"
+        },
+        "rebuild_slots": {
+          "$ref": "#/definitions/f65249ca-1002-47b3-bc02-b5a0cc986e3b"
+        },
+        "up": {
+          "$ref": "#/definitions/8041b0a6-096d-4ff1-a96e-7e8778f5766c"
+        },
+        "givemoney": {
+          "$ref": "#/definitions/d90a15ae-cf4e-4bb4-a422-29473ef887f5"
+        },
+        "set_param": {
+          "$ref": "#/definitions/8b254038-1b33-4321-83d7-73c98b44bc3d"
+        },
+        "run_rand": {
+          "$ref": "#/definitions/0852096c-408e-4a35-b9a2-3c8c5fc74156"
+        },
+        "back_to_or_close": {
+          "$ref": "#/definitions/1b902503-bcc4-4891-856d-af2e3251e40b"
+        },
+        "message": {
+          "$ref": "#/definitions/a4f6e97b-f451-483c-9fa5-74dbb0dd187b"
+        },
+        "action_bar": {
+          "$ref": "#/definitions/e1fbd9e0-1d2b-4078-a6c5-31cc8a649a3e"
+        },
+        "close": {
+          "$ref": "#/definitions/1ea4c158-db19-432e-a9bc-e652a7a1c631"
+        },
+        "update": {
+          "$ref": "#/definitions/730ba8c0-4f12-4770-bc6b-7728bd7f7f7f"
+        },
+        "down": {
+          "$ref": "#/definitions/95394b77-4e6a-4117-91f6-736e95be954c"
+        }
+      }
+    },
+    "896e0838-19a3-4197-8eaf-efb8dbe5b418": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        {
+          "$ref": "#/definitions/5aec9af8-2feb-4e15-894a-d273d840f575"
+        }
+      ]
+    },
+    "e7ecffc5-f48b-48fc-8103-2479dd9c9658": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/896e0838-19a3-4197-8eaf-efb8dbe5b418"
+      }
+    },
+    "f4d2f9cb-3cf7-4a59-9dbd-14f753556fcf": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/896e0838-19a3-4197-8eaf-efb8dbe5b418"
+        },
+        {
+          "$ref": "#/definitions/e7ecffc5-f48b-48fc-8103-2479dd9c9658"
+        }
+      ]
+    },
+    "89871256-ca36-4972-9999-db6336e61eda": {
+      "type": "object",
+      "properties": {
+        "requirements": {
+          "$ref": "#/definitions/f9a00dca-c871-417f-916f-d440e53f098e"
+        },
+        "deny_commands": {
+          "$ref": "#/definitions/f4d2f9cb-3cf7-4a59-9dbd-14f753556fcf"
+        }
+      },
+      "additionalProperties": false
+    },
+    "aa12ec88-9124-418e-a8e4-3d4898bb1edc": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        },
+        {
+          "$ref": "#/definitions/89871256-ca36-4972-9999-db6336e61eda"
+        }
+      ]
+    },
+    "0e4cb591-147d-4850-8d15-6d4bf64e85b3": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/f9a00dca-c871-417f-916f-d440e53f098e"
+        },
+        {
+          "$ref": "#/definitions/aa12ec88-9124-418e-a8e4-3d4898bb1edc"
+        }
+      ]
+    },
+    "d684b741-e5b5-409f-bee0-835cd5fae071": {
+      "type": "object",
+      "properties": {
+        "deny_commands": {
+          "$ref": "#/definitions/f4d2f9cb-3cf7-4a59-9dbd-14f753556fcf"
+        },
+        "commands": {
+          "$ref": "#/definitions/f4d2f9cb-3cf7-4a59-9dbd-14f753556fcf"
+        },
+        "requirements": {
+          "$ref": "#/definitions/f9a00dca-c871-417f-916f-d440e53f098e"
+        }
+      },
+      "additionalProperties": false
+    },
+    "6e77a6ec-092a-4362-aa75-05a06f74e992": {
+      "type": "object",
+      "properties": {
+        "on_left_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_right_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_shift_left_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_shift_right_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_middle_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_drop_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_number_key_0_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_number_key_1_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_number_key_2_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_number_key_3_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_number_key_4_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_number_key_5_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_number_key_6_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_number_key_7_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_number_key_8_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_swap_offhand_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        },
+        "on_control_drop_click": {
+          "$ref": "#/definitions/d684b741-e5b5-409f-bee0-835cd5fae071"
+        }
+      },
+      "additionalProperties": false
+    },
+    "3511dfe9-5e9f-498a-b361-fbd3faf72a81": {
+      "type": "object",
+      "properties": {
+        "tick_speed": {
+          "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+        },
+        "requirements": {
+          "$ref": "#/definitions/f9a00dca-c871-417f-916f-d440e53f098e"
+        },
+        "commands": {
+          "$ref": "#/definitions/f4d2f9cb-3cf7-4a59-9dbd-14f753556fcf"
+        },
+        "deny_commands": {
+          "$ref": "#/definitions/f4d2f9cb-3cf7-4a59-9dbd-14f753556fcf"
+        }
+      },
+      "additionalProperties": false
+    },
+    "017193e3-4d3f-4b2e-a703-cfe116635fc5": {
+      "type": "object",
+      "properties": {
+        "on_view": {
+          "$ref": "#/definitions/0e4cb591-147d-4850-8d15-6d4bf64e85b3"
+        },
+        "on_tick": {
+          "$ref": "#/definitions/3511dfe9-5e9f-498a-b361-fbd3faf72a81"
+        }
+      },
+      "patternProperties": {},
+      "additionalProperties": false,
+      "required": [
+        "on_tick"
+      ]
+    },
+    "1504d39e-f60c-4c8f-9214-15d814a4a3b0": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/017193e3-4d3f-4b2e-a703-cfe116635fc5"
+      }
+    },
+    "0a0c7a99-f4e9-41da-968f-041d2919c8f3": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/017193e3-4d3f-4b2e-a703-cfe116635fc5"
+        },
+        {
+          "$ref": "#/definitions/1504d39e-f60c-4c8f-9214-15d814a4a3b0"
+        }
+      ]
+    },
+    "8c79d7cf-6e21-4e33-a14a-7a237ec9977c": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/017193e3-4d3f-4b2e-a703-cfe116635fc5"
+        }
+      }
+    },
+    "020fd2bb-df1e-42e7-98c9-83f48fec2499": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/0a0c7a99-f4e9-41da-968f-041d2919c8f3"
+        },
+        {
+          "$ref": "#/definitions/8c79d7cf-6e21-4e33-a14a-7a237ec9977c"
+        }
+      ]
+    },
+    "2d3e579a-fcee-4a77-9f7f-aa4c19aa5b01": {
+      "$ref": "#/definitions/3511dfe9-5e9f-498a-b361-fbd3faf72a81"
+    },
+    "9aa0b7df-8a58-4c77-9cbb-a93bd8977970": {
+      "type": "object",
+      "properties": {
+        "oneOf": {
+          "$ref": "#/definitions/020fd2bb-df1e-42e7-98c9-83f48fec2499"
+        },
+        "on_view": {
+          "$ref": "#/definitions/0e4cb591-147d-4850-8d15-6d4bf64e85b3"
+        },
+        "on_tick": {
+          "$ref": "#/definitions/2d3e579a-fcee-4a77-9f7f-aa4c19aa5b01"
+        },
+        "tick_speed": {
+          "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+        }
+      },
+      "patternProperties": {},
+      "additionalProperties": false,
+      "required": [
+        "oneOf",
+        "on_tick"
+      ]
+    },
+    "b1729236-fd60-4b16-b4cd-0a439d605cc3": {
+      "type": "object",
+      "properties": {
+        "local_args": {
+          "$ref": "#/definitions/cf8be766-1abd-413c-b1df-db0083994808"
+        },
+        "priority": {
+          "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+        },
+        "slot": {
+          "$ref": "#/definitions/583b23c0-7dd4-425b-ab7b-3356442ad053"
+        }
+      },
+      "additionalProperties": false
+    },
+    "2b601f92-b75f-41c6-9732-b263c8848418": {
+      "type": "object",
+      "properties": {
+        "local_args": {
+          "$ref": "#/definitions/cf8be766-1abd-413c-b1df-db0083994808"
+        },
+        "priority": {
+          "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+        },
+        "slot": {
+          "$ref": "#/definitions/583b23c0-7dd4-425b-ab7b-3356442ad053"
+        }
+      },
+      "additionalProperties": false
+    },
+    "57d02ffc-fbdd-4f70-89e3-20b76092b030": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/b1729236-fd60-4b16-b4cd-0a439d605cc3"
+        },
+        {
+          "$ref": "#/definitions/2b601f92-b75f-41c6-9732-b263c8848418"
+        }
+      ]
+    },
+    "4f9f7a79-b245-436c-af30-3766ed591964": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/57d02ffc-fbdd-4f70-89e3-20b76092b030"
+        }
+      }
+    },
+    "1568fabc-b7d1-456b-8165-53713f5447b9": {
+      "$ref": "#/definitions/dub_3"
+    },
+    "39a8acf2-eb77-46d7-9c8a-8e18ea1ae079": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/1568fabc-b7d1-456b-8165-53713f5447b9"
+        },
+        {
+          "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+        }
+      ]
+    },
+    "f5779876-3e9b-475e-b075-958ba20f89bf": {
+      "type": [
+        "object"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "set": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "st": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "remove": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "rm": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "move": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "mv": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "swap": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "sw": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "copy": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "cl": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "cpy": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "goto": {
+          "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+        },
+        "gt": {
+          "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+        },
+        "sound": {
+          "$ref": "#/definitions/39a8acf2-eb77-46d7-9c8a-8e18ea1ae079"
+        },
+        "snd": {
+          "$ref": "#/definitions/39a8acf2-eb77-46d7-9c8a-8e18ea1ae079"
+        },
+        "commands": {
+          "$ref": "#/definitions/4a42b91f-8ffc-43c9-bafb-7b1363dd2014"
+        },
+        "cmd": {
+          "$ref": "#/definitions/4a42b91f-8ffc-43c9-bafb-7b1363dd2014"
+        },
+        "title": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "ttl": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "fill": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "fl": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "remove-if-not-empty": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "rne": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "copy-from-base": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "cfb": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "set-if-empty": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        },
+        "sie": {
+          "$ref": "#/definitions/faca62c4-fb38-4cf8-950d-2f47085bd332"
+        }
+      }
+    },
+    "fe1464b9-c8bf-467a-b615-22f38956e0b9": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/f5779876-3e9b-475e-b075-958ba20f89bf"
+      }
+    },
+    "ebb867a2-31a4-411e-bd19-5084ca599f43": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/f5779876-3e9b-475e-b075-958ba20f89bf"
+        },
+        {
+          "$ref": "#/definitions/fe1464b9-c8bf-467a-b615-22f38956e0b9"
+        }
+      ]
+    },
+    "259a41d9-8b98-459e-870c-12366fcd8d10": {
+      "type": "object",
+      "properties": {
+        "tick": {
+          "$ref": "#/definitions/2a1f04f3-845a-449b-9059-0c55e02e7f98"
+        },
+        "opcodes": {
+          "$ref": "#/definitions/ebb867a2-31a4-411e-bd19-5084ca599f43"
+        }
+      },
+      "required": [
+        "opcodes"
+      ]
+    },
+    "70c288af-33a5-4a24-9f6c-dc2440e03ae5": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/259a41d9-8b98-459e-870c-12366fcd8d10"
+      }
+    },
+    "10ed62b5-0876-4e09-96b6-3b8965ebd7c9": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/70c288af-33a5-4a24-9f6c-dc2440e03ae5"
+        }
+      }
+    },
+    "0e3f07d4-70ee-464e-acbb-f10f03f6bd49": {
+      "type": "object",
+      "properties": {
+        "weight": {
+          "$ref": "#/definitions/5fcc7df1-2912-4bd4-8e68-952a3ad2cdcf"
+        },
+        "commands": {
+          "$ref": "#/definitions/f4d2f9cb-3cf7-4a59-9dbd-14f753556fcf"
+        }
+      },
+      "additionalProperties": false
+    },
+    "8ccccc78-76a2-435e-a15a-c148969ab0cb": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/0e3f07d4-70ee-464e-acbb-f10f03f6bd49"
+        }
+      }
+    },
+    "84e400de-29ad-4188-959d-31c52b325d7c": {
+      "type": "object",
+      "properties": {
+        "requirements": {
+          "$ref": "#/definitions/f9a00dca-c871-417f-916f-d440e53f098e"
+        },
+        "deny_commands": {
+          "$ref": "#/definitions/f4d2f9cb-3cf7-4a59-9dbd-14f753556fcf"
+        },
+        "commands": {
+          "$ref": "#/definitions/f4d2f9cb-3cf7-4a59-9dbd-14f753556fcf"
+        }
+      },
+      "additionalProperties": false
+    },
+    "e97071f6-3e9f-4a4c-8ef8-8ba46563a6fb": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/84e400de-29ad-4188-959d-31c52b325d7c"
+        }
+      }
+    },
+    "76e0793c-bf8d-4156-8a4d-9706fa0ed799": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/57d02ffc-fbdd-4f70-89e3-20b76092b030"
+        }
+      }
+    },
+    "4ead1acf-0a8b-4246-8ed1-280290e0790f": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/fb409170-4a66-4f71-a5ad-0d1d3f0d80b1"
+      }
+    },
+    "dub_3": {
+      "enum": [
+        "block.nether_ore.place",
+        "block.ancient_debris.step",
+        "entity.skeleton.ambient",
+        "entity.ravager.roar",
+        "block.nether_sprouts.step",
+        "block.sand.place",
+        "entity.illusioner.mirror_move",
+        "entity.enderman.teleport",
+        "block.nether_gold_ore.break",
+        "entity.player.attack.strong",
+        "entity.zombie_villager.death",
+        "entity.parrot.imitate.shulker",
+        "entity.armor_stand.hit",
+        "entity.pillager.death",
+        "block.lantern.hit",
+        "entity.ravager.stunned",
+        "block.nylium.break",
+        "block.snow.hit",
+        "block.beehive.shear",
+        "entity.parrot.imitate.blaze",
+        "entity.parrot.imitate.husk",
+        "event.raid.horn",
+        "block.beehive.exit",
+        "block.conduit.attack.target",
+        "block.bubble_column.upwards_inside",
+        "block.weeping_vines.break",
+        "block.chain.place",
+        "entity.cow.milk",
+        "block.soul_soil.break",
+        "ambient.nether_wastes.loop",
+        "block.dispenser.fail",
+        "block.soul_sand.fall",
+        "block.honey_block.place",
+        "entity.arrow.hit",
+        "block.fence_gate.close",
+        "music.creative",
+        "ambient.warped_forest.additions",
+        "block.note_block.didgeridoo",
+        "entity.shulker.death",
+        "entity.zombie.destroy_egg",
+        "block.gravel.fall",
+        "block.campfire.crackle",
+        "block.comparator.click",
+        "entity.bat.loop",
+        "block.stone.fall",
+        "item.flintandsteel.use",
+        "entity.cow.hurt",
+        "entity.bee.death",
+        "music_disc.pigstep",
+        "entity.evoker.cast_spell",
+        "item.crossbow.quick_charge_2",
+        "item.crossbow.quick_charge_3",
+        "entity.ender_dragon.growl",
+        "item.crossbow.quick_charge_1",
+        "block.netherite_block.step",
+        "entity.llama.death",
+        "block.shulker_box.close",
+        "block.respawn_anchor.ambient",
+        "block.nylium.hit",
+        "entity.skeleton.shoot",
+        "entity.zombie.ambient",
+        "entity.elder_guardian.hurt_land",
+        "entity.ender_dragon.ambient",
+        "block.scaffolding.fall",
+        "entity.panda.aggressive_ambient",
+        "block.nether_bricks.break",
+        "block.wool.step",
+        "entity.wolf.pant",
+        "entity.parrot.death",
+        "entity.blaze.death",
+        "entity.player.hurt_drown",
+        "entity.squid.ambient",
+        "block.metal.step",
+        "entity.pillager.ambient",
+        "entity.sheep.hurt",
+        "block.beacon.activate",
+        "block.gravel.break",
+        "entity.firework_rocket.shoot",
+        "block.soul_soil.place",
+        "block.soul_sand.hit",
+        "entity.phantom.bite",
+        "block.wooden_pressure_plate.click_off",
+        "entity.zoglin.angry",
+        "entity.bee.pollinate",
+        "block.coral_block.step",
+        "entity.llama.angry",
+        "entity.hoglin.step",
+        "block.wet_grass.fall",
+        "entity.ravager.attack",
+        "block.note_block.bass",
+        "entity.villager.work_shepherd",
+        "entity.zombie_villager.cure",
+        "entity.armor_stand.place",
+        "block.lodestone.step",
+        "entity.parrot.eat",
+        "entity.ravager.step",
+        "block.nether_gold_ore.place",
+        "entity.endermite.ambient",
+        "block.note_block.banjo",
+        "entity.generic.burn",
+        "entity.villager.work_cleric",
+        "entity.elder_guardian.ambient",
+        "block.portal.travel",
+        "ui.toast.in",
+        "block.note_block.iron_xylophone",
+        "entity.parrot.imitate.zoglin",
+        "block.nether_bricks.step",
+        "block.netherrack.fall",
+        "block.soul_sand.step",
+        "block.composter.fill_success",
+        "entity.piglin.hurt",
+        "entity.villager.work_leatherworker",
+        "entity.panda.step",
+        "music.credits",
+        "block.bamboo.break",
+        "entity.hostile.hurt",
+        "entity.squid.death",
+        "music.game",
+        "block.wart_block.place",
+        "enchant.thorns.hit",
+        "entity.silverfish.death",
+        "entity.wolf.hurt",
+        "block.wool.fall",
+        "entity.dolphin.eat",
+        "entity.sheep.death",
+        "ambient.soul_sand_valley.mood",
+        "entity.villager.yes",
+        "entity.creeper.death",
+        "entity.boat.paddle_water",
+        "entity.zombie.hurt",
+        "ambient.nether_wastes.additions",
+        "block.chest.close",
+        "entity.puffer_fish.flop",
+        "entity.husk.ambient",
+        "block.iron_door.close",
+        "entity.player.attack.weak",
+        "block.stem.place",
+        "entity.evoker.prepare_summon",
+        "block.weeping_vines.place",
+        "entity.drowned.step",
+        "block.soul_sand.break",
+        "entity.cow.ambient",
+        "block.note_block.flute",
+        "block.stone_button.click_off",
+        "entity.firework_rocket.twinkle_far",
+        "block.gilded_blackstone.hit",
+        "entity.zombie_villager.step",
+        "block.nether_bricks.fall",
+        "entity.player.hurt",
+        "entity.skeleton.death",
+        "entity.magma_cube.hurt_small",
+        "entity.dolphin.death",
+        "block.chain.break",
+        "entity.magma_cube.squish_small",
+        "block.stem.break",
+        "entity.witch.drink",
+        "entity.silverfish.step",
+        "entity.drowned.ambient",
+        "entity.villager.work_mason",
+        "block.roots.place",
+        "entity.hostile.small_fall",
+        "block.lantern.break",
+        "entity.ghast.shoot",
+        "entity.pillager.hurt",
+        "block.anvil.destroy",
+        "entity.snow_golem.ambient",
+        "block.stone_pressure_plate.click_off",
+        "entity.cow.death",
+        "item.trident.throw",
+        "entity.player.breath",
+        "entity.parrot.imitate.spider",
+        "music_disc.cat",
+        "entity.zombie.infect",
+        "block.nether_bricks.place",
+        "entity.hoglin.converted_to_zombified",
+        "entity.player.attack.nodamage",
+        "block.sand.hit",
+        "entity.player.big_fall",
+        "block.note_block.xylophone",
+        "entity.shulker.teleport",
+        "music.menu",
+        "entity.zoglin.death",
+        "block.wooden_door.open",
+        "entity.item.pickup",
+        "block.ancient_debris.hit",
+        "block.blastfurnace.fire_crackle",
+        "entity.donkey.hurt",
+        "entity.villager.work_armorer",
+        "block.wood.place",
+        "item.armor.equip_leather",
+        "entity.squid.hurt",
+        "block.nylium.place",
+        "block.nether_ore.break",
+        "block.sand.break",
+        "entity.snow_golem.shear",
+        "entity.shulker.hurt",
+        "entity.drowned.death_water",
+        "block.gilded_blackstone.step",
+        "block.wood.break",
+        "entity.panda.death",
+        "block.netherrack.step",
+        "entity.elder_guardian.death",
+        "entity.ender_eye.launch",
+        "block.bamboo.step",
+        "block.tripwire.click_on",
+        "music.nether.warped_forest",
+        "block.wood.fall",
+        "entity.cod.flop",
+        "entity.phantom.hurt",
+        "block.stone.step",
+        "block.wool.hit",
+        "entity.polar_bear.hurt",
+        "entity.bat.ambient",
+        "entity.piglin.jealous",
+        "block.barrel.open",
+        "entity.salmon.flop",
+        "block.fungus.hit",
+        "entity.cat.beg_for_food",
+        "block.note_block.basedrum",
+        "block.dispenser.dispense",
+        "entity.ender_dragon.hurt",
+        "music.nether.crimson_forest",
+        "entity.piglin_brute.step",
+        "entity.fox.bite",
+        "entity.fox.eat",
+        "entity.polar_bear.warning",
+        "ui.button.click",
+        "particle.soul_escape",
+        "entity.experience_bottle.throw",
+        "item.nether_wart.plant",
+        "entity.leash_knot.place",
+        "entity.parrot.imitate.wither",
+        "ambient.warped_forest.loop",
+        "entity.parrot.step",
+        "entity.endermite.hurt",
+        "entity.endermite.death",
+        "entity.firework_rocket.launch",
+        "entity.chicken.hurt",
+        "block.composter.fill",
+        "block.metal_pressure_plate.click_off",
+        "block.wood.step",
+        "entity.strider.step",
+        "block.bubble_column.bubble_pop",
+        "entity.salmon.death",
+        "entity.strider.retreat",
+        "block.stone.break",
+        "block.lodestone.hit",
+        "block.roots.break",
+        "entity.tnt.primed",
+        "entity.wither_skeleton.step",
+        "block.scaffolding.step",
+        "entity.skeleton_horse.hurt",
+        "entity.mule.chest",
+        "entity.wither.shoot",
+        "item.armor.equip_diamond",
+        "block.bone_block.hit",
+        "entity.chicken.egg",
+        "item.trident.thunder",
+        "entity.pig.saddle",
+        "block.lodestone.fall",
+        "entity.llama.hurt",
+        "block.gilded_blackstone.fall",
+        "entity.parrot.imitate.stray",
+        "entity.phantom.ambient",
+        "entity.piglin.celebrate",
+        "entity.tropical_fish.flop",
+        "block.sand.step",
+        "block.end_portal.spawn",
+        "entity.piglin_brute.ambient",
+        "item.armor.equip_gold",
+        "entity.wolf.whine",
+        "entity.husk.step",
+        "entity.wandering_trader.death",
+        "block.roots.hit",
+        "entity.vex.hurt",
+        "block.scaffolding.place",
+        "entity.villager.work_toolsmith",
+        "block.gilded_blackstone.break",
+        "item.bucket.fill",
+        "item.trident.return",
+        "entity.hoglin.retreat",
+        "entity.tropical_fish.hurt",
+        "block.respawn_anchor.charge",
+        "entity.drowned.hurt_water",
+        "entity.parrot.imitate.silverfish",
+        "block.chorus_flower.death",
+        "entity.snow_golem.shoot",
+        "entity.skeleton.step",
+        "entity.slime.jump_small",
+        "entity.dolphin.attack",
+        "entity.hoglin.hurt",
+        "entity.painting.break",
+        "block.portal.ambient",
+        "entity.hostile.splash",
+        "block.shroomlight.hit",
+        "entity.fox.screech",
+        "block.basalt.place",
+        "block.brewing_stand.brew",
+        "entity.zombified_piglin.death",
+        "block.bamboo_sapling.hit",
+        "entity.piglin_brute.death",
+        "block.metal_pressure_plate.click_on",
+        "ambient.underwater.loop.additions",
+        "block.beehive.work",
+        "entity.enderman.scream",
+        "item.bottle.fill_dragonbreath",
+        "entity.generic.eat",
+        "block.slime_block.place",
+        "block.bubble_column.whirlpool_inside",
+        "entity.guardian.ambient_land",
+        "entity.egg.throw",
+        "entity.parrot.imitate.ravager",
+        "block.beacon.ambient",
+        "entity.panda.worried_ambient",
+        "entity.wither.death",
+        "entity.fox.aggro",
+        "entity.ghast.scream",
+        "ambient.cave",
+        "entity.generic.drink",
+        "entity.hostile.death",
+        "entity.parrot.imitate.ender_dragon",
+        "entity.leash_knot.break",
+        "entity.mule.eat",
+        "music.nether.nether_wastes",
+        "entity.vex.ambient",
+        "block.honey_block.fall",
+        "item.book.put",
+        "entity.ocelot.ambient",
+        "entity.hoglin.angry",
+        "block.fungus.step",
+        "entity.fox.spit",
+        "block.bamboo.fall",
+        "entity.magma_cube.death",
+        "entity.fox.teleport",
+        "entity.witch.celebrate",
+        "entity.chicken.step",
+        "entity.cow.step",
+        "entity.zombie_villager.ambient",
+        "item.hoe.till",
+        "entity.strider.hurt",
+        "entity.lingering_potion.throw",
+        "entity.hoglin.ambient",
+        "block.fungus.break",
+        "entity.fox.death",
+        "entity.player.hurt_sweet_berry_bush",
+        "block.grass.break",
+        "entity.slime.death_small",
+        "entity.parrot.ambient",
+        "entity.snowball.throw",
+        "entity.vex.charge",
+        "entity.chicken.ambient",
+        "entity.skeleton_horse.death",
+        "entity.firework_rocket.twinkle",
+        "block.sand.fall",
+        "entity.wither.spawn",
+        "item.chorus_fruit.teleport",
+        "entity.boat.paddle_land",
+        "entity.llama.eat",
+        "block.slime_block.step",
+        "music.end",
+        "entity.zombified_piglin.ambient",
+        "block.ender_chest.open",
+        "music_disc.blocks",
+        "entity.mooshroom.eat",
+        "entity.strider.saddle",
+        "block.anvil.place",
+        "item.trident.riptide_3",
+        "entity.player.small_fall",
+        "entity.llama.ambient",
+        "item.trident.riptide_1",
+        "entity.horse.eat",
+        "entity.ravager.death",
+        "item.trident.riptide_2",
+        "entity.vindicator.death",
+        "item.crossbow.loading_end",
+        "entity.turtle.ambient_land",
+        "entity.wolf.howl",
+        "block.water.ambient",
+        "entity.snow_golem.death",
+        "entity.spider.ambient",
+        "block.anvil.land",
+        "block.note_block.bell",
+        "entity.wandering_trader.hurt",
+        "entity.bee.loop",
+        "entity.panda.eat",
+        "entity.pig.step",
+        "entity.item_frame.rotate_item",
+        "block.ladder.place",
+        "block.glass.break",
+        "block.respawn_anchor.deplete",
+        "music_disc.wait",
+        "entity.guardian.death",
+        "item.bucket.fill_fish",
+        "block.bamboo.place",
+        "block.anvil.break",
+        "block.honey_block.break",
+        "block.gravel.step",
+        "block.portal.trigger",
+        "entity.fish.swim",
+        "block.snow.fall",
+        "block.coral_block.break",
+        "entity.generic.small_fall",
+        "entity.spider.hurt",
+        "item.shield.break",
+        "entity.zoglin.ambient",
+        "block.metal.fall",
+        "entity.strider.death",
+        "block.fungus.fall",
+        "entity.zombie.converted_to_drowned",
+        "entity.shulker.open",
+        "block.iron_door.open",
+        "block.netherite_block.fall",
+        "entity.llama.step",
+        "entity.ravager.celebrate",
+        "block.honey_block.step",
+        "entity.iron_golem.damage",
+        "entity.piglin_brute.angry",
+        "block.fungus.place",
+        "entity.panda.sneeze",
+        "entity.pig.death",
+        "entity.puffer_fish.sting",
+        "entity.drowned.shoot",
+        "entity.witch.hurt",
+        "entity.skeleton_horse.ambient_water",
+        "item.bottle.fill",
+        "block.netherite_block.hit",
+        "entity.ender_eye.death",
+        "entity.turtle.death",
+        "block.wooden_button.click_on",
+        "entity.elder_guardian.flop",
+        "block.piston.contract",
+        "entity.parrot.imitate.hoglin",
+        "entity.villager.trade",
+        "block.ancient_debris.fall",
+        "block.slime_block.fall",
+        "entity.donkey.death",
+        "entity.wither.hurt",
+        "entity.painting.place",
+        "entity.stray.step",
+        "block.wart_block.fall",
+        "entity.firework_rocket.large_blast",
+        "entity.elder_guardian.curse",
+        "block.furnace.fire_crackle",
+        "entity.shulker_bullet.hit",
+        "block.scaffolding.break",
+        "entity.parrot.imitate.wither_skeleton",
+        "entity.squid.squirt",
+        "entity.puffer_fish.death",
+        "entity.villager.work_librarian",
+        "block.wet_grass.break",
+        "entity.zombified_piglin.angry",
+        "entity.magma_cube.death_small",
+        "entity.phantom.death",
+        "block.wart_block.break",
+        "block.anvil.hit",
+        "entity.guardian.ambient",
+        "entity.illusioner.prepare_blindness",
+        "block.soul_soil.hit",
+        "entity.spider.death",
+        "entity.magma_cube.hurt",
+        "entity.horse.saddle",
+        "block.ladder.break",
+        "block.chest.open",
+        "entity.villager.death",
+        "entity.zoglin.hurt",
+        "block.vine.step",
+        "entity.drowned.hurt",
+        "entity.polar_bear.death",
+        "block.pumpkin.carve",
+        "entity.fishing_bobber.splash",
+        "block.glass.place",
+        "block.soul_sand.place",
+        "block.grass.hit",
+        "ambient.underwater.exit",
+        "entity.magma_cube.jump",
+        "entity.wandering_trader.drink_potion",
+        "block.bubble_column.upwards_ambient",
+        "entity.creeper.primed",
+        "block.end_gateway.spawn",
+        "entity.firework_rocket.blast",
+        "entity.generic.extinguish_fire",
+        "entity.parrot.imitate.witch",
+        "block.coral_block.place",
+        "block.tripwire.click_off",
+        "block.snow.step",
+        "entity.slime.squish_small",
+        "music_disc.chirp",
+        "entity.item_frame.break",
+        "block.ladder.hit",
+        "block.grass.place",
+        "entity.dragon_fireball.explode",
+        "item.totem.use",
+        "item.lodestone_compass.lock",
+        "ambient.crimson_forest.loop",
+        "item.bucket.empty_lava",
+        "entity.elder_guardian.death_land",
+        "entity.bee.sting",
+        "entity.slime.death",
+        "block.wet_grass.step",
+        "block.basalt.hit",
+        "entity.turtle.lay_egg",
+        "entity.panda.ambient",
+        "entity.enderman.hurt",
+        "entity.horse.step",
+        "entity.villager.no",
+        "item.bottle.empty",
+        "block.shroomlight.break",
+        "music_disc.ward",
+        "entity.iron_golem.death",
+        "entity.strider.ambient",
+        "entity.wolf.death",
+        "entity.panda.cant_breed",
+        "block.conduit.activate",
+        "item.sweet_berries.pick_from_bush",
+        "entity.iron_golem.attack",
+        "entity.turtle.hurt",
+        "entity.guardian.flop",
+        "entity.lightning_bolt.thunder",
+        "block.wet_grass.place",
+        "block.lantern.step",
+        "ui.cartography_table.take_result",
+        "entity.wandering_trader.drink_milk",
+        "block.bone_block.place",
+        "block.wooden_door.close",
+        "block.respawn_anchor.set_spawn",
+        "block.weeping_vines.step",
+        "block.roots.step",
+        "entity.pig.hurt",
+        "block.shroomlight.place",
+        "entity.zombie.attack_wooden_door",
+        "entity.wandering_trader.disappeared",
+        "entity.wither.ambient",
+        "entity.drowned.swim",
+        "ambient.underwater.loop",
+        "block.bone_block.step",
+        "ui.toast.challenge_complete",
+        "block.dispenser.launch",
+        "entity.generic.death",
+        "entity.horse.jump",
+        "entity.silverfish.hurt",
+        "block.beacon.deactivate",
+        "block.basalt.step",
+        "item.firecharge.use",
+        "block.anvil.fall",
+        "entity.pig.ambient",
+        "music.nether.soul_sand_valley",
+        "block.shroomlight.step",
+        "entity.horse.armor",
+        "entity.horse.gallop",
+        "item.armor.equip_netherite",
+        "entity.player.attack.sweep",
+        "entity.husk.death",
+        "block.metal.break",
+        "entity.mule.hurt",
+        "item.armor.equip_iron",
+        "ambient.nether_wastes.mood",
+        "block.lodestone.place",
+        "entity.witch.throw",
+        "entity.turtle.shamble",
+        "entity.cod.hurt",
+        "entity.parrot.imitate.phantom",
+        "entity.cat.ambient",
+        "entity.parrot.imitate.vex",
+        "entity.turtle.egg_hatch",
+        "music_disc.13",
+        "entity.illusioner.cast_spell",
+        "entity.bee.loop_aggressive",
+        "ambient.underwater.enter",
+        "music.under_water",
+        "entity.salmon.hurt",
+        "entity.zoglin.attack",
+        "ui.stonecutter.take_result",
+        "entity.parrot.imitate.elder_guardian",
+        "entity.piglin.converted_to_zombified",
+        "entity.piglin.ambient",
+        "entity.dolphin.ambient",
+        "entity.ender_dragon.shoot",
+        "music_disc.strad",
+        "entity.tropical_fish.ambient",
+        "entity.horse.hurt",
+        "entity.husk.hurt",
+        "entity.turtle.hurt_baby",
+        "block.weeping_vines.fall",
+        "entity.firework_rocket.blast_far",
+        "block.metal.place",
+        "block.basalt.fall",
+        "block.wart_block.step",
+        "entity.parrot.imitate.drowned",
+        "item.crossbow.shoot",
+        "entity.hoglin.attack",
+        "entity.slime.squish",
+        "ambient.soul_sand_valley.loop",
+        "entity.evoker.celebrate",
+        "block.stone.hit",
+        "block.fire.extinguish",
+        "entity.rabbit.death",
+        "block.barrel.close",
+        "block.nether_gold_ore.step",
+        "block.stone_button.click_on",
+        "entity.fox.ambient",
+        "entity.parrot.hurt",
+        "block.honey_block.slide",
+        "ambient.crimson_forest.additions",
+        "block.crop.break",
+        "block.note_block.chime",
+        "entity.item.break",
+        "block.slime_block.hit",
+        "entity.mooshroom.shear",
+        "entity.cod.ambient",
+        "entity.turtle.shamble_baby",
+        "entity.wolf.ambient",
+        "block.nylium.fall",
+        "block.end_portal_frame.fill",
+        "entity.villager.work_cartographer",
+        "entity.item_frame.place",
+        "entity.generic.explode",
+        "entity.bat.death",
+        "block.redstone_torch.burnout",
+        "entity.firework_rocket.large_blast_far",
+        "entity.parrot.imitate.endermite",
+        "entity.piglin_brute.hurt",
+        "entity.piglin.retreat",
+        "entity.blaze.burn",
+        "entity.parrot.imitate.skeleton",
+        "entity.endermite.step",
+        "entity.horse.angry",
+        "block.piston.extend",
+        "entity.parrot.imitate.slime",
+        "entity.pillager.celebrate",
+        "item.bucket.empty",
+        "entity.evoker_fangs.attack",
+        "entity.player.splash.high_speed",
+        "entity.mooshroom.milk",
+        "entity.ravager.hurt",
+        "block.beehive.drip",
+        "block.glass.fall",
+        "entity.dolphin.hurt",
+        "entity.mule.ambient",
+        "block.note_block.hat",
+        "entity.zombie_horse.ambient",
+        "entity.parrot.imitate.ghast",
+        "entity.vindicator.hurt",
+        "entity.wandering_trader.trade",
+        "entity.bat.hurt",
+        "entity.stray.death",
+        "entity.blaze.ambient",
+        "block.iron_trapdoor.open",
+        "block.wood.hit",
+        "entity.zombie_horse.hurt",
+        "item.crossbow.loading_start",
+        "entity.dolphin.jump",
+        "entity.parrot.imitate.pillager",
+        "entity.horse.step_wood",
+        "block.conduit.ambient.short",
+        "entity.illusioner.prepare_mirror",
+        "entity.mule.death",
+        "item.axe.strip",
+        "ambient.basalt_deltas.mood",
+        "entity.wolf.shake",
+        "block.note_block.cow_bell",
+        "entity.cat.stray_ambient",
+        "entity.evoker.ambient",
+        "block.grass.step",
+        "entity.player.attack.crit",
+        "block.chorus_flower.grow",
+        "entity.tropical_fish.death",
+        "block.beacon.power_select",
+        "entity.cat.hiss",
+        "entity.elder_guardian.ambient_land",
+        "entity.zombie_villager.converted",
+        "entity.skeleton.hurt",
+        "entity.donkey.eat",
+        "block.nether_bricks.hit",
+        "block.wooden_trapdoor.close",
+        "entity.donkey.ambient",
+        "entity.ghast.warn",
+        "block.soul_soil.step",
+        "entity.donkey.angry",
+        "entity.cat.purr",
+        "weather.rain",
+        "block.nether_sprouts.hit",
+        "entity.parrot.imitate.piglin_brute",
+        "entity.hoglin.death",
+        "block.slime_block.break",
+        "entity.ender_dragon.flap",
+        "entity.player.hurt_on_fire",
+        "block.basalt.break",
+        "block.chain.fall",
+        "entity.item_frame.add_item",
+        "block.shroomlight.fall",
+        "entity.vindicator.celebrate",
+        "entity.parrot.imitate.creeper",
+        "entity.wandering_trader.reappeared",
+        "block.bone_block.fall",
+        "block.ancient_debris.place",
+        "music_disc.11",
+        "entity.turtle.swim",
+        "entity.illusioner.ambient",
+        "entity.ender_dragon.death",
+        "block.bell.resonate",
+        "entity.evoker.death",
+        "block.roots.fall",
+        "entity.panda.pre_sneeze",
+        "block.anvil.use",
+        "entity.piglin.step",
+        "block.chain.hit",
+        "item.crossbow.loading_middle",
+        "music.nether.basalt_deltas",
+        "block.netherrack.hit",
+        "entity.zombie.step",
+        "block.lodestone.break",
+        "entity.wolf.step",
+        "block.nylium.step",
+        "entity.slime.hurt_small",
+        "block.composter.empty",
+        "entity.llama.spit",
+        "entity.turtle.death_baby",
+        "entity.ghast.ambient",
+        "entity.sheep.step",
+        "entity.enderman.stare",
+        "item.trident.hit_ground",
+        "entity.skeleton_horse.ambient",
+        "entity.rabbit.attack",
+        "block.anvil.step",
+        "block.conduit.ambient",
+        "entity.minecart.riding",
+        "entity.parrot.imitate.zombie_villager",
+        "block.metal.hit",
+        "entity.iron_golem.step",
+        "entity.polar_bear.ambient_baby",
+        "entity.skeleton_horse.jump_water",
+        "entity.villager.celebrate",
+        "entity.villager.work_weaponsmith",
+        "entity.wither_skeleton.ambient",
+        "entity.zombie_horse.death",
+        "entity.parrot.imitate.zombie",
+        "block.stone_pressure_plate.click_on",
+        "entity.shulker.ambient",
+        "item.elytra.flying",
+        "entity.villager.work_fletcher",
+        "entity.lightning_bolt.impact",
+        "block.soul_soil.fall",
+        "block.nether_gold_ore.fall",
+        "entity.piglin.admiring_item",
+        "block.lever.click",
+        "entity.dolphin.ambient_water",
+        "block.tripwire.detach",
+        "entity.horse.death",
+        "entity.wandering_trader.ambient",
+        "music_disc.far",
+        "block.grass.fall",
+        "entity.cat.eat",
+        "block.nether_gold_ore.hit",
+        "entity.ender_pearl.throw",
+        "entity.phantom.flap",
+        "entity.arrow.shoot",
+        "entity.villager.ambient",
+        "entity.player.splash",
+        "block.stone.place",
+        "item.armor.equip_chain",
+        "item.book.page_turn",
+        "entity.vindicator.ambient",
+        "block.tripwire.attach",
+        "block.lava.extinguish",
+        "entity.mooshroom.convert",
+        "entity.cod.death",
+        "entity.sheep.shear",
+        "block.note_block.guitar",
+        "block.chain.step",
+        "entity.phantom.swoop",
+        "block.lava.pop",
+        "entity.generic.big_fall",
+        "entity.stray.ambient",
+        "entity.drowned.ambient_water",
+        "entity.parrot.imitate.illusioner",
+        "block.shulker_box.open",
+        "block.composter.ready",
+        "entity.shulker.hurt_closed",
+        "entity.cat.death",
+        "entity.blaze.hurt",
+        "entity.dolphin.play",
+        "entity.turtle.egg_crack",
+        "ambient.warped_forest.mood",
+        "block.glass.step",
+        "entity.parrot.fly",
+        "ui.loom.take_result",
+        "item.shovel.flatten",
+        "entity.illusioner.hurt",
+        "music_disc.mellohi",
+        "block.nether_sprouts.place",
+        "entity.spider.step",
+        "entity.horse.breathe",
+        "entity.wither_skeleton.death",
+        "entity.parrot.imitate.piglin",
+        "block.weeping_vines.hit",
+        "entity.horse.ambient",
+        "block.ender_chest.close",
+        "item.bucket.fill_lava",
+        "entity.wolf.growl",
+        "block.conduit.deactivate",
+        "block.snow.break",
+        "entity.enderman.ambient",
+        "entity.cat.hurt",
+        "entity.zoglin.step",
+        "block.lantern.place",
+        "block.coral_block.hit",
+        "entity.guardian.attack",
+        "block.stem.fall",
+        "entity.player.levelup",
+        "entity.zombie.break_wooden_door",
+        "entity.llama.swag",
+        "block.ladder.step",
+        "entity.elder_guardian.hurt",
+        "entity.enderman.death",
+        "entity.villager.work_fisherman",
+        "entity.ghast.hurt",
+        "block.netherite_block.break",
+        "entity.iron_golem.hurt",
+        "block.bamboo_sapling.place",
+        "entity.horse.land",
+        "ambient.basalt_deltas.additions",
+        "entity.husk.converted_to_zombie",
+        "entity.item_frame.remove_item",
+        "ambient.basalt_deltas.loop",
+        "entity.wither_skeleton.hurt",
+        "entity.drowned.death",
+        "entity.skeleton_horse.step_water",
+        "entity.stray.hurt",
+        "block.sweet_berry_bush.break",
+        "entity.slime.jump",
+        "item.trident.hit",
+        "block.note_block.pling",
+        "entity.zombie_villager.hurt",
+        "entity.slime.hurt",
+        "block.scaffolding.hit",
+        "block.smoker.smoke",
+        "block.gilded_blackstone.place",
+        "entity.fox.hurt",
+        "block.iron_trapdoor.close",
+        "entity.guardian.death_land",
+        "block.ancient_debris.break",
+        "block.nether_ore.step",
+        "block.wool.break",
+        "entity.witch.ambient",
+        "item.armor.equip_generic",
+        "entity.evoker.hurt",
+        "entity.wither.break_block",
+        "block.fire.ambient",
+        "entity.parrot.imitate.magma_cube",
+        "block.lava.ambient",
+        "entity.splash_potion.break",
+        "entity.cat.purreow",
+        "entity.rabbit.jump",
+        "entity.ghast.death",
+        "block.note_block.harp",
+        "block.ladder.fall",
+        "block.wet_grass.hit",
+        "block.bamboo.hit",
+        "entity.piglin.death",
+        "entity.salmon.ambient",
+        "entity.minecart.inside",
+        "item.shield.block",
+        "ui.toast.out",
+        "block.grindstone.use",
+        "item.crossbow.hit",
+        "entity.generic.hurt",
+        "ambient.underwater.loop.additions.ultra_rare",
+        "entity.panda.bite",
+        "block.enchantment_table.use",
+        "entity.rabbit.hurt",
+        "entity.fishing_bobber.retrieve",
+        "entity.guardian.hurt",
+        "block.honey_block.hit",
+        "entity.slime.attack",
+        "entity.armor_stand.fall",
+        "entity.panda.hurt",
+        "entity.villager.work_farmer",
+        "music_disc.stal",
+        "entity.shulker.shoot",
+        "block.nether_sprouts.break",
+        "entity.ravager.ambient",
+        "entity.ocelot.hurt",
+        "entity.fox.sleep",
+        "entity.zombie.attack_iron_door",
+        "entity.parrot.imitate.guardian",
+        "entity.creeper.hurt",
+        "entity.ocelot.death",
+        "entity.chicken.death",
+        "entity.shulker_bullet.hurt",
+        "block.note_block.snare",
+        "entity.skeleton_horse.gallop_water",
+        "entity.fox.sniff",
+        "entity.piglin_brute.converted_to_zombified",
+        "block.netherrack.place",
+        "block.wooden_trapdoor.open",
+        "entity.puffer_fish.blow_out",
+        "music.dragon",
+        "entity.villager.hurt",
+        "entity.witch.death",
+        "entity.player.attack.knockback",
+        "entity.player.death",
+        "entity.zombified_piglin.hurt",
+        "entity.puffer_fish.blow_up",
+        "entity.hostile.big_fall",
+        "block.gravel.hit",
+        "block.bubble_column.whirlpool_ambient",
+        "entity.player.burp",
+        "item.honey_bottle.drink",
+        "block.glass.hit",
+        "entity.evoker.prepare_attack",
+        "block.coral_block.fall",
+        "item.armor.equip_turtle",
+        "entity.polar_bear.step",
+        "item.crop.plant",
+        "entity.generic.swim",
+        "entity.hostile.swim",
+        "entity.evoker.prepare_wololo",
+        "music_disc.mall",
+        "entity.skeleton_horse.swim",
+        "item.bucket.empty_fish",
+        "block.bell.use",
+        "entity.generic.splash",
+        "entity.strider.eat",
+        "entity.guardian.hurt_land",
+        "entity.parrot.imitate.vindicator",
+        "entity.wandering_trader.yes",
+        "block.sweet_berry_bush.place",
+        "block.lantern.fall",
+        "block.bone_block.break",
+        "block.chest.locked",
+        "ui.loom.select_pattern",
+        "entity.iron_golem.repair",
+        "entity.villager.work_butcher",
+        "block.wooden_button.click_off",
+        "block.gravel.place",
+        "entity.wandering_trader.no",
+        "entity.bee.hurt",
+        "entity.polar_bear.ambient",
+        "block.nether_wart.break",
+        "entity.puffer_fish.ambient",
+        "entity.arrow.hit_player",
+        "block.stem.step",
+        "entity.turtle.egg_break",
+        "entity.rabbit.ambient",
+        "weather.rain.above",
+        "block.wool.place",
+        "block.note_block.bit",
+        "entity.mule.angry",
+        "ambient.underwater.loop.additions.rare",
+        "entity.experience_orb.pickup",
+        "entity.player.swim",
+        "ambient.soul_sand_valley.additions",
+        "entity.dolphin.swim",
+        "block.wart_block.hit",
+        "block.nether_ore.fall",
+        "entity.illusioner.death",
+        "block.beehive.enter",
+        "block.fence_gate.open",
+        "entity.silverfish.ambient",
+        "block.snow.place",
+        "block.stem.hit",
+        "entity.piglin.angry",
+        "entity.armor_stand.break",
+        "entity.mooshroom.suspicious_milk",
+        "entity.fishing_bobber.throw",
+        "block.wooden_pressure_plate.click_on",
+        "ambient.crimson_forest.mood",
+        "block.nether_ore.hit",
+        "block.nether_sprouts.fall",
+        "entity.dolphin.splash",
+        "item.armor.equip_elytra",
+        "block.smithing_table.use",
+        "entity.sheep.ambient",
+        "entity.shulker.close",
+        "block.netherite_block.place",
+        "entity.strider.step_lava",
+        "entity.llama.chest",
+        "ui.stonecutter.select_recipe",
+        "entity.bat.takeoff",
+        "entity.parrot.imitate.evoker",
+        "block.lily_pad.place",
+        "entity.strider.happy",
+        "entity.splash_potion.throw",
+        "entity.magma_cube.squish",
+        "entity.snow_golem.hurt",
+        "entity.blaze.shoot",
+        "block.bamboo_sapling.break",
+        "block.netherrack.break",
+        "entity.donkey.chest",
+        "entity.vex.death",
+        "entity.zombie.death",
+        "entity.puffer_fish.hurt"
+      ],
+      "type": "string"
+    },
+    "dub_2": {
+      "enum": [
+        "gilded_blackstone",
+        "nether_brick_slab",
+        "andesite_slab",
+        "egg",
+        "music_disc_stal",
+        "potted_warped_fungus",
+        "piglin_brute_spawn_egg",
+        "birch_stairs",
+        "spruce_sign",
+        "dragon_head",
+        "green_dye",
+        "honey_block",
+        "diamond_ore",
+        "debug_stick",
+        "spruce_fence_gate",
+        "black_stained_glass_pane",
+        "azure_bluet",
+        "slime_ball",
+        "rabbit",
+        "prismarine_brick_slab",
+        "dragon_egg",
+        "parrot_spawn_egg",
+        "skeleton_wall_skull",
+        "warped_pressure_plate",
+        "light_gray_stained_glass_pane",
+        "scaffolding",
+        "mule_spawn_egg",
+        "suspicious_stew",
+        "potted_red_mushroom",
+        "magenta_stained_glass_pane",
+        "large_fern",
+        "light_blue_concrete",
+        "cocoa",
+        "lapis_ore",
+        "light_blue_bed",
+        "birch_pressure_plate",
+        "honeycomb",
+        "gold_block",
+        "writable_book",
+        "acacia_log",
+        "tropical_fish_spawn_egg",
+        "zombie_spawn_egg",
+        "tripwire",
+        "white_dye",
+        "potted_crimson_fungus",
+        "redstone",
+        "bone_block",
+        "dead_tube_coral_fan",
+        "turtle_spawn_egg",
+        "milk_bucket",
+        "birch_fence",
+        "cyan_terracotta",
+        "prismarine_stairs",
+        "warped_wall_sign",
+        "attached_pumpkin_stem",
+        "iron_boots",
+        "brown_concrete_powder",
+        "end_stone",
+        "glistering_melon_slice",
+        "nether_sprouts",
+        "green_concrete",
+        "acacia_door",
+        "golden_axe",
+        "white_stained_glass_pane",
+        "cobblestone_wall",
+        "white_glazed_terracotta",
+        "tube_coral_wall_fan",
+        "potted_dandelion",
+        "end_stone_brick_wall",
+        "cooked_rabbit",
+        "red_mushroom_block",
+        "crimson_slab",
+        "charcoal",
+        "nether_wart_block",
+        "infested_stone",
+        "stripped_oak_log",
+        "light_gray_concrete_powder",
+        "cooked_porkchop",
+        "netherite_helmet",
+        "cyan_concrete_powder",
+        "saddle",
+        "oak_sign",
+        "nether_gold_ore",
+        "redstone_ore",
+        "horn_coral_fan",
+        "stripped_warped_hyphae",
+        "cooked_beef",
+        "farmland",
+        "black_concrete",
+        "red_wool",
+        "black_wool",
+        "gold_ingot",
+        "stone_button",
+        "melon",
+        "infested_chiseled_stone_bricks",
+        "potted_brown_mushroom",
+        "music_disc_strad",
+        "structure_block",
+        "sticky_piston",
+        "dark_oak_button",
+        "gray_stained_glass",
+        "light_gray_shulker_box",
+        "netherite_axe",
+        "sand",
+        "polished_granite_slab",
+        "dark_oak_door",
+        "mojang_banner_pattern",
+        "potted_spruce_sapling",
+        "beacon",
+        "birch_wood",
+        "mushroom_stew",
+        "flint",
+        "smooth_sandstone_slab",
+        "warped_planks",
+        "mushroom_stem",
+        "emerald",
+        "blackstone",
+        "dead_tube_coral_wall_fan",
+        "hoglin_spawn_egg",
+        "dead_brain_coral_block",
+        "shulker_spawn_egg",
+        "beehive",
+        "polished_basalt",
+        "purple_wool",
+        "pink_glazed_terracotta",
+        "chorus_flower",
+        "lilac",
+        "sheep_spawn_egg",
+        "soul_torch",
+        "polished_blackstone_brick_stairs",
+        "spruce_fence",
+        "coal_block",
+        "potted_white_tulip",
+        "dead_brain_coral_wall_fan",
+        "stripped_crimson_hyphae",
+        "wooden_pickaxe",
+        "birch_leaves",
+        "diamond_pickaxe",
+        "flower_pot",
+        "acacia_button",
+        "stripped_dark_oak_wood",
+        "pink_terracotta",
+        "magenta_terracotta",
+        "gray_dye",
+        "black_shulker_box",
+        "ocelot_spawn_egg",
+        "polished_blackstone_wall",
+        "brain_coral_fan",
+        "red_nether_brick_slab",
+        "sugar_cane",
+        "tall_grass",
+        "tall_seagrass",
+        "orange_stained_glass",
+        "magenta_concrete",
+        "chain_command_block",
+        "iron_chestplate",
+        "weeping_vines",
+        "jungle_wall_sign",
+        "glowstone",
+        "bubble_column",
+        "snow_block",
+        "green_stained_glass",
+        "prismarine_bricks",
+        "white_tulip",
+        "iron_sword",
+        "lime_wall_banner",
+        "magenta_bed",
+        "warped_nylium",
+        "diorite",
+        "spruce_wood",
+        "cyan_shulker_box",
+        "cobweb",
+        "blaze_spawn_egg",
+        "gravel",
+        "witch_spawn_egg",
+        "nether_portal",
+        "elytra",
+        "acacia_fence_gate",
+        "jigsaw",
+        "blue_glazed_terracotta",
+        "flint_and_steel",
+        "tnt",
+        "brain_coral_wall_fan",
+        "pink_shulker_box",
+        "mossy_stone_brick_slab",
+        "yellow_carpet",
+        "air",
+        "jungle_fence_gate",
+        "sandstone",
+        "blue_terracotta",
+        "soul_fire",
+        "dark_prismarine_slab",
+        "conduit",
+        "tropical_fish",
+        "iron_ingot",
+        "nether_star",
+        "oak_stairs",
+        "player_head",
+        "bedrock",
+        "potato",
+        "nether_bricks",
+        "poisonous_potato",
+        "brown_stained_glass",
+        "black_dye",
+        "chiseled_nether_bricks",
+        "polished_blackstone_slab",
+        "polished_andesite_slab",
+        "magenta_banner",
+        "light_gray_stained_glass",
+        "tropical_fish_bucket",
+        "dark_oak_wall_sign",
+        "green_concrete_powder",
+        "end_portal",
+        "purpur_block",
+        "birch_wall_sign",
+        "blue_banner",
+        "smithing_table",
+        "comparator",
+        "gray_shulker_box",
+        "infested_cracked_stone_bricks",
+        "yellow_concrete_powder",
+        "blackstone_wall",
+        "cod",
+        "smooth_stone",
+        "spruce_pressure_plate",
+        "spruce_sapling",
+        "acacia_fence",
+        "spruce_wall_sign",
+        "warped_roots",
+        "arrow",
+        "crimson_hyphae",
+        "clay_ball",
+        "crimson_button",
+        "brown_mushroom",
+        "enderman_spawn_egg",
+        "potted_red_tulip",
+        "iron_nugget",
+        "donkey_spawn_egg",
+        "stonecutter",
+        "chainmail_boots",
+        "wall_torch",
+        "terracotta",
+        "lime_stained_glass_pane",
+        "structure_void",
+        "dead_brain_coral",
+        "green_wool",
+        "crimson_stairs",
+        "clock",
+        "llama_spawn_egg",
+        "light_blue_stained_glass_pane",
+        "dead_fire_coral_fan",
+        "creeper_spawn_egg",
+        "twisting_vines_plant",
+        "oak_log",
+        "jungle_planks",
+        "snow",
+        "magenta_carpet",
+        "powered_rail",
+        "granite_stairs",
+        "leather_helmet",
+        "emerald_ore",
+        "stripped_spruce_log",
+        "cut_red_sandstone",
+        "crimson_fence",
+        "blue_carpet",
+        "iron_hoe",
+        "chicken",
+        "crimson_stem",
+        "dead_horn_coral_block",
+        "cyan_banner",
+        "warped_door",
+        "potted_lily_of_the_valley",
+        "brewing_stand",
+        "stone_bricks",
+        "stripped_oak_wood",
+        "oak_pressure_plate",
+        "bubble_coral_fan",
+        "cyan_glazed_terracotta",
+        "basalt",
+        "jungle_door",
+        "oak_wall_sign",
+        "brown_carpet",
+        "fishing_rod",
+        "horse_spawn_egg",
+        "gray_concrete_powder",
+        "quartz",
+        "horn_coral_wall_fan",
+        "beetroot",
+        "dead_fire_coral",
+        "music_disc_mall",
+        "ladder",
+        "lodestone",
+        "ravager_spawn_egg",
+        "pink_wall_banner",
+        "netherite_hoe",
+        "infested_stone_bricks",
+        "end_stone_brick_slab",
+        "leather_boots",
+        "water_bucket",
+        "light_blue_dye",
+        "warped_stairs",
+        "dead_bubble_coral",
+        "chainmail_helmet",
+        "oak_slab",
+        "spruce_door",
+        "zombie_head",
+        "dead_tube_coral",
+        "chorus_fruit",
+        "horn_coral",
+        "prismarine_crystals",
+        "white_concrete_powder",
+        "granite_slab",
+        "sandstone_slab",
+        "red_wall_banner",
+        "cake",
+        "gray_wall_banner",
+        "acacia_leaves",
+        "yellow_shulker_box",
+        "brown_wall_banner",
+        "brown_banner",
+        "gunpowder",
+        "pufferfish_bucket",
+        "dead_bubble_coral_wall_fan",
+        "nether_brick",
+        "pink_stained_glass_pane",
+        "bamboo",
+        "red_sand",
+        "purple_shulker_box",
+        "clay",
+        "chiseled_stone_bricks",
+        "diamond_leggings",
+        "lectern",
+        "diamond_helmet",
+        "warped_slab",
+        "quartz_block",
+        "diamond_chestplate",
+        "mossy_cobblestone_slab",
+        "wooden_hoe",
+        "music_disc_blocks",
+        "white_wool",
+        "end_stone_brick_stairs",
+        "void_air",
+        "chainmail_chestplate",
+        "iron_leggings",
+        "light_gray_wall_banner",
+        "purple_stained_glass",
+        "purple_terracotta",
+        "green_bed",
+        "red_concrete_powder",
+        "repeater",
+        "mycelium",
+        "chiseled_sandstone",
+        "lingering_potion",
+        "stripped_birch_log",
+        "hay_block",
+        "light_blue_concrete_powder",
+        "pink_dye",
+        "orange_carpet",
+        "bamboo_sapling",
+        "magenta_concrete_powder",
+        "andesite_wall",
+        "yellow_concrete",
+        "warped_fungus_on_a_stick",
+        "cobblestone_slab",
+        "armor_stand",
+        "red_nether_bricks",
+        "light_gray_concrete",
+        "glass",
+        "chest",
+        "seagrass",
+        "warped_trapdoor",
+        "stone_stairs",
+        "red_terracotta",
+        "furnace_minecart",
+        "end_portal_frame",
+        "kelp_plant",
+        "grindstone",
+        "leather_leggings",
+        "dark_oak_leaves",
+        "lime_shulker_box",
+        "jungle_sapling",
+        "creeper_head",
+        "sweet_berry_bush",
+        "gray_banner",
+        "string",
+        "white_terracotta",
+        "book",
+        "wooden_shovel",
+        "blackstone_slab",
+        "lava",
+        "jungle_trapdoor",
+        "black_carpet",
+        "fire_coral",
+        "magenta_glazed_terracotta",
+        "gray_bed",
+        "trident",
+        "wet_sponge",
+        "yellow_wool",
+        "chicken_spawn_egg",
+        "dried_kelp_block",
+        "bone",
+        "yellow_terracotta",
+        "target",
+        "magma_block",
+        "cauldron",
+        "pink_concrete_powder",
+        "dragon_wall_head",
+        "wither_skeleton_spawn_egg",
+        "crossbow",
+        "soul_sand",
+        "horn_coral_block",
+        "diamond_shovel",
+        "piston_head",
+        "prismarine_brick_stairs",
+        "experience_bottle",
+        "golden_horse_armor",
+        "orange_tulip",
+        "bee_nest",
+        "smooth_red_sandstone_slab",
+        "cut_sandstone_slab",
+        "potted_birch_sapling",
+        "grass_block",
+        "music_disc_pigstep",
+        "end_gateway",
+        "black_bed",
+        "minecart",
+        "dead_horn_coral_fan",
+        "spectral_arrow",
+        "jungle_stairs",
+        "netherite_shovel",
+        "piglin_spawn_egg",
+        "oxeye_daisy",
+        "smooth_sandstone_stairs",
+        "leather_chestplate",
+        "blue_wool",
+        "popped_chorus_fruit",
+        "creeper_banner_pattern",
+        "redstone_wire",
+        "polar_bear_spawn_egg",
+        "stripped_dark_oak_log",
+        "attached_melon_stem",
+        "red_bed",
+        "lava_bucket",
+        "yellow_banner",
+        "barrel",
+        "chain",
+        "dead_brain_coral_fan",
+        "rotten_flesh",
+        "slime_block",
+        "pumpkin_stem",
+        "emerald_block",
+        "purple_banner",
+        "oak_fence",
+        "chainmail_leggings",
+        "tnt_minecart",
+        "acacia_planks",
+        "iron_ore",
+        "blaze_powder",
+        "quartz_pillar",
+        "dead_bubble_coral_block",
+        "purple_concrete_powder",
+        "polished_diorite_slab",
+        "smooth_stone_slab",
+        "golden_sword",
+        "prismarine",
+        "crimson_trapdoor",
+        "filled_map",
+        "lime_concrete",
+        "mossy_cobblestone_stairs",
+        "potted_blue_orchid",
+        "iron_block",
+        "birch_sign",
+        "weeping_vines_plant",
+        "porkchop",
+        "pink_tulip",
+        "warped_fence_gate",
+        "blue_ice",
+        "wolf_spawn_egg",
+        "stripped_warped_stem",
+        "crying_obsidian",
+        "brown_terracotta",
+        "vine",
+        "dark_oak_fence",
+        "quartz_stairs",
+        "rail",
+        "white_banner",
+        "blue_stained_glass",
+        "potted_wither_rose",
+        "green_terracotta",
+        "iron_horse_armor",
+        "red_carpet",
+        "water",
+        "white_concrete",
+        "flower_banner_pattern",
+        "oak_wood",
+        "lime_concrete_powder",
+        "red_shulker_box",
+        "light_blue_terracotta",
+        "blue_dye",
+        "sugar",
+        "cat_spawn_egg",
+        "music_disc_far",
+        "brown_glazed_terracotta",
+        "cod_bucket",
+        "crimson_planks",
+        "ink_sac",
+        "note_block",
+        "bowl",
+        "cracked_stone_bricks",
+        "skeleton_skull",
+        "purpur_stairs",
+        "orange_dye",
+        "yellow_bed",
+        "jungle_sign",
+        "green_glazed_terracotta",
+        "scute",
+        "golden_chestplate",
+        "netherite_leggings",
+        "golden_shovel",
+        "spruce_stairs",
+        "birch_planks",
+        "gray_wool",
+        "silverfish_spawn_egg",
+        "white_stained_glass",
+        "green_stained_glass_pane",
+        "ancient_debris",
+        "cave_air",
+        "diamond",
+        "black_concrete_powder",
+        "rabbit_spawn_egg",
+        "lime_carpet",
+        "blue_concrete_powder",
+        "purpur_slab",
+        "redstone_wall_torch",
+        "hopper",
+        "strider_spawn_egg",
+        "dragon_breath",
+        "potted_acacia_sapling",
+        "polished_diorite",
+        "lime_terracotta",
+        "beef",
+        "baked_potato",
+        "mossy_cobblestone",
+        "brick_wall",
+        "brain_coral_block",
+        "birch_fence_gate",
+        "music_disc_chirp",
+        "netherite_sword",
+        "yellow_stained_glass_pane",
+        "dark_oak_planks",
+        "phantom_membrane",
+        "wooden_sword",
+        "allium",
+        "jungle_leaves",
+        "chorus_plant",
+        "bucket",
+        "warped_button",
+        "oak_trapdoor",
+        "black_stained_glass",
+        "golden_helmet",
+        "dark_oak_pressure_plate",
+        "cut_red_sandstone_slab",
+        "lime_bed",
+        "blast_furnace",
+        "sponge",
+        "cartography_table",
+        "soul_wall_torch",
+        "netherite_ingot",
+        "light_gray_dye",
+        "potted_oxeye_daisy",
+        "daylight_detector",
+        "slime_spawn_egg",
+        "beetroot_soup",
+        "light_gray_carpet",
+        "music_disc_ward",
+        "grass",
+        "end_crystal",
+        "vindicator_spawn_egg",
+        "wheat",
+        "end_rod",
+        "phantom_spawn_egg",
+        "stone_pickaxe",
+        "iron_helmet",
+        "guardian_spawn_egg",
+        "black_wall_banner",
+        "pink_stained_glass",
+        "piston",
+        "dead_fire_coral_block",
+        "melon_slice",
+        "ender_chest",
+        "kelp",
+        "light_gray_wool",
+        "moving_piston",
+        "sunflower",
+        "brown_bed",
+        "heart_of_the_sea",
+        "polished_blackstone_bricks",
+        "jack_o_lantern",
+        "grass_path",
+        "polished_granite",
+        "smooth_red_sandstone",
+        "dead_bubble_coral_fan",
+        "furnace",
+        "red_stained_glass",
+        "stone_slab",
+        "dandelion",
+        "pink_bed",
+        "zombified_piglin_spawn_egg",
+        "rose_bush",
+        "blaze_rod",
+        "iron_trapdoor",
+        "drowned_spawn_egg",
+        "stone_pressure_plate",
+        "iron_bars",
+        "smooth_red_sandstone_stairs",
+        "quartz_bricks",
+        "wheat_seeds",
+        "brown_concrete",
+        "cyan_concrete",
+        "stone_shovel",
+        "stripped_birch_wood",
+        "bubble_coral_block",
+        "zombie_horse_spawn_egg",
+        "green_banner",
+        "light_gray_banner",
+        "frosted_ice",
+        "diamond_sword",
+        "rabbit_foot",
+        "yellow_wall_banner",
+        "cyan_wall_banner",
+        "bat_spawn_egg",
+        "diamond_horse_armor",
+        "netherite_block",
+        "glowstone_dust",
+        "crimson_fence_gate",
+        "white_carpet",
+        "fletching_table",
+        "red_concrete",
+        "cocoa_beans",
+        "cracked_polished_blackstone_bricks",
+        "purple_glazed_terracotta",
+        "acacia_slab",
+        "wither_skeleton_skull",
+        "fire_coral_fan",
+        "husk_spawn_egg",
+        "zombie_villager_spawn_egg",
+        "dispenser",
+        "bubble_coral",
+        "stripped_crimson_stem",
+        "lime_wool",
+        "redstone_lamp",
+        "diamond_axe",
+        "soul_lantern",
+        "orange_wool",
+        "turtle_helmet",
+        "jungle_wood",
+        "heavy_weighted_pressure_plate",
+        "potion",
+        "gold_nugget",
+        "red_sandstone_wall",
+        "crimson_door",
+        "warped_stem",
+        "acacia_trapdoor",
+        "polished_blackstone_pressure_plate",
+        "mossy_cobblestone_wall",
+        "chipped_anvil",
+        "acacia_wall_sign",
+        "purpur_pillar",
+        "red_stained_glass_pane",
+        "feather",
+        "trader_llama_spawn_egg",
+        "honey_bottle",
+        "acacia_stairs",
+        "dropper",
+        "light_blue_banner",
+        "potted_allium",
+        "purple_bed",
+        "light_blue_wool",
+        "polished_blackstone_stairs",
+        "light_blue_stained_glass",
+        "wither_skeleton_wall_skull",
+        "acacia_sapling",
+        "firework_rocket",
+        "orange_glazed_terracotta",
+        "blackstone_stairs",
+        "chiseled_polished_blackstone",
+        "black_glazed_terracotta",
+        "purple_concrete",
+        "cookie",
+        "bookshelf",
+        "orange_stained_glass_pane",
+        "pink_carpet",
+        "bell",
+        "warped_hyphae",
+        "infested_mossy_stone_bricks",
+        "mossy_stone_brick_stairs",
+        "warped_fungus",
+        "stripped_jungle_log",
+        "oak_boat",
+        "nautilus_shell",
+        "dead_bush",
+        "potted_oak_sapling",
+        "detector_rail",
+        "carrot_on_a_stick",
+        "shield",
+        "damaged_anvil",
+        "anvil",
+        "totem_of_undying",
+        "red_dye",
+        "magenta_stained_glass",
+        "potted_poppy",
+        "lapis_lazuli",
+        "music_disc_wait",
+        "netherite_pickaxe",
+        "mooshroom_spawn_egg",
+        "map",
+        "dark_oak_sign",
+        "netherite_boots",
+        "bread",
+        "polished_blackstone_button",
+        "torch",
+        "lantern",
+        "oak_button",
+        "iron_shovel",
+        "stray_spawn_egg",
+        "spawner",
+        "black_banner",
+        "brown_wool",
+        "warped_wart_block",
+        "cooked_salmon",
+        "green_carpet",
+        "mossy_stone_bricks",
+        "birch_door",
+        "stripped_acacia_wood",
+        "cow_spawn_egg",
+        "music_disc_13",
+        "diorite_wall",
+        "music_disc_11",
+        "blue_concrete",
+        "wooden_axe",
+        "vex_spawn_egg",
+        "brain_coral",
+        "shears",
+        "spruce_planks",
+        "warped_fence",
+        "splash_potion",
+        "light_blue_glazed_terracotta",
+        "written_book",
+        "cyan_stained_glass_pane",
+        "ghast_tear",
+        "glass_pane",
+        "sea_pickle",
+        "nether_quartz_ore",
+        "enchanted_book",
+        "potted_crimson_roots",
+        "carved_pumpkin",
+        "granite_wall",
+        "redstone_torch",
+        "sandstone_wall",
+        "polished_granite_stairs",
+        "dead_horn_coral",
+        "dirt",
+        "orange_concrete_powder",
+        "dark_oak_wood",
+        "lever",
+        "blue_bed",
+        "acacia_boat",
+        "acacia_pressure_plate",
+        "andesite_stairs",
+        "skeleton_horse_spawn_egg",
+        "dark_oak_fence_gate",
+        "compass",
+        "polished_andesite_stairs",
+        "coal",
+        "jungle_pressure_plate",
+        "smooth_quartz_slab",
+        "cyan_bed",
+        "stripped_acacia_log",
+        "golden_pickaxe",
+        "sweet_berries",
+        "bow",
+        "potted_orange_tulip",
+        "crimson_roots",
+        "smooth_sandstone",
+        "cobblestone",
+        "redstone_block",
+        "player_wall_head",
+        "cooked_cod",
+        "bone_meal",
+        "honeycomb_block",
+        "brick",
+        "yellow_dye",
+        "cyan_stained_glass",
+        "potted_bamboo",
+        "bricks",
+        "netherite_chestplate",
+        "orange_bed",
+        "petrified_oak_slab",
+        "salmon_spawn_egg",
+        "leather_horse_armor",
+        "orange_banner",
+        "tube_coral",
+        "pig_spawn_egg",
+        "stone_brick_slab",
+        "dark_prismarine",
+        "purple_wall_banner",
+        "painting",
+        "pumpkin",
+        "trapped_chest",
+        "brown_shulker_box",
+        "orange_concrete",
+        "potted_pink_tulip",
+        "pumpkin_seeds",
+        "oak_sapling",
+        "brown_stained_glass_pane",
+        "nether_brick_fence",
+        "white_bed",
+        "birch_slab",
+        "lily_pad",
+        "observer",
+        "podzol",
+        "cyan_wool",
+        "fire",
+        "stick",
+        "andesite",
+        "diamond_boots",
+        "fire_coral_block",
+        "repeating_command_block",
+        "packed_ice",
+        "gray_carpet",
+        "enchanting_table",
+        "cod_spawn_egg",
+        "gray_stained_glass_pane",
+        "lime_dye",
+        "orange_wall_banner",
+        "acacia_sign",
+        "polished_blackstone_brick_wall",
+        "rabbit_stew",
+        "peony",
+        "stone_axe",
+        "dark_oak_log",
+        "poppy",
+        "netherite_scrap",
+        "red_nether_brick_wall",
+        "ender_eye",
+        "stone_sword",
+        "cut_sandstone",
+        "chest_minecart",
+        "stone_brick_stairs",
+        "jungle_slab",
+        "cactus",
+        "spruce_trapdoor",
+        "carrots",
+        "name_tag",
+        "spruce_log",
+        "black_terracotta",
+        "gray_glazed_terracotta",
+        "birch_button",
+        "red_sandstone_slab",
+        "orange_terracotta",
+        "brown_dye",
+        "light_gray_bed",
+        "soul_campfire",
+        "salmon_bucket",
+        "brick_slab",
+        "spruce_leaves",
+        "command_block_minecart",
+        "light_gray_terracotta",
+        "spruce_slab",
+        "red_nether_brick_stairs",
+        "gray_terracotta",
+        "sea_lantern",
+        "ice",
+        "green_shulker_box",
+        "oak_door",
+        "dark_oak_stairs",
+        "blue_shulker_box",
+        "iron_axe",
+        "smoker",
+        "loom",
+        "polished_blackstone",
+        "creeper_wall_head",
+        "nether_wart",
+        "oak_leaves",
+        "composter",
+        "mutton",
+        "knowledge_book",
+        "white_wall_banner",
+        "obsidian",
+        "cyan_carpet",
+        "skull_banner_pattern",
+        "dead_horn_coral_wall_fan",
+        "firework_star",
+        "music_disc_mellohi",
+        "potted_cornflower",
+        "purple_carpet",
+        "golden_hoe",
+        "cooked_chicken",
+        "dolphin_spawn_egg",
+        "coarse_dirt",
+        "dark_prismarine_stairs",
+        "jungle_button",
+        "dead_tube_coral_block",
+        "potatoes",
+        "dark_oak_boat",
+        "cooked_mutton",
+        "jungle_fence",
+        "jukebox",
+        "green_wall_banner",
+        "purple_stained_glass_pane",
+        "birch_trapdoor",
+        "apple",
+        "elder_guardian_spawn_egg",
+        "spider_eye",
+        "zoglin_spawn_egg",
+        "piglin_banner_pattern",
+        "golden_boots",
+        "potted_dead_bush",
+        "lily_of_the_valley",
+        "blue_orchid",
+        "pumpkin_pie",
+        "red_sandstone_stairs",
+        "squid_spawn_egg",
+        "crafting_table",
+        "cave_spider_spawn_egg",
+        "cobblestone_stairs",
+        "brown_mushroom_block",
+        "melon_stem",
+        "potted_fern",
+        "diamond_block",
+        "end_stone_bricks",
+        "golden_carrot",
+        "stone",
+        "nether_brick_wall",
+        "crimson_sign",
+        "dark_oak_trapdoor",
+        "potted_cactus",
+        "prismarine_wall",
+        "enchanted_golden_apple",
+        "magma_cream",
+        "ghast_spawn_egg",
+        "pink_banner",
+        "melon_seeds",
+        "music_disc_cat",
+        "red_sandstone",
+        "purple_dye",
+        "fire_charge",
+        "chiseled_red_sandstone",
+        "tube_coral_block",
+        "sandstone_stairs",
+        "white_shulker_box",
+        "fern",
+        "skeleton_spawn_egg",
+        "pufferfish_spawn_egg",
+        "light_blue_carpet",
+        "diorite_slab",
+        "lime_banner",
+        "soul_soil",
+        "golden_leggings",
+        "dark_oak_sapling",
+        "polished_diorite_stairs",
+        "endermite_spawn_egg",
+        "tube_coral_fan",
+        "lime_glazed_terracotta",
+        "magenta_dye",
+        "crimson_fungus",
+        "leather",
+        "cracked_nether_bricks",
+        "potted_dark_oak_sapling",
+        "birch_boat",
+        "nether_brick_stairs",
+        "command_block",
+        "dead_fire_coral_wall_fan",
+        "wandering_trader_spawn_egg",
+        "villager_spawn_egg",
+        "snowball",
+        "bubble_coral_wall_fan",
+        "gray_concrete",
+        "light_blue_shulker_box",
+        "smooth_quartz_stairs",
+        "stone_brick_wall",
+        "glass_bottle",
+        "respawn_anchor",
+        "red_banner",
+        "blue_wall_banner",
+        "crimson_nylium",
+        "acacia_wood",
+        "bee_spawn_egg",
+        "lime_stained_glass",
+        "magenta_shulker_box",
+        "globe_banner_pattern",
+        "tipped_arrow",
+        "yellow_stained_glass",
+        "potted_warped_roots",
+        "ender_pearl",
+        "golden_apple",
+        "prismarine_slab",
+        "dried_kelp",
+        "evoker_spawn_egg",
+        "prismarine_shard",
+        "lead",
+        "lapis_block",
+        "magenta_wool",
+        "stone_hoe",
+        "beetroot_seeds",
+        "panda_spawn_egg",
+        "cornflower",
+        "shulker_shell",
+        "oak_fence_gate",
+        "stripped_jungle_wood",
+        "orange_shulker_box",
+        "iron_door",
+        "spruce_boat",
+        "smooth_quartz",
+        "barrier",
+        "beetroots",
+        "rabbit_hide",
+        "pink_wool",
+        "pillager_spawn_egg",
+        "campfire",
+        "wither_rose",
+        "light_gray_glazed_terracotta",
+        "jungle_boat",
+        "salmon",
+        "fox_spawn_egg",
+        "diamond_hoe",
+        "potted_jungle_sapling",
+        "polished_blackstone_brick_slab",
+        "twisting_vines",
+        "turtle_egg",
+        "red_glazed_terracotta",
+        "item_frame",
+        "red_tulip",
+        "coal_ore",
+        "birch_sapling",
+        "polished_andesite",
+        "brick_stairs",
+        "diorite_stairs",
+        "shroomlight",
+        "spider_spawn_egg",
+        "tripwire_hook",
+        "stripped_spruce_wood",
+        "crimson_wall_sign",
+        "potted_azure_bluet",
+        "spruce_button",
+        "zombie_wall_head",
+        "paper",
+        "magma_cube_spawn_egg",
+        "jungle_log",
+        "iron_pickaxe",
+        "dark_oak_slab",
+        "netherrack",
+        "light_blue_wall_banner",
+        "birch_log",
+        "light_weighted_pressure_plate",
+        "warped_sign",
+        "activator_rail",
+        "pufferfish",
+        "oak_planks",
+        "gold_ore",
+        "shulker_box",
+        "crimson_pressure_plate",
+        "fermented_spider_eye",
+        "magenta_wall_banner",
+        "chiseled_quartz_block",
+        "hopper_minecart",
+        "yellow_glazed_terracotta",
+        "cyan_dye",
+        "quartz_slab",
+        "blue_stained_glass_pane",
+        "fire_coral_wall_fan",
+        "mossy_stone_brick_wall",
+        "granite",
+        "red_mushroom",
+        "infested_cobblestone",
+        "pink_concrete",
+        "carrot"
+      ],
+      "type": "string"
+    },
+    "dub_1": {
+      "enum": [
+        "furnace",
+        "dropper",
+        "anvil",
+        "dispenser",
+        "smithing",
+        "brewing",
+        "smoker",
+        "loom",
+        "lectern",
+        "stonecutter",
+        "workbench",
+        "player",
+        "enchanting",
+        "barrel",
+        "chest",
+        "shulker_box",
+        "merchant",
+        "ender_chest",
+        "cartography",
+        "creative",
+        "grindstone",
+        "beacon",
+        "crafting",
+        "hopper",
+        "blast_furnace"
+      ],
+      "type": "string"
+    }
+  },
+  "patternProperties": {
+    "^items-": {
+      "$ref": "#/definitions/76e0793c-bf8d-4156-8a4d-9706fa0ed799"
+    }
+  },
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BMenu menu schema"
+}

@@ -1,8 +1,8 @@
 package dev.by1337.bmenu;
 
-import dev.by1337.bmenu.event.MenuEventHandler;
-import dev.by1337.bmenu.item.SlotContent;
-import dev.by1337.bmenu.item.SlotFactory;
+import dev.by1337.bmenu.handler.MenuEventHandler;
+import dev.by1337.bmenu.slot.SlotContent;
+import dev.by1337.bmenu.slot.SlotFactory;
 import dev.by1337.yaml.YamlMap;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;

@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.animation.util;
 
-import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.slot.SlotContent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

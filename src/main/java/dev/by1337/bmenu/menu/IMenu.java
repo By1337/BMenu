@@ -4,7 +4,7 @@ import dev.by1337.bmenu.MenuConfig;
 import dev.by1337.bmenu.MenuLoader;
 import dev.by1337.bmenu.command.CommandRunner;
 import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.slot.SlotContent;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.plc.PlaceholderResolver;
 import org.bukkit.entity.Player;

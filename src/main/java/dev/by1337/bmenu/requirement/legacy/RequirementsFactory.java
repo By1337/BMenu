@@ -69,9 +69,7 @@ public class RequirementsFactory {
                     );
                     requirements.add(new LegacyRequirement(requirement, commands, denyCommands));
                 }
-                default -> {
-                    throw new IllegalArgumentException("unknown type " + type);
-                }
+                default -> throw new IllegalArgumentException("unknown type " + type);
             }
         }
         return new Requirements(requirements);

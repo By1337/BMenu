@@ -6,29 +6,28 @@ provider: default
 type: chest
 size: 54
 title: '&7Селлер'
-only-open-from: [ ]
-
-args: { }
 
 on_left_click: &buy-ful
-  requirements: '%vault_eco_balance_fixed% >= {PRICE}'
-  deny_commands: &no_money
-    - message: '&cУ Вас не достаточно баланса!'
-    - layer: '2 set not_enough_money {clicked_slot}'
-  commands:
-    - takemoney: '{PRICE}'
-    - console: 'give %player_name% {MATERIAL} {AMOUNT}'
-    - message: '&aВы успешно купили {NAME}&a в количестве {AMOUNT}'
-    - update: ''
+  - if: '%vault_eco_balance_fixed% >= {PRICE}'
+    do:
+      - takemoney: '{PRICE}'
+      - console: 'give %player_name% {MATERIAL} {AMOUNT}'
+      - '&aВы успешно купили {NAME}&a в количестве {AMOUNT}'
+      - update_slots: '10-43'
+    else: &no_money
+      - '&cУ Вас не достаточно баланса!'
+      - layer: '2 set not_enough_money {clicked_slot}'
+      - update_slots: '10-43'
 
 on_right_click: &buy-32
-  requirements: '%vault_eco_balance_fixed% >= {PRICE_32}'
-  deny_commands: *no_money
-  commands:
-    - takemoney: '{PRICE_32}'
-    - console: 'give %player_name% {MATERIAL} {AMOUNT_32}'
-    - console: '&aВы успешно купили {NAME}&a в количестве {AMOUNT_32}'
-    - update: ''
+  - if: '%vault_eco_balance_fixed% >= {PRICE_32}'
+    do:
+      - takemoney: '{PRICE_32}'
+      - console: 'give %player_name% {MATERIAL} {AMOUNT_32}'
+      - '&aВы успешно купили {NAME}&a в количестве {AMOUNT_32}'
+      - update_slots: '10-43'
+    else: *no_money
+
 items-default:
   buyer-item2: &item
     oneOf:
@@ -58,7 +57,7 @@ items-default:
         on_click: *buy-32
 
       - material: '{MATERIAL}'
-        amount: '1'
+        amount: 1
         name: '&7{NAME}'
         lore:
           - '&r '
@@ -66,16 +65,15 @@ items-default:
           - '&r &7Цена за 32 {PRICE_32}'
           - '&r &7Цена за 64 {PRICE}'
           - '&r '
-        on_click:
-          commands: *no_money
+        on_click: *no_money
 
 items:
   not_enough_money:
     material: barrier
     name: "&cУ Вас не достаточно баланса!"
     tick_speed: 25
-    on_tick:
-      commands: '[die]'
+    on_tick: '[die]'
+
   item-lapis_lazuli:
     args:
       MATERIAL: lapis_lazuli
@@ -383,19 +381,3 @@ items:
       AMOUNT_32: 32
     slot: 43
     <<: *item
-
-
-animation:
-  - tick: 0
-    opcodes:
-      - title: '&7С'
-  - opcodes:
-      - title: '&7Се'
-  - opcodes:
-      - title: '&7Сел'
-  - opcodes:
-      - title: '&7Селл'
-  - opcodes:
-      - title: '&7Селле'
-  - opcodes:
-      - title: '&7Селлер'

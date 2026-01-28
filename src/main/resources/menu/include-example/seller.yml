@@ -34,35 +34,6 @@ items-defaults:
               - '&aВы успешно купили {NAME}'
             else: '&cУ Вас не достаточно баланса!'
 
-  item: &item_old
-    oneOf:
-      - material: '{MATERIAL}'
-        name: '{NAME}'
-        lore:
-          - '&r '
-          - '&r &7Нажмите лкм'
-          - '&r &7чтобы купить {NAME}&7 за {PRICE_FORMAT} монет'
-          - '&r '
-        on_view: '{menu_id} == example:prem-seller'
-        on_click:
-          requirements: '%vault_eco_balance_fixed% >= {PRICE}'
-          deny_commands: '&cУ Вас не достаточно баланса!'
-          commands:
-            - open: 'example:prem-seller-confirm'
-            - up: '' # команды ниже будут выполняться в открывшемся меню.
-            - layer: '0 set -me 13' # устанавливаем текущий предмет в слот 13
-            - update: '' # обновим этот предмет чтобы ещё раз on_view проверить
-
-      - material: '{MATERIAL}'
-        name: '{NAME}'
-        on_click:
-          requirements: '%vault_eco_balance_fixed% >= {PRICE}'
-          deny_commands: '&cУ Вас не достаточно баланса!'
-          commands:
-            - takemoney: '{PRICE}'
-            - console: 'give %player_name% {MATERIAL} {AMOUNT}'
-            - '&aВы успешно купили {NAME}'
-            - back: ''
 items:
   gui-lime:
     material: lime_stained_glass_pane

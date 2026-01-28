@@ -1,8 +1,8 @@
 package dev.by1337.bmenu.inventory;
 
-import dev.by1337.bmenu.item.SlotContent;
-import dev.by1337.bmenu.item.render.BukkitItemRenderer;
-import dev.by1337.bmenu.item.render.ItemRenderer;
+import dev.by1337.bmenu.slot.SlotContent;
+import dev.by1337.bmenu.slot.render.BukkitItemRenderer;
+import dev.by1337.bmenu.slot.render.ItemRenderer;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.core.BCore;
 import dev.by1337.core.bridge.inventory.InventoryUtil;

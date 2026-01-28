@@ -13,7 +13,7 @@ import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.item.component.EnchantmentData;
+import dev.by1337.item.component.EnchantmentData;
 import dev.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.NotNull;
 

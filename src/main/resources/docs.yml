@@ -1,0 +1,58 @@
+# Базовое меню
+
+# в id можно использовать символы [a-z0-9._-]
+id: my:first_menu
+type: chest # тип сундук
+size: 54
+title: '&7Пример меню'
+
+# Предметы в меню
+items:
+  example: # просто id
+    material: diamond
+    name: '&aПредмет в меню'
+    slot: 20
+---
+# Обработка кликов по предмету
+items:
+  example:
+    material: diamond
+    slot: 21
+    on_left_click:
+      commands: '&aЛКМ'
+    on_right_click:
+      commands: '&aПКМ'
+    on_click:
+      commands: '&7Другой клик'
+
+# Все виды кликов
+# on_left_click
+# on_right_click
+# on_shift_left_click
+# on_shift_right_click
+# on_middle_click
+# on_drop_click
+# on_click - любой не назначенный клик
+# on_number_key_0_click
+# on_number_key_1_click
+# on_number_key_2_click
+# on_number_key_3_click
+# on_number_key_4_click
+# on_number_key_5_click
+# on_number_key_6_click
+# on_number_key_7_click
+# on_number_key_8_click
+# on_swap_offhand_click
+# on_control_drop_click
+---
+# Обработка условий при клике
+items:
+  example: # просто id
+    material: diamond
+    name: '&aПредмет в меню'
+    slot: 21
+    on_click:
+      requirements: '%player_name% == _By1337_'
+      commands: '&aBy1337 нажал по предмету!'
+      deny_commands: '&cКто-то нажал по предмету'
+---

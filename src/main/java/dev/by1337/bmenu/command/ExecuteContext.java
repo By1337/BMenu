@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.command;
 
 import dev.by1337.cmd.CompiledCommand;
-import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.slot.SlotContent;
 import dev.by1337.bmenu.menu.Menu;
 import org.jetbrains.annotations.Nullable;
 

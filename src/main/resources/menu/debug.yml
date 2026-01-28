@@ -9,7 +9,6 @@
 # "[set_item_to_layer] <slots> <layer> <item>" -> "[layer] <layer+2> set <item> <slots>"
 # "[clear_layer] <layer>" -> "[layer] <layer+2> clear"
 # view_requirement -> on_view
-# tick_speed -> on_tick.tick_speed
 # potion_effects -> potion_contents
 id: debug:main
 provider: default
@@ -24,20 +23,47 @@ args:
   TEST:
     - 122
 123:
+  on_view77:
+    slot: 49
+    local_args:
+      okak: 0
+    oneOf:
+      - material: dirt
+        on_view: '{okak} == 0'
+      - material: gold_block
+        on_view: '{okak} == 1'
+      - material: diamond
+        on_view: '{okak} == 2'
+      - material: netherite_block
+        on_view: '{okak} == 3'
+      - material: barrier
+    on_tick: '[simulate] click 49'
+    tick_speed: 2
+    on_click:
+      - if: '{rand_bool} == true'
+        do:
+          if: '{rand_bool} == true'
+          do:
+            if: '{rand_bool} == true'
+            do:
+              - set_local: okak 3
+              - update: ''
+            else:
+              - set_local: okak 2
+              - update: ''
+          else:
+            - set_local: okak 1
+            - update: ''
+        else:
+          - set_local: okak 0
+          - update: ''
+
+
   on_view1:
     slot: 49
     material: diamond_block
     name: diamond_block
     on_click:
-      - if:
-          - '{rand_bool} == true'
-          - 'has super.perm'
-          - '{rand:100} * 66 > 99'
-        do:
-          - console: 'say 123'
-          - |
-            <red>Message!
-            <red>Message 2!
       - if: '{rand_bool} == true'
         do:
           if: '{rand_bool} == true'

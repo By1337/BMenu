@@ -1,0 +1,211 @@
+---
+
+### Условия requirements
+requirements: '100 > 100'
+---
+requirements: &requirements
+  - check: '100 + 100 * 100 == 15'
+    commands: [ ]
+    deny_commands: [ ]
+  - check: '100.5 + 100.5 == 201'
+  - check: 'has super.permission' # если у игрока есть пермишен
+  - check: '!has super.permission' # если у игрока нет пермишена
+  - check: 'string has str' # строка содержит
+  - check: 'string !has str' # строка не содержит
+  - check: 'string HAS str' # строка содержит без учёта регистра
+  - check: 'string !HAS str' # строка не содержит без учёта регистра
+  - check: 'string == string' # строка равна
+  - check: 'string != string' # строка не равна
+  - check: 'nearby world 10 10 10 100' # условие что игрок находится в радиусе 100 блоков от координат 10 10 10 в мире world
+    commands:
+      - '[message] string != string'
+      - '[break]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
+      - '[close]' # Так как выше команда [break] команда [close] не будет выполнена
+---
+
+extends:
+  - ./file.yml # путь относительно текущей папки
+  - ../file.yml # путь относительно папки на уровень выше
+  - /file.yml  # путь относительно корневой папки с меню
+
+include: [
+  "./file.yml",
+  "../file.yml",
+  "/file.yml",
+]
+
+click_cooldown: 100
+id: <namespace>:<id> # разрешены символы [a-z0-9._-]
+provider: <namespace>:<id> # по умолчанию bmenu:default
+type: chest
+size: 27
+title: '&7Menu title'
+
+# [run] <имя набора>
+# Или выполнять рандомно
+# [run_rand]
+commands-list:
+  example-1:
+    weight: 1.0 # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND]
+    commands: '&7Это команда из example-1'
+  example-2:
+    weight: 1.0
+    commands:
+      - '&7Это команда из example-1'
+
+# Меню ивенты
+menu-events:
+  on_open: # когда меню открывается
+    requirements: '100 == 100' # *requirements
+    deny_commands: [ ]
+    commands: 'Меню открыто!'
+  on_reopen: # открыли меню через [back]
+    deny_commands: [ ]
+    commands: 'Меню открыто заново!'
+  on_close: # когда меню закрывается
+    deny_commands: [ ]
+    commands: 'Меню закрыто!'
+
+
+
+# ЗВЁЗДОЧКА В ИМЕНИ ПАРАМЕТРА ПРОСТО ЧТОБЫ YAML НЕ РУГАЛСЯ
+# НАПРИМЕР slot*: 10 В РЕАЛЬНОМ КОНФИГЕ ДОЛЖНО БЫТЬ ПРОСТО slot: 10
+items:
+  itemID: &item_type
+    material: <material> # или basehead-<value> или плейсхолдер
+    name: "Имя предмета"
+    # слоты могут быть не указаны
+    # если указать слоты то этот предмет установится при инициализации меню
+    slot: 10
+    slot*: # звёздочка в имени параметра просто чтобы yaml не ругался
+      - '10'
+      - '11'
+      - '12-20'
+    slot*1: 10-15,20-25,53
+    amount: 1 # или плейсхолдер
+    lore: [ ] # описание
+    item_flags: [ ] # все флаги https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/inventory/ItemFlag.html
+    all_flags: true # включает все флаги
+    potion_contents:
+      glowing: 10 10
+      slow_falling: <duration> <amplifier>
+    color: '#aarrggbb' # для зелий и кожаной брони. Также можно указать без alpha канала #rrggbb (alpha работает с 1.19.4)
+    enchantments:
+      protection: 1
+    unbreakable: true
+    model_data: 0
+    # с 1.21.5 можно указывать больше параметров в model_data
+    model_data*:
+      floats:
+        - 1.0
+      flags:
+        - true
+      strings:
+        - 'str'
+      colors:
+        - '#rrggbb'
+
+    trim: # 1.19.4+
+      material: quartz
+      pattern: sentry
+    hide_tooltip: false # 1.20.5+
+    max_stack_size: 64 # 1.20.5+
+    damage: 10
+    priority: 0 # Как в DeluxeMenus работает, по сути устарел заменён на oneOf
+    oneOf: # мапа или список с *item_type. (не могут содержать oneOf)
+      item1:
+        material: diamond
+      item2:
+        material: gold_block
+    oneOf*:
+      - material: diamond
+      - material: gold_block
+
+
+    # аналог переменных меню, но только эти переменные видны только этому предмету
+    # Также эти переменные константные.
+    # Использовать аналогично {PARAM_1}
+    args:
+      PARAM_1: 'value'
+      PARAM_2: 'value'
+      PARAM_3: 'value'
+    # Условия видимости предмета
+    on_view*: '100 > 100' # в одну строку
+    on_view:
+      requirements: '100 > 1'
+      # Здесь можно выполнить команды в зависимости от результатов условий
+      deny_commands: [ ] # если хотя бы одно из условий окажется ложным
+    on_left_click: # обработка клика
+      - if: '100 == 100'
+        do:
+          - console: op %player_name%
+
+    on_tick: # Это аналогично блоку on_click но on_tick вызывается автоматически каждые tick_speed тиков сервера.
+      tick_speed: 20 # как часто будет вызываться on_tick в тиках.
+      requirements:
+        - check: '{tick} % 3 == 0'
+          commands: '[message] tick!'
+      deny_commands: '[update]'
+      commands:
+        - sound: sound 1 1
+
+---
+# rebuild_slots copy_from_previous_menu rebuild reopen refresh
+# Все команды
+# Аргумент в начале которого ? не обязательный
+# Команды могут быть записаны так
+# message: '&aMsg'
+# '[message] &aMsg'
+# Если команда без аргументов то пишется так close: '' или '[close]'
+commands:
+  ### Сообщения и вывод
+  - '&7Просто сообщение'
+  - message: '&7Тоже сообщение'
+  - sound: <sound> <?volume> <?pitch> # воспроизведёт звук
+  - title_all: '<"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>'
+  - set_title: '&7Title'
+  - title: '<"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>'
+  - action_bar_all: '<msg>'
+  - action_bar: '<msg>'
+  - broadcast: '<msg>'
+  ### Выполнение команд
+  - console: 'op %player_name%' # выполнить команду от имени сервера
+  - player: 'msg _By1337_ привет?' # выполнить команду от имени игрока
+  - chat: '/rtp' # Отправит сообщение от имени игрока, если в начале будет / то будет как команда
+  ### Навигация по меню
+  # В commands вы можете передать список команд которые необходимо выполнить в открывающейся менюшке
+  # Синтаксис [open] menu ["[message] сообщение из открытого меню", "[что-то] некст команда"]
+  - open: '<menu:id> <?commands>'
+  - close: '' # закроет меню
+  - back: '<?commands>' # вернутся в прошлое меню
+  - back_or_close: '<?commands>' # вернутся в прошлое меню если есть
+  - back_to_or_close: '<menu:id> <?commands>' # вернутся в <menu:id> если было открыто ранее
+  - back_or_open: '<menu:id> <?commands>' # вернутся в <menu:id> если было открыто иначе открыть <menu:id>
+  ### Экономика и сервер
+  - connect: '<server>' # подключает игрока к серверу
+  - givemoney: '<count>' # выдать монеты
+  - takemoney: '<count>' # снять монеты
+  ### Управление предметами
+  # <slots> - указывается как '10' или '0-10' или '0-10,30-40,50'
+  - update: '' # обновляет предмет выполнивший эту команду
+  - update_slots: '<slots>' # обновляет предметы в слотах
+  - die: '' # удаляет предмет выполнивший эту команду
+  - die_slots: '<slots>' # удаляет предметы в слотах
+  - layer: '<layer> set <item> <slots>'
+  - layer: '<layer> remove <slots>'
+  - layer: '<layer> move <layer2> <from> <to>'
+  - layer: '<layer> copy <layer2> <from> <to>'
+  - layer: '<layer> clear'
+  ### Анимации
+  - set_animation: '<animation>' # устанавливает анимацию из animations
+  - animation_tick: '' # принудительно вызывает тик анимации
+  - animation_force_end: '' # моментально завершает анимацию
+  ### Аргументы меню
+  - set_param: '<arg> <value>' # меняет значения в args
+  - import_params: '<item>' # копирует args из предмета в args меню
+  ### Выполнение команд меню
+  - run: '<id>' # выполняет список команд из commands-list
+  - run_rand: '' # выполняет случайных список команд из commands-list
+  - delay: '<delay> <cmd>' # выполнить команду с задержкой например [delay] 20 [message] &aЭто сообщение отправилось спустя 1 секунду!
+
+

@@ -2,7 +2,7 @@ package dev.by1337.bmenu.factory.fixer;
 
 import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.factory.MenuFilePostprocessor;
-import dev.by1337.bmenu.item.SlotTicker;
+import dev.by1337.bmenu.slot.component.OnTickComponent;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.PlaceholderSyntax;
@@ -18,7 +18,7 @@ import java.util.*;
 
 public class ItemFixer {
     public static final String STATIC_LORE_TAG = "<static>";
-    private static final YamlValue REPLACE_TICKING = SlotTicker.CODEC.encode(SlotTicker.DEFAULT);
+    private static final YamlValue REPLACE_TICKING = OnTickComponent.CODEC.encode(OnTickComponent.DEFAULT);
     private static final Logger log = LoggerFactory.getLogger("BMenu");
 
     public static void fixItem(YamlMap map) {
@@ -48,24 +48,6 @@ public class ItemFixer {
                 map.set("on_tick", REPLACE_TICKING.getValue());
             }
         }
-        {// tick_speed -> on_tick.tick_speed
-            Object tick_speed = map.getRaw("tick_speed");
-            if (tick_speed != null) {
-                map.getRaw().remove("tick_speed");
-                map.set("$moved-tick_speed", tick_speed);
-                Object on_tick = map.getRaw("on_tick");
-                if (on_tick instanceof Map m) {
-                    if (m.containsKey("tick_speed")) {
-                        m.put("$moved-tick_speed", "Failed to move tick_speed -> on_tick.tick_speed");
-                    } else {
-                        m.put("tick_speed", tick_speed);
-                    }
-                } else {
-                    map.set("$moved-tick_speed1", "on_tick not a map!");
-                }
-            }
-        }
-
 
         //last
         if (map.has("oneOf")) {

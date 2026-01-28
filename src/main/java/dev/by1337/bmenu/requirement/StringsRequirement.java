@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.requirement;
 
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.util.LazyLoad;
+import dev.by1337.bmenu.util.function.LazyLoad;
 import dev.by1337.plc.PlaceholderApplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

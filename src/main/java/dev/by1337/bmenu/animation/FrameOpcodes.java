@@ -1,19 +1,17 @@
 package dev.by1337.bmenu.animation;
 
 
-import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.JsonSchemaTypeBuilder;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import dev.by1337.bmenu.animation.impl.*;
+import dev.by1337.bmenu.animation.opcode.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.crypto.Data;
 import java.util.*;
 
 public enum FrameOpcodes {

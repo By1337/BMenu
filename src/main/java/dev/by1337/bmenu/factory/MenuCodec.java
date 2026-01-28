@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.factory;
 
-import dev.by1337.bmenu.event.MenuEventHandler;
+import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.yaml.BukkitYamlCodecs;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
@@ -13,7 +13,7 @@ import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryType;
 import dev.by1337.bmenu.MenuConfig;
-import dev.by1337.bmenu.item.SlotFactory;
+import dev.by1337.bmenu.slot.SlotFactory;
 import dev.by1337.bmenu.MenuLoader;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.command.CommandList;
@@ -152,7 +152,7 @@ public class MenuCodec {
                 List.of()
         ));
         FIELDS.add(MenuCodecs.ARGS_CODEC.fieldOf("args", m -> m.args, (m, v) -> m.args = v, Map.of()));
-        FIELDS.add(YamlCodec.mapOf(YamlCodec.STRING, SlotFactory.YAML_CODEC).fieldOf("items", m -> m.items, (m, v) -> m.items = v, Map.of()));
+        FIELDS.add(YamlCodec.mapOf(YamlCodec.STRING, SlotFactory.CODEC).fieldOf("items", m -> m.items, (m, v) -> m.items = v, Map.of()));
         FIELDS.add(Animator.AnimatorContext.CODEC.fieldOf("animation", m -> m.animator, (m, v) -> m.animator = v));
         FIELDS.add(YamlCodec.mapOf(YamlCodec.STRING, Animator.AnimatorContext.CODEC).fieldOf("animations", m -> m.animations, (m, v) -> m.animations = v));
         FIELDS.add(CommandList.CODEC.fieldOf("commands-list", m -> m.commandList, (m, v) -> m.commandList = v));
@@ -166,7 +166,7 @@ public class MenuCodec {
         for (YamlField<MenuCodec, ?> field : FIELDS) {
             builder.properties(field.name(), field.codec().schema());
         }
-        builder.patternProperties("^items-", SlotFactory.YAML_CODEC.schema().asMap());
+        builder.patternProperties("^items-", SlotFactory.CODEC.schema().asMap());
         builder.properties("include", SchemaTypes.STRING.listOf());
        // builder.definitions(MenuCodecs.COMMANDS_SCHEMA_TYPE_REF_NAME, MenuCodecs.COMMANDS_SCHEMA_TYPE);
         builder.additionalProperties(true);

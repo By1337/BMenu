@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.command;
 
-import dev.by1337.bmenu.event.MenuEventHandler;
+import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.cmd.CompiledCommand;
 import dev.by1337.plc.PlaceholderApplier;
 import org.jetbrains.annotations.Nullable;

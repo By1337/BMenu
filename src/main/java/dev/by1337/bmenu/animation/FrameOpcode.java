@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.animation;
 
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.slot.SlotContent;
 import org.jetbrains.annotations.Nullable;
 
 @FunctionalInterface

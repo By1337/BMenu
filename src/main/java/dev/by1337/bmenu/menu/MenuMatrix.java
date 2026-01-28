@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.menu;
 
-import dev.by1337.bmenu.item.SlotContent;
+import dev.by1337.bmenu.slot.SlotContent;
 
 import java.util.Arrays;
 import java.util.Collections;

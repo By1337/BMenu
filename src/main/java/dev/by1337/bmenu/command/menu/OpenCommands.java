@@ -24,7 +24,6 @@ public class OpenCommands {
     public OpenCommands(MenuLoader loader, YamlMap config) {
         this.loader = loader;
         openCommands = new ArrayList<>();
-        //todo
         Map<String, OpenCommandConfig> commands = config.get("open_commands")
                 .decode(YamlCodec.mapOf(YamlCodec.STRING, OpenCommandConfig.CODEC), Map.of()).getOrThrow();
         for (String cmd : commands.keySet()) {
