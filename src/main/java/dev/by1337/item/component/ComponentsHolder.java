@@ -115,6 +115,7 @@ public class ComponentsHolder {
             ));
         }
         if (im instanceof PotionMeta potionMeta){
+
             if (potionMeta.hasCustomEffects()){
                 result.set(ItemComponents.POTION_CONTENTS, new PotionContentsComponent(potionMeta.getCustomEffects()));
             }
