@@ -1,28 +1,4 @@
 ---
-
-### Условия requirements
-requirements: '100 > 100'
----
-requirements: &requirements
-  - check: '100 + 100 * 100 == 15'
-    commands: [ ]
-    deny_commands: [ ]
-  - check: '100.5 + 100.5 == 201'
-  - check: 'has super.permission' # если у игрока есть пермишен
-  - check: '!has super.permission' # если у игрока нет пермишена
-  - check: 'string has str' # строка содержит
-  - check: 'string !has str' # строка не содержит
-  - check: 'string HAS str' # строка содержит без учёта регистра
-  - check: 'string !HAS str' # строка не содержит без учёта регистра
-  - check: 'string == string' # строка равна
-  - check: 'string != string' # строка не равна
-  - check: 'nearby world 10 10 10 100' # условие что игрок находится в радиусе 100 блоков от координат 10 10 10 в мире world
-    commands:
-      - '[message] string != string'
-      - '[break]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
-      - '[close]' # Так как выше команда [break] команда [close] не будет выполнена
----
-
 extends:
   - ./file.yml # путь относительно текущей папки
   - ../file.yml # путь относительно папки на уровень выше
@@ -41,37 +17,47 @@ type: chest
 size: 27
 title: '&7Menu title'
 
+---
+commands:
+  - if: '100 == 100'
+    do:
+      - console: 'say 100 == 100'
+    else:
+      - console: 'say wtf?'
+  - if:
+      - '100 == 100'
+      - '200 == 200'
+    do: '[message] ok'
+---
+
 # [run] <имя набора>
 # Или выполнять рандомно
 # [run_rand]
 commands-list:
   example-1:
     weight: 1.0 # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND]
-    commands: '&7Это команда из example-1'
+    commands:  #*commands
+      - '&7Это команда из example-1'
   example-2:
     weight: 1.0
-    commands:
+    commands: #*commands
       - '&7Это команда из example-1'
 
 # Меню ивенты
 menu-events:
-  on_open: # когда меню открывается
-    requirements: '100 == 100' # *requirements
-    deny_commands: [ ]
-    commands: 'Меню открыто!'
-  on_reopen: # открыли меню через [back]
-    deny_commands: [ ]
-    commands: 'Меню открыто заново!'
-  on_close: # когда меню закрывается
-    deny_commands: [ ]
-    commands: 'Меню закрыто!'
+  on_open: #*commands
+    - 'Меню открыто!'
+  on_reopen: #*commands
+    - 'Меню открыто заново!'
+  on_close: #*commands
+    - 'Меню закрыто!'
 
 
 
 # ЗВЁЗДОЧКА В ИМЕНИ ПАРАМЕТРА ПРОСТО ЧТОБЫ YAML НЕ РУГАЛСЯ
 # НАПРИМЕР slot*: 10 В РЕАЛЬНОМ КОНФИГЕ ДОЛЖНО БЫТЬ ПРОСТО slot: 10
 items:
-  itemID: &item_type
+  itemID:
     material: <material> # или basehead-<value> или плейсхолдер
     name: "Имя предмета"
     # слоты могут быть не указаны
@@ -111,16 +97,11 @@ items:
     hide_tooltip: false # 1.20.5+
     max_stack_size: 64 # 1.20.5+
     damage: 10
-    priority: 0 # Как в DeluxeMenus работает, по сути устарел заменён на oneOf
-    oneOf: # мапа или список с *item_type. (не могут содержать oneOf)
-      item1:
-        material: diamond
-      item2:
-        material: gold_block
-    oneOf*:
+    #priority: 0 # Как в DeluxeMenus работает, по сути устарел заменён на oneOf
+    oneOf: #выбирает один из вариантов ниже, проверяет условия сверху вниз.
       - material: diamond
+        on_view: '100 == 100'
       - material: gold_block
-
 
     # аналог переменных меню, но только эти переменные видны только этому предмету
     # Также эти переменные константные.
@@ -129,25 +110,25 @@ items:
       PARAM_1: 'value'
       PARAM_2: 'value'
       PARAM_3: 'value'
+    local_args: # как args но только эти параметры можно менять через '[set_local] <name> <value>'.
+      lParam_1: 'value'
+      lParam_2: 'value'
+      lParam_3: 'value'
     # Условия видимости предмета
-    on_view*: '100 > 100' # в одну строку
-    on_view:
-      requirements: '100 > 1'
-      # Здесь можно выполнить команды в зависимости от результатов условий
-      deny_commands: [ ] # если хотя бы одно из условий окажется ложным
-    on_left_click: # обработка клика
+    on_view: '100 > 100' # в одну строку
+    on_view*: # или несколько
+      - '100 == 100'
+      - '90 - 90 == 0'
+    on_left_click: #*commands # обработка клика #*commands
       - if: '100 == 100'
         do:
           - console: op %player_name%
 
+    tick_speed: 20 # как часто будет вызываться on_tick в тиках.
     on_tick: # Это аналогично блоку on_click но on_tick вызывается автоматически каждые tick_speed тиков сервера.
-      tick_speed: 20 # как часто будет вызываться on_tick в тиках.
-      requirements:
-        - check: '{tick} % 3 == 0'
-          commands: '[message] tick!'
-      deny_commands: '[update]'
-      commands:
-        - sound: sound 1 1
+      - if: '{tick} % 3 == 0'
+        do: '[message] tick!'
+        else: '[update]'
 
 ---
 # rebuild_slots copy_from_previous_menu rebuild reopen refresh

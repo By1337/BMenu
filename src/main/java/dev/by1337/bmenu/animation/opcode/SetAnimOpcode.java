@@ -30,7 +30,7 @@ public class SetAnimOpcode implements FrameOpcode {
         if (builder == null) {
             AnimationUtil.set(SlotContent.ofMaterial(menu.setPlaceholders(item)), matrix, slots);
         } else {
-            SlotContent slotContent1 = builder.build(menu);
+            SlotContent slotContent1 = builder.buildIfVisible(menu);
             if (slotContent1 != null) {
                 AnimationUtil.set(slotContent1, matrix, slots);
             }

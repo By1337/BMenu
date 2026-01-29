@@ -8,7 +8,6 @@ import dev.by1337.bmenu.slot.impl.BaseSlotContent;
 import dev.by1337.bmenu.slot.impl.SlotContentImpl;
 import dev.by1337.item.ItemModel;
 import dev.by1337.plc.PlaceholderResolver;
-import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -29,12 +28,23 @@ public final class SlotFactory implements Comparable<SlotFactory> {
 
     }
 
-
-    public SlotContent build(Menu menu) {
-        return build(menu, null, null);
+    @Nullable
+    public SlotContent buildIfVisible(Menu menu) {
+        return buildIfVisible(menu, null, null);
     }
 
-    public SlotContent build(Menu menu, @Nullable final ItemModel base, PlaceholderResolver<Menu> custom) {
+    @Nullable
+    public SlotContent buildIfVisible(Menu menu, @Nullable final ItemModel base, PlaceholderResolver<Menu> custom) {
+        var v = build(base, custom);
+        if (!v.isVisible(menu)) return null;
+        return v;
+    }
+
+    public SlotContent build() {
+        return build(null, null);
+    }
+
+    public SlotContent build(@Nullable final ItemModel base, PlaceholderResolver<Menu> custom) {
         BaseSlotContent result = new SlotContentImpl(
                 localArgs.copy(),
                 variant,
@@ -89,7 +99,7 @@ public final class SlotFactory implements Comparable<SlotFactory> {
                 .build()
                 .preDecode(v -> {
                     var res = v.asYamlMap();
-                    if (res.hasResult()){
+                    if (res.hasResult()) {
                         var map = res.result();
                         ItemFixer.fixItem(map);
                         return YamlValue.wrap(map);

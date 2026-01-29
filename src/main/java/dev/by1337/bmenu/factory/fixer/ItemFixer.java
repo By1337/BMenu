@@ -10,6 +10,7 @@ import dev.by1337.plc.Placeholders;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
+import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class ItemFixer {
-    public static final String STATIC_LORE_TAG = "<static>";
+    private static final List<String> ALL_ITEM_FLAGS = Arrays.stream(ItemFlag.values()).map(Enum::name).toList();
     private static final YamlValue REPLACE_TICKING = OnTickComponent.CODEC.encode(OnTickComponent.DEFAULT);
     private static final Logger log = LoggerFactory.getLogger("BMenu");
 
@@ -34,6 +35,12 @@ public class ItemFixer {
         rename(map, "view_req", "view_requirement");
         rename(map, "view_requirement", "on_view");
         rename(map, "potion_effects", "potion_contents");
+
+        if (Objects.equals(map.getRaw("all_flags"), true)){
+            rename(map, "item_flags", "$item_flags");
+            map.set("$all_flags", "apply");
+            map.set("item_flags", ALL_ITEM_FLAGS);
+        }
 
         replacePlaceholders(map, superItem);
         map.set("name", fixDisplay(map.getRaw("name")));

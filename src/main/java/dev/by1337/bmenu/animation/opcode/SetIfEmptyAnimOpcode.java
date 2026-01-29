@@ -30,7 +30,7 @@ public class SetIfEmptyAnimOpcode implements FrameOpcode {
 
             setIfEmpty(SlotContent.ofMaterial(menu.setPlaceholders(item)), matrix, slots);
         } else {
-            SlotContent slotContent1 = builder.build(menu);
+            SlotContent slotContent1 = builder.buildIfVisible(menu);
             if (slotContent1 != null) {
                 setIfEmpty(slotContent1, matrix, slots);
             }

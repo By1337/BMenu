@@ -67,7 +67,7 @@ public class BMenu extends JavaPlugin {
                 this,
                 config.get("hot-reload").asBool(false)
         );
-        writeSchemas(this);
+        // writeSchemas(this); //todo пока не работает(
     }
 
     @Override

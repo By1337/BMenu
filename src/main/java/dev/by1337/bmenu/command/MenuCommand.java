@@ -53,4 +53,14 @@ public class MenuCommand implements MenuEventHandler {
     public boolean hasPlaceholders() {
         return hasPlaceholders;
     }
+
+    @Override
+    public String toString() {
+        return "MenuCommand{" +
+                "source='" + source + '\'' +
+                ", compiled=" + compiled +
+                ", canBeCompiled=" + canBeCompiled +
+                ", hasPlaceholders=" + hasPlaceholders +
+                '}';
+    }
 }

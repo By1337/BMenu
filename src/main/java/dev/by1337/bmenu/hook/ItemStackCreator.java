@@ -61,6 +61,7 @@ public class ItemStackCreator {
     public static class SkullUtils {
         @NotNull
         public static ItemStack getSkull(@NotNull String skinUrl) {
+            if (skinUrl.isEmpty()) throw new IllegalArgumentException("value is empty!");
             ItemStack head = new ItemStack(Material.PLAYER_HEAD);
             head.editMeta(m -> {
                 PlayerProfile profile = Bukkit.createProfile(UUID.nameUUIDFromBytes(skinUrl.getBytes(StandardCharsets.UTF_8)));

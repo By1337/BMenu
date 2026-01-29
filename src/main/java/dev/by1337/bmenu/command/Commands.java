@@ -179,4 +179,12 @@ public class Commands implements MenuEventHandler {
             return DataResult.error(e);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Commands{" +
+                "commands=" + commands +
+                ", hasBreak=" + hasBreak +
+                '}';
+    }
 }

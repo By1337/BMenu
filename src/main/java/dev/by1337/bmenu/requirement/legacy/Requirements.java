@@ -47,12 +47,10 @@ public class Requirements {
             try {
                 if (!requirement.test(ctx, placeholders)) {
                     Commands c = requirement.denyCommands();
-                    c.run(ctx, placeholders);
                     if (c.isHasBreak()) return false;
                     result = false;
                 } else {
                     Commands c = requirement.commands();
-                    c.run(ctx, placeholders);
                     if (c.isHasBreak()) return true;
                 }
             } catch (Exception e) {
@@ -73,5 +71,12 @@ public class Requirements {
 
     public boolean isEmpty() {
         return this == EMPTY || requirements.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return "Requirements{" +
+                "requirements=" + requirements +
+                '}';
     }
 }

@@ -43,10 +43,10 @@ click_cooldown: 100
 commands-list:
   example-1:
     weight: 1.0 # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND]
-    commands: *modern_commands
+    commands: *modern_commands #| *legacy_commands
   example-2:
     weight: 1.0
-    commands: *modern_commands
+    commands: *modern_commands #| *legacy_commands
 
 menu-events:
   on_open: *modern_commands #| *legacy_commands

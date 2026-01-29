@@ -112,7 +112,7 @@ public class MenuConfig implements MenuItemLookup, Keyed {
             for (int slot : slots) {
                 if (slot < 0 || slot >= invSize) continue;
                 if (slotContent == null) {
-                    slotContent = builder.build(menu);
+                    slotContent = builder.buildIfVisible(menu);
                     if (slotContent == null) break;
                 }
                 matrix[slot] = slotContent;

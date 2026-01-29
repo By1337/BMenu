@@ -274,10 +274,8 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                 if (cmp != null) {
                     cmp.execute(ctx);
                     return cmp;
-                } else {
-                    Menu.commands.execute(ctx, command);
-                    return null;
                 }
+                Menu.commands.execute(ctx, command);
             }
         } catch (Exception e) {
             loader.getLogger().error("Failed to run command: {}", command, e);
@@ -364,6 +362,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     public void onEvent(String event) {
+        System.out.println(config.getId() + " call " + event);
         MenuEventHandler commandRequirements = config.getMenuEventListeners().get(event);
         if (commandRequirements != null) {
             commandRequirements.run(ExecuteContext.of(this), this);
@@ -1064,7 +1063,7 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
                             } else {
                                 SlotFactory builder = v.menu.config.findMenuItem(itemID, v.menu);
                                 if (builder != null) {
-                                    item = builder.build(v.menu);
+                                    item = builder.buildIfVisible(v.menu);
                                 } else {
                                     item = SlotContent.ofMaterial(itemID);
                                 }

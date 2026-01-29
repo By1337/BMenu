@@ -29,7 +29,7 @@ public class FillAnimOpcode implements FrameOpcode {
         if (builder == null) {
             slotContent = SlotContent.ofMaterial(menu.setPlaceholders(item));
         } else {
-            slotContent = builder.build(menu);
+            slotContent = builder.buildIfVisible(menu);
         }
         Arrays.fill(matrix, slotContent);
     }
