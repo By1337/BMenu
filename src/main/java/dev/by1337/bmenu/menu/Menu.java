@@ -362,7 +362,6 @@ public abstract class Menu implements InventoryHolder, CommandRunner<ExecuteCont
     }
 
     public void onEvent(String event) {
-        System.out.println(config.getId() + " call " + event);
         MenuEventHandler commandRequirements = config.getMenuEventListeners().get(event);
         if (commandRequirements != null) {
             commandRequirements.run(ExecuteContext.of(this), this);

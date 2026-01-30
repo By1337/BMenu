@@ -2,8 +2,8 @@ package dev.by1337.bmenu.command;
 
 
 import dev.by1337.bmenu.handler.MenuEventHandler;
-import dev.by1337.bmenu.requirement.legacy.LegacyRequirement;
 import dev.by1337.bmenu.requirement.Requirement;
+import dev.by1337.bmenu.requirement.legacy.LegacyRequirement;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
@@ -36,12 +36,25 @@ public class Commands implements MenuEventHandler {
             }
             return S2OBJET_MAP.decode(yaml).flatMap(map -> {
                 if (map.containsKey("if")) {
-                    return allOf(
+                    StringBuilder err = new StringBuilder();
+                    List<MenuEventHandler> handlers = new ArrayList<>();
+                    var v = allOf(
                             LegacyRequirement::new,
                             map.get("if").decode(Requirement.CODEC),
                             YamlValue.wrap(map.get("do")).decode(CODEC, Commands.EMPTY),
                             YamlValue.wrap(map.get("else")).decode(CODEC, Commands.EMPTY)
                     ).mapValue(Commands::new);
+                    if (v.hasError()) err.append(v.error()).append("\n");
+                    if (v.hasResult()) handlers.add(v.result());
+                    for (String s : map.keySet()) {
+                        if (s.equals("if") || s.equals("else") || s.equals("do")) continue;
+                        var data = CODEC.decode(map.get(s));
+                        if (data.hasError()) err.append(data.error()).append("\n");
+                        if (data.hasResult()) handlers.add(data.result());
+                    }
+                    if (err.isEmpty()) return DataResult.success(new Commands(handlers, false));
+                    err.setLength(err.length() - 1);
+                    return DataResult.error(err.toString()).partial(new Commands(handlers, false));
                 } else {
                     List<String> commands = new ArrayList<>();
                     StringBuilder buffer = new StringBuilder();
@@ -153,28 +166,28 @@ public class Commands implements MenuEventHandler {
         final T2 t2;
         if (r.hasResult()) {
             t = r.result();
-          //  if (r.hasError()) err.append(r.error()).append("\n");
+            //  if (r.hasError()) err.append(r.error()).append("\n");
         } else {
             return (DataResult<R>) r;
         }
         if (r1.hasResult()) {
             t1 = r1.result();
-           // if (r1.hasError()) err.append(r1.error()).append("\n");
+            // if (r1.hasError()) err.append(r1.error()).append("\n");
         } else {
             return (DataResult<R>) r1;
         }
         if (r2.hasResult()) {
             t2 = r2.result();
-          //  if (r2.hasError()) err.append(r2.error()).append("\n");
+            //  if (r2.hasError()) err.append(r2.error()).append("\n");
         } else {
             return (DataResult<R>) r2;
         }
         try {
             R res = f.apply(t, t1, t2);
             return DataResult.success(res);
-           // if (err.isEmpty()) return DataResult.success(res);
-           // err.setLength(err.length() - 1);
-           // return DataResult.error(err.toString()).partial(res);
+            // if (err.isEmpty()) return DataResult.success(res);
+            // err.setLength(err.length() - 1);
+            // return DataResult.error(err.toString()).partial(res);
         } catch (Exception e) {
             return DataResult.error(e);
         }

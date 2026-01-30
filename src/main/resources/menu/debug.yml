@@ -24,7 +24,7 @@ args:
     - 122
 123:
   on_view77:
-    slot: 49
+   # slot: 49
     local_args:
       okak: 0
     oneOf:
@@ -63,11 +63,27 @@ args:
     slot: 49
     material: diamond_block
     name: diamond_block
-    on_click:
+    on_left_click:
+      - 'test 1'
       - if: '{rand_bool} == true'
         do:
+          - 'test 2'
+          - if: '{rand_bool} == true'
+            do:
+              - 'test 3'
+              - if: '{rand_bool} == true'
+                do: '<gold>4'
+                else: '<black>3'
+            else: '<green>2'
+        else: '<red>1'
+    on_click:
+      - message: 'test 1'
+        if: '{rand_bool} == true'
+        do:
+          message: 'test 2'
           if: '{rand_bool} == true'
           do:
+            message: 'test 3'
             if: '{rand_bool} == true'
             do: '<gold>4'
             else: '<black>3'
