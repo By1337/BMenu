@@ -1,18 +1,18 @@
 package dev.by1337.bmenu.slot.render;
 
 import dev.by1337.bmenu.hook.ItemStackCreator;
-import dev.by1337.item.ItemModel;
-import dev.by1337.item.ItemComponents;
-import dev.by1337.item.component.impl.ContainerComponent;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.text.RawTextComponent;
+import dev.by1337.bmenu.util.ObjectUtil;
 import dev.by1337.bmenu.util.holder.IntHolder;
 import dev.by1337.bmenu.util.holder.StringHolder;
-import dev.by1337.bmenu.util.ObjectUtil;
 import dev.by1337.core.BCore;
 import dev.by1337.core.ServerVersion;
 import dev.by1337.core.bridge.inventory.InventoryUtil;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
+import dev.by1337.item.ItemComponents;
+import dev.by1337.item.ItemModel;
+import dev.by1337.item.component.impl.ContainerComponent;
 import dev.by1337.plc.PlaceholderApplier;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.kyori.adventure.text.Component;
@@ -107,6 +107,10 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
                     m.addCustomEffect(potionEffect, true);
                 }
             }
+        }
+        var basePotion = item.get(ItemComponents.BASE_POTION);
+        if (basePotion != null && im instanceof PotionMeta pm){
+            basePotion.apply(pm);
         }
 
         var color0 = item.get(ItemComponents.COLOR);

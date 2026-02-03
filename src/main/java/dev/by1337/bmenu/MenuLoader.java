@@ -158,7 +158,7 @@ public class MenuLoader implements Listener {
 
     private List<MenuConfig> loadMenus0(File dir) {
         List<MenuConfig> result = new ArrayList<>();
-        for (File file : Objects.requireNonNull(dir.listFiles(), "Menu folder isn't exists")) {
+        for (File file : Objects.requireNonNull(dir.listFiles(), "Menu folder isn'type exists")) {
             if (file.isDirectory()) {
                 result.addAll(loadMenus0(file));
             }
@@ -206,7 +206,7 @@ public class MenuLoader implements Listener {
 
     public void registerMenu(MenuConfig config) {
         if (config.getId() == null) {
-            throw new IllegalArgumentException("Can't register anonymous menu config");
+            throw new IllegalArgumentException("Can'type register anonymous menu config");
         }
         menuRegistry.register(config);
     }

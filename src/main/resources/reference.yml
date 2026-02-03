@@ -75,10 +75,16 @@ items:
     potion_contents:
       glowing: 10 10
       slow_falling: <duration> <amplifier>
+    potion: strong_slowness # https://jd.papermc.io/paper/1.21.8/org/bukkit/potion/PotionType.html
     color: '#aarrggbb' # для зелий и кожаной брони. Также можно указать без alpha канала #rrggbb (alpha работает с 1.19.4)
     enchantments:
       protection: 1
     unbreakable: true
+    container:
+      0:
+        material: stone
+      1:
+        material: dirt
     model_data: 0
     # с 1.21.5 можно указывать больше параметров в model_data
     model_data*:
@@ -96,6 +102,8 @@ items:
       pattern: sentry
     hide_tooltip: false # 1.20.5+
     max_stack_size: 64 # 1.20.5+
+    enchantment_glint_override: true # 1.20.5+
+    glider: true # 1.21.3+
     damage: 10
     #priority: 0 # Как в DeluxeMenus работает, по сути устарел заменён на oneOf
     oneOf: #выбирает один из вариантов ниже, проверяет условия сверху вниз.

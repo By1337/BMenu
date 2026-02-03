@@ -33,6 +33,7 @@ public class ItemComponents {
     public static final BaseComponent<Boolean> UNBREAKABLE = register("unbreakable", YamlCodec.BOOL);
     public static final BaseComponent<ContainerComponent> CONTAINER = register("container", ContainerComponent.CODEC);
     public static final BaseComponent<HideFlagsComponents> HIDE_FLAGS = register("item_flags", HideFlagsComponents.CODEC);
+    public static final BaseComponent<BasePotionComponent> BASE_POTION = register("potion", BasePotionComponent.CODEC);
     //1.19.4+
     @Nullable
     public static final BaseComponent<ArmorTrimComponent> TRIM = register("trim", ArmorTrimComponent.CODEC, ArmorTrimComponent.CODEC != null);

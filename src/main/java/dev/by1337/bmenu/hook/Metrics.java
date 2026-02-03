@@ -297,7 +297,7 @@ public class Metrics {
             // WARNING: You must not modify and part of this Metrics class, including the
             // submit delay or frequency!
             // WARNING: Modifying this code will get your plugin banned on bStats. Just
-            // don't do it!
+            // don'type do it!
             long initialDelay = (long) (1000 * 60 * (3 + Math.random() * 3));
             long secondDelay = (long) (1000 * 60 * (Math.random() * 30));
             scheduler.schedule(submitTask, initialDelay, TimeUnit.MILLISECONDS);
@@ -639,7 +639,7 @@ public class Metrics {
             try {
                 JsonObjectBuilder.JsonObject data = getChartData();
                 if (data == null) {
-                    // If the data is null we don't send the chart.
+                    // If the data is null we don'type send the chart.
                     return null;
                 }
                 builder.appendField("data", data);

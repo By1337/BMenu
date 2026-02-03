@@ -10,6 +10,11 @@
 # "[clear_layer] <layer>" -> "[layer] <layer+2> clear"
 # view_requirement -> on_view
 # potion_effects -> potion_contents
+
+
+# new
+# potion: https://jd.papermc.io/paper/1.21.8/org/bukkit/potion/PotionType.html
+
 id: debug:main
 provider: default
 type: chest
@@ -412,8 +417,8 @@ items:
 
   potion_legacy:
     material: potion
-    name: '&7potion test'
     slot: 17
+    potion: strong_slowness
     potion_effects:
       - "fire_resistance;200;1"
       - "regeneration;200;2"

@@ -115,13 +115,13 @@ public class ComponentsHolder {
             ));
         }
         if (im instanceof PotionMeta potionMeta){
-
             if (potionMeta.hasCustomEffects()){
                 result.set(ItemComponents.POTION_CONTENTS, new PotionContentsComponent(potionMeta.getCustomEffects()));
             }
             if (potionMeta.hasColor()){
                 result.set(ItemComponents.COLOR, ColorHolder.fromBukkit(potionMeta.getColor()));
             }
+            result.set(ItemComponents.BASE_POTION, BasePotionComponent.fromMeta(potionMeta));
         }
         if (im instanceof LeatherArmorMeta m){
             result.set(ItemComponents.COLOR, ColorHolder.fromBukkit(m.getColor()));

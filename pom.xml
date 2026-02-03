@@ -117,12 +117,14 @@
             <scope>system</scope>
             <systemPath>${basedir}/libs/result.jar</systemPath>
         </dependency>
-        <dependency>
+
+
+<!--        <dependency>
             <groupId>ca.bkaw</groupId>
             <artifactId>paper-nms</artifactId>
             <version>1.21.11-SNAPSHOT</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>it.unimi.dsi</groupId>

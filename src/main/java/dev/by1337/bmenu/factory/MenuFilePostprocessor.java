@@ -173,7 +173,7 @@ public class MenuFilePostprocessor {
                     result.append("\\n");
                     break;
                 case '\t':
-                    result.append("\\t");
+                    result.append("\\type");
                     break;
                 case '\b':
                     result.append("\\b");
