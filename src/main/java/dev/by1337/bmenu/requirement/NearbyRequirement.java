@@ -40,10 +40,10 @@ public class NearbyRequirement implements Requirement {
 
     @Override
     public boolean test(Menu menu, PlaceholderApplier placeholders) {
-        if (!menu.getViewer().getWorld().getName().equals(world)) {
+        if (!menu.viewer().getWorld().getName().equals(world)) {
             return not;
         }
-        return not != (distanceSquared(menu.getViewer().getLocation()) < radiusSq);
+        return not != (distanceSquared(menu.viewer().getLocation()) < radiusSq);
     }
 
     private double distanceSquared(Location loc) {

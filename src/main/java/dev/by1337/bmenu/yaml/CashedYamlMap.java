@@ -18,7 +18,9 @@ public class CashedYamlMap {
         this.source = source;
     }
 
-    @SuppressWarnings("unchecked")
+    public <T> DataResult<@Nullable T> get(@NotNull String path, YamlCodec<T> codec) {
+        return get(path, null, codec);
+    }
     public <T> DataResult<@Nullable T> get(@NotNull String path, @Nullable T def, YamlCodec<T> codec) {
         var v = cashed.get(path);
         if (v != null) {

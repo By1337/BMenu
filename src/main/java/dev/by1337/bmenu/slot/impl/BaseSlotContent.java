@@ -69,7 +69,7 @@ public abstract class BaseSlotContent implements SlotContent {
 
     @Override
     public PlaceholderApplier getPlaceholders(Menu menu) {
-        return menu.getPlaceholderResolver().and(this).bind(menu);
+        return menu.resolvers().and(this).bind(menu);
     }
 
     public void setPlaceholder(String placeholder, Supplier<Object> value) {

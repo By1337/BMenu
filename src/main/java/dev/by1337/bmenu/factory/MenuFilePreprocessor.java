@@ -1,18 +1,12 @@
 package dev.by1337.bmenu.factory;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import dev.by1337.bmenu.loader.MenuLoader;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.YamlCodec;
-import org.bukkit.configuration.file.YamlConfiguration;
-import dev.by1337.bmenu.MenuLoader;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,15 +15,7 @@ import java.util.stream.Stream;
 public class MenuFilePreprocessor {
 
     public static String loadFile(File file, MenuLoader loader) throws InvalidMenuConfigException {
-        String str = readYamlAndApplyPreprocessor(file, loader, new HashSet<>());
-     //   YamlConfiguration configuration = new YamlConfiguration();
-        return str; //todo crash dump?
-        /*try {
-            configuration.loadFromString(str);
-        } catch (InvalidConfigurationException e) {
-            throw new InvalidMenuConfigException("Не удалось прочитать файл так как в синтаксисе yaml ошибка! https://codebeautify.org/yaml-validator - здесь можно проверить конфиг на наличие ошибок в yaml", e);
-        }
-        return new YamlContext(configuration);*/
+        return readYamlAndApplyPreprocessor(file, loader, new HashSet<>());
     }
 
     private static String readYamlAndApplyPreprocessor(File file, MenuLoader loader, Set<File> loaded) throws InvalidMenuConfigException {

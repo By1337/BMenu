@@ -2,6 +2,7 @@ package dev.by1337.bmenu.requirement.legacy;
 
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.handler.ConditionalHandler;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class Requirements {
     public static final YamlCodec<Requirements> CODEC = new YamlCodec<>() {
-        final YamlCodec<List<LegacyRequirement>> LIST_CODEC = LegacyRequirement.CODEC.listOf();
+        final YamlCodec<List<ConditionalHandler>> LIST_CODEC = ConditionalHandler.CODEC.listOf();
 
         @Override
         public DataResult<Requirements> decode(YamlValue yamlValue) {
@@ -35,32 +36,32 @@ public class Requirements {
     };
 
     public static final Requirements EMPTY = new Requirements(Collections.emptyList());
-    private final List<LegacyRequirement> requirements;
+    private final List<ConditionalHandler> requirements;
 
-    public Requirements(List<LegacyRequirement> requirements) {
+    public Requirements(List<ConditionalHandler> requirements) {
         this.requirements = requirements;
     }
 
     public boolean test(Menu menu, PlaceholderApplier placeholders, ExecuteContext ctx) {
         boolean result = true;
-        for (LegacyRequirement requirement : requirements) {
+        for (ConditionalHandler requirement : requirements) {
             try {
-                if (!requirement.test(ctx, placeholders)) {
-                    Commands c = requirement.denyCommands();
+                if (!requirement.run(ctx, placeholders)) {
+                    Commands c = requirement.elseCmds();
                     if (c.isHasBreak()) return false;
                     result = false;
                 } else {
-                    Commands c = requirement.commands();
+                    Commands c = requirement.doCmds();
                     if (c.isHasBreak()) return true;
                 }
             } catch (Exception e) {
-                menu.getLoader().getLogger().error("Failed to check requirement: {}", requirement, e);
+                menu.loader().logger().error("Failed to check requirement: {}", requirement, e);
             }
         }
         return result;
     }
 
-    public List<LegacyRequirement> getRequirements() {
+    public List<ConditionalHandler> getRequirements() {
         return requirements;
     }
 

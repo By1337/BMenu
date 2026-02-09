@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.slot;
 
-import dev.by1337.bmenu.factory.ItemFactory;
+import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.factory.fixer.ItemFixer;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.placeholder.SimplePlaceholders;
@@ -14,10 +14,12 @@ import dev.by1337.yaml.codec.YamlCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 public final class SlotFactory implements Comparable<SlotFactory> {
 
     public static final YamlCodec<SlotFactory> CODEC;
-
+    private Map<String, String> args;
     private int[] slots = new int[]{-1};
     private SimplePlaceholders localArgs = new SimplePlaceholders();
     private SlotVariant variant;
@@ -71,6 +73,13 @@ public final class SlotFactory implements Comparable<SlotFactory> {
         return slots;
     }
 
+    public boolean hasSlot() {
+        for (int slot : slots) {
+            if (slot != -1) return true;
+        }
+        return false;
+    }
+
     public SimplePlaceholders getLocalArgs() {
         return localArgs;
     }
@@ -87,13 +96,21 @@ public final class SlotFactory implements Comparable<SlotFactory> {
         this.priority = priority;
     }
 
+    public Map<String, String> args() {
+        return args;
+    }
+
+    public void setArgs(Map<String, String> args) {
+        this.args = args;
+    }
 
     static {
         PipelineYamlCodecBuilder<SlotFactory> builder = PipelineYamlCodecBuilder.of(SlotFactory::new)
+                .field(MenuCodecs.ARGS_CODEC, "args", SlotFactory::args, SlotFactory::setArgs)
                 .field(SimplePlaceholders.CODEC, "local_args", SlotFactory::getLocalArgs, SlotFactory::setLocalArgs)
                 .integer("priority", SlotFactory::priority, SlotFactory::setPriority, 0)
                 .field(SlotVariant.CODEC, null, s -> s.variant, (f, s) -> f.variant = s)
-                .field(ItemFactory.SLOTS_YAML_CODEC, "slot", SlotFactory::slots, SlotFactory::setSlots, new int[]{-1});
+                .field(MenuCodecs.SLOTS_CODEC, "slot", SlotFactory::slots, SlotFactory::setSlots, new int[]{-1});
 
         CODEC = builder
                 .build()

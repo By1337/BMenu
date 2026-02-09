@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.MenuLoader;
+import dev.by1337.bmenu.loader.MenuLoader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,8 +21,8 @@ public class OpenCommands {
     private final MenuLoader loader;
     private final List<OpenCommand> openCommands;
 
-    public OpenCommands(MenuLoader loader, YamlMap config) {
-        this.loader = loader;
+    public OpenCommands(MenuLoader loader1, YamlMap config) {
+        this.loader = loader1;
         openCommands = new ArrayList<>();
         Map<String, OpenCommandConfig> commands = config.get("open_commands")
                 .decode(YamlCodec.mapOf(YamlCodec.STRING, OpenCommandConfig.CODEC), Map.of()).getOrThrow();
@@ -36,7 +36,7 @@ public class OpenCommands {
                    arguments.add(argumentType.creator().create(data, name));
                }
            }
-            OpenCommand openCommand = new OpenCommand(cmd, cfg.menu, arguments, loader.getPlugin());
+            OpenCommand openCommand = new OpenCommand(cmd, cfg.menu, arguments, loader.plugin());
             openCommand.setAliases(cfg.aliases);
             openCommand.setPermission(cfg.permission);
             openCommands.add(openCommand);

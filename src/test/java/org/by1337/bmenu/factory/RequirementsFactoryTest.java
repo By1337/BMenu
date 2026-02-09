@@ -1,6 +1,46 @@
 package dev.by1337.bmenu.factory;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import dev.by1337.bmenu.handler.MenuEventHandler;
+import dev.by1337.bmenu.slot.component.ClickMapComponent;
+import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.codec.YamlCodec;
+import org.by1337.bmenu.factory.YamlReaderImpl;
+import org.junit.jupiter.api.Test;
+
+import java.io.StringReader;
+
 public class RequirementsFactoryTest {
+
+    private static String YAML = """
+      on_left_click:
+        requirements:
+          check:
+            type: math
+            expression: '%vault_eco_balance% >= ${PRICE}'
+        deny_commands:
+          - '[MESSAGE] &cУ Вас не достаточно баланса!'
+        commands:
+          - '[CONSOLE] eco take %player_name% ${PRICE}'
+          - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
+          - '[MESSAGE] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'""";
+     @Test
+    public void run(){
+      //  YamlMap.setYamlReader(new YamlReaderImpl());
+        YamlMap map = YamlMap.load(new StringReader(YAML));
+        // var codec = YamlCodec.mapOf(YamlCodec.STRING, MenuEventHandler.CODEC);
+        var handlers = map.get().decode(ClickMapComponent.CODEC).getOrThrow();
+
+        System.out.println(handlers);
+
+        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+
+        System.out.println( gson.toJson(handlers));
+
+        System.out.println(ClickMapComponent.CODEC.encode(handlers).asYamlMap().getOrThrow().saveToString());
+
+    }
    /* private static final String YAML = """
             requirements:
               - check: '100 + 100 * 100 == 15'

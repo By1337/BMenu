@@ -22,7 +22,7 @@ public class RemoveIfNotEmptyAnimOpcode implements FrameOpcode {
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
         for (int slot : slots) {
-            var item = menu.getMatrix()[slot];
+            var item = menu.matrix()[slot];
             if (item != null/* && !item.getItemStack().getType().isAir()*/) { //todo?
                 matrix[slot] = null;
             }

@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public interface RequirementHandler {
-    YamlCodec<RequirementHandler> CODEC = new YamlCodec<RequirementHandler>() {
+    YamlCodec<RequirementHandler> CODEC = new YamlCodec<>() {
         @Override
         public DataResult<RequirementHandler> decode(YamlValue yaml) {
             if (yaml.isMap()) return LegacyHandler.CODEC.decode(yaml).mapValue(v -> v);

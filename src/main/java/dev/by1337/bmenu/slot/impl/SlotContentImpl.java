@@ -29,6 +29,7 @@ public final class SlotContentImpl extends BaseSlotContent {
 
     public SlotContentImpl(SimplePlaceholders localArgs, SlotVariant variant, @Nullable ItemModel base) {
         super(localArgs);
+        this.base = base;
         head = variant;
         ticker = variant.ticker();
         ticking = ticker != null;

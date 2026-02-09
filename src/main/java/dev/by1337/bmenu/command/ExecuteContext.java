@@ -26,24 +26,4 @@ public class ExecuteContext {
     public static ExecuteContext of(Menu menu, @Nullable SlotContent item) {
         return new ExecuteContext(menu, item);
     }
-
-
-    public void runCommands(List<String> commands) {
-        menu.runCommands(this, commands);
-    }
-
-
-    public void executeCommand(String command) {
-        menu.executeCommand(this, command);
-    }
-
-
-    public @Nullable CompiledCommand<ExecuteContext> executeAndTryCompile(String command) {
-        return menu.executeAndTryCompile(this, command);
-    }
-
-
-    public void executeCommand(CompiledCommand<ExecuteContext> command) {
-        menu.executeCommand(this, command);
-    }
 }

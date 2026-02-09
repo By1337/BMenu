@@ -21,80 +21,33 @@ type: chest
 size: 54
 title: "123"
 
-
 args:
   REBUILD_TEST: 0
   DAMAGE_TEST: 0
   TEST:
     - 122
-123:
-  on_view77:
-   # slot: 49
-    local_args:
-      okak: 0
-    oneOf:
-      - material: dirt
-        on_view: '{okak} == 0'
-      - material: gold_block
-        on_view: '{okak} == 1'
-      - material: diamond
-        on_view: '{okak} == 2'
-      - material: netherite_block
-        on_view: '{okak} == 3'
-      - material: barrier
-    on_tick: '[simulate] click 49'
-    tick_speed: 2
-    on_click:
-      - if: '{rand_bool} == true'
-        do:
-          if: '{rand_bool} == true'
-          do:
-            if: '{rand_bool} == true'
-            do:
-              - set_local: okak 3
-              - update: ''
-            else:
-              - set_local: okak 2
-              - update: ''
-          else:
-            - set_local: okak 1
-            - update: ''
-        else:
-          - set_local: okak 0
-          - update: ''
 
-
-  on_view1:
-    slot: 49
-    material: diamond_block
-    name: diamond_block
-    on_left_click:
-      - 'test 1'
-      - if: '{rand_bool} == true'
+е64:
+  - oneOf:
+      - if: '%bcases_keys_count_of_type_default% < 1'
+        do: '&cУ Вас не достаточно ключей!'
+      - if: '{playing} == true'
         do:
-          - 'test 2'
-          - if: '{rand_bool} == true'
-            do:
-              - 'test 3'
-              - if: '{rand_bool} == true'
-                do: '<gold>4'
-                else: '<black>3'
-            else: '<green>2'
-        else: '<red>1'
-    on_click:
-      - message: 'test 1'
-        if: '{rand_bool} == true'
-        do:
-          message: 'test 2'
-          if: '{rand_bool} == true'
-          do:
-            message: 'test 3'
-            if: '{rand_bool} == true'
-            do: '<gold>4'
-            else: '<black>3'
-          else: '<green>2'
-        else: '<red>1'
+          - '[MESSAGE] &cКто-то уже открывает этот кейс!'
+          - '[CLOSE]'
+      - do:
+          - '[TAKE_KEY] default'
+          - '[PLAY] $random default'
+          - '[CLOSE]'
 
+v1:
+  if: '100 == 100'
+  if-all:
+    - '100 == 100'
+    - '200 == 200'
+  if-one:
+    - '100 == 100'
+    - '200 == 100'
 
 menu-events:
   on_refresh:

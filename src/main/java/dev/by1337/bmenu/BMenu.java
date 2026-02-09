@@ -2,10 +2,11 @@ package dev.by1337.bmenu;
 
 
 import dev.by1337.bmenu.command.menu.OpenCommands;
-import dev.by1337.bmenu.factory.MenuCodec;
-import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.hook.Metrics;
 import dev.by1337.bmenu.hook.BungeeCordMessageSender;
+import dev.by1337.bmenu.hook.Metrics;
+import dev.by1337.bmenu.loader.MenuConfig;
+import dev.by1337.bmenu.loader.MenuLoader;
+import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.cmd.Command;
 import dev.by1337.cmd.argument.ArgumentStrings;
 import dev.by1337.core.command.bcmd.CommandError;
@@ -18,16 +19,11 @@ import dev.by1337.core.util.io.ResourceUtil;
 import dev.by1337.core.util.reflect.ClasspathUtil;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.yaml.YamlMap;
-import dev.by1337.yaml.codec.schema.SchemaHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Registry;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +33,7 @@ import java.util.List;
 
 public class BMenu extends JavaPlugin {
     private static final Logger log = LoggerFactory.getLogger("BMenu");
-    private MenuLoader loader;
+    private static MenuLoader loader;
     private CommandWrapper commandWrapper;
     private OpenCommands openCommands;
     private Metrics metrics;
@@ -66,9 +62,10 @@ public class BMenu extends JavaPlugin {
         config = ResourceUtil.load("config.yml", this);
         loader = new MenuLoader(
                 new File(getDataFolder(), "menu"),
-                this,
-                config.get("hot-reload").asBool(false)
+                this
+                //, config.get("hot-reload").asBool(false) // todo?
         );
+        loader.codecRegistry().register("bmenu:default", MenuConfig.CODEC);
         // writeSchemas(this); //todo пока не работает(
     }
 
@@ -76,9 +73,7 @@ public class BMenu extends JavaPlugin {
     public void onEnable() {
         BungeeCordMessageSender.registerChannel(this);
         openCommands = new OpenCommands(loader, config);
-        loader.startTicker();
-        loader.loadMenus();
-        loader.registerListeners();
+        loader.enable();
         commandWrapper = new CommandWrapper(createCommand(), this);
         commandWrapper.setPermission("bmenu.use");
         commandWrapper.register();
@@ -89,12 +84,15 @@ public class BMenu extends JavaPlugin {
     @Override
     public void onDisable() {
         BungeeCordMessageSender.unregisterChannel(this);
-        loader.close();
+        loader.disable();
         commandWrapper.close();
         openCommands.unregister();
         metrics.shutdown();
     }
 
+    public static MenuLoader menuLoader() {
+        return loader;
+    }
 
     private Command<CommandSender> createCommand() {
         Command<CommandSender> cmd = new Command<CommandSender>("bmenu")
@@ -107,12 +105,12 @@ public class BMenu extends JavaPlugin {
                             openCommands.unregister();
                             openCommands = new OpenCommands(loader, ResourceUtil.load("config.yml", this));
                             openCommands.register();
-                            sender.sendMessage(MiniMessage.deserialize("&aReloaded " + loader.getMenuRegistry().size() + " menus!"));
+                            sender.sendMessage(MiniMessage.deserialize("&aReloaded " + loader.menus().size() + " menus!"));
                         })
                 )
                 .sub(new Command<CommandSender>("open")
                         .requires(new RequiresPermission<>("bmenu.open"))
-                        .argument(new ArgumentDynamicRegistry<>("$menu", () -> loader.getMenuRegistry()))
+                        .argument(new ArgumentDynamicRegistry<>("$menu", () -> loader.menus()))
                         .argument(new ArgumentPlayers<>("$player"))
                         .argument(new ArgumentStrings<>("$custom"))
                         //  .argument(new MenuArgumentList("$custom", openCommands))
@@ -131,13 +129,13 @@ public class BMenu extends JavaPlugin {
                                     String openArgs = (String) args.get("$custom");
                                     if (openArgs != null) {
                                         for (OpenCommands.OpenCommand command : openCommands.openCommands()) {
-                                            if (command.menuId().equals(menu.getId().asString())) {
+                                            if (command.menuId().equals(menu.id().asString())) {
                                                 command.execute(player, openArgs);
                                                 break;
                                             }
                                         }
                                     } else {
-                                        Menu m = loader.create(menu, player, null);
+                                        Menu m = menu.create(player, null);
                                         m.open();
                                     }
                                 } catch (Exception t) {
@@ -157,7 +155,7 @@ public class BMenu extends JavaPlugin {
                         .requires(new RequiresPermission<>("bmenu.dump"))
                         .sub(new Command<CommandSender>("menu")
                                 .requires(new RequiresPermission<>("bmenu.dump.menu"))
-                                .argument(new ArgumentDynamicRegistry<>("menu", () -> loader.getMenuRegistry()))
+                                .argument(new ArgumentDynamicRegistry<>("menu", () -> loader.menus()))
                                 .executor((sender, args) -> {
                                     MenuConfig config = (MenuConfig) args.getOrThrow("menu", "Use /bmenu dump menu <menu>");
 
@@ -172,13 +170,14 @@ public class BMenu extends JavaPlugin {
         return cmd;
     }
 
-    public static void writeSchemas(Plugin plugin) {
-        Plugin bMenu = Bukkit.getPluginManager().getPlugin("BMenu");
-        String bMenuVersion = bMenu == null ? plugin.getDescription().getVersion() : bMenu.getDescription().getVersion();
-        SchemaHolder.addSchema(plugin.getDataFolder(), "bmenu-schema-v" + bMenuVersion + ".json", "menu/**/*.yml", MenuCodec.schema(), "BMenu menu schema");
-    }
+//    public static void writeSchemas(Plugin plugin) {
+//        Plugin bMenu = Bukkit.getPluginManager().getPlugin("BMenu");
+//        String bMenuVersion = bMenu == null ? plugin.getDescription().getVersion() : bMenu.getDescription().getVersion();
+//        SchemaHolder.addSchema(plugin.getDataFolder(), "bmenu-schema-v" + bMenuVersion + ".json", "menu/**/*.yml", MenuCodec.schema(), "BMenu menu schema");
+//    }
+//
+//    public MenuLoader getMenuLoader() {
+//        return loader;
+//    }
 
-    public MenuLoader getMenuLoader() {
-        return loader;
-    }
 }

@@ -1,7 +1,11 @@
 package dev.by1337.bmenu.requirement.legacy;
 
 import dev.by1337.bmenu.command.Commands;
-import dev.by1337.bmenu.requirement.*;
+import dev.by1337.bmenu.handler.ConditionalHandler;
+import dev.by1337.bmenu.requirement.MathRequirement;
+import dev.by1337.bmenu.requirement.PermissionRequirement;
+import dev.by1337.bmenu.requirement.RegexRequirement;
+import dev.by1337.bmenu.requirement.StringsRequirement;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -15,7 +19,7 @@ public class RequirementsFactory {
 
     //@Deprecated
     public static Requirements readLegacy(YamlValue data) {
-        List<LegacyRequirement> requirements = new ArrayList<>();
+        List<ConditionalHandler> requirements = new ArrayList<>();
         Map<String, YamlMap> map = data.decode(STRING_TO_YAML_MAP_CODEC).getOrThrow();
         for (YamlMap value : map.values()) {
             String type = value.get("type").decode(YamlCodec.STRING).getOrThrow();
@@ -23,7 +27,7 @@ public class RequirementsFactory {
             var denyCommands = value.get("deny_commands").decode(Commands.CODEC, Commands.EMPTY).getOrThrow();
             switch (type) {
                 case "math", "!math", "m", "!m" -> {
-                    requirements.add(new LegacyRequirement(new MathRequirement(
+                    requirements.add(new ConditionalHandler(new MathRequirement(
                             value.get("expression").asString().getOrThrow()
                     ), commands, denyCommands));
                 }
@@ -34,7 +38,7 @@ public class RequirementsFactory {
                             value.get("output").asString().getOrThrow()
                     );
                     if (type.startsWith("!")) requirement = requirement.invert();
-                    requirements.add(new LegacyRequirement(requirement, commands, denyCommands));
+                    requirements.add(new ConditionalHandler(requirement, commands, denyCommands));
                 }
                 case "string equals ignorecase", "!string equals ignorecase", "sei", "!sei" -> {
                     StringsRequirement requirement = new StringsRequirement(
@@ -43,7 +47,7 @@ public class RequirementsFactory {
                             value.get("output").asString().getOrThrow()
                     );
                     if (type.startsWith("!")) requirement = requirement.invert();
-                    requirements.add(new LegacyRequirement(requirement, commands, denyCommands));
+                    requirements.add(new ConditionalHandler(requirement, commands, denyCommands));
                 }
                 case "string contains", "!string contains", "sc", "!sc" -> {
                     StringsRequirement requirement = new StringsRequirement(
@@ -52,7 +56,7 @@ public class RequirementsFactory {
                             value.get("output").asString().getOrThrow()
                     );
                     if (type.startsWith("!")) requirement = requirement.invert();
-                    requirements.add(new LegacyRequirement(requirement, commands, denyCommands));
+                    requirements.add(new ConditionalHandler(requirement, commands, denyCommands));
                 }
                 case "regex matches", "!regex matches", "rm", "!rm" -> {
                     RegexRequirement requirement = new RegexRequirement(
@@ -60,14 +64,14 @@ public class RequirementsFactory {
                             value.get("regex").asString().getOrThrow(),
                             value.get("input").asString().getOrThrow()
                     );
-                    requirements.add(new LegacyRequirement(requirement, commands, denyCommands));
+                    requirements.add(new ConditionalHandler(requirement, commands, denyCommands));
                 }
                 case "has permission", "!has permission", "hp", "!hp" -> {
                     PermissionRequirement requirement = new PermissionRequirement(
                             type.startsWith("!") ? PermissionRequirement.Operation.YES : PermissionRequirement.Operation.NO,
                             value.get("permission").asString().getOrThrow()
                     );
-                    requirements.add(new LegacyRequirement(requirement, commands, denyCommands));
+                    requirements.add(new ConditionalHandler(requirement, commands, denyCommands));
                 }
                 default -> throw new IllegalArgumentException("unknown type " + type);
             }

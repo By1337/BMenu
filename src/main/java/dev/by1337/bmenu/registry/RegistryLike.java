@@ -5,20 +5,28 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 public class RegistryLike<T extends Keyed> implements Iterable<T> {
+    private static final Logger log = LoggerFactory.getLogger("BMenu");
     private final Map<NamespacedKey, T> key2value = new HashMap<>();
     private final Map<String, List<T>> path2Value = new HashMap<>();
     private final Map<T, NamespacedKey> value2Key = new IdentityHashMap<>();
 
     public void register(T value) {
         NamespacedKey key = value.getKey();
-        if (key2value.containsKey(key)) throw new IllegalStateException("key already exists " + key);
-        if (value2Key.containsKey(value))
-            throw new IllegalStateException(value + " already registered with key " + value2Key.get(value));
+        if (key2value.containsKey(key)) {
+            log.error("key already exists {}", key);
+            return;
+        }
+        if (value2Key.containsKey(value)) {
+            log.error("{} already registered with key {}", value, value2Key.get(value));
+            return;
+        }
         key2value.put(key, value);
         value2Key.put(value, key);
         path2Value.computeIfAbsent(key.getKey(), k -> new ArrayList<>()).add(value);
@@ -33,6 +41,11 @@ public class RegistryLike<T extends Keyed> implements Iterable<T> {
         var list = path2Value.get(s);
         if (list == null || list.size() != 1) return null;
         return path2Value.get(s).get(0);
+    }
+    public void clear(){
+        key2value.clear();
+        value2Key.clear();
+        path2Value.clear();
     }
     public Stream<T> stream() {
         return key2value.values().stream();

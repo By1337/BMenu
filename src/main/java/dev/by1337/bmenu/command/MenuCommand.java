@@ -3,6 +3,7 @@ package dev.by1337.bmenu.command;
 import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.cmd.CompiledCommand;
 import dev.by1337.plc.PlaceholderApplier;
+import dev.by1337.yaml.YamlValue;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,22 +21,24 @@ public class MenuCommand implements MenuEventHandler {
         canBeCompiled = !hasPlaceholders;
     }
 
-    public void run(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean run(ExecuteContext ctx, PlaceholderApplier placeholders) {
         if (compiled != null) {
-            ctx.executeCommand(compiled);
+            ctx.menu.executeCommand(ctx, compiled);
         } else {
             if (canBeCompiled) {
-                compiled = ctx.executeAndTryCompile(source);
+                compiled = ctx.menu.compile(source);
                 canBeCompiled = false;
-                //log.info("Command {} compiled {}", source, compiled);
+              //  log.info("Command {} compiled {}", source, compiled);
+                run(ctx, placeholders);
             } else {
                 if (hasPlaceholders) {
-                    ctx.executeCommand(placeholders.setPlaceholders(source));
+                    ctx.menu.executeCommand(ctx, placeholders.setPlaceholders(source));
                 } else {
-                    ctx.executeCommand(source);
+                    ctx.menu.executeCommand(ctx, source);
                 }
             }
         }
+        return true;
     }
 
     public String source() {
@@ -52,6 +55,11 @@ public class MenuCommand implements MenuEventHandler {
 
     public boolean hasPlaceholders() {
         return hasPlaceholders;
+    }
+
+    @Override
+    public YamlValue encode() {
+        return YamlValue.wrap(source);
     }
 
     @Override

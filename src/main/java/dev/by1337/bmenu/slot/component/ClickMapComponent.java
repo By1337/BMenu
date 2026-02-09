@@ -2,18 +2,19 @@ package dev.by1337.bmenu.slot.component;
 
 import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.handler.MenuEventHandler;
-import dev.by1337.bmenu.util.ObjectUtil;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public record ClickMapComponent(Map<MenuClickType, MenuEventHandler> map) {
     public static final ClickMapComponent EMPTY = new ClickMapComponent(Map.of());
-    public static final YamlCodec<ClickMapComponent> CODEC = ObjectUtil.make(() -> {
+    public static final YamlCodec<ClickMapComponent> CODEC = make(() -> {
         var builder = PipelineYamlCodecBuilder.of(() -> new EnumMap<MenuClickType, MenuEventHandler>(MenuClickType.class));
         for (MenuClickType value : MenuClickType.values()) {
             String key = value.getConfigKeyClick();
@@ -39,12 +40,22 @@ public record ClickMapComponent(Map<MenuClickType, MenuEventHandler> map) {
         return map.get(type);
     }
 
-    public boolean doClick(MenuClickType type,ExecuteContext ctx, PlaceholderApplier placeholders) {
-        MenuEventHandler handler = ObjectUtil.requireNonNullElseGet(map.get(type), () -> map.get(MenuClickType.ANY_CLICK));
+    public boolean doClick(MenuClickType type, ExecuteContext ctx, PlaceholderApplier placeholders) {
+        MenuEventHandler handler = requireNonNullElseGet(map.get(type), () -> map.get(MenuClickType.ANY_CLICK));
         if (handler != null) {
             handler.run(ctx, placeholders);
             return true;
         }
         return false;
+    }
+
+    @Nullable
+    @Contract(value = "!null, _ -> !null")
+    public static <T> T requireNonNullElseGet(@Nullable T val, Supplier<@Nullable T> supplier) {
+        return val != null ? val : supplier.get();
+    }
+
+    public static <T> T make(Supplier<T> maker) {
+        return maker.get();
     }
 }

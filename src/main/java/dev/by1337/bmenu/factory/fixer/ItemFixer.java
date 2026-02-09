@@ -21,26 +21,19 @@ public class ItemFixer {
     private static final List<String> ALL_ITEM_FLAGS = Arrays.stream(ItemFlag.values()).map(Enum::name).toList();
     private static final YamlValue REPLACE_TICKING = OnTickComponent.CODEC.encode(OnTickComponent.DEFAULT);
     private static final Logger log = LoggerFactory.getLogger("BMenu");
+    private static final String FIXER = "$" + ItemFixer.class.getName().replace(".", "_");
 
     public static void fixItem(YamlMap map) {
         fixItem(map, null);
     }
 
     public static void fixItem(YamlMap map, @Nullable YamlMap superItem) {
-        if (map.has("$fixed")) return;
-        map.set("$fixed", true);
+        if (map.has(FIXER)) return;
+        map.set(FIXER, true);
         rename(map, "tick-speed", "tick_speed");
         rename(map, "slots", "slot");
-        rename(map, "display_name", "name");
         rename(map, "view_req", "view_requirement");
         rename(map, "view_requirement", "on_view");
-        rename(map, "potion_effects", "potion_contents");
-
-        if (Objects.equals(map.getRaw("all_flags"), true)){
-            rename(map, "item_flags", "$item_flags");
-            map.set("$all_flags", "apply");
-            map.set("item_flags", ALL_ITEM_FLAGS);
-        }
 
         replacePlaceholders(map, superItem);
         map.set("name", fixDisplay(map.getRaw("name")));

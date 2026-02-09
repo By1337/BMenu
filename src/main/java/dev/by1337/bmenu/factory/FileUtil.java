@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.factory;
 
-import dev.by1337.bmenu.MenuLoader;
+import dev.by1337.bmenu.loader.MenuLoader;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class FileUtil {
                 }
                 result.add(menu);
             } else if (s.startsWith("/")) {
-                File menu = new File(loader.getHomeDir(), s.substring(1));
+                File menu = new File(loader.homeDir(), s.substring(1));
                 if (!menu.exists()) {
                     throw new InvalidMenuConfigException("Invalid menu path: {}", menu.getAbsolutePath());
                 }

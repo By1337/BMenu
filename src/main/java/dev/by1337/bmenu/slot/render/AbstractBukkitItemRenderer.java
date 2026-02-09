@@ -1,11 +1,12 @@
+/*
 package dev.by1337.bmenu.slot.render;
 
 import dev.by1337.bmenu.hook.ItemStackCreator;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.text.RawTextComponent;
 import dev.by1337.bmenu.util.ObjectUtil;
-import dev.by1337.bmenu.util.holder.IntHolder;
-import dev.by1337.bmenu.util.holder.StringHolder;
+import dev.by1337.core.util.text.component.RawTextComponent;
+import dev.by1337.item.component.impl.MaterialComponent;
+import dev.by1337.item.util.IntHolder;
 import dev.by1337.core.BCore;
 import dev.by1337.core.ServerVersion;
 import dev.by1337.core.bridge.inventory.InventoryUtil;
@@ -81,7 +82,7 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
     }
 
     private ItemStack build(ItemModel item, PlaceholderApplier placeholders) {
-        String material = item.get(ItemComponents.MATERIAL, new StringHolder("dirt")).get(placeholders);
+        String material = item.get(ItemComponents.MATERIAL, MaterialComponent.DEFAULT).get(placeholders);
         ItemStack itemStack = ItemStackCreator.getItem(material);
 
         ItemMeta im = itemStack.getItemMeta();
@@ -202,3 +203,4 @@ public abstract class AbstractBukkitItemRenderer implements ItemRenderer<Invento
         return itemStack;
     }
 }
+*/

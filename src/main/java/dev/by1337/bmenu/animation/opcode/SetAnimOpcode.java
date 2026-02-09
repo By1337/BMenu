@@ -26,7 +26,7 @@ public class SetAnimOpcode implements FrameOpcode {
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        SlotFactory builder = menu.getConfig().findMenuItem(menu.setPlaceholders(item), menu);
+        SlotFactory builder = menu.config().resolveSlotBuilder(menu.setPlaceholders(item), menu);
         if (builder == null) {
             AnimationUtil.set(SlotContent.ofMaterial(menu.setPlaceholders(item)), matrix, slots);
         } else {

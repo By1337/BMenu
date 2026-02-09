@@ -57,7 +57,7 @@ public class SoundAnimOpcode implements FrameOpcode {
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        Player viewer = menu.getViewer();
+        Player viewer = menu.viewer();
         viewer.playSound(viewer.getLocation(), sound, volume, pitch);
     }
 

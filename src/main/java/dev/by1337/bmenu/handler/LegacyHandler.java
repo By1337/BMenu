@@ -5,6 +5,7 @@ import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.requirement.legacy.Requirements;
 import dev.by1337.plc.PlaceholderApplier;
+import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 
@@ -21,11 +22,13 @@ public record LegacyHandler(
     );
 
     @Override
-    public void run(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean run(ExecuteContext ctx, PlaceholderApplier placeholders) {
         if (requirements.test(ctx.menu, placeholders, ctx)) {
             commands.run(ctx, placeholders);
+            return true;
         } else {
             denyCommands.run(ctx, placeholders);
+            return false;
         }
     }
     @Deprecated
@@ -39,5 +42,10 @@ public record LegacyHandler(
         }
         denyCommands.run(ctx, placeholders);
         return false;
+    }
+
+    @Override
+    public YamlValue encode() {
+        return CODEC.encode(this);
     }
 }

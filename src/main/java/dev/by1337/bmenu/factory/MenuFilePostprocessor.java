@@ -32,7 +32,7 @@ public class MenuFilePostprocessor {
             });
             return o;
         } else if (o instanceof List<?>) {
-            ((List<Object>) o).replaceAll(v -> fixPlaceholders(v));
+            ((List<Object>) o).replaceAll(MenuFilePostprocessor::fixPlaceholders);
             return o;
         } else if (o instanceof String s) {
             String fixed = s

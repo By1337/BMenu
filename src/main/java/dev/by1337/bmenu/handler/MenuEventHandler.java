@@ -21,9 +21,7 @@ public interface MenuEventHandler {
 
         @Override
         public YamlValue encode(MenuEventHandler handler) {
-            if (handler instanceof LegacyHandler l) return LegacyHandler.CODEC.encode(l);
-            if (handler instanceof Commands c) return Commands.CODEC.encode(c);
-            return YamlValue.wrap(handler.toString());
+            return handler.encode();
         }
 
         @Override
@@ -32,5 +30,7 @@ public interface MenuEventHandler {
         }
     };
 
-    void run(ExecuteContext ctx, PlaceholderApplier placeholders);
+    boolean run(ExecuteContext ctx, PlaceholderApplier placeholders);
+
+    YamlValue encode();
 }

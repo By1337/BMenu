@@ -8,7 +8,7 @@ public record PermissionRequirement(Operation op, String perm) implements  Requi
 
     @Override
     public boolean test(Menu menu, PlaceholderApplier placeholders) {
-        boolean state = menu.getViewer().hasPermission(placeholders.setPlaceholders(perm));
+        boolean state = menu.viewer().hasPermission(placeholders.setPlaceholders(perm));
         return op.state == state;
     }
 

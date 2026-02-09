@@ -7,8 +7,11 @@ import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.core.BCore;
 import dev.by1337.core.bridge.inventory.InventoryUtil;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -23,12 +26,19 @@ public class BukkitInventory {
     private final int size;
     private final Menu menu;
 
-    public BukkitInventory(Inventory inventory, Menu menu) {
-        this.inventory = inventory;
-        size = inventory.getSize();
+    public BukkitInventory(Menu menu, int size, Component title, InventoryType type) {
+        this.inventory = createInventory(menu, size, title, type);
+        this.size = inventory.getSize();
         this.menu = menu;
         seenItems = new SlotContent[size];
         items = new SlotContent[size];
+    }
+    private Inventory createInventory(InventoryHolder h, int size, Component title, InventoryType type) {
+        if (type == InventoryType.CHEST) {
+            return Bukkit.createInventory(h, size, title);
+        } else {
+            return Bukkit.createInventory(h, type, title);
+        }
     }
 
     public void show(Player player) {
@@ -66,7 +76,7 @@ public class BukkitInventory {
                         slot,
                         actual.getItemModel(),
                         menu,
-                        menu.getPlaceholderResolver().and(actual).bind(menu)
+                        menu.resolvers().and(actual).bind(menu)
                 );
                 actual.setDirty(false);
             }
@@ -88,7 +98,6 @@ public class BukkitInventory {
         INV_UTIL.sendFakeTitle(inventory, newTitle);
     }
 
-    @Deprecated //todo скрыть под апи? ну пока пусть так
     public Inventory getInventory() {
         return inventory;
     }

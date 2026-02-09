@@ -32,6 +32,7 @@ public class AnimationUtil {
     }
 
     public static int[] readSlots(String str) {
+        str = str.replace(" ", "");
         if (str.contains(",")) {
             List<Integer> result = new ArrayList<>();
             String[] slots = str.split(",");

@@ -14,7 +14,7 @@ public record MathRequirement(String input) implements Requirement {
         try {
             return FastExpressionParser.parse(s) == 1D;
         } catch (FastExpressionParser.MathFormatException e) {
-            menu.getLoader().getLogger().error(
+            menu.loader().logger().error(
                     "Failed to parse math requirement. expression: '{}' replaced expression: '{}'\n{}",
                     input, s,
                     e.getMessage()

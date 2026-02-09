@@ -27,7 +27,7 @@ public class CopyFromBaseAnimOpcode implements FrameOpcode {
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        SlotContent[] base = menu.getMatrix();
+        SlotContent[] base = menu.matrix();
         int srcIndex = 0;
         for (int toIndex : dest) {
             int fromIndex = src[srcIndex];

@@ -18,7 +18,7 @@ public record OnTickComponent(MenuEventHandler handler) {
 
 
     public void tick(SlotContent slotContent, Menu menu) {
-        var placeholder = menu.getPlaceholderResolver().and(slotContent).bind(menu);
+        var placeholder = menu.resolvers().and(slotContent).bind(menu);
         ExecuteContext ctx = ExecuteContext.of(menu, slotContent);
         handler.run(ctx, placeholder);
     }
