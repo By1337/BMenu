@@ -2,10 +2,12 @@ package dev.by1337.bmenu.loader;
 
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.command.CommandList;
+import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.bmenu.menu.DefaultMenu;
 import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.bmenu.slot.SlotBuilderSource;
 import dev.by1337.bmenu.slot.SlotContent;
 import dev.by1337.bmenu.slot.SlotFactory;
@@ -47,7 +49,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
     private @Nullable Animator.AnimatorContext animation;
     private final Map<String, Animator.AnimatorContext> animations = new HashMap<>();
     private CommandList commandList = new CommandList(new HashMap<>());
-    private final Map<String, MenuEventHandler> eventHandlers = new HashMap<>();
+    private final Map<String, Commands> eventHandlers = new HashMap<>();
     private long clickCooldown = 100;
 
     private Object data;
@@ -142,7 +144,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
                 .field(Animator.AnimatorContext.CODEC, "animation", m -> m.animation, (m, v) -> m.animation = v)
                 .field(YamlCodec.mapOf(YamlCodec.STRING, Animator.AnimatorContext.CODEC), "animations", m -> m.animations, (m, v) -> m.animations.putAll(v))
                 .field(CommandList.CODEC, "commands-list", m -> m.commandList, (m, v) -> m.commandList = v)
-                .field(YamlCodec.mapOf(YamlCodec.STRING, MenuEventHandler.CODEC), "menu-events", m -> m.eventHandlers, (m, v) -> m.eventHandlers.putAll(v))
+                .field(YamlCodec.mapOf(YamlCodec.STRING, Commands.CODEC), "menu-events", m -> m.eventHandlers, (m, v) -> m.eventHandlers.putAll(v))
                 .field(YamlCodec.LONG, "click_cooldown", m -> m.clickCooldown, (m, v) -> m.clickCooldown = v)
                 .field(YamlCodec.YAML_MAP, null, m -> null, (m, v) -> {
                     m.yaml = v;
@@ -152,6 +154,9 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
         CODEC = RAW_CODEC.build();
     }
 
+    public YamlCodec<? extends MenuConfig> codec(){
+        return CODEC;
+    }
     public void dump(Path toFolder) {
         dump(toFolder, getSaveName());
     }
@@ -162,7 +167,8 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
                 toFolder.toFile().mkdirs();
             }
 
-            Files.writeString(toFolder.resolve(name + ".yml"), CODEC.encode(this).asYamlMap().result().saveToString());
+            // noinspection all
+            Files.writeString(toFolder.resolve(name + ".yml"), ((YamlCodec)codec()).encode(this).asYamlMap().result().saveToString());
 
             int x = 0;
             for (MenuConfig superMenu : supers) {
@@ -241,7 +247,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
         return commandList;
     }
 
-    public Map<String, MenuEventHandler> eventHandlers() {
+    public Map<String, Commands> eventHandlers() {
         return eventHandlers;
     }
 

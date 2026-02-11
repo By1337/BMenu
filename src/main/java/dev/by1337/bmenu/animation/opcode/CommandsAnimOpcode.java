@@ -23,7 +23,7 @@ public class CommandsAnimOpcode implements FrameOpcode {
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        commands.run(ExecuteContext.of(menu), menu);
+        commands.test(ExecuteContext.of(menu), menu);
     }
 
     @Override

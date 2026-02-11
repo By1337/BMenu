@@ -9,6 +9,8 @@ import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ConditionalHandler implements MenuEventHandler {
@@ -23,7 +25,12 @@ public class ConditionalHandler implements MenuEventHandler {
                     "check", "if",
                     "commands", "do",
                     "deny_commands", "else"
-            )));
+            )))
+            .whenPrimitive(Requirement.CODEC.map(
+                    r -> new ConditionalHandler(r, Commands.EMPTY, Commands.EMPTY),
+                    r -> r.req
+            ));
+
 
     private Requirement req;
     private Commands doCmds;
@@ -42,12 +49,12 @@ public class ConditionalHandler implements MenuEventHandler {
     }
 
     @Override
-    public boolean run(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
         if (req.test(ctx.menu, placeholders)) {
-            doCmds.run(ctx, placeholders);
+            doCmds.test(ctx, placeholders);
             return true;
         }
-        elseCmds.run(ctx, placeholders);
+        elseCmds.test(ctx, placeholders);
         return false;
     }
 
@@ -60,11 +67,15 @@ public class ConditionalHandler implements MenuEventHandler {
         return req;
     }
 
-    public Commands doCmds() {
+    public Commands doCommands() {
         return doCmds;
     }
 
-    public Commands elseCmds() {
+    public Commands elseCommands() {
         return elseCmds;
+    }
+
+    private static <T> T unsupported(String msg) {
+        throw new UnsupportedOperationException(msg);
     }
 }

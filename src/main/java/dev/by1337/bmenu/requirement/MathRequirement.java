@@ -1,5 +1,6 @@
 package dev.by1337.bmenu.requirement;
 
+import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
 import dev.by1337.plc.PlaceholderApplier;
@@ -9,12 +10,12 @@ import org.jetbrains.annotations.Nullable;
 public record MathRequirement(String input) implements Requirement {
 
     @Override
-    public boolean test(Menu menu, PlaceholderApplier placeholders) {
+    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
         String s = placeholders.setPlaceholders(input);
         try {
             return FastExpressionParser.parse(s) == 1D;
         } catch (FastExpressionParser.MathFormatException e) {
-            menu.loader().logger().error(
+            ctx.menu.loader().logger().error(
                     "Failed to parse math requirement. expression: '{}' replaced expression: '{}'\n{}",
                     input, s,
                     e.getMessage()

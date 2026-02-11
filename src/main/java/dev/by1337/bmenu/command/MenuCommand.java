@@ -21,7 +21,7 @@ public class MenuCommand implements MenuEventHandler {
         canBeCompiled = !hasPlaceholders;
     }
 
-    public boolean run(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
         if (compiled != null) {
             ctx.menu.executeCommand(ctx, compiled);
         } else {
@@ -29,7 +29,7 @@ public class MenuCommand implements MenuEventHandler {
                 compiled = ctx.menu.compile(source);
                 canBeCompiled = false;
               //  log.info("Command {} compiled {}", source, compiled);
-                run(ctx, placeholders);
+                test(ctx, placeholders);
             } else {
                 if (hasPlaceholders) {
                     ctx.menu.executeCommand(ctx, placeholders.setPlaceholders(source));

@@ -1,12 +1,14 @@
-package dev.by1337.bmenu.factory;
+package org.by1337.bmenu.factory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dev.by1337.bmenu.handler.MenuEventHandler;
-import dev.by1337.bmenu.slot.component.ClickMapComponent;
+import dev.by1337.bmenu.command.Commands;
+import dev.by1337.bmenu.requirement.Requirement;
+import dev.by1337.bmenu.slot.component.OnViewComponent;
 import dev.by1337.yaml.YamlMap;
+import dev.by1337.yaml.YamlValue;
+import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
-import org.by1337.bmenu.factory.YamlReaderImpl;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -14,71 +16,107 @@ import java.io.StringReader;
 public class RequirementsFactoryTest {
 
     private static String YAML = """
-      on_left_click:
-        requirements:
-          check:
-            type: math
-            expression: '%vault_eco_balance% >= ${PRICE}'
-        deny_commands:
-          - '[MESSAGE] &cУ Вас не достаточно баланса!'
-        commands:
-          - '[CONSOLE] eco take %player_name% ${PRICE}'
-          - '[CONSOLE] give %player_name% ${MATERIAL} ${AMOUNT}'
-          - '[MESSAGE] &aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'""";
-     @Test
-    public void run(){
-      //  YamlMap.setYamlReader(new YamlReaderImpl());
-        YamlMap map = YamlMap.load(new StringReader(YAML));
-        // var codec = YamlCodec.mapOf(YamlCodec.STRING, MenuEventHandler.CODEC);
-        var handlers = map.get().decode(ClickMapComponent.CODEC).getOrThrow();
-
-        System.out.println(handlers);
-
-        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-
-        System.out.println( gson.toJson(handlers));
-
-        System.out.println(ClickMapComponent.CODEC.encode(handlers).asYamlMap().getOrThrow().saveToString());
-
-    }
-   /* private static final String YAML = """
-            requirements:
-              - check: '100 + 100 * 100 == 15'
-                commands: [ ]
+            legacy_test:
+              on_left_click:
+                requirements:
+                  - check: '{playing} == true'
+                    commands: 'do {playing}'
+                    deny_commands: 'else {playing}'
+                commands: 'do on_left_click'
+                deny_commands: 'else on_left_click'
+              on_reght_click:
+                requirements:
+                  check:
+                    type: math
+                    expression: '100 + 100 == 10 * (5 * 4)'
+                    deny_commands: [ ]
+                    commands: [ ]
+                  check-1:
+                    type: string equals
+                    input: 'str'
+                    output: 'str'
+                    commands:
+                      - '[MESSAGE] str == str'
+                      - '[BREAK]'
                 deny_commands: [ ]
-              - check: '100.5 + 100.5 == 201'
-              - check: 'has super.permission'
-              - check: '!has super.permission'
-              - check: 'string has str'
-              - check: 'string !has str'
-              - check: 'string HAS str'
-              - check: 'string !HAS str'
-              - check: 'string == string'
-              - check: 'string != string'
+              on_reght_click2:
+                requirements: # алиас req
+                  check: # если условие окажется ложным, то проверка остальных условий прервётся
+                    type: math
+                    expression: '100 + 100 == 10 * (5 * 4)'
+                    deny_commands: [ ] # во всех проверках тоже можно указывать команды
+                    commands: [ ]
+                  check-1:
+                    type: string equals
+                    input: 'str'
+                    output: 'str'
+                    commands:
+                      - '[MESSAGE] str == str'
+                      - '[BREAK]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
+                      - '[CLOSE]' # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена
+                  check-2:
+                    type: string equals ignorecase
+                    input: 'str'
+                    output: 'STR'
+                  check-3:
+                    type: string contains
+                    input: 'str_str_str'
+                    output: 'str'
+                  check-4:
+                    type: regex matches
+                    regex: '^(str)\\d+'
+                    input: 'str88ing'
+                  check-5:
+                    type: has permission
+                    permission: 'admin.use'
+                  # Здесь можно выполнить команды в зависимости от результатов условий
+                deny_commands: [ ] # если хотя бы одно из условий окажется ложным
+              on_click:
+                commands:
+                  - '[console] kick ${PLAYER} 1.1'
+                  - '[message] &aИгрок ${PLAYER} был кикнут по причине 1.1'
+                  - '[close]'
+              on_view: '100 == 100'
+              on_view2:
+                if: '100 == 99'
+                else: 'else'
+                do: 'do'
+              on_view3:
+                - if: '123 == 123'
+                - if: '321 == 321'
+                - '999 == 999'
             """;
+    private static final Gson gson = new GsonBuilder()
+            .disableHtmlEscaping()
+            .setPrettyPrinting()
+            .create();
 
     @Test
-    public void run() throws InvalidConfigurationException {
-        YamlContext ctx = load(YAML);
-        Requirements req = RequirementsFactory.read(ctx.get("requirements"));
-        Assertions.assertEquals(10, req.getRequirements().size());
-        Assertions.assertTrue(req.getRequirements().get(0) instanceof MathRequirement);
-        Assertions.assertTrue(req.getRequirements().get(1) instanceof MathRequirement);
-        Assertions.assertTrue(req.getRequirements().get(2) instanceof HasPermissionRequirement);
-        Assertions.assertTrue(req.getRequirements().get(3) instanceof HasPermissionRequirement);
-        Assertions.assertTrue(req.getRequirements().get(4) instanceof StringContainsRequirement);
-        Assertions.assertTrue(req.getRequirements().get(5) instanceof StringContainsRequirement);
-        Assertions.assertTrue(req.getRequirements().get(6) instanceof StringEqualsIgnoreCaseRequirement);
-        Assertions.assertTrue(req.getRequirements().get(7) instanceof StringEqualsIgnoreCaseRequirement);
-        Assertions.assertTrue(req.getRequirements().get(8) instanceof StringEqualsRequirement);
-        Assertions.assertTrue(req.getRequirements().get(9) instanceof StringEqualsRequirement);
+    public void run() {
+        //legacy_test.on_left_click
+        //legacy_test.on_reght_click
+        YamlMap map = YamlMap.load(new StringReader(YAML));
 
+      //  decodeTest(map.get("legacy_test.on_left_click"), Commands.CODEC);
+      //  decodeTest(map.get("legacy_test.on_reght_click"), Commands.CODEC);
+      //  decodeTest(map.get("legacy_test.on_reght_click2"), Commands.CODEC);
+        decodeTest(map.get("legacy_test.on_click"), Commands.CODEC);
+        decodeTest(map.get("legacy_test.on_view"), OnViewComponent.CODEC);
+        decodeTest(map.get("legacy_test.on_view2"), OnViewComponent.CODEC);
+        decodeTest(map.get("legacy_test.on_view3"), OnViewComponent.CODEC);
     }
 
-    private YamlContext load(String s) throws InvalidConfigurationException {
-        YamlConfiguration configuration = new YamlConfiguration();
-        configuration.loadFromString(s);
-        return new YamlContext(configuration);
-    }*/
+    private static <T> void decodeTest(YamlValue v, YamlCodec<T> c) {
+        DataResult<T> res = c.decode(v);
+        if (res.hasError()) {
+            System.out.println(res.error());
+        }
+        T t = res.getOrThrow();
+       // System.out.println(gson.toJson(t));
+        var encoded = c.encode(t);
+        YamlMap map = new YamlMap();
+        map.set("encoded", encoded);
+        System.out.println(map.saveToString());
+    }
 
 }

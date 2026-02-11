@@ -20,7 +20,7 @@ public class Requirements {
 
         @Override
         public DataResult<Requirements> decode(YamlValue yamlValue) {
-            if (yamlValue.isMap()) return DataResult.success(RequirementsFactory.readLegacy(yamlValue));
+            if (yamlValue.isMap()) return DataResult.success(RequirementsFactory.readLegacy2(yamlValue));
             return yamlValue.decode(LIST_CODEC).mapValue(Requirements::new);
         }
 
@@ -46,12 +46,12 @@ public class Requirements {
         boolean result = true;
         for (ConditionalHandler requirement : requirements) {
             try {
-                if (!requirement.run(ctx, placeholders)) {
-                    Commands c = requirement.elseCmds();
+                if (!requirement.test(ctx, placeholders)) {
+                    Commands c = requirement.elseCommands();
                     if (c.isHasBreak()) return false;
                     result = false;
                 } else {
-                    Commands c = requirement.doCmds();
+                    Commands c = requirement.doCommands();
                     if (c.isHasBreak()) return true;
                 }
             } catch (Exception e) {

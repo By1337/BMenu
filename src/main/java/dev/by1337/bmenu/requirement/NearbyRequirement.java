@@ -1,5 +1,6 @@
 package dev.by1337.bmenu.requirement;
 
+import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.codec.InlineYamlCodecBuilder;
@@ -39,11 +40,11 @@ public class NearbyRequirement implements Requirement {
     }
 
     @Override
-    public boolean test(Menu menu, PlaceholderApplier placeholders) {
-        if (!menu.viewer().getWorld().getName().equals(world)) {
+    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
+        if (!ctx.menu.viewer().getWorld().getName().equals(world)) {
             return not;
         }
-        return not != (distanceSquared(menu.viewer().getLocation()) < radiusSq);
+        return not != (distanceSquared(ctx.menu.viewer().getLocation()) < radiusSq);
     }
 
     private double distanceSquared(Location loc) {

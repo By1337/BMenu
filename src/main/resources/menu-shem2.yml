@@ -1,4 +1,3 @@
-
 extends:
   - ./file.yml # путь относительно текущей папки
   - ../file.yml # путь относительно папки на уровень выше
@@ -14,6 +13,28 @@ modern_commands: &modern_commands
     do: 'do'
     else: "else"
   - console: 'say okak'
+
+  - if: '{rand_bool} == true'
+    do:
+      if: '{rand_bool} == true'
+      do:
+        if: '{rand_bool} == true'
+        do: '<gold>4'
+        else: '<black>3'
+      else: '<green>2'
+    else: '<red>1'
+
+  - oneOf:
+      - if: '%bcases_keys_count_of_type_default% < 1'
+        do: '&cУ Вас не достаточно ключей!'
+      - if: '{playing} == true'
+        do:
+          - '[MESSAGE] &cКто-то уже открывает этот кейс!'
+          - '[CLOSE]'
+      - do:
+          - '[TAKE_KEY] default'
+          - '[PLAY] $random default'
+          - '[CLOSE]'
 
 legacy_commands: &legacy_commands
   commands: *modern_commands
@@ -67,72 +88,94 @@ args:
   PARAM_3: 'value'
 
 items:
-  itemID:
-    material: <material> # или basehead-<value> или плейсхолдер
-    name: "Имя предмета"
-    amount: 1 # или плейсхолдер
-    lore: [ ] # описание
-    item_flags: [ ] # все флаги https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/inventory/ItemFlag.html
-    all_flags: true # включает все флаги
-    potion_contents:
-      glowing: 10 10
-      slow_falling: <duration> <amplifier>
-    color: '#aarrggbb' # для зелий и кожаной брони. Также можно указать без alpha канала #rrggbb (alpha работает с 1.19.4)
-    enchantments:
-      protection: 1
+  itemID: &self
+    lore:
+      - lore
+    name: name
+    amount: 10
+    damage: 20
+    material: stone # or basehead-<value> or player-<name/uuid>
+    # noinspection all
+    model_data: 10
+    # noinspection all
+    model_data: # 1.21.4+
+      floats: [ ]
+      flags: [ ]
+      strings: [ ]
+      colors: [ ]
+    potion: strong_slowness # https://jd.papermc.io/paper/org/bukkit/potion/PotionType.html
+    potion_contents: # https://jd.papermc.io/paper/org/bukkit/potion/PotionEffectType.html
+      type: duration amplifier
+      night_vision: 240 1
+    color: '#aarrggbb' # or #rrggbb (alpha available 1.19.4+, ignored in lower versions)
+    enchantments: # https://jd.papermc.io/paper/org/bukkit/enchantments/Enchantment.html
+      enchantment: lvl
+      infinity: 0
     unbreakable: true
-    model_data: 0
-    # с 1.21.5 можно указывать больше параметров в model_data
-    $model_data:
-      floats:
-        - 1.0
-      flags:
-        - true
-      strings:
-        - 'str'
-      colors:
-        - '#rrggbb'
-    damage: 10
+    container:
+      slot: { }
+      0:
+        material: stone
+      # noinspection all
+      1: *self
+    item_flags: # https://jd.papermc.io/paper/org/bukkit/inventory/ItemFlag.html
+      - hide_additional_tooltip
+    all_flags: true
+    trim: # 1.19.4+
+      material: iron # https://jd.papermc.io/paper/org/bukkit/inventory/meta/trim/TrimMaterial.html
+      pattern: coast # https://jd.papermc.io/paper/org/bukkit/inventory/meta/trim/TrimPattern.html
+    hide_tooltip: true # 1.20.6+
+    enchantment_glint_override: true # 1.20.6+
+    max_stack_size: 99 # 1-99 1.20.6+
+    glider: true # 1.21.3+
+    tooltip_style: minecraft:idk # 1.21.3+
+    attributes:
+      - name: example
+        attribute: 'max_health' # https://jd.papermc.io/paper/org/bukkit/attribute/Attribute.html
+        amount: 2.0
+        operation: add_number # add_number, add_scalar, multiply_scalar_1 # https://jd.papermc.io/paper/org/bukkit/attribute/AttributeModifier.Operation.html
+        slot: body # https://jd.papermc.io/paper/org/bukkit/inventory/EquipmentSlot.html
     priority: 0
+    # noinspection all
     slot: 10
-    $slot:
+    # noinspection all
+    slot:
       - '10'
       - '11'
       - '12-20'
-    $1-slot: 10-15,20-25,53
-    trim: # 1.19.4+
-      material: quartz
-      pattern: sentry
-    hide_tooltip: false # 1.20.5+
-    max_stack_size: 64 # 1.20.5+
+    # noinspection all
+    slot: 10-15,20-25,53
+    local_args:
+      example: 'value'
     args:
       PARAM_1: 'value'
       PARAM_2: 'value'
       PARAM_3: 'value'
-    on_view:  *legacy_commands #| *strings
-    on_left_click: *modern_commands #| *legacy_commands
-    on_right_click: *modern_commands #| *legacy_commands
-    on_shift_left_click: *modern_commands #| *legacy_commands
-    on_shift_right_click: *modern_commands #| *legacy_commands
-    on_middle_click: *modern_commands #| *legacy_commands
-    on_drop_click: *modern_commands #| *legacy_commands
-    on_click: *modern_commands #| *legacy_commands
-    on_number_key_0_click: *modern_commands #| *legacy_commands
-    on_number_key_1_click: *modern_commands #| *legacy_commands
-    on_number_key_2_click: *modern_commands #| *legacy_commands
-    on_number_key_3_click: *modern_commands #| *legacy_commands
-    on_number_key_4_click: *modern_commands #| *legacy_commands
-    on_number_key_5_click: *modern_commands #| *legacy_commands
-    on_number_key_6_click: *modern_commands #| *legacy_commands
-    on_number_key_7_click: *modern_commands #| *legacy_commands
-    on_number_key_8_click: *modern_commands #| *legacy_commands
-    on_swap_offhand_click: *modern_commands #| *legacy_commands
-    on_control_drop_click: *modern_commands #| *legacy_commands
+    on_view:  *legacy_commands
+    on_left_click: *legacy_commands
+    on_right_click: *modern_commands
+    on_shift_left_click: *modern_commands
+    on_shift_right_click: *modern_commands
+    on_middle_click: *modern_commands
+    on_drop_click: *modern_commands
+    on_click: *modern_commands
+    on_number_key_0_click: *modern_commands
+    on_number_key_1_click: *modern_commands
+    on_number_key_2_click: *modern_commands
+    on_number_key_3_click: *modern_commands
+    on_number_key_4_click: *modern_commands
+    on_number_key_5_click: *modern_commands
+    on_number_key_6_click: *modern_commands
+    on_number_key_7_click: *modern_commands
+    on_number_key_8_click: *modern_commands
+    on_swap_offhand_click: *modern_commands
+    on_control_drop_click: *modern_commands
     tick_speed: 20
-    on_tick: *modern_commands #| *legacy_commands
+    on_tick: *modern_commands
     oneOf:
       - material: diamond
       - material: gold_block
+      - *self
 
 
 # Анимация может взаимодействовать только с элементами своего слоя, однако она может перекрывать предметы первого слоя.

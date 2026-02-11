@@ -17,9 +17,9 @@ public class FirstMatchHandler implements MenuEventHandler {
     }
 
     @Override
-    public boolean run(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
         for (ConditionalHandler block : blocks) {
-            if (block.run(ctx, placeholders)) return true;
+            if (block.test(ctx, placeholders)) return true;
         }
         return true;
     }

@@ -1,36 +1,7 @@
 package dev.by1337.bmenu.handler;
 
-import dev.by1337.bmenu.command.Commands;
-import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.plc.PlaceholderApplier;
-import dev.by1337.yaml.YamlValue;
-import dev.by1337.yaml.codec.DataResult;
-import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.yaml.codec.schema.SchemaType;
-import org.jetbrains.annotations.NotNull;
+import dev.by1337.bmenu.requirement.Requirement;
 
-public interface MenuEventHandler {
-    YamlCodec<MenuEventHandler> CODEC = new YamlCodec<>() {
-        @Override
-        public DataResult<MenuEventHandler> decode(YamlValue yaml) {
-            if (yaml.isMap()) return LegacyHandler.CODEC.decode(yaml)
-                    .mapValue(v -> v);
-            return Commands.CODEC.decode(yaml)
-                    .mapValue(v -> v);
-        }
+public interface MenuEventHandler extends Requirement {
 
-        @Override
-        public YamlValue encode(MenuEventHandler handler) {
-            return handler.encode();
-        }
-
-        @Override
-        public @NotNull SchemaType schema() {
-            return Commands.CODEC.schema();
-        }
-    };
-
-    boolean run(ExecuteContext ctx, PlaceholderApplier placeholders);
-
-    YamlValue encode();
 }

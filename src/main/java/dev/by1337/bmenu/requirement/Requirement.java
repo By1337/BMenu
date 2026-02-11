@@ -1,6 +1,15 @@
 package dev.by1337.bmenu.requirement;
 
+import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.handler.BreakableConditionalHandler;
+import dev.by1337.bmenu.handler.ConditionalHandler;
+import dev.by1337.bmenu.handler.FirstMatchHandler;
+import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.requirement.legacy.RequirementsFactory;
+import dev.by1337.bmenu.yaml.codec.CodecSelector;
+import dev.by1337.bmenu.yaml.codec.YamlTester;
+import dev.by1337.bmenu.yaml.dfu.BMenuDFU;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
@@ -18,7 +27,7 @@ public interface Requirement {
     YamlCodec<Requirement> CODEC = Codec.allOf();
     Requirement TRUE = new Requirement() {
         @Override
-        public boolean test(Menu menu, PlaceholderApplier placeholders) {
+        public boolean test(ExecuteContext menu, PlaceholderApplier placeholders) {
             return true;
         }
 
@@ -34,7 +43,7 @@ public interface Requirement {
     };
     Requirement FALSE = new Requirement() {
         @Override
-        public boolean test(Menu menu, PlaceholderApplier placeholders) {
+        public boolean test(ExecuteContext menu, PlaceholderApplier placeholders) {
             return false;
         }
 
@@ -49,7 +58,11 @@ public interface Requirement {
         }
     };
 
-    boolean test(Menu menu, PlaceholderApplier placeholders);
+    @Deprecated
+   default boolean test(Menu menu, PlaceholderApplier placeholders){
+       return test(ExecuteContext.of(menu), placeholders);
+   }
+   boolean test(ExecuteContext ctx, PlaceholderApplier placeholders);
 
     default @Nullable Requirement compile() {
         return null;
@@ -60,69 +73,12 @@ public interface Requirement {
     }
 
     class Codec {
-        public static final YamlCodec<Requirement> ANY_OF = new YamlCodec<>() {
-            @Override
-            public DataResult<Requirement> decode(YamlValue yaml) {
-                if (yaml.isPrimitive()) return STRING.decode(yaml)
-                        .flatMap(Codec::fromString)
-                        .flatMap(r -> {
-                            var v = r.compile();
-                            return v == null ? DataResult.success(r) : DataResult.success(v);
-                        });
-                if (yaml.isMap()) {
-                    YamlMap map = yaml.asYamlMap().getOrThrow();
-                    if (map.has("checks")) {
-                        boolean anyOf = Objects.equals(true, map.getRaw("anyOf"));
-                        var codec = anyOf ? oneOf() : allOf();
-                        return codec.decode(map.get("checks"));
-                    }
-                    return DataResult.error("Expected a String, but found Map.");
-                }
-                return yaml.asList(this).flatMap(l -> DataResult.success(oneOf(l)));
-            }
+        public static final YamlCodec<Requirement> ANY_OF = codec(false);
 
-            @Override
-            public YamlValue encode(Requirement requirement) {
-                return requirement.encode();
-            }
+        public static final YamlCodec<Requirement> ALL_OF = codec(true);
 
-            @Override
-            public @NotNull SchemaType schema() {
-                return SchemaTypes.STRING;
-            }
-        };
 
-        public static final YamlCodec<Requirement> ALL_OF = new YamlCodec<>() {
-            @Override
-            public DataResult<Requirement> decode(YamlValue yaml) {
-                if (yaml.isPrimitive()) return STRING.decode(yaml)
-                        .flatMap(Codec::fromString)
-                        .flatMap(r -> {
-                            var v = r.compile();
-                            return v == null ? DataResult.success(r) : DataResult.success(v);
-                        });
-                if (yaml.isMap()) {
-                    YamlMap map = yaml.asYamlMap().getOrThrow();
-                    if (map.has("checks")) {
-                        boolean anyOf = Objects.equals(true, map.getRaw("anyOf"));
-                        var codec = anyOf ? oneOf() : allOf();
-                        return codec.decode(map.get("checks"));
-                    }
-                    return DataResult.error("Expected a String, but found Map.");
-                }
-                return yaml.asList(this).flatMap(l -> DataResult.success(allOf(l)));
-            }
 
-            @Override
-            public YamlValue encode(Requirement requirement) {
-                return requirement.encode();
-            }
-
-            @Override
-            public @NotNull SchemaType schema() {
-                return SchemaTypes.STRING;
-            }
-        };
 
         public static YamlCodec<Requirement> allOf() {
             return ALL_OF;
@@ -130,6 +86,43 @@ public interface Requirement {
 
         public static YamlCodec<Requirement> oneOf() {
             return ANY_OF;
+        }
+
+        private static final YamlCodec<Requirement> FROM_STRING = YamlCodec.of(
+                v -> YamlCodec.STRING.decode(v).flatMap(Codec::fromString).flatMap(r -> {
+                    var c = r.compile();
+                    return c == null ? DataResult.success(r) : DataResult.success(c);
+                }),
+                Requirement::encode,
+                SchemaTypes.ANY
+        );
+
+        public static YamlCodec<Requirement> codec(boolean allOf){
+            return YamlCodec.recursive(codec -> new CodecSelector<Requirement>(v -> {
+                        var c = v.encode();
+                        if (c.isMap()){
+                            c.asYamlMap().result().set("$type", v.getClass().getSimpleName());
+                        }
+                        return c;
+                    })
+                    .add(YamlTester.IF_PRIMITIVE, FROM_STRING)
+                    .add(YamlTester.ifKey("requirements"), YamlCodec.lazyLoad(() -> BreakableConditionalHandler.CODEC))
+                    .add(YamlTester.ifKey("if", "if-one", "if-all", "check"), YamlCodec.lazyLoad(() -> ConditionalHandler.CODEC))
+                    .add(YamlTester.ifKey("oneOf"), YamlCodec.lazyLoad(() -> FirstMatchHandler.CODEC))
+                    .add(YamlTester.ifKey("do"), YamlCodec.lazyLoad(() -> ConditionalHandler.CODEC))
+                    .add(YamlTester.ifKey("type"), RequirementsFactory::readLegacyType)
+                    .add(YamlTester.ifKey("checks"), v -> v.asYamlMap().flatMap(map -> {
+                        boolean anyOf = Objects.equals(true, map.getRaw("anyOf"));
+                        if (anyOf) return oneOf().decode(map.get("checks"));
+                        return allOf().decode(map.get("checks"));
+                    }))
+                    .add(YamlTester.IF_LIST, v -> v.asList(codec).flatMap(l -> {
+                        if (allOf){
+                            return DataResult.success(allOf(l));
+                        }
+                        return DataResult.success(oneOf(l));
+                    }))
+            );
         }
 
 
@@ -145,7 +138,7 @@ public interface Requirement {
             if (list.isEmpty()) return TRUE;
             return new Requirement() {
                 @Override
-                public boolean test(Menu menu, PlaceholderApplier placeholders) {
+                public boolean test(ExecuteContext menu, PlaceholderApplier placeholders) {
                     if (allOf) {
                         for (Requirement requirement : list) {
                             if (!requirement.test(menu, placeholders)) return false;

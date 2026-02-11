@@ -1,5 +1,6 @@
 package dev.by1337.bmenu.requirement;
 
+import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.util.function.LazyLoad;
 import dev.by1337.plc.PlaceholderApplier;
@@ -14,7 +15,7 @@ public record StringsRequirement(Operation op, String s, String s1) implements R
 
 
     @Override
-    public boolean test(Menu menu, PlaceholderApplier placeholders) {
+    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
         return op.test.test(placeholders.setPlaceholders(s), placeholders.setPlaceholders(s1));
     }
 

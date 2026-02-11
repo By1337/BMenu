@@ -1,9 +1,11 @@
 package dev.by1337.bmenu.command;
 
 
+import dev.by1337.bmenu.handler.BreakableConditionalHandler;
 import dev.by1337.bmenu.handler.ConditionalHandler;
 import dev.by1337.bmenu.handler.FirstMatchHandler;
 import dev.by1337.bmenu.handler.MenuEventHandler;
+import dev.by1337.bmenu.yaml.dfu.BMenuDFU;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
@@ -22,7 +24,7 @@ import java.util.function.Consumer;
 public class Commands implements MenuEventHandler {
     public static final Commands EMPTY = new Commands(List.of());
 
-    public static final YamlCodec<Commands> CODEC = YamlCodec.recursive(codec -> new YamlCodec<Commands>() {
+    public static final YamlCodec<Commands> CODEC = YamlCodec.<Commands>recursive(codec -> new YamlCodec<Commands>() {
         private final YamlCodec<Map<String, YamlValue>> S2OBJET_MAP = YamlCodec.mapOf(STRING, YAML_VALUE);
 
         @Override
@@ -34,20 +36,31 @@ public class Commands implements MenuEventHandler {
             return S2OBJET_MAP.decode(yaml).flatMap(map -> {
                 List<MenuEventHandler> handlers = new ArrayList<>();
                 StringBuilder err = new StringBuilder();
-                if (
-                        map.containsKey("if") ||
-                                map.containsKey("if-all") ||
-                                map.containsKey("if-one")
-                ) {
-                    tryDecode(yaml, ConditionalHandler.CODEC, err, handlers::add);
+                if (map.containsKey("requirements")){
+                    tryDecode(yaml, BreakableConditionalHandler.CODEC, err, handlers::add);
                 }
                 if (map.containsKey("oneOf")) {
                     tryDecode(map.get("oneOf"), FirstMatchHandler.CODEC, err, handlers::add);
                 }
+                if (
+                        map.containsKey("do") ||
+                        map.containsKey("else")
+                ) {
+                    tryDecode(yaml, ConditionalHandler.CODEC, err, handlers::add);
+                }
                 boolean hasBreak = false;
                 StringBuilder buffer = new StringBuilder();
                 for (String cmd : map.keySet()) {
-                    if (cmd.startsWith("if") || cmd.equals("oneOf") || cmd.equals("do") || cmd.equals("else")) continue;
+                    if (
+                            cmd.startsWith("$") ||
+                            cmd.startsWith("if") ||
+                            cmd.equals("oneOf") ||
+                            cmd.equals("requirements") ||
+                            cmd.equals("commands") ||
+                            cmd.equals("deny_commands") ||
+                            cmd.equals("do") ||
+                            cmd.equals("else")
+                    ) continue;
                     buffer.append("[").append(cmd).append("]");
                     var value = map.get(cmd).decode(MULTI_LINE_STRING).getOrThrow();
                     if (!value.isBlank()) {
@@ -84,6 +97,9 @@ public class Commands implements MenuEventHandler {
             for (MenuEventHandler command : commands.commands) {
                 list.add(command.encode().getRaw());
             }
+            if (commands.hasBreak){
+                list.add("[break]");
+            }
             return YamlValue.wrap(list);
         }
 
@@ -96,7 +112,8 @@ public class Commands implements MenuEventHandler {
             if (input.startsWith("[")) return input;
             return "[message] " + input.replace("\n", "<br><reset>");
         }
-    });
+    }).preDecode(BMenuDFU.COMMANDS_KEY_RENAMER);
+
     private final List<MenuEventHandler> commands;
     private boolean hasBreak;
 
@@ -122,10 +139,10 @@ public class Commands implements MenuEventHandler {
     }
 
     @Override
-    public boolean run(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
         boolean state = true;
         for (MenuEventHandler like : commands) {
-            if (!like.run(ctx, placeholders)) {
+            if (!like.test(ctx, placeholders)) {
                 state = false;
             }
         }

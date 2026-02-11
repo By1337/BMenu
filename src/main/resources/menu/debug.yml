@@ -11,6 +11,131 @@
 # view_requirement -> on_view
 # potion_effects -> potion_contents
 
+# LegacyConditionalHandler
+# if string -> Requirement
+# if list -> RequirementsFactory#readLegacy -> of(list)
+# if map ->
+#   if has no key requirements -> RequirementsFactory#readLegacy -> of(list)
+#   key requirements -> ConditionalHandler &
+#   key commands -> Commands &
+#   key deny_commands -> Commands
+#
+
+# RequirementsFactory#readLegacy
+# if string -> failed
+# if list RequirementsFactory.listOf()
+# if map ->
+#   read -> ConditionalHandler
+
+# Requirement
+# if string -> base Requirement
+# if list -> Requirement.listOf() -> map allOf(list)
+# if map ->
+#   has key type -> readLegacyType
+#   has key checks -> Requirement.listOf(anyOf/allOf)
+
+# Commands
+# if string -> MenuCommand
+# if list -> Commands.listOf()
+# if map ->
+#   if has key anyOf(if, if-one, if-all, do, else) -> ConditionalHandler
+#   if has key oneOf -> FirstMatchHandler
+#   others keys -> to string '[{key}] {value}' -> MenuCommand
+
+# ConditionalHandler
+# if string -> Requirement
+# if list -> ConditionalHandler.listOf() -> allOf(list)
+# if map ->
+#   key if or if-all or if-one -> Requirement &
+#   key do -> Commands &
+#   key else -> Commands
+
+# FirstMatchHandler
+# any -> ConditionalHandler.listOf()
+
+# commands -> do
+# deny_commands -> else
+# check -> if
+
+example:
+  modern: # Commands
+    if: # remap requirements -> if
+      - if: '%vault_eco_balance_fixed% >= ${PRICE}' # remap check -> if
+    else: # remap deny_commands -> else
+      - message: '&cУ Вас не достаточно баланса!'
+      - set_item_to_layer: '{clicked_slot} 0 not_enough_money'
+  legacy: # Commands
+    requirements:
+      - check: '%vault_eco_balance_fixed% >= ${PRICE}'
+    deny_commands:
+      - message: '&cУ Вас не достаточно баланса!'
+      - set_item_to_layer: '{clicked_slot} 0 not_enough_money'
+  legacy2:
+    requirements: # алиас req
+      check: # если условие окажется ложным, то проверка остальных условий прервётся
+        type: math
+        expression: '100 + 100 == 10 * (5 * 4)'
+        deny_commands: [ ] # во всех проверках тоже можно указывать команды
+        commands: [ ]
+    deny_commands: [ ] # если хотя бы одно из условий окажется ложным
+legacy_test:
+  on_left_click:
+    requirements:
+      - check: '{playing} == true'
+        commands: 'do {playing}'
+        deny_commands: 'else {playing}'
+    commands: 'do on_left_click'
+    deny_commands: 'else on_left_click'
+  on_reght_click:
+    requirements:
+      check:
+        type: math
+        expression: '100 + 100 == 10 * (5 * 4)'
+        deny_commands: [ ]
+        commands: [ ]
+      check-1:
+        type: string equals
+        input: 'str'
+        output: 'str'
+        commands:
+          - '[MESSAGE] str == str'
+          - '[BREAK]'
+    deny_commands: [ ]
+  on_reght_click2:
+    requirements: # алиас req
+      check: # если условие окажется ложным, то проверка остальных условий прервётся
+        type: math
+        expression: '100 + 100 == 10 * (5 * 4)'
+        deny_commands: [ ] # во всех проверках тоже можно указывать команды
+        commands: [ ]
+      check-1:
+        type: string equals
+        input: 'str'
+        output: 'str'
+        commands:
+          - '[MESSAGE] str == str'
+          - '[BREAK]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
+          - '[CLOSE]' # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена
+      check-2:
+        type: string equals ignorecase
+        input: 'str'
+        output: 'STR'
+      check-3:
+        type: string contains
+        input: 'str_str_str'
+        output: 'str'
+      check-4:
+        type: regex matches
+        regex: '^(str)\d+'
+        input: 'str88ing'
+      check-5:
+        type: has permission
+        permission: 'admin.use'
+      # Здесь можно выполнить команды в зависимости от результатов условий
+      deny_commands: [ ] # если хотя бы одно из условий окажется ложным
+
+
+
 
 # new
 # potion: https://jd.papermc.io/paper/1.21.8/org/bukkit/potion/PotionType.html

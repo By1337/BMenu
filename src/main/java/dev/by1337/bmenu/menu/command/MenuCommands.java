@@ -385,7 +385,7 @@ public class MenuCommands {
                             if (set == null) {
                                 throw new CommandError("commands_list не определён в конфиге!");
                             }
-                    set.run(v, v.menu);
+                    set.test(v, v.menu);
                         }
                 )
         );
@@ -398,7 +398,7 @@ public class MenuCommands {
                             if (set == null) {
                                 throw new CommandError("В commands_list не пределён набор команд {}", name);
                             }
-                    set.run(v, v.menu);
+                    set.test(v, v.menu);
                         }
                 )
         );

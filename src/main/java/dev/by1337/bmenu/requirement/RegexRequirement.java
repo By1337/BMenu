@@ -1,5 +1,6 @@
 package dev.by1337.bmenu.requirement;
 
+import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
@@ -23,7 +24,7 @@ public class RegexRequirement implements Requirement {
     }
 
     @Override
-    public boolean test(Menu ignored, PlaceholderApplier placeholders) {
+    public boolean test(ExecuteContext ignored, PlaceholderApplier placeholders) {
         Matcher m = pattern.matcher(placeholders.setPlaceholders(input));
         return not != m.find();
     }
@@ -31,7 +32,7 @@ public class RegexRequirement implements Requirement {
     @Override
     public @Nullable Requirement compile() {
         if (input.contains("{") || input.contains("%")) return null;
-        return test(null, s -> s) ? TRUE : FALSE;
+        return test((ExecuteContext)null, s -> s) ? TRUE : FALSE;
     }
 
     @Override

@@ -2,6 +2,7 @@ package dev.by1337.bmenu.menu;
 
 import dev.by1337.bmenu.MenuEvents;
 import dev.by1337.bmenu.animation.Animator;
+import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.bmenu.inventory.BukkitInventory;
@@ -10,6 +11,7 @@ import dev.by1337.bmenu.loader.MenuLoader;
 import dev.by1337.bmenu.menu.command.MenuCommands;
 import dev.by1337.bmenu.placeholder.PlaceholderResolverList;
 import dev.by1337.bmenu.placeholder.SimplePlaceholders;
+import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.bmenu.slot.SlotContent;
 import dev.by1337.bmenu.slot.SlotFactory;
 import dev.by1337.bmenu.slot.component.MenuClickType;
@@ -255,9 +257,9 @@ public abstract class AbstractMenu implements Menu {
     }
 
     public void onEvent(String event) {
-        MenuEventHandler commandRequirements = config.eventHandlers().get(event);
+        Commands commandRequirements = config.eventHandlers().get(event);
         if (commandRequirements != null) {
-            commandRequirements.run(ExecuteContext.of(this), this);
+            commandRequirements.test(ExecuteContext.of(this), this);
         }
     }
 
