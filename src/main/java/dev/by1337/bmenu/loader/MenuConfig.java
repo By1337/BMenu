@@ -4,10 +4,8 @@ import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.command.CommandList;
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.factory.MenuCodecs;
-import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.bmenu.menu.DefaultMenu;
 import dev.by1337.bmenu.menu.Menu;
-import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.bmenu.slot.SlotBuilderSource;
 import dev.by1337.bmenu.slot.SlotContent;
 import dev.by1337.bmenu.slot.SlotFactory;
@@ -71,17 +69,17 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
         }
     }
 
-    public Menu create(Player viewer, @Nullable Menu previousMenu){
+    public Menu create(Player viewer, @Nullable Menu previousMenu) {
         return defaultMenuCreator.createMenu(this, viewer, previousMenu);
     }
 
-    public void supers(List<MenuConfig> supers, List<File> fromFiles){
+    public void supers(List<MenuConfig> supers, List<File> fromFiles) {
         this.fromFiles = fromFiles;
         Map<String, SlotFactory> items = new HashMap<>();
         for (int i = supers.size() - 1; i >= 0; i--) {
             MenuConfig superMenu = supers.get(i);
             items.putAll(superMenu.idToItems);
-            if (superMenu.id != null){
+            if (superMenu.id != null) {
                 supersId.add(superMenu.id);
             }
             this.onlyOpenFrom.addAll(superMenu.onlyOpenFrom);
@@ -134,11 +132,11 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
     static {
         RAW_CODEC = PipelineYamlCodecBuilder.of(MenuConfig::new)
                 .string("title", m -> m.title, (m, v) -> m.title = v)
-                .field(BukkitCodecs.namespaced_key(), "id", m -> m.id, (m, v) -> m.id = v)
-                .field(BukkitCodecs.namespaced_key(), "provider", m -> m.provider, (m, v) -> m.provider = v)
+                .field(MenuCodecs.NAMESPACED_KEY, "id", m -> m.id, (m, v) -> m.id = v)
+                .field(MenuCodecs.NAMESPACED_KEY, "provider", m -> m.provider, (m, v) -> m.provider = v)
                 .field(BukkitCodecs.inventory_type(), "type", m -> m.invType, (m, v) -> m.invType = v)
                 .integer("size", m -> m.size, (m, v) -> m.size = v)
-                .field(BukkitCodecs.namespaced_key().listOf().asSet(), "only-open-from", m -> m.onlyOpenFrom, (m, v) -> m.onlyOpenFrom.addAll(v))
+                .field(MenuCodecs.NAMESPACED_KEY.listOf().asSet(), "only-open-from", m -> m.onlyOpenFrom, (m, v) -> m.onlyOpenFrom.addAll(v))
                 .field(MenuCodecs.ARGS_CODEC, "args", m -> m.args, (m, v) -> m.args.putAll(v))
                 .field(YamlCodec.mapOf(YamlCodec.STRING, SlotFactory.CODEC), "items", m -> m.idToItems, (m, v) -> m.idToItems.putAll(v))
                 .field(Animator.AnimatorContext.CODEC, "animation", m -> m.animation, (m, v) -> m.animation = v)
@@ -154,9 +152,10 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
         CODEC = RAW_CODEC.build();
     }
 
-    public YamlCodec<? extends MenuConfig> codec(){
+    public YamlCodec<? extends MenuConfig> codec() {
         return CODEC;
     }
+
     public void dump(Path toFolder) {
         dump(toFolder, getSaveName());
     }
@@ -168,7 +167,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
             }
 
             // noinspection all
-            Files.writeString(toFolder.resolve(name + ".yml"), ((YamlCodec)codec()).encode(this).asYamlMap().result().saveToString());
+            Files.writeString(toFolder.resolve(name + ".yml"), ((YamlCodec) codec()).encode(this).asYamlMap().result().saveToString());
 
             int x = 0;
             for (MenuConfig superMenu : supers) {

@@ -35,6 +35,7 @@ public class RegistryLike<T extends Keyed> implements Iterable<T> {
     }
 
     public @Nullable T get(String s) {
+        s = s.toLowerCase();
         if (s.contains(":")) {
             var key = NamespacedKey.fromString(s);
             if (key != null)

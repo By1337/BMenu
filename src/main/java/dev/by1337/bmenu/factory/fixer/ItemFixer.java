@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class ItemFixer {
-    private static final List<String> ALL_ITEM_FLAGS = Arrays.stream(ItemFlag.values()).map(Enum::name).toList();
     private static final YamlValue REPLACE_TICKING = OnTickComponent.CODEC.encode(OnTickComponent.DEFAULT);
     private static final Logger log = LoggerFactory.getLogger("BMenu");
     private static final String FIXER = "$" + ItemFixer.class.getName().replace(".", "_");
