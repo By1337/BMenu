@@ -1,7 +1,5 @@
 package dev.by1337.bmenu.io;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -10,8 +8,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-@ApiStatus.Experimental
-@ApiStatus.Internal
 public class FileWatcher implements Closeable {
     private final File configPath;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();

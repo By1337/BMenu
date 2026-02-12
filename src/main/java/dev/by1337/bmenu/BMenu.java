@@ -12,7 +12,6 @@ import dev.by1337.cmd.Command;
 import dev.by1337.cmd.argument.ArgumentStrings;
 import dev.by1337.core.command.bcmd.CommandError;
 import dev.by1337.core.command.bcmd.CommandWrapper;
-import dev.by1337.core.command.bcmd.argument.ArgumentDynamicRegistry;
 import dev.by1337.core.command.bcmd.argument.ArgumentPlayers;
 import dev.by1337.core.command.bcmd.requires.RequiresPermission;
 import dev.by1337.core.util.RepositoryUtil;
@@ -54,7 +53,8 @@ public class BMenu extends JavaPlugin {
         if (!new File(getDataFolder(), "menu").exists()) {
             ResourceUtil.saveIfNotExist("menu/animation-54.yml", this);
             ResourceUtil.saveIfNotExist("menu/example-seller.yml", this);
-            ResourceUtil.saveIfNotExist("menu-shem.yml", this);
+            //   ResourceUtil.saveIfNotExist("menu-shem.yml", this);
+            ResourceUtil.saveIfNotExist("reference.yml", this);
             ResourceUtil.saveIfNotExist("menu/include-example/confirm.yml", this);
             ResourceUtil.saveIfNotExist("menu/include-example/seller.yml", this);
             ResourceUtil.saveIfNotExist("menu/random-colors/rand-colors-menu.yml", this);
@@ -63,8 +63,8 @@ public class BMenu extends JavaPlugin {
         config = ResourceUtil.load("config.yml", this);
         loader = new MenuLoader(
                 new File(getDataFolder(), "menu"),
-                this
-                //, config.get("hot-reload").asBool(false) // todo?
+                this,
+                config.get("hot-reload").asBool(false)
         );
         loader.codecRegistry().register("bmenu:default", MenuConfig.CODEC);
         // writeSchemas(this); //todo пока не работает(

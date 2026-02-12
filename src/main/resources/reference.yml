@@ -63,20 +63,20 @@ clicks:
 commands-list:
   example-1:
     weight: 1.0 # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND]
-    commands:
+    commands: # примеры команд в clicks
       - '&7Это команда из example-1'
   example-2:
     weight: 1.0
-    commands:
+    commands: # примеры команд в clicks
       - '&7Это команда из example-1'
 
 # Меню ивенты
 menu-events:
-  on_open:
+  on_open: # примеры команд в clicks
     - 'Меню открыто!'
-  on_reopen:
+  on_reopen: # примеры команд в clicks
     - 'Меню открыто заново!'
-  on_close:
+  on_close: # примеры команд в clicks
     - 'Меню закрыто!'
 
 
