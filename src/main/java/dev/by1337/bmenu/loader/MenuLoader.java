@@ -59,10 +59,12 @@ public class MenuLoader implements Listener {
     public void enable(){
         startTicker();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        menus.clear();
         loadMenus();
     }
     public void reload(){
         closeAllOpenMenus();
+        menus.clear();
         loadMenus();
     }
 
@@ -74,7 +76,6 @@ public class MenuLoader implements Listener {
     }
 
     public void loadMenus() {
-        menus.clear();
         recursiveLoad(homeDir);
     }
 

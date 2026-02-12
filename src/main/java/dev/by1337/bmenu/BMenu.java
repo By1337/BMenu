@@ -1,6 +1,7 @@
 package dev.by1337.bmenu;
 
 
+import dev.by1337.bmenu.command.argument.ArgumentMenuConfig;
 import dev.by1337.bmenu.command.menu.OpenCommands;
 import dev.by1337.bmenu.hook.BungeeCordMessageSender;
 import dev.by1337.bmenu.hook.Metrics;
@@ -110,10 +111,9 @@ public class BMenu extends JavaPlugin {
                 )
                 .sub(new Command<CommandSender>("open")
                         .requires(new RequiresPermission<>("bmenu.open"))
-                        .argument(new ArgumentDynamicRegistry<>("$menu", () -> loader.menus()))
+                        .argument(new ArgumentMenuConfig<>("$menu", loader))
                         .argument(new ArgumentPlayers<>("$player"))
                         .argument(new ArgumentStrings<>("$custom"))
-                        //  .argument(new MenuArgumentList("$custom", openCommands))
                         .executor((sender, args) -> {
                             MenuConfig menu = (MenuConfig) args.getOrThrow("$menu", "Use /bmenu open <menu> <player>");
                             List<Player> players = (List<Player>) args.get("$player");
@@ -155,7 +155,7 @@ public class BMenu extends JavaPlugin {
                         .requires(new RequiresPermission<>("bmenu.dump"))
                         .sub(new Command<CommandSender>("menu")
                                 .requires(new RequiresPermission<>("bmenu.dump.menu"))
-                                .argument(new ArgumentDynamicRegistry<>("menu", () -> loader.menus()))
+                                .argument(new ArgumentMenuConfig<>("menu", loader))
                                 .executor((sender, args) -> {
                                     MenuConfig config = (MenuConfig) args.getOrThrow("menu", "Use /bmenu dump menu <menu>");
 

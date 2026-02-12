@@ -185,17 +185,15 @@ items-custom-section: # schema support
     lore: '&7one line lore'
 
   test2:
+    slot: 10
     oneOf:
-      - slot: 10
-        material: gold_nugget
+      - material: gold_nugget
         name: '&cУ Вас меньше 100 монет'
         on_view: '%vault_eco_balance_fixed% < 100'
-      - slot: 10
-        material: gold_ingot
+      - material: gold_ingot
         name: '&cУ Вас меньше 1000 монет'
         on_view: '%vault_eco_balance_fixed% < 1000'
-      - slot: 10
-        material: gold_block
+      - material: gold_block
         name: '&cУ Вас больше 1000 монет'
 
   test:
@@ -233,7 +231,44 @@ test2:
       name: '&cУ Вас больше 1000 монет'
 
 
+clicks:
+  on_click:
+    - 'msg' # можно указывать сразу команду
+    - if: '100 == 100' # условие
+      do: # если условие верно, то выполнятся эти команды (ранее commands)
+        - '100 == 100'
+      else: # если условие ложно, то выполнятся эти команды (ранее deny_commands)
+        - '100 != 100'
+    - if: '%vault_eco_balance% > 1000'
+      do:
+        console: 'eco take %player_name% 1000'
+    - if: '99 == 99'
+      do:
+        if: '88 == 88' # можно указывать if внутри других if
+        do: 'Вложенный if'
+  on_left_click:
+    - oneOf: # oneOf команды, это команды которые останавливаются на первом успешном if
+        - if: '%vault_eco_balance% < 1000'
+          do: 'У Вас не достаточно монет!'
+        - if: '%player_name% == _By1337_'
+          do: 'Вы не _By1337_'
+        - do: # просто do без условия
+            - 'Вы _By1337_ с 1000 монет!'
+  on_view: # в on_view тоже можно использовать if
+    - if: '%vault_eco_balance% > 1000'
+      else: 'Ты слишком бедный, чтобы видеть этот предмет('
+  on_right_click:
+    - if-all: # можно объединить несколько условий
+        - '%vault_eco_balance% > 1000'
+        - '%player_name% == _By1337%'
+      do: 'Все условия верны'
+    - if-one:
+        - '%vault_eco_balance% > 1000'
+        - '100 < -1'
+      do: 'Как минимум одно условие верно!'
+
 items:
+
 
   shulker:
     slot: 54

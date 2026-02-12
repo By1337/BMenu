@@ -1,4 +1,6 @@
 ---
+# плейсхолдеры меню {menu_id}, {has_back_menu}, {clicked_slot}
+
 extends:
   - ./file.yml # путь относительно текущей папки
   - ../file.yml # путь относительно папки на уровень выше
@@ -18,16 +20,41 @@ size: 27
 title: '&7Menu title'
 
 ---
-commands:
-  - if: '100 == 100'
-    do:
-      - console: 'say 100 == 100'
-    else:
-      - console: 'say wtf?'
-  - if:
-      - '100 == 100'
-      - '200 == 200'
-    do: '[message] ok'
+clicks:
+  on_click:
+    - 'msg' # можно указывать сразу команду
+    - if: '100 == 100' # условие
+      do: # если условие верно, то выполнятся эти команды (ранее commands)
+        - '100 == 100'
+      else: # если условие ложно, то выполнятся эти команды (ранее deny_commands)
+        - '100 != 100'
+    - if: '%vault_eco_balance% > 1000'
+      do:
+        console: 'eco take %player_name% 1000'
+    - if: '99 == 99'
+      do:
+        if: '88 == 88' # можно указывать if внутри других if
+        do: 'Вложенный if'
+  on_left_click:
+    - oneOf: # oneOf команды, это команды которые останавливаются на первом успешном if
+        - if: '%vault_eco_balance% < 1000'
+          do: 'У Вас не достаточно монет!'
+        - if: '%player_name% == _By1337_'
+          do: 'Вы не _By1337_'
+        - do: # просто do без условия
+            - 'Вы _By1337_ с 1000 монет!'
+  on_view: # в on_view тоже можно использовать if
+    - if: '%vault_eco_balance% > 1000'
+      else: 'Ты слишком бедный, чтобы видеть этот предмет('
+  on_right_click:
+    - if-all: # можно объединить несколько условий
+        - '%vault_eco_balance% > 1000'
+        - '%player_name% == _By1337%'
+      do: 'Все условия верны'
+    - if-one:
+        - '%vault_eco_balance% > 1000'
+        - '100 < -1'
+      do: 'Как минимум одно условие верно!'
 ---
 
 # [run] <имя набора>
@@ -36,78 +63,42 @@ commands:
 commands-list:
   example-1:
     weight: 1.0 # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND]
-    commands:  #*commands
+    commands:
       - '&7Это команда из example-1'
   example-2:
     weight: 1.0
-    commands: #*commands
+    commands:
       - '&7Это команда из example-1'
 
 # Меню ивенты
 menu-events:
-  on_open: #*commands
+  on_open:
     - 'Меню открыто!'
-  on_reopen: #*commands
+  on_reopen:
     - 'Меню открыто заново!'
-  on_close: #*commands
+  on_close:
     - 'Меню закрыто!'
 
 
-
-# ЗВЁЗДОЧКА В ИМЕНИ ПАРАМЕТРА ПРОСТО ЧТОБЫ YAML НЕ РУГАЛСЯ
-# НАПРИМЕР slot*: 10 В РЕАЛЬНОМ КОНФИГЕ ДОЛЖНО БЫТЬ ПРОСТО slot: 10
 items:
   itemID:
-    material: <material> # или basehead-<value> или плейсхолдер
-    name: "Имя предмета"
+    # также все параметры из https://github.com/By1337/ConfigurableItems/blob/master/src/main/resources/cfg_items/reference.yml
     # слоты могут быть не указаны
     # если указать слоты то этот предмет установится при инициализации меню
+    # noinspection all
     slot: 10
-    slot*: # звёздочка в имени параметра просто чтобы yaml не ругался
+    # noinspection all
+    slot:
       - '10'
       - '11'
       - '12-20'
-    slot*1: 10-15,20-25,53
+    # noinspection all
+    slot: 10-15,20-25,53
     amount: 1 # или плейсхолдер
-    lore: [ ] # описание
-    item_flags: [ ] # все флаги https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/inventory/ItemFlag.html
-    all_flags: true # включает все флаги
-    potion_contents:
-      glowing: 10 10
-      slow_falling: <duration> <amplifier>
-    potion: strong_slowness # https://jd.papermc.io/paper/1.21.8/org/bukkit/potion/PotionType.html
-    color: '#aarrggbb' # для зелий и кожаной брони. Также можно указать без alpha канала #rrggbb (alpha работает с 1.19.4)
-    enchantments:
-      protection: 1
-    unbreakable: true
-    container:
-      0:
-        material: stone
-      1:
-        material: dirt
-    model_data: 0
-    # с 1.21.5 можно указывать больше параметров в model_data
-    model_data*:
-      floats:
-        - 1.0
-      flags:
-        - true
-      strings:
-        - 'str'
-      colors:
-        - '#rrggbb'
-
-    trim: # 1.19.4+
-      material: quartz
-      pattern: sentry
-    hide_tooltip: false # 1.20.5+
-    max_stack_size: 64 # 1.20.5+
-    enchantment_glint_override: true # 1.20.5+
-    glider: true # 1.21.3+
-    damage: 10
     #priority: 0 # Как в DeluxeMenus работает, по сути устарел заменён на oneOf
-    oneOf: #выбирает один из вариантов ниже, проверяет условия сверху вниз.
+    oneOf: # выбирает один из вариантов ниже, проверяет условия сверху вниз.
       - material: diamond
+        # здесь нельзя указывать local_args, priority, slot, on_tick, tick_speed, oneOf
         on_view: '100 == 100'
       - material: gold_block
 
@@ -123,15 +114,20 @@ items:
       lParam_2: 'value'
       lParam_3: 'value'
     # Условия видимости предмета
+    # noinspection all
     on_view: '100 > 100' # в одну строку
-    on_view*: # или несколько
+    # noinspection all
+    on_view: # или несколько
       - '100 == 100'
       - '90 - 90 == 0'
-    on_left_click: #*commands # обработка клика #*commands
+    # noinspection all
+    on_view: # или с if внутри
+      - if: '100 == 100'
+        do: 'msg'
+    on_left_click: # обработка клика
       - if: '100 == 100'
         do:
           - console: op %player_name%
-
     tick_speed: 20 # как часто будет вызываться on_tick в тиках.
     on_tick: # Это аналогично блоку on_click но on_tick вызывается автоматически каждые tick_speed тиков сервера.
       - if: '{tick} % 3 == 0'
@@ -139,11 +135,11 @@ items:
         else: '[update]'
 
 ---
-# rebuild_slots copy_from_previous_menu rebuild reopen refresh
 # Все команды
-# Аргумент в начале которого ? не обязательный
+# Аргумент в начале которого ? не обязательный.
 # Команды могут быть записаны так
 # message: '&aMsg'
+# или
 # '[message] &aMsg'
 # Если команда без аргументов то пишется так close: '' или '[close]'
 commands:
@@ -189,9 +185,11 @@ commands:
   - set_animation: '<animation>' # устанавливает анимацию из animations
   - animation_tick: '' # принудительно вызывает тик анимации
   - animation_force_end: '' # моментально завершает анимацию
-  ### Аргументы меню
+  ### Параметры меню
   - set_param: '<arg> <value>' # меняет значения в args
   - import_params: '<item>' # копирует args из предмета в args меню
+  ### Параметры предмета
+  - set_local: <name> <value> # меняет параметры предмета из local_args
   ### Выполнение команд меню
   - run: '<id>' # выполняет список команд из commands-list
   - run_rand: '' # выполняет случайных список команд из commands-list

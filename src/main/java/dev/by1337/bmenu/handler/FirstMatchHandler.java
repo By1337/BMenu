@@ -21,7 +21,7 @@ public class FirstMatchHandler implements MenuEventHandler {
         for (ConditionalHandler block : blocks) {
             if (block.test(ctx, placeholders)) return true;
         }
-        return true;
+        return false;
     }
 
     @Override

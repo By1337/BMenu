@@ -16,6 +16,7 @@ public class RegistryLike<T extends Keyed> implements Iterable<T> {
     private final Map<NamespacedKey, T> key2value = new HashMap<>();
     private final Map<String, List<T>> path2Value = new HashMap<>();
     private final Map<T, NamespacedKey> value2Key = new IdentityHashMap<>();
+    private long lastMutatedTimestamp;
 
     public void register(T value) {
         NamespacedKey key = value.getKey();
@@ -30,6 +31,7 @@ public class RegistryLike<T extends Keyed> implements Iterable<T> {
         key2value.put(key, value);
         value2Key.put(value, key);
         path2Value.computeIfAbsent(key.getKey(), k -> new ArrayList<>()).add(value);
+        lastMutatedTimestamp = System.currentTimeMillis();
     }
 
     public @Nullable T get(String s) {
@@ -46,6 +48,7 @@ public class RegistryLike<T extends Keyed> implements Iterable<T> {
         key2value.clear();
         value2Key.clear();
         path2Value.clear();
+        lastMutatedTimestamp = System.currentTimeMillis();
     }
     public Stream<T> stream() {
         return key2value.values().stream();
@@ -62,5 +65,9 @@ public class RegistryLike<T extends Keyed> implements Iterable<T> {
    // @Override
     public @Nullable T get(@NotNull NamespacedKey namespacedKey) {
         return key2value.get(namespacedKey);
+    }
+
+    public long lastMutatedTimestamp() {
+        return lastMutatedTimestamp;
     }
 }

@@ -252,7 +252,7 @@ items:
         - check: 'str == str'
       # Здесь можно указываются команды в зависимости от результатов проверки
       deny_commands: [ ]
-      commands: [ ]
+      commands: []
 
     tick_speed: 20 # как часто будет вызываться on_tick в тиках.
     on_tick: # Это аналогично блоку on_click но on_tick вызывается автоматически каждые tick_speed тиков сервера.
