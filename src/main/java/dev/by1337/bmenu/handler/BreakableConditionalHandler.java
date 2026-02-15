@@ -45,9 +45,9 @@ public class BreakableConditionalHandler implements MenuEventHandler {
         for (Requirement requirement : handlers) {
             try {
                 if (!requirement.test(ctx, placeholders)) {
+                    result = false;
                     if (requirement instanceof ConditionalHandler c1){
                         Commands c = c1.elseCommands();
-                        result = false;
                         if (c.isHasBreak()) {
                             break;
                         }

@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class MenuConfig implements SlotBuilderSource, Keyed {
+    private static final int DEFAULT_CLICK_COOLDOWN = Integer.getInteger("bmenu.click.cooldown", 100);
     public static final PipelineYamlCodecBuilder<MenuConfig> RAW_CODEC;
     public static final YamlCodec<MenuConfig> CODEC;
 
@@ -48,7 +49,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
     private final Map<String, Animator.AnimatorContext> animations = new HashMap<>();
     private CommandList commandList = new CommandList(new HashMap<>());
     private final Map<String, Commands> eventHandlers = new HashMap<>();
-    private long clickCooldown = 100;
+    private long clickCooldown = DEFAULT_CLICK_COOLDOWN;
 
     private Object data;
     private MenuLoader loader;

@@ -36,15 +36,13 @@ public class Commands implements MenuEventHandler {
             return S2OBJET_MAP.decode(yaml).flatMap(map -> {
                 List<MenuEventHandler> handlers = new ArrayList<>();
                 StringBuilder err = new StringBuilder();
-                if (map.containsKey("requirements")){
+                if (map.containsKey("requirements")) {
                     tryDecode(yaml, BreakableConditionalHandler.CODEC, err, handlers::add);
-                }
-                if (map.containsKey("oneOf")) {
+                } else if (map.containsKey("oneOf")) {
                     tryDecode(map.get("oneOf"), FirstMatchHandler.CODEC, err, handlers::add);
-                }
-                if (
+                } else if (
                         map.containsKey("do") ||
-                        map.containsKey("else")
+                                map.containsKey("else")
                 ) {
                     tryDecode(yaml, ConditionalHandler.CODEC, err, handlers::add);
                 }
@@ -53,13 +51,13 @@ public class Commands implements MenuEventHandler {
                 for (String cmd : map.keySet()) {
                     if (
                             cmd.startsWith("$") ||
-                            cmd.startsWith("if") ||
-                            cmd.equals("oneOf") ||
-                            cmd.equals("requirements") ||
-                            cmd.equals("commands") ||
-                            cmd.equals("deny_commands") ||
-                            cmd.equals("do") ||
-                            cmd.equals("else")
+                                    cmd.startsWith("if") ||
+                                    cmd.equals("oneOf") ||
+                                    cmd.equals("requirements") ||
+                                    cmd.equals("commands") ||
+                                    cmd.equals("deny_commands") ||
+                                    cmd.equals("do") ||
+                                    cmd.equals("else")
                     ) continue;
                     buffer.append("[").append(cmd).append("]");
                     var value = map.get(cmd).decode(MULTI_LINE_STRING).getOrThrow();
@@ -97,7 +95,7 @@ public class Commands implements MenuEventHandler {
             for (MenuEventHandler command : commands.commands) {
                 list.add(command.encode().getRaw());
             }
-            if (commands.hasBreak){
+            if (commands.hasBreak) {
                 list.add("[break]");
             }
             return YamlValue.wrap(list);

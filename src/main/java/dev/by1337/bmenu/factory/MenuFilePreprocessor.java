@@ -28,8 +28,8 @@ public class MenuFilePreprocessor {
                 if (line.startsWith("#")) continue;
                 if (line.trim().startsWith("include:")) {
                     StringBuilder include = new StringBuilder(line);
-                    boolean closed = false;
-                    while (iterator.hasNext()) {
+                    boolean closed = line.contains("]");
+                    while (iterator.hasNext() && !closed) {
                         line = iterator.next();
                         include.append(line);
                         if (line.contains("]")) {

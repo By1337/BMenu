@@ -234,8 +234,8 @@ public class MenuCommands {
                         .argument(new ArgumentDouble<>("volume"))
                         .argument(new ArgumentDouble<>("pitch"))
                         .executor((v, args) -> {
-                                    float volume = ((Double) args.getOrDefault("volume", 1F)).floatValue();
-                                    float pitch = ((Double) args.getOrDefault("pitch", 1F)).floatValue();
+                                    float volume = ((Number) args.getOrDefault("volume", 1F)).floatValue();
+                                    float pitch = ((Number) args.getOrDefault("pitch", 1F)).floatValue();
                                     Sound sound = (Sound) args.getOrThrow("sound", "use [sound] <sound> <?volume> <?pitch>");
                                     v.playSound(v.getLocation(), sound, volume, pitch);
                                 }
@@ -453,7 +453,7 @@ public class MenuCommands {
                 .aliases("[givemoney]")
                 .argument(new ArgumentDouble<>("count"))
                 .executor((v, args) -> {
-                            Double count = (Double) args.getOrThrow("count", "Use: [givemoney] <count>");
+                            Double count = ((Number) args.getOrThrow("count", "Use: [givemoney] <count>")).doubleValue();
                             if (!VaultHook.get().isAvailable()) {
                                 throw new CommandError("Economy not defined");
                             }
@@ -465,7 +465,7 @@ public class MenuCommands {
                 .aliases("[takemoney]")
                 .argument(new ArgumentDouble<>("count"))
                 .executor((v, args) -> {
-                            Double count = (Double) args.getOrThrow("count", "Use: [takemoney] <count>");
+                            Double count = ((Number) args.getOrThrow("count", "Use: [takemoney] <count>")).doubleValue();
                             if (!VaultHook.get().isAvailable()) {
                                 throw new CommandError("Economy not defined");
                             }

@@ -137,13 +137,12 @@ public abstract class AbstractMenu implements Menu {
             animator = config.animation().createAnimator();
         }
         layers.clear();
-
+        if (animator != null && !animator.isEnd()) {
+            animator.tick(layers.getAnimationLayer(), this);
+        }
         onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
         if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventoryLike.getInventory())) {
             return;
-        }
-        if (animator != null && !animator.isEnd()) {
-            animator.tick(layers.getAnimationLayer(), this);
         }
         generate0();
     }
