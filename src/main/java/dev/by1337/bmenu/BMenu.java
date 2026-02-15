@@ -18,16 +18,19 @@ import dev.by1337.core.util.RepositoryUtil;
 import dev.by1337.core.util.io.ResourceUtil;
 import dev.by1337.core.util.reflect.ClasspathUtil;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
+import dev.by1337.item.ItemModel;
 import dev.by1337.yaml.YamlMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -163,6 +166,55 @@ public class BMenu extends JavaPlugin {
                                     file.mkdirs();
                                     config.dump(file.toPath());
                                     sender.sendMessage(MiniMessage.deserialize("&aSaved to " + file.getPath()));
+                                })
+                        )
+                        .sub(new Command<CommandSender>("item_model")
+                                .requires(new RequiresPermission<>("bmenu.dump.item_model"))
+                                .requires(sender -> sender instanceof Player)
+                                .executor((sender, args) -> {
+                                    Player player = (Player) sender;
+                                    ItemStack itemStack = player.getInventory().getItemInMainHand();
+                                    //noinspection all
+                                    if (itemStack == null || itemStack.getType().isAir()) {
+                                        player.sendMessage(Component.text("У Вас в руке должен быть предмет!"));
+                                        return;
+                                    }
+                                    ItemModel model = ItemModel.fromItemStack(itemStack);
+                                    File dumps = new File(getDataFolder(), "item_models.yml");
+                                    YamlMap map;
+                                    if (dumps.exists()) {
+                                        try {
+                                            map = YamlMap.load(dumps);
+                                        } catch (Exception e) {
+                                            map = new YamlMap();
+                                            log.error("Failed to load item_models.yml", e);
+                                            try {
+                                                int x = 0;
+                                                File moveTo;
+                                                do {
+                                                    moveTo = new File(getDataFolder(), "item_models-" + x + ".yml");
+                                                    x++;
+                                                } while (moveTo.exists());
+                                                Files.move(
+                                                        dumps.toPath(),
+                                                        moveTo.toPath()
+                                                );
+                                            } catch (Exception ex) {
+                                                throw new RuntimeException(ex);
+                                            }
+                                        }
+                                    }else {
+                                        map = new YamlMap();
+                                    }
+                                    String uid = Long.toString(System.currentTimeMillis());
+                                    map.set("items." + uid, model, ItemModel.CODEC);
+                                    String result = map.saveToString();
+                                    try {
+                                        Files.writeString(dumps.toPath(), result);
+                                    } catch (Exception ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                    player.sendMessage(Component.text("Saved to item_models.yml items." + uid));
                                 })
                         )
                 );
