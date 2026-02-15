@@ -27,7 +27,6 @@ public final class SlotFactory implements Comparable<SlotFactory> {
 
 
     public SlotFactory() {
-
     }
 
     @Nullable

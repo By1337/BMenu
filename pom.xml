@@ -124,13 +124,6 @@
         </dependency>
 
         <dependency>
-            <groupId>dev.by1337.item</groupId>
-            <artifactId>ConfigurableItems</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <groupId>dev.by1337.core</groupId>
             <artifactId>BLibV2</artifactId>
             <version>1.4</version>

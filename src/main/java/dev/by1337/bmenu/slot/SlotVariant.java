@@ -12,13 +12,14 @@ import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class SlotVariant {
 
-    public static final YamlCodec<SlotVariant> CODEC = YamlCodec.recursive(codec -> PipelineYamlCodecBuilder.of(SlotVariant::new)
+    public static final YamlCodec<SlotVariant> CODEC = YamlCodec.<SlotVariant>recursive(codec -> PipelineYamlCodecBuilder.of(SlotVariant::new)
             .field(ItemModel.CODEC, null, v -> v.itemModel, (h, v) -> h.itemModel = v)
             .field(OnViewComponent.CODEC, "on_view", v -> v.onViewComponent, (h, v) -> h.onViewComponent = v)
             .field(ClickMapComponent.CODEC, null, v -> v.clicks, (h, v) -> h.clicks = v)
@@ -26,7 +27,7 @@ public class SlotVariant {
             .integer("tick_speed", v -> v.tickSpeed, (h, v) -> h.tickSpeed = v)
             .field(codec.schema(SchemaTypes.ANY).listOf(), "oneOf", v -> v.variants, (h, v) -> h.variants = v)
             .build()
-    );
+    ).map(SlotVariant::postDecode, v -> v);
 
     private ItemModel itemModel = ItemModel.AIR;
     private @Nullable OnViewComponent onViewComponent;
@@ -36,6 +37,16 @@ public class SlotVariant {
     private int tickSpeed = 20;
 
     public SlotVariant() {
+    }
+
+    @ApiStatus.Internal
+    private SlotVariant postDecode(){
+        if (variants != null){
+            for (SlotVariant variant : variants) {
+                variant.itemModel = variant.itemModel.setDefaults(itemModel);
+            }
+        }
+        return this;
     }
 
     private SlotVariant copy(){

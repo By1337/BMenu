@@ -30,9 +30,10 @@ on_right_click: &buy-32
 
 items-default:
   buyer-item2: &item
+    # все предметы внутри oneOf унаследуют параметр material, список всех параметров которые наследуются здесь https://github.com/By1337/ConfigurableItems/blob/master/src/main/resources/cfg_items/reference.yml
+    material: '{MATERIAL}'
     oneOf:
-      - material: '{MATERIAL}'
-        amount: '{AMOUNT}'
+      - amount: '{AMOUNT}'
         name: '&7{NAME} x{AMOUNT}'
         lore:
           - '&r '
@@ -45,8 +46,7 @@ items-default:
         on_left_click: *buy-ful
         on_right_click: *buy-32
 
-      - material: '{MATERIAL}'
-        amount: '{AMOUNT_32}'
+      - amount: '{AMOUNT_32}'
         name: '&7{NAME} x{AMOUNT_32}'
         lore:
           - '&r '
@@ -56,8 +56,7 @@ items-default:
         on_view: '%vault_eco_balance_fixed% >= {PRICE_32}'
         on_click: *buy-32
 
-      - material: '{MATERIAL}'
-        amount: 1
+      - amount: 1
         name: '&7{NAME}'
         lore:
           - '&r '
