@@ -1,0 +1,60 @@
+package dev.by1337.bmenu.placeholder;
+
+import dev.by1337.bmenu.factory.MenuCodecs;
+import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.util.map.HashMapLike;
+import dev.by1337.plc.PlaceholderResolver;
+import dev.by1337.plc.PlaceholderSyntax;
+import dev.by1337.yaml.codec.YamlCodec;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
+public class SimplePlaceholders implements PlaceholderResolver<Menu> {
+    public static final YamlCodec<SimplePlaceholders> CODEC = MenuCodecs.ARGS_CODEC
+            .map(SimplePlaceholders::new, SimplePlaceholders::asStringMap);
+
+    private final HashMapLike<String, Supplier<Object>> map;
+
+    public SimplePlaceholders(Map<String, String> map) {
+        this.map = new HashMapLike<>();
+        map.forEach((k, v) -> this.map.put(k, () -> v));
+    }
+
+    public SimplePlaceholders(HashMapLike<String, Supplier<Object>> map) {
+        this.map = map;
+    }
+
+    public SimplePlaceholders() {
+        map = new HashMapLike<>();
+    }
+
+    public SimplePlaceholders copy() {
+        return new SimplePlaceholders(map.copy());
+    }
+
+    public void set(String key, Supplier<Object> supplier) {
+        map.put(key, supplier);
+    }
+
+    @Override
+    public boolean has(String s, PlaceholderSyntax placeholderFormat) {
+        return PlaceholderSyntax.BRACKET == placeholderFormat && map.containsKey(s);
+    }
+
+    @Override
+    public @Nullable String resolve(String key, String params, @Nullable Menu ctx, PlaceholderSyntax format) {
+        if (format != PlaceholderSyntax.BRACKET) return null;
+        var v = map.get(key);
+        return v == null ? null : String.valueOf(v.get());
+    }
+
+    public Map<String, String> asStringMap() {
+        Map<String, String> map = new HashMap<>();
+        this.map.forEach((k, v) -> map.put(k, String.valueOf(v.get())));
+        return map;
+    }
+
+}

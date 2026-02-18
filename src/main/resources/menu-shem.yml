@@ -89,6 +89,9 @@ include: [
   "/file.yml",
 ]
 
+#Кд на клики в меню, по умолчанию 100мс
+click_cooldown: 100
+
 # здесь вы можете объявлять наборы команд
 # после вы можете их выполнять используя команду
 # [run] <имя набора>
@@ -153,7 +156,7 @@ only-open-from:
 # Все родительские меню также могут использовать эти переменные.
 # Все наследники этого меню могут использовать эти переменные
 # Этот параметр наследуется
-# синтаксис использования ${PARAM_1}
+# синтаксис использования {PARAM_1}
 # могут быть изменены командой [set_param]
 # Эти параметры не статичны и уникальны для каждого открытого меню, а также они существуют пока это меню открыто или находится в иерархии открытых меню
 args:
@@ -168,15 +171,12 @@ args:
 defaults:
   on_left_click_logic: &on_left_click_logic
     requirements:
-      - check: '%vault_eco_balance_fixed% >= ${PRICE}'
+      - check: '%vault_eco_balance_fixed% >= {PRICE}'
     deny_commands: '[message] &cУ Вас не достаточно баланса!'
     commands:
-      - '[console] eco take %player_name% ${PRICE}'
-      - '[console] give %player_name% ${MATERIAL} ${AMOUNT}'
-      - '[message] &aВы успешно купили ${NAME} в количестве ${AMOUNT}'
-    modern_commands:
-      - console: 'op _By1337_'
-      - die: ~
+      - console: 'eco take %player_name% {PRICE}'
+      - console: 'give %player_name% {MATERIAL} {AMOUNT}'
+      - message: '&aВы успешно купили {NAME} в количестве {AMOUNT}'
 
 
 items:
@@ -188,22 +188,20 @@ items:
     amount: 1 # или плейсхолдер
     lore: [ ] # описание
     item_flags: [ ] # все флаги https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/inventory/ItemFlag.html
-    all_flags: true # включает существующие флаги
+    all_flags: true # включает все флаги
     potion_effects:
       glowing: 10 10
       slow_falling: <duration> <amplifier>
-    color: '#aabbcc' # для зелий и кожаной брони
+    color: '#rrggbb' # для зелий и кожаной брони
     enchantments:
       protection: 1
     unbreakable: true
     model_data: 0
     damage: 10
     priority: 0
-    ticking: false # Будет ли предмет обновляться сам по себе
-    tick_speed: 20 # каждую секунду предмет будет обновляться если ticking = true
     # Если этот предмет визуально никогда не меняется — то есть
     # в имени, описании (lore), материале и количестве нет плейсхолдеров
-    # (за исключением плейсхолдеров самого предмета), и у предмета нет `view_requirement`,
+    # (за исключением плейсхолдеров самого предмета),
     # то вы можете указать `static: true`, чтобы снизить нагрузку плагина на сервер.
     # Однако плагин и сам способен определить, является ли предмет статичным.
     static: true
@@ -214,19 +212,21 @@ items:
     #   - '10'
     #   - '11'
     #   - '12-20'
-    # slot: 10-15,20-25
+    # slot: 10-15,20-25,53
 
     # аналог переменных меню, но только эти переменные видны только этому предмету
     # Также эти переменные константные.
-    # Использовать аналогично ${PARAM_1}
+    # Использовать аналогично {PARAM_1}
     args:
       PARAM_1: 'value'
       PARAM_2: 'value'
       PARAM_3: 'value'
-    view_requirement: # алиас view_req
+    # Условия видимости предмета
+    # on_view: '100 > 100' # в одну строку
+    on_view:
       # если в type перед проверкой поставить ! то проверка будет работать на оборот
       # например type: '!has permission' такая проверка сработает если игрок не имеет пермишена
-      requirements: # алиас req
+      requirements:
         - check: '100 + 100 * 100 == 15'
           commands: [ ]
           deny_commands: [ ]
@@ -247,11 +247,21 @@ items:
       # Здесь можно выполнить команды в зависимости от результатов условий
       deny_commands: [ ] # если хотя бы одно из условий окажется ложным
     on_left_click: # обработка клика
+      # requirements: 'str == str' # можно в одну строку
       requirements: # здесь можно указать условия
         - check: 'str == str'
       # Здесь можно указываются команды в зависимости от результатов проверки
       deny_commands: [ ]
-      commands: [ ]
+      commands: []
+
+    tick_speed: 20 # как часто будет вызываться on_tick в тиках.
+    on_tick: # Это аналогично блоку on_click но on_tick вызывается автоматически каждые tick_speed тиков сервера.
+      requirements:
+        - check: '{tick} % 3 == 0'
+          commands: '[message] tick!'
+      deny_commands: '[update]'
+      commands:
+        - sound: sound 1 1
 
   example:
     args:
@@ -259,13 +269,13 @@ items:
       PRICE: 10
       AMOUNT: 64
       NAME: 'камень'
-    material: ${MATERIAL}
-    amount: ${AMOUNT}
-    name: '&7${NAME} x${AMOUNT}'
+    material: '{MATERIAL}'
+    amount: '{AMOUNT}'
+    name: '&7{NAME} x{AMOUNT}'
     lore:
       - '&r '
       - '&r &7Нажмите лкм'
-      - '&r &7чтобы купить ${NAME} в количестве ${AMOUNT}'
+      - '&r &7чтобы купить {NAME} в количестве {AMOUNT}'
       - '&r '
     on_left_click:
       <<: *on_left_click_logic
@@ -371,8 +381,6 @@ animations:
 # [rebuild_slots] <slots> - пересоздаёт предметы в указанных слотах.
 # [copy_from_previous_menu] <slots from> <slots to> - скопирует предметы из предыдущего меню.
 # [set_title] <title> - меняет заголовок меню.
-# [set_item_to_layer] <slots> <layer> <item> - устанавливает предмет в указанные слоты на указанный слой.
-# [clear_layer] <layer> - очищает указанный слой
 # [rebuild] - пересоздаёт предмет выполнивший эту команду
 # [update] - обновляет предмет выполнивший эту команду
 # [update_slots] <slots> - обновляет предметы в указанных слотах

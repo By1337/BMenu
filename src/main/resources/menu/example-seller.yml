@@ -6,51 +6,73 @@ provider: default
 type: chest
 size: 54
 title: '&7Селлер'
-only-open-from: [ ]
 
-args: { }
+on_left_click: &buy-ful
+  - if: '%vault_eco_balance_fixed% >= {PRICE}'
+    do:
+      - takemoney: '{PRICE}'
+      - console: 'give %player_name% {MATERIAL} {AMOUNT}'
+      - '&aВы успешно купили {NAME}&a в количестве {AMOUNT}'
+      - update_slots: '10-43'
+    else: &no_money
+      - '&cУ Вас не достаточно баланса!'
+      - layer: '2 set not_enough_money {clicked_slot}'
+      - update_slots: '10-43'
+
+on_right_click: &buy-32
+  - if: '%vault_eco_balance_fixed% >= {PRICE_32}'
+    do:
+      - takemoney: '{PRICE_32}'
+      - console: 'give %player_name% {MATERIAL} {AMOUNT_32}'
+      - '&aВы успешно купили {NAME}&a в количестве {AMOUNT_32}'
+      - update_slots: '10-43'
+    else: *no_money
 
 items-default:
-  buyer-item: &item
-    material: ${MATERIAL}
-    static: false
-    amount: ${AMOUNT}
-    name: '&7${NAME} x${AMOUNT}'
-    lore:
-      - '&r '
-      - '&r &7Нажмите лкм'
-      - '&r &7чтобы купить ${NAME}&7 в количестве ${AMOUNT} за ${PRICE} монет'
-      - '&r &7Нажмите пкм'
-      - '&r &7чтобы купить ${NAME}&7 в количестве ${AMOUNT_32} за ${PRICE_32} монет'
-      - '&r '
-    on_left_click:
-      requirements:
-        - check: '%vault_eco_balance_fixed% >= ${PRICE}'
-      deny_commands:
-        - message: '&cУ Вас не достаточно баланса!'
-        - set_item_to_layer: '{clicked_slot} 0 not_enough_money'
-      commands:
-        - takemoney: '${PRICE}'
-        - console: 'give %player_name% ${MATERIAL} ${AMOUNT}'
-        - message: '&aВы успешно купили ${NAME}&a в количестве ${AMOUNT}'
-    on_right_click:
-      requirements:
-        - check: '%vault_eco_balance_fixed% >= ${PRICE_32}'
-      deny_commands:
-        - message: '&cУ Вас не достаточно баланса!'
-        - set_item_to_layer: '{clicked_slot} 0 not_enough_money'
-      commands:
-        - takemoney: '${PRICE_32}'
-        - console: 'give %player_name% ${MATERIAL} ${AMOUNT_32}'
-        - console: '&aВы успешно купили ${NAME}&a в количестве ${AMOUNT_32}'
+  buyer-item2: &item
+    # все предметы внутри oneOf унаследуют параметр material, список всех параметров которые наследуются здесь https://github.com/By1337/ConfigurableItems/blob/master/src/main/resources/cfg_items/reference.yml
+    material: '{MATERIAL}'
+    oneOf:
+      - amount: '{AMOUNT}'
+        name: '&7{NAME} x{AMOUNT}'
+        lore:
+          - '&r '
+          - '&r &7Нажмите лкм'
+          - '&r &7чтобы купить {NAME}&7 в количестве {AMOUNT} за {PRICE} монет'
+          - '&r &7Нажмите пкм'
+          - '&r &7чтобы купить {NAME}&7 в количестве {AMOUNT_32} за {PRICE_32} монет'
+          - '&r '
+        on_view: '%vault_eco_balance_fixed% >= {PRICE}'
+        on_left_click: *buy-ful
+        on_right_click: *buy-32
+
+      - amount: '{AMOUNT_32}'
+        name: '&7{NAME} x{AMOUNT_32}'
+        lore:
+          - '&r '
+          - '&r &7Нажмите'
+          - '&r &7чтобы купить {NAME}&7 в количестве {AMOUNT_32} за {PRICE_32} монет'
+          - '&r '
+        on_view: '%vault_eco_balance_fixed% >= {PRICE_32}'
+        on_click: *buy-32
+
+      - amount: 1
+        name: '&7{NAME}'
+        lore:
+          - '&r '
+          - '&r &cУ Вас не достаточно баланса!'
+          - '&r &7Цена за 32 {PRICE_32}'
+          - '&r &7Цена за 64 {PRICE}'
+          - '&r '
+        on_click: *no_money
 
 items:
   not_enough_money:
     material: barrier
     name: "&cУ Вас не достаточно баланса!"
     tick_speed: 25
-    on_tick:
-      commands: '[die]'
+    on_tick: '[die]'
+
   item-lapis_lazuli:
     args:
       MATERIAL: lapis_lazuli
@@ -358,19 +380,3 @@ items:
       AMOUNT_32: 32
     slot: 43
     <<: *item
-
-
-animation:
-  - tick: 0
-    opcodes:
-      - title: '&7С'
-  - opcodes:
-      - title: '&7Се'
-  - opcodes:
-      - title: '&7Сел'
-  - opcodes:
-      - title: '&7Селл'
-  - opcodes:
-      - title: '&7Селле'
-  - opcodes:
-      - title: '&7Селлер'

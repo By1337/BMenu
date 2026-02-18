@@ -1,0 +1,288 @@
+extends:
+  - ./file.yml # путь относительно текущей папки
+  - ../file.yml # путь относительно папки на уровень выше
+  - /file.yml  # путь относительно корневой папки с меню
+
+include: [
+  "./file.yml",
+  "../file.yml",
+  "/file.yml",
+]
+modern_commands: &modern_commands
+  - if: '100 == 100'
+    do: 'do'
+    else: "else"
+  - console: 'say okak'
+
+  - if: '{rand_bool} == true'
+    do:
+      if: '{rand_bool} == true'
+      do:
+        if: '{rand_bool} == true'
+        do: '<gold>4'
+        else: '<black>3'
+      else: '<green>2'
+    else: '<red>1'
+
+  - oneOf:
+      - if: '%bcases_keys_count_of_type_default% < 1'
+        do: '&cУ Вас не достаточно ключей!'
+      - if: '{playing} == true'
+        do:
+          - '[MESSAGE] &cКто-то уже открывает этот кейс!'
+          - '[CLOSE]'
+      - do:
+          - '[TAKE_KEY] default'
+          - '[PLAY] $random default'
+          - '[CLOSE]'
+
+legacy_commands: &legacy_commands
+  commands: *modern_commands
+  deny_commands: *modern_commands
+  requirements:
+    - check: '100 + 100 * 100 == 15'
+      commands: *modern_commands
+      deny_commands: *modern_commands
+    - check: '100.5 + 100.5 == 201'
+    - check: 'has super.permission' # если у игрока есть пермишен
+    - check: '!has super.permission' # если у игрока нет пермишена
+    - check: 'string has str' # строка содержит
+    - check: 'string !has str' # строка не содержит
+    - check: 'string HAS str' # строка содержит без учёта регистра
+    - check: 'string !HAS str' # строка не содержит без учёта регистра
+    - check: 'string == string' # строка равна
+    - check: 'string != string' # строка не равна
+    - check: 'nearby world 10 10 10 100' # условие что игрок находится в радиусе 100 блоков от координат 10 10 10 в мире world
+      commands:
+        - '[message] string != string'
+        - '[break]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
+        - '[close]' # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена
+
+
+click_cooldown: 100
+
+commands-list:
+  example-1:
+    weight: 1.0 # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND]
+    commands: *modern_commands #| *legacy_commands
+  example-2:
+    weight: 1.0
+    commands: *modern_commands #| *legacy_commands
+
+menu-events:
+  on_open: *modern_commands #| *legacy_commands
+  on_reopen: *modern_commands #| *legacy_commands
+  on_close: *modern_commands #| *legacy_commands
+
+id: <namespace>:<id>
+
+provider: <namespace>:<id>
+type: chest
+size: 27
+title: '&7Menu title'
+only-open-from:
+  - <namespace>:<id>
+args:
+  PARAM_1: 'value'
+  PARAM_2: 'value'
+  PARAM_3: 'value'
+
+items:
+  itemID: &self
+    lore:
+      - lore
+    name: name
+    amount: 10
+    damage: 20
+    material: stone # or basehead-<value> or player-<name/uuid>
+    # noinspection all
+    model_data: 10
+    # noinspection all
+    model_data: # 1.21.4+
+      floats: [ ]
+      flags: [ ]
+      strings: [ ]
+      colors: [ ]
+    potion: strong_slowness # https://jd.papermc.io/paper/org/bukkit/potion/PotionType.html
+    potion_contents: # https://jd.papermc.io/paper/org/bukkit/potion/PotionEffectType.html
+      type: duration amplifier
+      night_vision: 240 1
+    color: '#aarrggbb' # or #rrggbb (alpha available 1.19.4+, ignored in lower versions)
+    enchantments: # https://jd.papermc.io/paper/org/bukkit/enchantments/Enchantment.html
+      enchantment: lvl
+      infinity: 0
+    unbreakable: true
+    container:
+      slot: { }
+      0:
+        material: stone
+      # noinspection all
+      1: *self
+    item_flags: # https://jd.papermc.io/paper/org/bukkit/inventory/ItemFlag.html
+      - hide_additional_tooltip
+    all_flags: true
+    trim: # 1.19.4+
+      material: iron # https://jd.papermc.io/paper/org/bukkit/inventory/meta/trim/TrimMaterial.html
+      pattern: coast # https://jd.papermc.io/paper/org/bukkit/inventory/meta/trim/TrimPattern.html
+    hide_tooltip: true # 1.20.6+
+    enchantment_glint_override: true # 1.20.6+
+    max_stack_size: 99 # 1-99 1.20.6+
+    glider: true # 1.21.3+
+    tooltip_style: minecraft:idk # 1.21.3+
+    attributes:
+      - name: example
+        attribute: 'max_health' # https://jd.papermc.io/paper/org/bukkit/attribute/Attribute.html
+        amount: 2.0
+        operation: add_number # add_number, add_scalar, multiply_scalar_1 # https://jd.papermc.io/paper/org/bukkit/attribute/AttributeModifier.Operation.html
+        slot: body # https://jd.papermc.io/paper/org/bukkit/inventory/EquipmentSlot.html
+    priority: 0
+    # noinspection all
+    slot: 10
+    # noinspection all
+    slot:
+      - '10'
+      - '11'
+      - '12-20'
+    # noinspection all
+    slot: 10-15,20-25,53
+    local_args:
+      example: 'value'
+    args:
+      PARAM_1: 'value'
+      PARAM_2: 'value'
+      PARAM_3: 'value'
+    on_view:  *legacy_commands
+    on_left_click: *legacy_commands
+    on_right_click: *modern_commands
+    on_shift_left_click: *modern_commands
+    on_shift_right_click: *modern_commands
+    on_middle_click: *modern_commands
+    on_drop_click: *modern_commands
+    on_click: *modern_commands
+    on_number_key_0_click: *modern_commands
+    on_number_key_1_click: *modern_commands
+    on_number_key_2_click: *modern_commands
+    on_number_key_3_click: *modern_commands
+    on_number_key_4_click: *modern_commands
+    on_number_key_5_click: *modern_commands
+    on_number_key_6_click: *modern_commands
+    on_number_key_7_click: *modern_commands
+    on_number_key_8_click: *modern_commands
+    on_swap_offhand_click: *modern_commands
+    on_control_drop_click: *modern_commands
+    tick_speed: 20
+    on_tick: *modern_commands
+    oneOf:
+      - material: diamond
+      - material: gold_block
+      - *self
+
+
+# Анимация может взаимодействовать только с элементами своего слоя, однако она может перекрывать предметы первого слоя.
+animation: &anim
+  - tick: 0 # на каком тике анимации следует применить этот фрейм, если не указать, то будет на один больше, чем предыдущий
+    opcodes:
+      - fill: itemID # устанавливает предмет во все слоты меню
+      - set: itemID 13 # устанавливает предмет в указанный слот
+      - set: itemID 10-20 # устанавливает предмет в указанные слоты
+      - set: AIR 10-20 # удаляет предметы в указанных слотах
+      - set-if-empty: AIR 10-20 # устанавливает предмет только в пустые слоты
+      - remove: 10-20 # аналогично set: AIR 10-20
+      - remove-if-not-empty: 10-20 # удаляет предмет из слоя анимации если на основном слое есть предмет
+      - move: 13 14 # перемещает предмет из слота 13 в слот 14, в слот 13 устанавливается AIR
+      - move: 10-15 20-25 # перемещает предметы из слотов 10-15 в слоты 20-25
+      - move: 13++ # перемещает предмет из слота 13 в слот 14
+      - move: 13++ # перемещает предмет из слота 13 в слот 14
+      - move: 13,17 15,20 # перемещает предметы из слотов 13 и 17 в слоты 15 и 20
+      - swap: 10 11 # меняет местами предметы в слотах 10 и 11
+      - swap: 10++ # меняет местами предметы в слотах 10 и 11
+      - swap: 10-- # меняет местами предметы в слотах 10 и 9
+      - swap: 10-15 20-25 # меняет местами предметы в слотах 10-15 и 20-25
+      - copy: 10 11 # копирует предмет из слота 10 в слот 11
+      - copy: 10++ # копирует предмет из слота 10 в слот 11
+      - copy: 10-- # копирует предмет из слота 10 в слот 9
+      - copy: 10-15 20-25 # копирует предметы из слотов 10-15 в слоты 20-25
+      - copy-from-base: 10-15 20-25 # копирует предметы из основного слоя на слой анимации
+      - goto: 13 # переходит к указанному тику, позволяет зациклить анимацию
+      - sound: ui.button.click  1.0 1.0
+      - commands: *modern_commands
+      - title: title # устанавливает title меню
+      - copy-from-base: 10-10 10-10 # скопирует предметы из основного слоя на слой анимации
+      - set-if-empty: item 10-10 # установит предмет в слот только если слот пустой
+# Алиасы к опкодам
+# set -> st
+# remove -> rm
+# move -> mv
+# swap -> sw
+# copy -> cl
+# goto -> gt
+# sound -> snd
+# commands -> cmd
+# title -> ttl
+# fill -> fl
+# remove-if-not-empty -> rne
+# set-if-empty -> sie
+# copy-from-base -> cfb
+# copy-from-base -> cfb
+# set-if-empty -> sie
+animations:
+  default: *anim
+  other: *anim
+
+# rebuild_slots copy_from_previous_menu rebuild reopen refresh
+# Все команды
+# Аргумент в начале которого ? не обязательный
+# Команды могут быть записаны так
+# message: '&aMsg'
+# '[message] &aMsg'
+# Если команда без аргументов то пишется так close: '' или '[close]'
+commands:
+  ### Сообщения и вывод
+  - '&7Просто сообщение'
+  - message: '&7Тоже сообщение'
+  - sound: <sound> <?volume> <?pitch> # воспроизведёт звук
+  - title_all: '<"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>'
+  - set_title: '&7Title'
+  - title: '<"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>'
+  - action_bar_all: '<msg>'
+  - action_bar: '<msg>'
+  - broadcast: '<msg>'
+  ### Выполнение команд
+  - console: 'op %player_name%' # выполнить команду от имени сервера
+  - player: 'msg _By1337_ привет?' # выполнить команду от имени игрока
+  - chat: '/rtp' # Отправит сообщение от имени игрока, если в начале будет / то будет как команда
+  ### Навигация по меню
+  # В commands вы можете передать список команд которые необходимо выполнить в открывающейся менюшке
+  # Синтаксис [open] menu ["[message] сообщение из открытого меню", "[что-то] некст команда"]
+  - open: '<menu:id> <?commands>'
+  - close: '' # закроет меню
+  - back: '<?commands>' # вернутся в прошлое меню
+  - back_or_close: '<?commands>' # вернутся в прошлое меню если есть
+  - back_to_or_close: '<menu:id> <?commands>' # вернутся в <menu:id> если было открыто ранее
+  - back_or_open: '<menu:id> <?commands>' # вернутся в <menu:id> если было открыто иначе открыть <menu:id>
+  ### Экономика и сервер
+  - connect: '<server>' # подключает игрока к серверу
+  - givemoney: '<count>' # выдать монеты
+  - takemoney: '<count>' # снять монеты
+  ### Управление предметами
+  # <slots> - указывается как '10' или '0-10' или '0-10,30-40,50'
+  - update: '' # обновляет предмет выполнивший эту команду
+  - update_slots: '<slots>' # обновляет предметы в слотах
+  - die: '' # удаляет предмет выполнивший эту команду
+  - die_slots: '<slots>' # удаляет предметы в слотах
+  - layer: '<layer> set <item> <slots>'
+  - layer: '<layer> remove <slots>'
+  - layer: '<layer> move <layer2> <from> <to>'
+  - layer: '<layer> copy <layer2> <from> <to>'
+  - layer: '<layer> clear'
+  ### Анимации
+  - set_animation: '<animation>' # устанавливает анимацию из animations
+  - animation_tick: '' # принудительно вызывает тик анимации
+  - animation_force_end: '' # моментально завершает анимацию
+  ### Аргументы меню
+  - set_param: '<arg> <value>' # меняет значения в args
+  - import_params: '<item>' # копирует args из предмета в args меню
+  ### Выполнение команд меню
+  - run: '<id>' # выполняет список команд из commands-list
+  - run_rand: '' # выполняет случайных список команд из commands-list
+  - delay: '<delay> <cmd>' # выполнить команду с задержкой например [delay] 20 [message] &aЭто сообщение отправилось спустя 1 секунду!

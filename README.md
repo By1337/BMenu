@@ -9,7 +9,7 @@
 ```xml
 <dependencies>
     <dependency>
-        <groupId>org.by1337.bmenu</groupId>
+        <groupId>dev.by1337.bmenu</groupId>
         <artifactId>BMenu</artifactId>
         <version>1.6</version>
         <scope>provided</scope>

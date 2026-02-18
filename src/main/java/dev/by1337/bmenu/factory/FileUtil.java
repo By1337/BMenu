@@ -1,0 +1,38 @@
+package dev.by1337.bmenu.factory;
+
+import dev.by1337.bmenu.loader.MenuLoader;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class FileUtil {
+    public static List<File> findFiles(File file, MenuLoader loader, List<String> files) {
+        if (files.isEmpty()) return Collections.emptyList();
+        File fileFolder = file.getParentFile();
+        List<File> result = new ArrayList<>();
+        for (String s : files) {
+            if (s.startsWith("./")) {
+                File menu = new File(fileFolder, s.substring(2));
+                if (!menu.exists()) {
+                    throw new InvalidMenuConfigException("Invalid menu path: {}", menu.getAbsolutePath());
+                }
+                result.add(menu);
+            } else if (s.startsWith("../")) {
+                File menu = new File(fileFolder.getParent(), s.substring(3));
+                if (!menu.exists()) {
+                    throw new InvalidMenuConfigException("Invalid menu path: {}", menu.getAbsolutePath());
+                }
+                result.add(menu);
+            } else if (s.startsWith("/")) {
+                File menu = new File(loader.homeDir(), s.substring(1));
+                if (!menu.exists()) {
+                    throw new InvalidMenuConfigException("Invalid menu path: {}", menu.getAbsolutePath());
+                }
+                result.add(menu);
+            }
+        }
+        return result;
+    }
+}

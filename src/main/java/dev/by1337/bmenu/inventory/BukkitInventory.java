@@ -1,0 +1,104 @@
+package dev.by1337.bmenu.inventory;
+
+import dev.by1337.bmenu.slot.SlotContent;
+import dev.by1337.bmenu.slot.render.BukkitItemRenderer;
+import dev.by1337.bmenu.slot.render.ItemRenderer;
+import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.core.BCore;
+import dev.by1337.core.bridge.inventory.InventoryUtil;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+
+import java.util.Arrays;
+import java.util.Objects;
+
+public class BukkitInventory {
+    private static final InventoryUtil INV_UTIL = BCore.getInventoryUtil();
+    private static final ItemRenderer<Inventory> RENDERER = new BukkitItemRenderer();
+
+    private final Inventory inventory;
+    private final SlotContent[] seenItems;
+    private final SlotContent[] items;
+    private final int size;
+    private final Menu menu;
+
+    public BukkitInventory(Menu menu, int size, Component title, InventoryType type) {
+        this.inventory = createInventory(menu, size, title, type);
+        this.size = inventory.getSize();
+        this.menu = menu;
+        seenItems = new SlotContent[size];
+        items = new SlotContent[size];
+    }
+    private Inventory createInventory(InventoryHolder h, int size, Component title, InventoryType type) {
+        if (type == InventoryType.CHEST) {
+            return Bukkit.createInventory(h, size, title);
+        } else {
+            return Bukkit.createInventory(h, type, title);
+        }
+    }
+
+    public void show(Player player) {
+        if (!Objects.equals(player.getOpenInventory().getTopInventory(), inventory)) {
+            player.openInventory(inventory);
+        }
+        // Отключаем автоматическую синхронизацию инвентаря с клиентом,
+        // так как сервер может периодически отправлять обновления,
+        // что может нарушить отображение анимаций.
+        INV_UTIL.disableAutoFlush(player);
+    }
+
+    public void onClose(Player player) {
+        // Восстанавливаем автоматическую синхронизацию инвентаря с клиентом,
+        // так как пользователь закрыл кастомное меню, и ответственность за обновление
+        // инвентаря теперь возвращается серверу.
+        INV_UTIL.enableAutoFlush(player);
+    }
+
+    public void setItem(int slot, SlotContent item) {
+        items[slot] = item;
+    }
+
+    public void sync(Player player) {
+        for (int slot = 0; slot < size; slot++) {
+            SlotContent old = seenItems[slot];
+            SlotContent actual = items[slot];
+            if (actual == null) {
+                inventory.setItem(slot, null);
+                seenItems[slot] = null;
+            } else if (old != actual || actual.isDirty()) {
+                seenItems[slot] = actual;
+                RENDERER.render(
+                        inventory,
+                        slot,
+                        actual.getItemModel(),
+                        menu,
+                        menu.resolvers().and(actual).bind(menu)
+                );
+                actual.setDirty(false);
+            }
+        }
+        RENDERER.flush(inventory, menu);
+    }
+
+    public void clear() {
+        Arrays.fill(seenItems, null);
+        Arrays.fill(items, null);
+        inventory.clear();
+    }
+
+    public SlotContent[] getItems() {
+        return items;
+    }
+
+    public void setTitle(Component newTitle) {
+        INV_UTIL.sendFakeTitle(inventory, newTitle);
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+}

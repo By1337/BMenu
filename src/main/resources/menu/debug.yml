@@ -1,14 +1,119 @@
+example:
+  modern: # Commands
+    if: # remap requirements -> if
+      - if: '%vault_eco_balance_fixed% >= ${PRICE}' # remap check -> if
+    else: # remap deny_commands -> else
+      - message: '&cУ Вас не достаточно баланса!'
+      - set_item_to_layer: '{clicked_slot} 0 not_enough_money'
+  legacy: # Commands
+    requirements:
+      - check: '%vault_eco_balance_fixed% >= ${PRICE}'
+    deny_commands:
+      - message: '&cУ Вас не достаточно баланса!'
+      - set_item_to_layer: '{clicked_slot} 0 not_enough_money'
+  legacy2:
+    requirements: # алиас req
+      check: # если условие окажется ложным, то проверка остальных условий прервётся
+        type: math
+        expression: '100 + 100 == 10 * (5 * 4)'
+        deny_commands: [ ] # во всех проверках тоже можно указывать команды
+        commands: [ ]
+    deny_commands: [ ] # если хотя бы одно из условий окажется ложным
+legacy_test:
+  on_left_click:
+    requirements:
+      - check: '{playing} == true'
+        commands: 'do {playing}'
+        deny_commands: 'else {playing}'
+    commands: 'do on_left_click'
+    deny_commands: 'else on_left_click'
+  on_reght_click:
+    requirements:
+      check:
+        type: math
+        expression: '100 + 100 == 10 * (5 * 4)'
+        deny_commands: [ ]
+        commands: [ ]
+      check-1:
+        type: string equals
+        input: 'str'
+        output: 'str'
+        commands:
+          - '[MESSAGE] str == str'
+          - '[BREAK]'
+    deny_commands: [ ]
+  on_reght_click2:
+    requirements: # алиас req
+      check: # если условие окажется ложным, то проверка остальных условий прервётся
+        type: math
+        expression: '100 + 100 == 10 * (5 * 4)'
+        deny_commands: [ ] # во всех проверках тоже можно указывать команды
+        commands: [ ]
+      check-1:
+        type: string equals
+        input: 'str'
+        output: 'str'
+        commands:
+          - '[MESSAGE] str == str'
+          - '[BREAK]' # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд
+          - '[CLOSE]' # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена
+      check-2:
+        type: string equals ignorecase
+        input: 'str'
+        output: 'STR'
+      check-3:
+        type: string contains
+        input: 'str_str_str'
+        output: 'str'
+      check-4:
+        type: regex matches
+        regex: '^(str)\d+'
+        input: 'str88ing'
+      check-5:
+        type: has permission
+        permission: 'admin.use'
+      # Здесь можно выполнить команды в зависимости от результатов условий
+      deny_commands: [ ] # если хотя бы одно из условий окажется ложным
+
+
+
+
+# new
+# potion: https://jd.papermc.io/paper/1.21.8/org/bukkit/potion/PotionType.html
+
 id: debug:main
 provider: default
 type: chest
 size: 54
-title: '&7Debug Menu'
+title: "123"
 
 args:
   REBUILD_TEST: 0
   DAMAGE_TEST: 0
   TEST:
     - 122
+
+е64:
+  - oneOf:
+      - if: '%bcases_keys_count_of_type_default% < 1'
+        do: '&cУ Вас не достаточно ключей!'
+      - if: '{playing} == true'
+        do:
+          - '[MESSAGE] &cКто-то уже открывает этот кейс!'
+          - '[CLOSE]'
+      - do:
+          - '[TAKE_KEY] default'
+          - '[PLAY] $random default'
+          - '[CLOSE]'
+
+v1:
+  if: '100 == 100'
+  if-all:
+    - '100 == 100'
+    - '200 == 200'
+  if-one:
+    - '100 == 100'
+    - '200 == 100'
 
 menu-events:
   on_refresh:
@@ -20,7 +125,162 @@ items-custom-section: # schema support
     material: dirt
     lore: '&7one line lore'
 
+  test2:
+    slot: 10
+    oneOf:
+      - material: gold_nugget
+        name: '&cУ Вас меньше 100 монет'
+        on_view: '%vault_eco_balance_fixed% < 100'
+      - material: gold_ingot
+        name: '&cУ Вас меньше 1000 монет'
+        on_view: '%vault_eco_balance_fixed% < 1000'
+      - material: gold_block
+        name: '&cУ Вас больше 1000 монет'
+
+  test:
+    oneOf:
+      test:
+        slot: 10
+        material: gold_nugget
+        name: '&cУ Вас меньше 100 монет'
+        on_view:
+          requirements: '%vault_eco_balance_fixed% < 100'
+      test2:
+        slot: 10
+        material: gold_ingot
+        name: '&cУ Вас меньше 1000 монет'
+        on_view:
+          requirements:
+            - check: '%vault_eco_balance_fixed% < 1000'
+      test3:
+        slot: 10
+        material: gold_block
+        name: '&cУ Вас больше 1000 монет'
+
+test2:
+  slot: 51
+  oneOf:
+    - material: gold_nugget
+      name: '&cУ Вас меньше 100 монет'
+      on_view: '%vault_eco_balance_fixed% < 100'
+    #
+    - material: gold_ingot
+      name: '&cУ Вас меньше 1000 монет'
+      on_view: '%vault_eco_balance_fixed% < 1000'
+    #
+    - material: gold_block
+      name: '&cУ Вас больше 1000 монет'
+
+
+clicks:
+  on_click:
+    - 'msg' # можно указывать сразу команду
+    - if: '100 == 100' # условие
+      do: # если условие верно, то выполнятся эти команды (ранее commands)
+        - '100 == 100'
+      else: # если условие ложно, то выполнятся эти команды (ранее deny_commands)
+        - '100 != 100'
+    - if: '%vault_eco_balance% > 1000'
+      do:
+        console: 'eco take %player_name% 1000'
+    - if: '99 == 99'
+      do:
+        if: '88 == 88' # можно указывать if внутри других if
+        do: 'Вложенный if'
+  on_left_click:
+    - oneOf: # oneOf команды, это команды которые останавливаются на первом успешном if
+        - if: '%vault_eco_balance% < 1000'
+          do: 'У Вас не достаточно монет!'
+        - if: '%player_name% == _By1337_'
+          do: 'Вы не _By1337_'
+        - do: # просто do без условия
+            - 'Вы _By1337_ с 1000 монет!'
+  on_view: # в on_view тоже можно использовать if
+    - if: '%vault_eco_balance% > 1000'
+      else: 'Ты слишком бедный, чтобы видеть этот предмет('
+  on_right_click:
+    - if-all: # можно объединить несколько условий
+        - '%vault_eco_balance% > 1000'
+        - '%player_name% == _By1337%'
+      do: 'Все условия верны'
+    - if-one:
+        - '%vault_eco_balance% > 1000'
+        - '100 < -1'
+      do: 'Как минимум одно условие верно!'
+
 items:
+
+
+  shulker:
+    slot: 54
+    material: shulker_box
+    name: "test"
+    container:
+      0:
+        material: diamond
+      1:
+        material: diamond
+      2:
+        material: diamond
+  on_view1:
+    slot: 49
+    material: diamond_block
+    name: diamond_block
+    on_click:
+      - if: '{rand_bool} == true'
+        do:
+          if: '{rand_bool} == true'
+          do:
+            if: '{rand_bool} == true'
+            do: '<gold>4'
+            else: '<black>3'
+          else: '<green>2'
+        else: '<red>1'
+
+  on_view:
+    slot: 50
+    material: diamond
+    name: 'on_view test'
+    on_left_click: '<red>One line!'
+    on_right_click: |
+      <green>Line 1
+      <green>Line 2
+      <green>Line 3
+      <green>Line 4
+    on_drop_click:
+      - console: 'say on_drop_click'
+      - |
+        <red>msg line 1
+        <red>msg line 2
+        <red>msg line 3
+    on_click:
+      commands:
+        - console: 'say 123'
+        - |
+          <red>msg line 1
+          msg line 2
+          <yellow>msg line 3
+        - console: 'say 321'
+        - message: |
+            <red>line 1
+            <green>line 2
+            <black>line 3
+
+  oneOf_example:
+    slot: 51
+    oneOf:
+      - material: gold_nugget
+        name: '&cУ Вас меньше 100 монет'
+        on_view: '%vault_eco_balance_fixed% < 100'
+      #
+      - material: gold_ingot
+        name: '&cУ Вас меньше 1000 монет'
+        on_view: '%vault_eco_balance_fixed% < 1000'
+      #
+      - material: gold_block
+        name: '&cУ Вас больше 1000 монет'
+
+
   one-line-lore:
     slot: 0
     material: di
@@ -64,8 +324,6 @@ items:
         - console: 'op &player_name%'
         - message: '&aDone'
         - update: ''
-
-
 
 
   rebuild1:
@@ -146,6 +404,9 @@ items:
       commands:
         - '[set_item_to_layer] 20 0 banned-item'
 
+
+
+
   banned-item:
     args:
       TIME: '5' # 5 секунд
@@ -196,12 +457,39 @@ items:
       requirements:
         - check: '${page} == 0'
           commands:
+            - '1'
             - '[set_local] current_name ${name2}'
             - '[set_local] current_lore ${lore2}'
             - '[set_local] page 1'
             - '[update]'
           deny_commands:
+            - '2'
             - '[set_local] current_name ${name1}'
             - '[set_local] current_lore ${lore1}'
             - '[set_local] page 0'
             - '[update]'
+
+  potion_legacy:
+    material: potion
+    slot: 17
+    potion: strong_slowness
+    potion_effects:
+      - "fire_resistance;200;1"
+      - "regeneration;200;2"
+      - "DAMAGE_RESISTANCE;200;3"
+
+  end:
+    material: end_stone
+    slot: 28
+    enchantments:
+      silk_touch: 1
+      efficiency: 10
+      luck_of_the_sea: 127
+
+  end_legacy:
+    material: end_stone
+    slot: 29
+    enchantments:
+      - "silk_touch;1"
+      - "efficiency;10"
+      - "luck_of_the_sea;127"

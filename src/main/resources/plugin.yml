@@ -1,7 +1,7 @@
 name: BMenu
 author: By1337
 version: '${project.version}'
-main: org.by1337.bmenu.BMenu
+main: dev.by1337.bmenu.BMenu
 api-version: '1.16'
 depend: [ BLib, PlaceholderAPI ]
 authors: [ By1337 ]

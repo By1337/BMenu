@@ -1,0 +1,202 @@
+---
+# плейсхолдеры меню {menu_id}, {has_back_menu}, {clicked_slot}
+
+extends:
+  - ./file.yml # путь относительно текущей папки
+  - ../file.yml # путь относительно папки на уровень выше
+  - /file.yml  # путь относительно корневой папки с меню
+
+include: [
+  "./file.yml",
+  "../file.yml",
+  "/file.yml",
+]
+
+click_cooldown: 100
+id: <namespace>:<id> # разрешены символы [a-z0-9._-]
+provider: <namespace>:<id> # по умолчанию bmenu:default
+type: chest
+size: 27
+title: '&7Menu title'
+
+---
+clicks:
+  on_click:
+    - 'msg' # можно указывать сразу команду
+    - if: '100 == 100' # условие
+      do: # если условие верно, то выполнятся эти команды (ранее commands)
+        - '100 == 100'
+      else: # если условие ложно, то выполнятся эти команды (ранее deny_commands)
+        - '100 != 100'
+    - if: '%vault_eco_balance% > 1000'
+      do:
+        console: 'eco take %player_name% 1000'
+    - if: '99 == 99'
+      do:
+        if: '88 == 88' # можно указывать if внутри других if
+        do: 'Вложенный if'
+  on_left_click:
+    - oneOf: # oneOf команды, это команды которые останавливаются на первом успешном if
+        - if: '%vault_eco_balance% < 1000'
+          do: 'У Вас не достаточно монет!'
+        - if: '%player_name% == _By1337_'
+          do: 'Вы не _By1337_'
+        - do: # просто do без условия
+            - 'Вы _By1337_ с 1000 монет!'
+  on_view: # в on_view тоже можно использовать if
+    - if: '%vault_eco_balance% > 1000'
+      else: 'Ты слишком бедный, чтобы видеть этот предмет('
+  on_right_click:
+    - if-all: # можно объединить несколько условий
+        - '%vault_eco_balance% > 1000'
+        - '%player_name% == _By1337%'
+      do: 'Все условия верны'
+    - if-one:
+        - '%vault_eco_balance% > 1000'
+        - '100 < -1'
+      do: 'Как минимум одно условие верно!'
+---
+
+# [run] <имя набора>
+# Или выполнять рандомно
+# [run_rand]
+commands-list:
+  example-1:
+    weight: 1.0 # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND]
+    commands: # примеры команд в clicks
+      - '&7Это команда из example-1'
+  example-2:
+    weight: 1.0
+    commands: # примеры команд в clicks
+      - '&7Это команда из example-1'
+
+# Меню ивенты
+menu-events:
+  on_open: # примеры команд в clicks
+    - 'Меню открыто!'
+  on_reopen: # примеры команд в clicks
+    - 'Меню открыто заново!'
+  on_close: # примеры команд в clicks
+    - 'Меню закрыто!'
+
+
+items:
+  itemID:
+    # также все параметры из https://github.com/By1337/ConfigurableItems/blob/master/src/main/resources/cfg_items/reference.yml
+    # слоты могут быть не указаны
+    # если указать слоты то этот предмет установится при инициализации меню
+    # noinspection all
+    slot: 10
+    # noinspection all
+    slot:
+      - '10'
+      - '11'
+      - '12-20'
+    # noinspection all
+    slot: 10-15,20-25,53
+    amount: 1 # или плейсхолдер
+    #priority: 0 # Как в DeluxeMenus работает, по сути устарел заменён на oneOf
+    oneOf: # выбирает один из вариантов ниже, проверяет условия сверху вниз.
+      - material: diamond
+        # здесь нельзя указывать local_args, priority, slot, on_tick, tick_speed, oneOf
+        on_view: '100 == 100'
+      - material: gold_block
+
+    # аналог переменных меню, но только эти переменные видны только этому предмету
+    # Также эти переменные константные.
+    # Использовать аналогично {PARAM_1}
+    args:
+      PARAM_1: 'value'
+      PARAM_2: 'value'
+      PARAM_3: 'value'
+    local_args: # как args но только эти параметры можно менять через '[set_local] <name> <value>'.
+      lParam_1: 'value'
+      lParam_2: 'value'
+      lParam_3: 'value'
+    # Условия видимости предмета
+    # noinspection all
+    on_view: '100 > 100' # в одну строку
+    # noinspection all
+    on_view: # или несколько
+      - '100 == 100'
+      - '90 - 90 == 0'
+    # noinspection all
+    on_view: # или с if внутри
+      - if: '100 == 100'
+        do: 'msg'
+    on_left_click: # обработка клика
+      - if: '100 == 100'
+        do:
+          - console: op %player_name%
+    tick_speed: 20 # как часто будет вызываться on_tick в тиках.
+    on_tick: # Это аналогично блоку on_click но on_tick вызывается автоматически каждые tick_speed тиков сервера.
+      - if: '{tick} % 3 == 0'
+        do: '[message] tick!'
+        else: '[update]'
+
+---
+# Все команды
+# Аргумент в начале которого ? не обязательный.
+# Команды могут быть записаны так
+# message: '&aMsg'
+# или
+# '[message] &aMsg'
+# Если команда без аргументов то пишется так close: '' или '[close]'
+commands:
+  ### Сообщения и вывод
+  - '&7Просто сообщение'
+  - message: '&7Тоже сообщение'
+  - sound: <sound> <?volume> <?pitch> # воспроизведёт звук
+  - title_all: '<"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>'
+  - set_title: '&7Title'
+  - title: '<"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>'
+  - action_bar_all: '<msg>'
+  - action_bar: '<msg>'
+  - broadcast: '<msg>'
+  ### Выполнение команд
+  - console: 'op %player_name%' # выполнить команду от имени сервера
+  - player: 'msg _By1337_ привет?' # выполнить команду от имени игрока
+  - chat: '/rtp' # Отправит сообщение от имени игрока, если в начале будет / то будет как команда
+  ### Навигация по меню
+  # В commands вы можете передать список команд которые необходимо выполнить в открывающейся менюшке
+  # Синтаксис [open] menu ["[message] сообщение из открытого меню", "[что-то] некст команда"]
+  - open: '<menu:id> <?commands>'
+  - close: '' # закроет меню
+  - back: '<?commands>' # вернутся в прошлое меню
+  - back_or_close: '<?commands>' # вернутся в прошлое меню если есть
+  - back_to_or_close: '<menu:id> <?commands>' # вернутся в <menu:id> если было открыто ранее
+  - back_or_open: '<menu:id> <?commands>' # вернутся в <menu:id> если было открыто иначе открыть <menu:id>
+  ### Экономика и сервер
+  - connect: '<server>' # подключает игрока к серверу
+  - givemoney: '<count>' # выдать монеты
+  - takemoney: '<count>' # снять монеты
+  ### Управление предметами
+  # <slots> - указывается как '10' или '0-10' или '0-10,30-40,50'
+  - update: '' # обновляет предмет выполнивший эту команду
+  - update_slots: '<slots>' # обновляет предметы в слотах
+  - die: '' # удаляет предмет выполнивший эту команду
+  - die_slots: '<slots>' # удаляет предметы в слотах
+  - layer: '<layer> set <item> <slots>'
+  - layer: '<layer> remove <slots>'
+  - layer: '<layer> move <layer2> <from> <to>'
+  - layer: '<layer> copy <layer2> <from> <to>'
+  - layer: '<layer> clear'
+  - simulate: 'click slot' # симулирует клик по предмету в слоте
+  ### Анимации
+  - set_animation: '<animation>' # устанавливает анимацию из animations
+  - animation_tick: '' # принудительно вызывает тик анимации
+  - animation_force_end: '' # моментально завершает анимацию
+  ### Параметры меню
+  - set_param: '<arg> <value>' # меняет значения в args
+  - import_params: '<item>' # копирует args из предмета в args меню
+  ### Параметры предмета
+  - set_local: <name> <value> # меняет параметры предмета из local_args
+  ### Выполнение команд меню
+  - run: '<id>' # выполняет список команд из commands-list
+  - run_rand: '' # выполняет случайных список команд из commands-list
+  - delay: '<delay> <cmd>' # выполнить команду с задержкой например [delay] 20 [message] &aЭто сообщение отправилось спустя 1 секунду!
+  ### Контекст
+  - up: ''
+  - down: ''
+  - import_from_down: ''
+
