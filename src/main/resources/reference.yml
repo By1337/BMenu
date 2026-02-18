@@ -181,6 +181,7 @@ commands:
   - layer: '<layer> move <layer2> <from> <to>'
   - layer: '<layer> copy <layer2> <from> <to>'
   - layer: '<layer> clear'
+  - simulate: 'click slot' # симулирует клик по предмету в слоте
   ### Анимации
   - set_animation: '<animation>' # устанавливает анимацию из animations
   - animation_tick: '' # принудительно вызывает тик анимации
@@ -194,5 +195,8 @@ commands:
   - run: '<id>' # выполняет список команд из commands-list
   - run_rand: '' # выполняет случайных список команд из commands-list
   - delay: '<delay> <cmd>' # выполнить команду с задержкой например [delay] 20 [message] &aЭто сообщение отправилось спустя 1 секунду!
-
+  ### Контекст
+  - up: ''
+  - down: ''
+  - import_from_down: ''
 
