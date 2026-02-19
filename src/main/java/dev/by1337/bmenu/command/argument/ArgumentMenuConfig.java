@@ -21,6 +21,7 @@ public class ArgumentMenuConfig<C> extends ArgumentRegistry<C, MenuConfig> {
 
     protected void rebuildIfNeeded() {
         if (loader.menus().lastMutatedTimestamp() != timestamp) {
+            lookup.clear();
             build(loader.menus(), false);
             timestamp = loader.menus().lastMutatedTimestamp();
         }
