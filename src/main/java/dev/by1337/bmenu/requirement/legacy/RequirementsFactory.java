@@ -84,7 +84,7 @@ public class RequirementsFactory {
                 }
                 case "has permission", "!has permission", "hp", "!hp" -> {
                     PermissionRequirement requirement = new PermissionRequirement(
-                            type.startsWith("!") ? PermissionRequirement.Operation.YES : PermissionRequirement.Operation.NO,
+                            type.startsWith("!"),
                             value.get("permission").asString().getOrThrow()
                     );
                     return DataResult.success(new ConditionalHandler(requirement, commands, denyCommands));

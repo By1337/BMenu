@@ -177,10 +177,7 @@ public interface Requirement {
             }
 
             if (input.startsWith("has") || input.startsWith("!has")) {
-                PermissionRequirement.Operation op;
-                if (input.startsWith("!")) op = PermissionRequirement.Operation.NO;
-                else op = PermissionRequirement.Operation.YES;
-                return DataResult.success(new PermissionRequirement(op, input.split(" ")[1]));
+                return DataResult.success(new PermissionRequirement(input.startsWith("!"), input.split(" ")[1]));
             } else if (input.startsWith("nearby") || input.startsWith("!nearby")) {
                 return NearbyRequirement.CODEC.decode(YamlValue.wrap(input))
                         .flatMap(DataResult::success);
