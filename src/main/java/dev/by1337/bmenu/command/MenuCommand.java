@@ -23,18 +23,21 @@ public class MenuCommand implements MenuEventHandler {
 
     public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
         if (compiled != null) {
-            ctx.menu.executeCommand(ctx, compiled);
+            try (var ignored = ctx.tracer.timing("run: %s", source)) {
+                ctx.menu.executeCommand(ctx, compiled);
+            }
         } else {
             if (canBeCompiled) {
                 compiled = ctx.menu.compile(source);
                 canBeCompiled = false;
-              //  log.info("Command {} compiled {}", source, compiled);
                 test(ctx, placeholders);
             } else {
-                if (hasPlaceholders) {
-                    ctx.menu.executeCommand(ctx, placeholders.setPlaceholders(source));
-                } else {
-                    ctx.menu.executeCommand(ctx, source);
+                try (var ignored = ctx.tracer.timing("run: %s", source)) {
+                    if (hasPlaceholders) {
+                        ctx.menu.executeCommand(ctx, placeholders.setPlaceholders(source));
+                    } else {
+                        ctx.menu.executeCommand(ctx, source);
+                    }
                 }
             }
         }

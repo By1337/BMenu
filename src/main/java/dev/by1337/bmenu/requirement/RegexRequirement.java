@@ -24,9 +24,16 @@ public class RegexRequirement implements Requirement {
     }
 
     @Override
-    public boolean test(ExecuteContext ignored, PlaceholderApplier placeholders) {
-        Matcher m = pattern.matcher(placeholders.setPlaceholders(input));
-        return not != m.find();
+    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
+        String s = placeholders.setPlaceholders(input);
+        Matcher m = pattern.matcher(s);
+        var v = not != m.find();
+        if (not) {
+            ctx.tracer.log("if '!regex %s' -> %s", s, v);
+        } else {
+            ctx.tracer.log("if 'regex %s' -> %s", s, v);
+        }
+        return v;
     }
 
     @Override

@@ -27,6 +27,7 @@ public class NearbyRequirement implements Requirement {
     private final int radius;
     private final int radiusSq;
     private boolean not;
+    private final String value;
 
     public NearbyRequirement(String name, String world, double x, double y, double z, int radius) {
         this.name = name;
@@ -37,14 +38,18 @@ public class NearbyRequirement implements Requirement {
         this.radius = radius;
         this.radiusSq = radius * radius;
         not = name.startsWith("!");
+        value = toString();
     }
 
     @Override
     public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
         if (!ctx.menu.viewer().getWorld().getName().equals(world)) {
+            ctx.tracer.log("if '%s' -> %s", value, not);
             return not;
         }
-        return not != (distanceSquared(ctx.menu.viewer().getLocation()) < radiusSq);
+        var v = not != (distanceSquared(ctx.menu.viewer().getLocation()) < radiusSq);
+        ctx.tracer.log("if '%s' -> %s", value, v);
+        return v;
     }
 
     private double distanceSquared(Location loc) {

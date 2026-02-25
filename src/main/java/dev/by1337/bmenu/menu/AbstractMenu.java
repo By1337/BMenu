@@ -258,7 +258,9 @@ public abstract class AbstractMenu implements Menu {
     public void onEvent(String event) {
         Commands commandRequirements = config.eventHandlers().get(event);
         if (commandRequirements != null) {
-            commandRequirements.test(ExecuteContext.of(this), this);
+            try (var ctx = ExecuteContext.of(this, event)){
+                commandRequirements.test(ctx, this);
+            }
         }
     }
 

@@ -16,7 +16,11 @@ public record StringsRequirement(Operation op, String s, String s1) implements R
 
     @Override
     public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        return op.test.test(placeholders.setPlaceholders(s), placeholders.setPlaceholders(s1));
+        var left = placeholders.setPlaceholders(s);
+        var right = placeholders.setPlaceholders(s1);
+        var v = op.test.test(left, right);
+        ctx.tracer.log("if '%s %s %s' -> %s", left, op.name, right, v);
+        return v;
     }
 
     @Override

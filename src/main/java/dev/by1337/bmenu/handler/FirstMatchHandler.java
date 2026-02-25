@@ -18,10 +18,19 @@ public class FirstMatchHandler implements MenuEventHandler {
 
     @Override
     public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        for (ConditionalHandler block : blocks) {
-            if (block.test(ctx, placeholders)) return true;
+        try (var enter = ctx.tracer.enter("first-math [", "] -> %s")){
+            enter.result(true);
+            var iterator = blocks.iterator();
+            while (iterator.hasNext()){
+                var block = iterator.next();
+                if (block.test(ctx, placeholders)) return true;
+                if (iterator.hasNext()){
+                    ctx.tracer.log("");
+                }
+            }
+            enter.result(false);
+            return false;
         }
-        return false;
     }
 
     @Override

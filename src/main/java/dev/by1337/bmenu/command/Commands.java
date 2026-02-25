@@ -115,7 +115,6 @@ public class Commands implements MenuEventHandler {
     private final List<MenuEventHandler> commands;
     private boolean hasBreak;
 
-    @ApiStatus.Experimental
     public Commands(ConditionalHandler requirement) {
         commands = List.of(requirement);
     }
@@ -138,13 +137,22 @@ public class Commands implements MenuEventHandler {
 
     @Override
     public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        boolean state = true;
-        for (MenuEventHandler like : commands) {
-            if (!like.test(ctx, placeholders)) {
-                state = false;
+        try (var enter = ctx.tracer.enter("list [", "] -> %s")){
+            boolean state = true;
+            var iterator = commands.iterator();
+            while (iterator.hasNext()){
+                MenuEventHandler like = iterator.next();
+                if (!like.test(ctx, placeholders)) {
+                    state = false;
+                }
+                if (iterator.hasNext()){
+                    ctx.tracer.log("");
+                }
             }
+            enter.result(state);
+            return state;
         }
-        return state;
+
     }
 
     public static Commands fromCommandsList(List<Commands> list) {

@@ -13,7 +13,9 @@ public record MathRequirement(String input) implements Requirement {
     public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
         String s = placeholders.setPlaceholders(input);
         try {
-            return FastExpressionParser.parse(s) == 1D;
+            var v = FastExpressionParser.parse(s) == 1D;
+            ctx.tracer.log("if '%s' -> %s", s, v);
+            return v;
         } catch (FastExpressionParser.MathFormatException e) {
             ctx.menu.loader().logger().error(
                     "Failed to parse math requirement. expression: '{}' replaced expression: '{}'\n{}",

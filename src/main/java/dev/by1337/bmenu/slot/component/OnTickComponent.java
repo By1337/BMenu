@@ -20,8 +20,9 @@ public record OnTickComponent(Commands handler) {
 
     public void tick(SlotContent slotContent, Menu menu) {
         var placeholder = menu.resolvers().and(slotContent).bind(menu);
-        ExecuteContext ctx = ExecuteContext.of(menu, slotContent);
-        handler.test(ctx, placeholder);
+        try (ExecuteContext ctx = ExecuteContext.of(menu, slotContent, "on_tick")){
+            handler.test(ctx, placeholder);
+        }
     }
 
     public boolean shouldTick(int ticks, int tickSpeed) {

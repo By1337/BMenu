@@ -41,10 +41,11 @@ public final class SlotContentImpl extends BaseSlotContent {
     @Override
     public void doClick(Menu menu, Player player, MenuClickType type) {
         var pl = getPlaceholders(menu);
-        var ctx = ExecuteContext.of(menu, this);
-        if (!head.doClick(type, ctx, pl)) {
-            if (view != null) {
-                view.doClick(type, ctx, pl);
+        try (var ctx = ExecuteContext.of(menu, this, "on click")){
+            if (!head.doClick(type, ctx, pl)) {
+                if (view != null) {
+                    view.doClick(type, ctx, pl);
+                }
             }
         }
     }

@@ -17,7 +17,9 @@ public record OnViewComponent(@Nullable Requirement requirement) {
     public boolean isVisible(Menu menu, SlotContent slotContent) {
         if (requirement == null) return true;
         var placeholders = slotContent.getPlaceholders(menu);
-        return requirement.test(ExecuteContext.of(menu, slotContent), placeholders);
+        try (var ctx = ExecuteContext.of(menu, slotContent, "on_view")){
+            return requirement.test(ctx, placeholders);
+        }
     }
 
     @Override

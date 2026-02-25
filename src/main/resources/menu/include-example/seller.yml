@@ -32,6 +32,7 @@ items-defaults:
               - takemoney: '{PRICE}'
               - console: 'give %player_name% {MATERIAL} {AMOUNT}'
               - '&aВы успешно купили {NAME}'
+              - back: ''
             else: '&cУ Вас не достаточно баланса!'
 
 items:

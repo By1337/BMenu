@@ -41,35 +41,45 @@ public class BreakableConditionalHandler implements MenuEventHandler {
 
     @Override
     public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        boolean result = true;
-        for (Requirement requirement : handlers) {
-            try {
-                if (!requirement.test(ctx, placeholders)) {
-                    result = false;
-                    if (requirement instanceof ConditionalHandler c1){
-                        Commands c = c1.elseCommands();
-                        if (c.isHasBreak()) {
-                            break;
+        try (var enter = ctx.tracer.enter("requirements [", "] -> %s")){
+            boolean result = true;
+            var iterator = handlers.iterator();
+            while (iterator.hasNext()){
+                var requirement = iterator.next();
+                try {
+                    if (!requirement.test(ctx, placeholders)) {
+                        result = false;
+                        if (requirement instanceof ConditionalHandler c1){
+                            Commands c = c1.elseCommands();
+                            if (c.isHasBreak()) {
+                                ctx.tracer.log("break");
+                                break;
+                            }
+                        }
+                    } else {
+                        if (requirement instanceof ConditionalHandler c1){
+                            Commands c = c1.doCommands();
+                            if (c.isHasBreak()) {
+                                ctx.tracer.log("break");
+                                break;
+                            }
                         }
                     }
-                } else {
-                    if (requirement instanceof ConditionalHandler c1){
-                        Commands c = c1.doCommands();
-                        if (c.isHasBreak()) {
-                            break;
-                        }
-                    }
+                } catch (Exception e) {
+                    ctx.menu.loader().logger().error("Failed to check requirement: {}", requirement, e);
                 }
-            } catch (Exception e) {
-                ctx.menu.loader().logger().error("Failed to check requirement: {}", requirement, e);
+                if (iterator.hasNext()){
+                    ctx.tracer.log("");
+                }
             }
+            enter.result(result);
+            if (result) {
+                doCmds.test(ctx, placeholders);
+            } else {
+                elseCmds.test(ctx, placeholders);
+            }
+            return result;
         }
-        if (result) {
-            doCmds.test(ctx, placeholders);
-        } else {
-            elseCmds.test(ctx, placeholders);
-        }
-        return result;
     }
 
     @Override

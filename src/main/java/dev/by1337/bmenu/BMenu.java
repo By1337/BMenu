@@ -1,6 +1,7 @@
 package dev.by1337.bmenu;
 
 
+import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.command.argument.ArgumentMenuConfig;
 import dev.by1337.bmenu.command.menu.OpenCommands;
 import dev.by1337.bmenu.hook.BungeeCordMessageSender;
@@ -111,6 +112,16 @@ public class BMenu extends JavaPlugin {
                             openCommands.register();
                             sender.sendMessage(MiniMessage.deserialize("&aReloaded " + loader.menus().size() + " menus!"));
                         })
+                ).sub(new Command<CommandSender>("tracer")
+                        .requires(new RequiresPermission<>("bmenu.tracer"))
+                        .executor((sender, args) -> {
+                            ExecuteContext.ENABLE_TRACER = !ExecuteContext.ENABLE_TRACER;
+                            if (ExecuteContext.ENABLE_TRACER) {
+                                sender.sendMessage(MiniMessage.deserialize("&aTracer enabled"));
+                            } else {
+                                sender.sendMessage(MiniMessage.deserialize("&7Tracer disabled"));
+                            }
+                        })
                 )
                 .sub(new Command<CommandSender>("open")
                         .requires(new RequiresPermission<>("bmenu.open"))
@@ -203,7 +214,7 @@ public class BMenu extends JavaPlugin {
                                                 throw new RuntimeException(ex);
                                             }
                                         }
-                                    }else {
+                                    } else {
                                         map = new YamlMap();
                                     }
                                     String uid = Long.toString(System.currentTimeMillis());

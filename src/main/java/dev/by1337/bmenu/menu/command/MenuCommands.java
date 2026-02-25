@@ -663,8 +663,7 @@ public class MenuCommands {
     //todo json?
     private static void runIn(String rawList, Menu menu, MenuLoader loader, ExecuteContext ctx) {
         if (rawList != null && !rawList.isBlank()) {
-            ExecuteContext newCtx = ExecuteContext.of(menu, ctx.item);
-            try {
+            try (ExecuteContext newCtx = ExecuteContext.of(menu, ctx.item, "run in " + menu.getId())){
                 YamlMap yaml = YamlMap.loadFromString("data: " + rawList);
                 var list = yaml.get("data").decode(YamlCodec.STRINGS).getOrThrow();
                 menu.runCommands(newCtx, list);

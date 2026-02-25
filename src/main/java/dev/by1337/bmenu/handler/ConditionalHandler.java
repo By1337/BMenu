@@ -50,12 +50,16 @@ public class ConditionalHandler implements MenuEventHandler {
 
     @Override
     public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        if (req.test(ctx.menu, placeholders)) {
-            doCmds.test(ctx, placeholders);
-            return true;
+        try (var enter = ctx.tracer.enter("if-do {", "} -> %s")){
+            if (req.test(ctx, placeholders)) {
+                doCmds.test(ctx, placeholders);
+                enter.result(true);
+                return true;
+            }
+            elseCmds.test(ctx, placeholders);
+            enter.result(false);
+            return false;
         }
-        elseCmds.test(ctx, placeholders);
-        return false;
     }
 
     @Override
