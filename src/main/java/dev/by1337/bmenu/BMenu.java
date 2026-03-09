@@ -6,6 +6,7 @@ import dev.by1337.bmenu.command.argument.ArgumentMenuConfig;
 import dev.by1337.bmenu.command.menu.OpenCommands;
 import dev.by1337.bmenu.hook.BungeeCordMessageSender;
 import dev.by1337.bmenu.hook.Metrics;
+import dev.by1337.bmenu.listener.PlayerInputListener;
 import dev.by1337.bmenu.loader.MenuConfig;
 import dev.by1337.bmenu.loader.MenuLoader;
 import dev.by1337.bmenu.menu.Menu;
@@ -42,6 +43,7 @@ public class BMenu extends JavaPlugin {
     private OpenCommands openCommands;
     private Metrics metrics;
     private YamlMap config;
+    private PlayerInputListener playerInputListener;
 
     public BMenu() {
         Path libraries = getDataFolder().toPath().resolve(".libraries");
@@ -54,11 +56,11 @@ public class BMenu extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        ResourceUtil.saveIfNotExist("reference.yml", this);
         if (!new File(getDataFolder(), "menu").exists()) {
             ResourceUtil.saveIfNotExist("menu/animation-54.yml", this);
             ResourceUtil.saveIfNotExist("menu/example-seller.yml", this);
             //   ResourceUtil.saveIfNotExist("menu-shem.yml", this);
-            ResourceUtil.saveIfNotExist("reference.yml", this);
             ResourceUtil.saveIfNotExist("menu/include-example/confirm.yml", this);
             ResourceUtil.saveIfNotExist("menu/include-example/seller.yml", this);
             ResourceUtil.saveIfNotExist("menu/random-colors/rand-colors-menu.yml", this);
@@ -77,6 +79,7 @@ public class BMenu extends JavaPlugin {
     @Override
     public void onEnable() {
         BungeeCordMessageSender.registerChannel(this);
+        playerInputListener = new PlayerInputListener(this);
         openCommands = new OpenCommands(loader, config);
         loader.enable();
         commandWrapper = new CommandWrapper(createCommand(), this);
@@ -89,10 +92,15 @@ public class BMenu extends JavaPlugin {
     @Override
     public void onDisable() {
         BungeeCordMessageSender.unregisterChannel(this);
+        playerInputListener.close();
         loader.disable();
         commandWrapper.close();
         openCommands.unregister();
         metrics.shutdown();
+    }
+
+    public PlayerInputListener playerInputListener() {
+        return playerInputListener;
     }
 
     public static MenuLoader menuLoader() {

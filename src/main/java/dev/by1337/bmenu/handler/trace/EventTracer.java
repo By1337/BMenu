@@ -24,6 +24,11 @@ public interface EventTracer {
         }
 
         @Override
+        public TracerDepth enter(String name, Object o, String exit) {
+            return nop;
+        }
+
+        @Override
         public void log(String s, Object... args) {
             //nop
         }
@@ -35,7 +40,8 @@ public interface EventTracer {
 
         @Override
         public TimingScope timing(String s, Object... args) {
-            return () -> {};
+            return () -> {
+            };
         }
     };
 
@@ -144,14 +150,19 @@ public interface EventTracer {
 
     TracerDepth enter(String name, String exit);
 
+    default TracerDepth enter(String name, Object o, String exit) {
+        return enter(String.format(name, o), exit);
+    }
+
 
     void log(String s, Object... args);
 
     void log(String s);
 
-    default TimingScope timing(String s, Object... args){
+    default TimingScope timing(String s, Object... args) {
         return new TimingScope() {
             final long nanos = System.nanoTime();
+
             @Override
             public void close() {
                 long l = System.nanoTime() - nanos;
@@ -165,14 +176,16 @@ public interface EventTracer {
         };
     }
 
-    interface TimingScope extends AutoCloseable{
+    interface TimingScope extends AutoCloseable {
         @Override
         void close();
     }
+
     interface TracerDepth extends AutoCloseable {
 
         @Override
         void close();
+
         void result(boolean b);
     }
 

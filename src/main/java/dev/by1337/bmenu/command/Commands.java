@@ -6,6 +6,7 @@ import dev.by1337.bmenu.handler.BreakableConditionalHandler;
 import dev.by1337.bmenu.handler.ConditionalHandler;
 import dev.by1337.bmenu.handler.FirstMatchHandler;
 import dev.by1337.bmenu.handler.MenuEventHandler;
+import dev.by1337.bmenu.handler.input.PlayerNumberInput;
 import dev.by1337.bmenu.yaml.dfu.BMenuDFU;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
@@ -52,7 +53,9 @@ public class Commands implements MenuEventHandler {
                 for (String cmd : map.keySet()) {
                     if (
                             cmd.startsWith("$") ||
-                                    cmd.startsWith("if") ||
+                                    cmd.equals("if") ||
+                                    cmd.equals("if-all") ||
+                                    cmd.equals("if-one") ||
                                     cmd.equals("oneOf") ||
                                     cmd.equals("requirements") ||
                                     cmd.equals("commands") ||
@@ -62,31 +65,40 @@ public class Commands implements MenuEventHandler {
                     ) continue;
 
                     YamlValue cmdValue = map.get(cmd);
-                    if (cmd.equals("open") && cmdValue.isMap()) {
-                        buffer.append("$open_with_args ");
+                    if (cmd.equals("input_chat")) {
+                        tryDecode(cmdValue, PlayerNumberInput.CODEC, err, handlers::add);
+                    } else if (cmd.equals("open") && cmdValue.isMap()) {
+                        buffer.append("open_with_args ");
                         var params = S2S_MAP.decode(cmdValue).getOrThrow();
                         params.forEach((k, v) -> {
                             buffer.append('"').append(ArgumentParamsMap.escape(k)).append("\"=\"")
                                     .append(ArgumentParamsMap.escape(v)).append("\",");
                         });
-                        if (!params.isEmpty()){
-                            buffer.setLength(buffer.length()-1);
+                        if (!params.isEmpty()) {
+                            buffer.setLength(buffer.length() - 1);
                         }
+                        var s = buffer.toString();
+                        if (s.equalsIgnoreCase("[break]")) {
+                            hasBreak = true;
+                            break;
+                        }
+                        handlers.add(new MenuCommand(buffer.toString()));
+                        buffer.setLength(0);
                     } else {
                         buffer.append("[").append(cmd).append("]");
                         var value = map.get(cmd).decode(MULTI_LINE_STRING).getOrThrow();
                         if (!value.isBlank()) {
                             buffer.append(" ").append(value.replace("\n", "<br><reset>"));
                         }
+                        var s = buffer.toString();
+                        if (s.equalsIgnoreCase("[break]")) {
+                            hasBreak = true;
+                            break;
+                        }
+                        handlers.add(new MenuCommand(buffer.toString()));
+                        buffer.setLength(0);
                     }
-                    var s = buffer.toString();
-                    if (s.equalsIgnoreCase("[break]")) {
-                        hasBreak = true;
-                        break;
-                    }
-                    handlers.add(new MenuCommand(buffer.toString()));
 
-                    buffer.setLength(0);
                 }
                 var res = new Commands(handlers, hasBreak);
                 if (err.isEmpty()) return DataResult.success(res);

@@ -157,7 +157,7 @@ public class MenuCommands {
                                 }
                         )
                 )
-                .sub(new Command<ExecuteContext>("$open_with_args").executor(
+                .sub(new Command<ExecuteContext>("open_with_args").executor(
                         new ArgumentParamsMap<>("params"),
                         (v, params) -> {
                             if (params == null) throw new CommandMsgError("Use: open: {menu: <menu>}");

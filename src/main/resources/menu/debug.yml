@@ -209,10 +209,8 @@ clicks:
       do: 'Как минимум одно условие верно!'
 
 items:
-
-
   shulker:
-    slot: 54
+    slot: 53
     material: shulker_box
     name: "test"
     container:
@@ -222,6 +220,19 @@ items:
         material: diamond
       2:
         material: diamond
+    on_click:
+      - input_chat:
+          param: 'chat_result'
+          on_pass:
+            - if: '{chat_result} > 0 && {chat_result} < 2kk'
+              do:
+                - '&aInput: {chat_result}'
+                - reopen: ''
+              else:
+                - '&cNan!'
+          on_failed:
+            - '&cNan'
+      - close: ''
   on_view1:
     slot: 49
     material: diamond_block
