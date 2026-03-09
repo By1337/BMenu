@@ -30,7 +30,15 @@ public class ArgumentMenuConfig<C> extends ArgumentRegistry<C, MenuConfig> {
     @Override
     public void parse(C ctx, CommandReader reader, ArgumentMap out) throws CommandMsgError {
         rebuildIfNeeded();
-        super.parse(ctx, reader, out);
+        int idx = reader.ridx();
+        String str = reader.readString();
+        MenuConfig cfg = loader.findMenuConfig(str);
+        if (cfg != null) {
+            out.put(name, cfg);
+        } else {
+            reader.ridx(idx);
+            super.parse(ctx, reader, out);
+        }
     }
 
     @Override

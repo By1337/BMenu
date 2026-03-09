@@ -3,8 +3,10 @@ package dev.by1337.bmenu.loader;
 import dev.by1337.bmenu.io.FileWatcher;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.registry.RegistryLike;
+import dev.by1337.bmenu.registry.RegistryShortcut;
 import dev.by1337.core.util.misc.Pair;
 import dev.by1337.yaml.codec.DataResult;
+import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -22,9 +24,13 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MenuLoader implements Listener {
+    private final RegistryShortcut<YamlCodec<? extends MenuConfig>> lookupProviders;
+    private final RegistryShortcut<MenuConfig> lookupMenus;
     private final MenuCodecRegistry menuCodecRegistry = new MenuCodecRegistry();
     private final RegistryLike<MenuConfig> menus = new RegistryLike<>();
     private final File homeDir;
@@ -32,6 +38,7 @@ public class MenuLoader implements Listener {
     private final Logger logger;
     private BukkitTask ticker;
     private @Nullable FileWatcher fileWatcher;
+    private final Map<Plugin, MenuSubLoader> subLoaders = new IdentityHashMap<>();
 
     public MenuLoader(File homeDir, Plugin plugin) {
         this(homeDir, plugin, false);
@@ -45,6 +52,48 @@ public class MenuLoader implements Listener {
             fileWatcher = new FileWatcher(homeDir, this::onFileChange);
             fileWatcher.startWatching();
         }
+        lookupProviders = new RegistryShortcut<YamlCodec<? extends MenuConfig>>() {
+            @Override
+            protected YamlCodec<? extends MenuConfig> find(String key) {
+                var v = menuCodecRegistry.get(key);
+                if (v != null) return v;
+                for (MenuSubLoader value : subLoaders.values()) {
+                    if (((v = value.menuCodecRegistry.get(key)) != null)) return v;
+                }
+                return null;
+            }
+
+            @Override
+            protected YamlCodec<? extends MenuConfig> find(NamespacedKey key) {
+                var v = menuCodecRegistry.get(key);
+                if (v != null) return v;
+                for (MenuSubLoader value : subLoaders.values()) {
+                    if (((v = value.menuCodecRegistry.get(key)) != null)) return v;
+                }
+                return null;
+            }
+        };
+        lookupMenus = new RegistryShortcut<MenuConfig>() {
+            @Override
+            protected MenuConfig find(String key) {
+                var v = menus.get(key);
+                if (v != null) return v;
+                for (MenuSubLoader value : subLoaders.values()) {
+                    if (((v = value.menus.get(key)) != null)) return v;
+                }
+                return null;
+            }
+
+            @Override
+            protected MenuConfig find(NamespacedKey key) {
+                var v = menus.get(key);
+                if (v != null) return v;
+                for (MenuSubLoader value : subLoaders.values()) {
+                    if (((v = value.menus.get(key)) != null)) return v;
+                }
+                return null;
+            }
+        };
     }
 
     private void onFileChange(Path path) {
@@ -115,12 +164,14 @@ public class MenuLoader implements Listener {
     public void reload() {
         closeAllOpenMenus();
         menus.clear();
+        lookupMenus.clear();
         loadMenus();
     }
 
     public void disable() {
         closeAllOpenMenus();
         menus.clear();
+        lookupMenus.clear();
         ticker.cancel();
         HandlerList.unregisterAll(this);
         if (fileWatcher != null) {
@@ -147,7 +198,7 @@ public class MenuLoader implements Listener {
             }
         } else if (f.getName().endsWith(".yml") || f.getName().endsWith(".yaml")) {
             try {
-                MenuConfigDecoder decoder = new MenuConfigDecoder(f, this, codecRegistry());
+                MenuConfigDecoder decoder = new MenuConfigDecoder(f, this);
                 DataResult<? extends MenuConfig> res = decoder.decode();
                 if (res.hasError()) {
                     logger.error("Errors in {}\n{}", f.getPath(), res.error());
@@ -163,7 +214,7 @@ public class MenuLoader implements Listener {
     }
 
     public Menu create(NamespacedKey menuId, Player viewer, @Nullable Menu previousMenu) {
-        MenuConfig cfg = menus.get(menuId);
+        MenuConfig cfg = lookupMenus.get(menuId);
         if (cfg == null) {
             throw new IllegalArgumentException("Menu not found: " + menuId);
         }
@@ -171,11 +222,39 @@ public class MenuLoader implements Listener {
     }
 
     public Menu create(String menuId, Player viewer, @Nullable Menu previousMenu) {
-        MenuConfig cfg = menus.get(menuId);
+        MenuConfig cfg = lookupMenus.get(menuId);
         if (cfg == null) {
             throw new IllegalArgumentException("Menu not found: " + menuId);
         }
         return cfg.create(viewer, previousMenu);
+    }
+
+    public YamlCodec<? extends MenuConfig> findMenuCodec(String provider) {
+        return lookupProviders.get(provider);
+    }
+
+    public MenuConfig findMenuConfig(String name){
+        return lookupMenus.get(name);
+    }
+
+    public void registerSubLoader(Plugin owner, MenuSubLoader subLoader) {
+        var old = subLoaders.get(owner);
+        if (old != null) {
+            throw new IllegalStateException("sub loader for " + owner + " is already registered " + old + " new " + subLoader);
+        }
+        subLoaders.put(owner, subLoader);
+        lookupProviders.clear();
+        lookupMenus.clear();
+    }
+
+    public void unregisterSubLoader(Plugin owner) {
+        subLoaders.remove(owner);
+        lookupProviders.clear();
+        lookupMenus.clear();
+    }
+    void onReload(MenuSubLoader subLoader){
+        lookupProviders.clear();
+        lookupMenus.clear();
     }
 
     @EventHandler

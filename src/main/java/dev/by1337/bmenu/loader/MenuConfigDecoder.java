@@ -11,18 +11,16 @@ import java.io.File;
 import java.util.*;
 
 public class MenuConfigDecoder {
-    private final MenuCodecRegistry codecRegistry;
     private final File file;
     private final MenuLoader loader;
     private final MenuLoadContext ctx;
 
 
-    public MenuConfigDecoder(File file, MenuLoader loader, MenuCodecRegistry codecRegistry) {
-        this(codecRegistry, file, loader, new MenuLoadContext());
+    public MenuConfigDecoder(File file, MenuLoader loader) {
+        this(file, loader, new MenuLoadContext());
     }
 
-    private MenuConfigDecoder(MenuCodecRegistry codecRegistry, File file, MenuLoader loader, MenuLoadContext ctx) {
-        this.codecRegistry = codecRegistry;
+    private MenuConfigDecoder(File file, MenuLoader loader, MenuLoadContext ctx) {
         this.file = file;
         this.loader = loader;
         this.ctx = ctx;
@@ -75,7 +73,7 @@ public class MenuConfigDecoder {
 
     public DataResult<? extends MenuConfig> decode(YamlMap ctx) {
         String provider = ctx.get("provider").asString("bmenu:default");
-        YamlCodec<? extends MenuConfig> codec = codecRegistry.get(provider);
+        YamlCodec<? extends MenuConfig> codec = loader.findMenuCodec(provider);
         if (codec == null) return DataResult.error("unknown provider " + provider);
         return codec.decode(ctx);
     }

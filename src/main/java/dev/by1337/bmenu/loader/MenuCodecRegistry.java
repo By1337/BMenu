@@ -20,16 +20,15 @@ public class MenuCodecRegistry {
         register(NamespacedKey.fromString(key), s);
     }
 
+    @Deprecated
     public void register(NamespacedKey key, MenuSupplier s) {
-        register(key, MenuConfig.CODEC.map(
-                v -> {
-                    v.setDefaultMenuCreator(s);
-                    return v;
-                },
-                v -> v
-        ));
+        register(key, MenuConfig.createCodecFor(s));
     }
 
+    public void unregister(YamlCodec<? extends MenuConfig> value) {
+        key2value.values().removeIf(c -> c == value);
+        path2Value.values().forEach(l -> l.remove(value));
+    }
 
     public void register(String key, YamlCodec<? extends MenuConfig> value) {
         register(NamespacedKey.fromString(key), value);
@@ -48,7 +47,7 @@ public class MenuCodecRegistry {
         }
         var list = path2Value.get(s);
         if (list == null || list.size() != 1) return null;
-        return path2Value.get(s).get(0);
+        return list.get(0);
     }
 
     public int size() {

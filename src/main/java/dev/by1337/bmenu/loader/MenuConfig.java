@@ -70,6 +70,16 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
         }
     }
 
+    public static YamlCodec<MenuConfig> createCodecFor(MenuSupplier t) {
+        return MenuConfig.CODEC.map(
+                v -> {
+                    v.setDefaultMenuCreator(t);
+                    return v;
+                },
+                v -> v
+        );
+    }
+
     public Menu create(Player viewer, @Nullable Menu previousMenu) {
         return defaultMenuCreator.createMenu(this, viewer, previousMenu);
     }
