@@ -1,6 +1,7 @@
 package dev.by1337.bmenu.command;
 
 
+import dev.by1337.bmenu.command.argument.ArgumentParamsMap;
 import dev.by1337.bmenu.handler.BreakableConditionalHandler;
 import dev.by1337.bmenu.handler.ConditionalHandler;
 import dev.by1337.bmenu.handler.FirstMatchHandler;
@@ -12,7 +13,6 @@ import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaType;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -26,6 +26,7 @@ public class Commands implements MenuEventHandler {
 
     public static final YamlCodec<Commands> CODEC = YamlCodec.<Commands>recursive(codec -> new YamlCodec<Commands>() {
         private final YamlCodec<Map<String, YamlValue>> S2OBJET_MAP = YamlCodec.mapOf(STRING, YAML_VALUE);
+        private final YamlCodec<Map<String, String>> S2S_MAP = YamlCodec.mapOf(STRING, MULTI_LINE_STRING);
 
         @Override
         public DataResult<Commands> decode(YamlValue yaml) {
@@ -59,10 +60,24 @@ public class Commands implements MenuEventHandler {
                                     cmd.equals("do") ||
                                     cmd.equals("else")
                     ) continue;
-                    buffer.append("[").append(cmd).append("]");
-                    var value = map.get(cmd).decode(MULTI_LINE_STRING).getOrThrow();
-                    if (!value.isBlank()) {
-                        buffer.append(" ").append(value.replace("\n", "<br><reset>"));
+
+                    YamlValue cmdValue = map.get(cmd);
+                    if (cmd.equals("open") && cmdValue.isMap()) {
+                        buffer.append("$open_with_args ");
+                        var params = S2S_MAP.decode(cmdValue).getOrThrow();
+                        params.forEach((k, v) -> {
+                            buffer.append('"').append(ArgumentParamsMap.escape(k)).append("\"=\"")
+                                    .append(ArgumentParamsMap.escape(v)).append("\",");
+                        });
+                        if (!params.isEmpty()){
+                            buffer.setLength(buffer.length()-1);
+                        }
+                    } else {
+                        buffer.append("[").append(cmd).append("]");
+                        var value = map.get(cmd).decode(MULTI_LINE_STRING).getOrThrow();
+                        if (!value.isBlank()) {
+                            buffer.append(" ").append(value.replace("\n", "<br><reset>"));
+                        }
                     }
                     var s = buffer.toString();
                     if (s.equalsIgnoreCase("[break]")) {
@@ -70,6 +85,7 @@ public class Commands implements MenuEventHandler {
                         break;
                     }
                     handlers.add(new MenuCommand(buffer.toString()));
+
                     buffer.setLength(0);
                 }
                 var res = new Commands(handlers, hasBreak);
@@ -137,15 +153,15 @@ public class Commands implements MenuEventHandler {
 
     @Override
     public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        try (var enter = ctx.tracer.enter("list [", "] -> %s")){
+        try (var enter = ctx.tracer.enter("list [", "] -> %s")) {
             boolean state = true;
             var iterator = commands.iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 MenuEventHandler like = iterator.next();
                 if (!like.test(ctx, placeholders)) {
                     state = false;
                 }
-                if (iterator.hasNext()){
+                if (iterator.hasNext()) {
                     ctx.tracer.log("");
                 }
             }

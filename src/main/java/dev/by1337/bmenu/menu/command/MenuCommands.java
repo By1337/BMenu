@@ -1,12 +1,13 @@
 package dev.by1337.bmenu.menu.command;
 
 import dev.by1337.bmenu.animation.Animator;
-import dev.by1337.bmenu.loader.MenuLoader;
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.command.argument.ArgumentParamsMap;
 import dev.by1337.bmenu.command.argument.ArgumentSlots;
 import dev.by1337.bmenu.hook.BungeeCordMessageSender;
 import dev.by1337.bmenu.hook.VaultHook;
+import dev.by1337.bmenu.loader.MenuLoader;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.slot.SlotContent;
 import dev.by1337.bmenu.slot.SlotFactory;
@@ -155,6 +156,21 @@ public class MenuCommands {
                                     m.open();
                                 }
                         )
+                )
+                .sub(new Command<ExecuteContext>("$open_with_args").executor(
+                        new ArgumentParamsMap<>("params"),
+                        (v, params) -> {
+                            if (params == null) throw new CommandMsgError("Use: open: {menu: <menu>}");
+                            String menu = params.get("menu");
+                            if (menu == null) throw new CommandMsgError("Use: open: {menu: <menu>}");
+                            Menu m = v.menu.loader().create(menu, v.menu.viewer(), v.menu);
+                            params.forEach((k, p) -> {
+                                if (k.equals("menu")) return;
+                                m.addArgument(k, p);
+                            });
+                            v.menu.setUpperMenu(m);
+                            m.open();
+                        })
                 )
                 .sub(new Command<ExecuteContext>("[BACK_OR_OPEN]")
                         .aliases("[back_or_open]")
@@ -385,7 +401,7 @@ public class MenuCommands {
                             if (set == null) {
                                 throw new CommandError("commands_list не определён в конфиге!");
                             }
-                    set.test(v, v.menu);
+                            set.test(v, v.menu);
                         }
                 )
         );
@@ -398,7 +414,7 @@ public class MenuCommands {
                             if (set == null) {
                                 throw new CommandError("В commands_list не пределён набор команд {}", name);
                             }
-                    set.test(v, v.menu);
+                            set.test(v, v.menu);
                         }
                 )
         );
@@ -663,7 +679,7 @@ public class MenuCommands {
     //todo json?
     private static void runIn(String rawList, Menu menu, MenuLoader loader, ExecuteContext ctx) {
         if (rawList != null && !rawList.isBlank()) {
-            try (ExecuteContext newCtx = ExecuteContext.of(menu, ctx.item, "run in " + menu.getId())){
+            try (ExecuteContext newCtx = ExecuteContext.of(menu, ctx.item, "run in " + menu.getId())) {
                 YamlMap yaml = YamlMap.loadFromString("data: " + rawList);
                 var list = yaml.get("data").decode(YamlCodec.STRINGS).getOrThrow();
                 menu.runCommands(newCtx, list);
