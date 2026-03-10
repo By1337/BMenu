@@ -42,7 +42,10 @@ public record ClickMapComponent(Map<MenuClickType, Commands> map) {
     }
 
     public boolean doClick(MenuClickType type, ExecuteContext ctx, PlaceholderApplier placeholders) {
-        Requirement handler = requireNonNullElseGet(map.get(type), () -> map.get(MenuClickType.ANY_CLICK));
+        Requirement handler = requireNonNullElseGet(map.get(type), () -> {
+            ctx.tracer.log("-> on_click");
+           return map.get(MenuClickType.ANY_CLICK);
+        });
         if (handler != null) {
             handler.test(ctx, placeholders);
             return true;

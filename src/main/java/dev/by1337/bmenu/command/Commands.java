@@ -72,7 +72,7 @@ public class Commands implements MenuEventHandler {
                         var params = S2S_MAP.decode(cmdValue).getOrThrow();
                         params.forEach((k, v) -> {
                             buffer.append('"').append(ArgumentParamsMap.escape(k)).append("\"=\"")
-                                    .append(ArgumentParamsMap.escape(v)).append("\",");
+                                    .append(ArgumentParamsMap.escape(v.replace("\\n", "\n"))).append("\",");
                         });
                         if (!params.isEmpty()) {
                             buffer.setLength(buffer.length() - 1);

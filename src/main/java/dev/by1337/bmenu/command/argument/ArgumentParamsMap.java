@@ -80,11 +80,17 @@ public class ArgumentParamsMap<C> extends Argument<C, Map<String, String>> {
             char c = s.charAt(i);
 
             if (quoted) {
-
                 if (c == '\\') {
                     if (++i >= s.length())
                         throw new IllegalArgumentException("Invalid escape");
-                    out.append(s.charAt(i));
+                    c = s.charAt(i);
+                    switch (c) {
+                        case 'n' -> out.append('\n');
+                        case 'r' -> out.append('\r');
+                        case '\\' -> out.append('\\');
+                        case 't' -> out.append('\t');
+                        default -> out.append(c);
+                    }
                     continue;
                 }
 
