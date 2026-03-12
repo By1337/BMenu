@@ -172,6 +172,40 @@ public class MenuCommands {
                             m.open();
                         })
                 )
+                .sub(new Command<ExecuteContext>("back_with_args").executor(
+                        new ArgumentParamsMap<>("params"),
+                        (v, params) -> {
+                            if (params == null) throw new CommandMsgError("Use: back: {}");
+                            var menu = Objects.requireNonNull(v.menu.previousMenu(), "does not have a previous menu!");
+                            params.forEach(menu::addArgument);
+                            menu.reopen();
+                        })
+                )
+                .sub(new Command<ExecuteContext>("back_or_open_with_args").executor(
+                        new ArgumentParamsMap<>("params"),
+                        (v, params) -> {
+                            if (params == null) throw new CommandMsgError("Use: back_or_open: {menu: <menu>}");
+                            String menu = params.get("menu");
+                            if (menu == null) throw new CommandMsgError("Use: back_or_open: {menu: <menu>}");
+                            var previousMenu = v.menu.previousMenu();
+                            Menu m;
+                            if (previousMenu != null) {
+                                m = previousMenu;
+                            } else {
+                                m = v.menu.loader().create(menu, v.menu.viewer(), v.menu);
+                            }
+                            params.forEach((k, p) -> {
+                                if (k.equals("menu")) return;
+                                m.addArgument(k, p);
+                            });
+                            if (m == previousMenu) {
+                                m.reopen();
+                            } else {
+                                v.menu.setUpperMenu(m);
+                                m.open();
+                            }
+                        })
+                        )
                 .sub(new Command<ExecuteContext>("[BACK_OR_OPEN]")
                         .aliases("[back_or_open]")
                         .argument(new ArgumentString<>("menu"))

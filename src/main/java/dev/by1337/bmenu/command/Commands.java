@@ -67,8 +67,12 @@ public class Commands implements MenuEventHandler {
                     YamlValue cmdValue = map.get(cmd);
                     if (cmd.equals("input_chat")) {
                         tryDecode(cmdValue, PlayerNumberInput.CODEC, err, handlers::add);
-                    } else if (cmd.equals("open") && cmdValue.isMap()) {
-                        buffer.append("open_with_args ");
+                    } else if (cmdValue.isMap() && (
+                            cmd.equals("open") ||
+                                    cmd.equals("back") ||
+                                    cmd.equals("back_or_open")
+                    )) {
+                        buffer.append(cmd).append("_with_args ");
                         var params = S2S_MAP.decode(cmdValue).getOrThrow();
                         params.forEach((k, v) -> {
                             buffer.append('"').append(ArgumentParamsMap.escape(k)).append("\"=\"")

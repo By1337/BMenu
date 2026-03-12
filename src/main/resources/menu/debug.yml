@@ -221,6 +221,15 @@ items:
       2:
         material: diamond
     on_click:
+      - open:
+          menu: menu
+          param: 123
+      - back:
+          param: 123
+      - back_or_open:
+          menu: menu
+          param: 123
+
       - input_chat:
           param: 'chat_result'
           on_pass:
