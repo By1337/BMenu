@@ -148,7 +148,8 @@ public class Commands implements MenuEventHandler {
     private boolean hasBreak;
 
     public Commands(ConditionalHandler requirement) {
-        commands = List.of(requirement);
+        commands = new ArrayList<>();
+        commands.add(requirement);
     }
 
     public Commands(List<MenuEventHandler> commands, boolean hasBreak) {
@@ -213,6 +214,9 @@ public class Commands implements MenuEventHandler {
         return CODEC.encode(this);
     }
 
+    public void addHandler(MenuEventHandler handler) {
+        commands.add(handler);
+    }
 
     @Override
     public String toString() {

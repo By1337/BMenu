@@ -90,6 +90,13 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
         for (int i = supers.size() - 1; i >= 0; i--) {
             MenuConfig superMenu = supers.get(i);
             items.putAll(superMenu.idToItems);
+            superMenu.eventHandlers.forEach((k, v) -> {
+                var old = eventHandlers.get(k);
+                if (old == null) eventHandlers.put(k, v);
+                else {
+                    old.addHandler(v);
+                }
+            });
             if (superMenu.id != null) {
                 supersId.add(superMenu.id);
             }
