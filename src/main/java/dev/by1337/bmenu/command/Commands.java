@@ -2,6 +2,7 @@ package dev.by1337.bmenu.command;
 
 
 import dev.by1337.bmenu.command.argument.ArgumentParamsMap;
+import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.handler.BreakableConditionalHandler;
 import dev.by1337.bmenu.handler.ConditionalHandler;
 import dev.by1337.bmenu.handler.FirstMatchHandler;
@@ -27,7 +28,7 @@ public class Commands implements MenuEventHandler {
 
     public static final YamlCodec<Commands> CODEC = YamlCodec.<Commands>recursive(codec -> new YamlCodec<Commands>() {
         private final YamlCodec<Map<String, YamlValue>> S2OBJET_MAP = YamlCodec.mapOf(STRING, YAML_VALUE);
-        private final YamlCodec<Map<String, String>> S2S_MAP = YamlCodec.mapOf(STRING, MULTI_LINE_STRING);
+        private final YamlCodec<Map<String, String>> S2S_MAP = YamlCodec.mapOf(STRING, MenuCodecs.MULTI_LINE_STRING);
 
         @Override
         public DataResult<Commands> decode(YamlValue yaml) {

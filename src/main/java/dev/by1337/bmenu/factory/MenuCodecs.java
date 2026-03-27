@@ -2,11 +2,13 @@ package dev.by1337.bmenu.factory;
 
 import com.google.common.base.Joiner;
 import dev.by1337.bmenu.animation.util.AnimationUtil;
+import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.bukkit.NamespacedKey;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -41,5 +43,41 @@ public class MenuCodecs {
             return DataResult.error("Failed to decode NamespacedKey: " + e.getMessage());
         }
     }, NamespacedKey::asString);
-}
 
+    public static YamlCodec<List<String>> STR_LIST = new YamlCodec<>() {
+
+        @Override
+        public DataResult<List<String>> decode(YamlValue yaml) {
+            if (!yaml.isCollection()) return STRING.decode(yaml).mapValue(s ->
+                    Arrays.asList(s.replace("\\n", "\n").split("\n"))
+            );
+            return yaml.asCollection().flatMap(o -> {
+                StringBuilder err = new StringBuilder();
+                List<String> result = new ArrayList<>();
+                for (Object object : o) {
+                    var res = decode(YamlValue.wrap(object));
+                    if (res.hasResult()){
+                        result.addAll(res.result());
+                    }
+                    if (res.hasError()){
+                        err.append(res.error()).append("\n");
+                    }
+                }
+                if (err.isEmpty()) return DataResult.success(result);
+                err.setLength(err.length() - 1);
+                return DataResult.error(err.toString()).partial(result);
+            });
+        }
+
+        @Override
+        public YamlValue encode(List<String> strings) {
+            return YamlValue.wrap(strings);
+        }
+
+    };
+    public static YamlCodec<String> MULTI_LINE_STRING = STR_LIST.map(
+            l -> Joiner.on("\n").join(l),
+            s -> Arrays.asList(s.replace("\\n", "\n").split("\n"))
+    );
+
+}

@@ -10,7 +10,6 @@ import dev.by1337.plc.Placeholders;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
-import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,9 @@ public class ItemFixer {
 
         replacePlaceholders(map, superItem);
         map.set("name", fixDisplay(map.getRaw("name")));
-        map.set("lore", fixDisplay(map.getRaw("lore"), true));
+        if (map.has("lore")){
+            map.set("lore", map.get("lore").decode(MenuCodecs.STR_LIST).result());
+        }
 
         if (Objects.equals(map.getRaw("ticking"), true)) {
             if (map.has("on_tick")) {
@@ -91,11 +92,23 @@ public class ItemFixer {
         if (o instanceof Collection<?> c) {
             List<String> result = new ArrayList<>();
             for (Object object : c) {
-                String s = String.valueOf(object);
-                if (s.contains("\n")) {
-                    result.addAll(Arrays.asList(s.split("\n")));
+                Object v = fixDisplay(object, true);
+                if (v instanceof Collection<?> l) {
+                    for (Object o1 : l) {
+                        String s = String.valueOf(o1);
+                        if (s.contains("\n")) {
+                            result.addAll(Arrays.asList(s.split("\n")));
+                        } else {
+                            result.add(s);
+                        }
+                    }
                 } else {
-                    result.add(s);
+                    String s = String.valueOf(v);
+                    if (s.contains("\n")) {
+                        result.addAll(Arrays.asList(s.split("\n")));
+                    } else {
+                        result.add(s);
+                    }
                 }
             }
             return result;
