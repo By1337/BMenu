@@ -1,0 +1,20 @@
+# так как это меню будет открываться через theme_selector.yml меню, id не указываем
+provider: default
+type: chest
+size: 27
+title: "<{COLOR1}>Пример меню"
+items:
+  a:
+    slot: 13
+    name: "<{COLOR1}>Кнопка"
+    lore:
+      - "<{COLOR1}>Нажми чтобы"
+      - "<{COLOR1}>сменить цвет на случайный"
+    material: diamond
+    on_click:
+      - '<{COLOR1}>Сменил!'
+      - open: 'theme:example'
+  b:
+    slot: 0-12,14-26
+    name: ''
+    material: '{GUI}'

@@ -1,11 +1,11 @@
 package dev.by1337.bmenu.requirement;
 
-import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.codec.InlineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.Location;
+import org.jetbrains.annotations.UnknownNullability;
 
 public class NearbyRequirement implements Requirement {
     public static YamlCodec<NearbyRequirement> CODEC = InlineYamlCodecBuilder.inline(
@@ -42,13 +42,14 @@ public class NearbyRequirement implements Requirement {
     }
 
     @Override
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        if (!ctx.menu.viewer().getWorld().getName().equals(world)) {
-            ctx.tracer.log("if '%s' -> %s", value, not);
+    public boolean test(@UnknownNullability PlayerContext ctx, PlaceholderApplier placeholders) {
+        var pl = ctx.getPlayer();
+        if (!pl.getWorld().getName().equals(world)) {
+            ctx.tracer().log("if '%s' -> %s", value, not);
             return not;
         }
-        var v = not != (distanceSquared(ctx.menu.viewer().getLocation()) < radiusSq);
-        ctx.tracer.log("if '%s' -> %s", value, v);
+        var v = not != (distanceSquared(pl.getLocation()) < radiusSq);
+        ctx.tracer().log("if '%s' -> %s", value, v);
         return v;
     }
 

@@ -3,6 +3,7 @@ package dev.by1337.bmenu.loader;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.command.CommandList;
 import dev.by1337.bmenu.command.Commands;
+import dev.by1337.bmenu.factory.FileUtil;
 import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.menu.DefaultMenu;
 import dev.by1337.bmenu.menu.Menu;
@@ -31,30 +32,30 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
     public static final PipelineYamlCodecBuilder<MenuConfig> RAW_CODEC;
     public static final YamlCodec<MenuConfig> CODEC;
 
-    private MenuSupplier defaultMenuCreator = DefaultMenu::new;
-    private final Set<NamespacedKey> supersId = new HashSet<>();
-    private final List<MenuConfig> supers = new ArrayList<>();
-    private @Nullable NamespacedKey id;
-    private @Nullable NamespacedKey provider = new NamespacedKey("bmenu", "default");
-    private InventoryType invType = InventoryType.CHEST;
-    private int size = 54;
-    private final Set<NamespacedKey> onlyOpenFrom = new HashSet<>();
-    private final Map<String, String> args = new HashMap<>();
-    private final Map<String, SlotFactory> idToItems = new HashMap<>();
-    private YamlMap yaml;
-    private CashedYamlMap cachedYaml;
-    private String title;
-    private List<SlotFactory> items;
-    private @Nullable Animator.AnimatorContext animation;
-    private final Map<String, Animator.AnimatorContext> animations = new HashMap<>();
-    private CommandList commandList = new CommandList(new HashMap<>());
-    private final Map<String, Commands> eventHandlers = new HashMap<>();
-    private long clickCooldown = DEFAULT_CLICK_COOLDOWN;
+    protected MenuSupplier defaultMenuCreator = DefaultMenu::new;
+    protected final Set<NamespacedKey> supersId = new HashSet<>();
+    protected final List<MenuConfig> supers = new ArrayList<>();
+    protected @Nullable NamespacedKey id;
+    protected @Nullable NamespacedKey provider = new NamespacedKey("bmenu", "default");
+    protected InventoryType invType = InventoryType.CHEST;
+    protected int size = 54;
+    protected final Set<NamespacedKey> onlyOpenFrom = new HashSet<>();
+    protected final Map<String, String> args = new HashMap<>();
+    protected final Map<String, SlotFactory> idToItems = new HashMap<>();
+    protected YamlMap yaml;
+    protected CashedYamlMap cachedYaml;
+    protected String title;
+    protected List<SlotFactory> items;
+    protected @Nullable Animator.AnimatorContext animation;
+    protected final Map<String, Animator.AnimatorContext> animations = new HashMap<>();
+    protected CommandList commandList = new CommandList(new HashMap<>());
+    protected final Map<String, Commands> eventHandlers = new HashMap<>();
+    protected long clickCooldown = DEFAULT_CLICK_COOLDOWN;
+    protected List<File> fromFiles;
 
     private Object data;
     private MenuLoader loader;
 
-    private List<File> fromFiles;
 
     public void fill(Menu menu, SlotContent[] matrix) {
         int invSize = matrix.length;
@@ -84,7 +85,19 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
         return defaultMenuCreator.createMenu(this, viewer, previousMenu);
     }
 
-    public void supers(List<MenuConfig> supers, List<File> fromFiles) {
+    public void onDecode(YamlMap from,File fromFile, MenuDecoder decoder){
+        List<File> supers = FileUtil.findFiles(fromFile, loader, from.get("extends").asList(YamlCodec.STRING, List.of()));
+        for (File file : supers) {
+            decoder.loadFile(file);
+        }
+    }
+
+    public void postDecode(File base, Map<File, MenuConfig> configs) {
+        configs.remove(base);
+        supers(new ArrayList<>(configs.values()), new ArrayList<>(configs.keySet()));
+    }
+
+    protected void supers(List<MenuConfig> supers, List<File> fromFiles) {
         this.fromFiles = fromFiles;
         Map<String, SlotFactory> items = new HashMap<>();
         for (int i = supers.size() - 1; i >= 0; i--) {
@@ -292,5 +305,9 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
     @Override
     public NamespacedKey getKey() {
         return id;
+    }
+
+    public void setId(@Nullable NamespacedKey id) {
+        this.id = id;
     }
 }

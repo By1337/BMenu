@@ -1,6 +1,6 @@
 package dev.by1337.bmenu.handler;
 
-import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -17,15 +17,15 @@ public class FirstMatchHandler implements MenuEventHandler {
     }
 
     @Override
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        try (var enter = ctx.tracer.enter("first-math [", "] -> %s")){
+    public boolean test(PlayerContext ctx, PlaceholderApplier placeholders) {
+        try (var enter = ctx.tracer().enter("first-math [", "] -> %s")){
             enter.result(true);
             var iterator = blocks.iterator();
             while (iterator.hasNext()){
                 var block = iterator.next();
                 if (block.test(ctx, placeholders)) return true;
                 if (iterator.hasNext()){
-                    ctx.tracer.log("");
+                    ctx.tracer().log("");
                 }
             }
             enter.result(false);

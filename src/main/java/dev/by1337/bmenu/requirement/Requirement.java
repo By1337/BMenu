@@ -1,6 +1,7 @@
 package dev.by1337.bmenu.requirement;
 
 import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.bmenu.handler.BreakableConditionalHandler;
 import dev.by1337.bmenu.handler.ConditionalHandler;
 import dev.by1337.bmenu.handler.FirstMatchHandler;
@@ -23,7 +24,7 @@ public interface Requirement {
     YamlCodec<Requirement> CODEC = Codec.allOf();
     Requirement TRUE = new Requirement() {
         @Override
-        public boolean test(ExecuteContext menu, PlaceholderApplier placeholders) {
+        public boolean test(PlayerContext menu, PlaceholderApplier placeholders) {
             return true;
         }
 
@@ -39,7 +40,7 @@ public interface Requirement {
     };
     Requirement FALSE = new Requirement() {
         @Override
-        public boolean test(ExecuteContext menu, PlaceholderApplier placeholders) {
+        public boolean test(PlayerContext menu, PlaceholderApplier placeholders) {
             return false;
         }
 
@@ -54,7 +55,7 @@ public interface Requirement {
         }
     };
 
-    boolean test(ExecuteContext ctx, PlaceholderApplier placeholders);
+    boolean test(PlayerContext ctx, PlaceholderApplier placeholders);
 
     default @Nullable Requirement compile() {
         return null;
@@ -128,7 +129,7 @@ public interface Requirement {
             if (list.isEmpty()) return TRUE;
             return new Requirement() {
                 @Override
-                public boolean test(ExecuteContext menu, PlaceholderApplier placeholders) {
+                public boolean test(PlayerContext menu, PlaceholderApplier placeholders) {
                     if (allOf) {
                         for (Requirement requirement : list) {
                             if (!requirement.test(menu, placeholders)) return false;

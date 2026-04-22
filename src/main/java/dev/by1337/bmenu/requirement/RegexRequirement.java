@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.requirement;
 
 import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
 import org.jetbrains.annotations.NotNull;
@@ -24,14 +24,14 @@ public class RegexRequirement implements Requirement {
     }
 
     @Override
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean test(PlayerContext ctx, PlaceholderApplier placeholders) {
         String s = placeholders.setPlaceholders(input);
         Matcher m = pattern.matcher(s);
         var v = not != m.find();
         if (not) {
-            ctx.tracer.log("if '!regex %s' -> %s", s, v);
+            ctx.tracer().log("if '!regex %s' -> %s", s, v);
         } else {
-            ctx.tracer.log("if 'regex %s' -> %s", s, v);
+            ctx.tracer().log("if 'regex %s' -> %s", s, v);
         }
         return v;
     }

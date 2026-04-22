@@ -8,9 +8,15 @@ import java.util.Collections;
 import java.util.List;
 
 public class FileUtil {
-    public static List<File> findFiles(File file, MenuLoader loader, List<String> files) {
+    public static File findFile(File base, MenuLoader loader, String path) {
+        var l = findFiles(base, loader, List.of(path));
+        if (l.isEmpty())
+            throw new InvalidMenuConfigException("Invalid menu path: {}", path);
+        return l.get(0);
+    }
+    public static List<File> findFiles(File base, MenuLoader loader, List<String> files) {
         if (files.isEmpty()) return Collections.emptyList();
-        File fileFolder = file.getParentFile();
+        File fileFolder = base.getParentFile();
         List<File> result = new ArrayList<>();
         for (String s : files) {
             if (s.startsWith("./")) {

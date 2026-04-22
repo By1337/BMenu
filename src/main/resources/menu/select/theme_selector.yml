@@ -1,0 +1,28 @@
+id: theme:example
+provider: bmenu:select
+
+menus:
+  night:
+    # путь до файла
+    # - ./file.yml # путь относительно текущей папки
+    #- ../file.yml # путь относительно папки на уровень выше
+    #- /file.yml # путь относительно корневой папки с меню
+    file: './theme_base.yml'
+    # Как args, но заменяется во всём файле разом при загрузке меню.
+    replaces:
+      'COLOR1': 'gray'
+      'GUI': 'black_stained_glass_pane'
+  light:
+    file: './theme_base.yml'
+    replaces:
+      'COLOR1': 'white'
+      'GUI': 'white_stained_glass_pane'
+
+# "условие": '<меню>'
+selector:
+  # Условия выполняются сверху вниз.
+  '{rand_bool} == true': light
+  '{rand_bool} == false': night
+  'has theme#night': night # все # заменяются на '.' так как bukkit запрещает '.' в ключах
+  true: light # true как значение по умолчанию
+

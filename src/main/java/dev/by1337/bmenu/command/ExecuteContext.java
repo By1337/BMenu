@@ -3,13 +3,14 @@ package dev.by1337.bmenu.command;
 import dev.by1337.bmenu.handler.trace.EventTracer;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.slot.SlotContent;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 
-public class ExecuteContext implements AutoCloseable, Closeable {
+public class ExecuteContext implements AutoCloseable, Closeable, PlayerContext {
     private static final Logger log = LoggerFactory.getLogger("BMenu");
     public static boolean ENABLE_TRACER = false;
     public Menu menu;
@@ -59,5 +60,15 @@ public class ExecuteContext implements AutoCloseable, Closeable {
     @Override
     public void close() {
         flushTracer();
+    }
+
+    @Override
+    public Player getPlayer() {
+        return menu.viewer();
+    }
+
+    @Override
+    public EventTracer tracer() {
+        return tracer;
     }
 }

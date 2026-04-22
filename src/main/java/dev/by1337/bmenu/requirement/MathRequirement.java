@@ -1,23 +1,27 @@
 package dev.by1337.bmenu.requirement;
 
-import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
 import dev.by1337.plc.PlaceholderApplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public record MathRequirement(String input) implements Requirement {
 
+    private static final Logger log = LoggerFactory.getLogger("BMenu");
+
     @Override
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean test(PlayerContext ctx, PlaceholderApplier placeholders) {
         String s = placeholders.setPlaceholders(input);
         try {
             var v = FastExpressionParser.parse(s) == 1D;
-            ctx.tracer.log("if '%s' -> %s", s, v);
+            ctx.tracer().log("if '%s' -> %s", s, v);
             return v;
         } catch (FastExpressionParser.MathFormatException e) {
-            ctx.menu.loader().logger().error(
+            log.error(
                     "Failed to parse math requirement. expression: '{}' replaced expression: '{}'\n{}",
                     input, s,
                     e.getMessage()

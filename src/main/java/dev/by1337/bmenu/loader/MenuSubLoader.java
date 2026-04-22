@@ -48,8 +48,7 @@ public class MenuSubLoader {
             }
         } else if (f.getName().endsWith(".yml") || f.getName().endsWith(".yaml")) {
             try {
-                MenuConfigDecoder decoder = new MenuConfigDecoder(f, base);
-                DataResult<? extends MenuConfig> res = decoder.decode();
+                DataResult<? extends MenuConfig> res = new MenuDecoder(base).decode(f);
                 if (res.hasError()) {
                     log.error("Errors in {}\n{}", f.getPath(), res.error());
                 }

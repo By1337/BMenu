@@ -170,8 +170,8 @@ public class Commands implements MenuEventHandler {
     }
 
     @Override
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        try (var enter = ctx.tracer.enter("list [", "] -> %s")) {
+    public boolean test(PlayerContext ctx, PlaceholderApplier placeholders) {
+        try (var enter = ctx.tracer().enter("list [", "] -> %s")) {
             boolean state = true;
             var iterator = commands.iterator();
             while (iterator.hasNext()) {
@@ -180,7 +180,7 @@ public class Commands implements MenuEventHandler {
                     state = false;
                 }
                 if (iterator.hasNext()) {
-                    ctx.tracer.log("");
+                    ctx.tracer().log("");
                 }
             }
             enter.result(state);

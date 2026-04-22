@@ -10,6 +10,7 @@ import dev.by1337.bmenu.listener.PlayerInputListener;
 import dev.by1337.bmenu.loader.MenuConfig;
 import dev.by1337.bmenu.loader.MenuLoader;
 import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.menu.select.SelectMenuConfig;
 import dev.by1337.cmd.Command;
 import dev.by1337.cmd.argument.ArgumentStrings;
 import dev.by1337.core.command.bcmd.CommandError;
@@ -73,6 +74,7 @@ public class BMenu extends JavaPlugin {
                 config.get("hot-reload").asBool(false)
         );
         loader.codecRegistry().register("bmenu:default", MenuConfig.CODEC);
+        loader.codecRegistry().register("bmenu:select", SelectMenuConfig.CODEC);
         // writeSchemas(this); //todo пока не работает(
     }
 

@@ -21,9 +21,10 @@ public class MenuCommand implements MenuEventHandler {
         canBeCompiled = !hasPlaceholders;
     }
 
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean test(PlayerContext ctx0, PlaceholderApplier placeholders) {
+        var ctx = (ExecuteContext) ctx0;
         if (compiled != null) {
-            try (var ignored = ctx.tracer.timing("run: %s", source)) {
+            try (var ignored = ctx.tracer().timing("run: %s", source)) {
                 ctx.menu.executeCommand(ctx, compiled);
             }
         } else {
@@ -32,7 +33,7 @@ public class MenuCommand implements MenuEventHandler {
                 canBeCompiled = false;
                 test(ctx, placeholders);
             } else {
-                try (var ignored = ctx.tracer.timing("run: %s", source)) {
+                try (var ignored = ctx.tracer().timing("run: %s", source)) {
                     if (hasPlaceholders) {
                         ctx.menu.executeCommand(ctx, placeholders.setPlaceholders(source));
                     } else {

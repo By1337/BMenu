@@ -1,15 +1,15 @@
 package dev.by1337.bmenu.handler;
 
 import dev.by1337.bmenu.command.Commands;
-import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.bmenu.requirement.Requirement;
-import dev.by1337.bmenu.yaml.codec.CodecSelector;
-import dev.by1337.bmenu.yaml.codec.YamlTester;
 import dev.by1337.bmenu.yaml.dfu.BMenuDFU;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +28,7 @@ public class BreakableConditionalHandler implements MenuEventHandler {
             Commands.CODEC.fieldOf("do", BreakableConditionalHandler::doCmds, Commands.EMPTY),
             Commands.CODEC.fieldOf("else", BreakableConditionalHandler::elseCmds, Commands.EMPTY)
     ).preDecode(BMenuDFU.COMMANDS_KEY_RENAMER);
+    private static final Logger log = LoggerFactory.getLogger(BreakableConditionalHandler.class);
 
     private final List<Requirement> handlers;
     private final Commands doCmds;
@@ -40,8 +41,8 @@ public class BreakableConditionalHandler implements MenuEventHandler {
     }
 
     @Override
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        try (var enter = ctx.tracer.enter("requirements [", "] -> %s")){
+    public boolean test(PlayerContext ctx, PlaceholderApplier placeholders) {
+        try (var enter = ctx.tracer().enter("requirements [", "] -> %s")){
             boolean result = true;
             var iterator = handlers.iterator();
             while (iterator.hasNext()){
@@ -52,7 +53,7 @@ public class BreakableConditionalHandler implements MenuEventHandler {
                         if (requirement instanceof ConditionalHandler c1){
                             Commands c = c1.elseCommands();
                             if (c.isHasBreak()) {
-                                ctx.tracer.log("break");
+                                ctx.tracer().log("break");
                                 break;
                             }
                         }
@@ -60,16 +61,16 @@ public class BreakableConditionalHandler implements MenuEventHandler {
                         if (requirement instanceof ConditionalHandler c1){
                             Commands c = c1.doCommands();
                             if (c.isHasBreak()) {
-                                ctx.tracer.log("break");
+                                ctx.tracer().log("break");
                                 break;
                             }
                         }
                     }
                 } catch (Exception e) {
-                    ctx.menu.loader().logger().error("Failed to check requirement: {}", requirement, e);
+                    log.error("Failed to check requirement: {}", requirement, e);
                 }
                 if (iterator.hasNext()){
-                    ctx.tracer.log("");
+                    ctx.tracer().log("");
                 }
             }
             enter.result(result);

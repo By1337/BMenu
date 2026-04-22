@@ -1,0 +1,18 @@
+id: test:select
+provider: bmenu:select
+
+menus:
+  light:
+    file: './base.yml'
+    replaces:
+      '{COLOR1}': '#FFFFFF'
+  night:
+    file: './base.yml'
+    replaces:
+      '{COLOR1}': '#000000'
+
+selector:
+  "has mode.light": light
+  "has mode.night": night
+  true: light
+

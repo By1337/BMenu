@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.handler;
 
 import dev.by1337.bmenu.command.Commands;
-import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.bmenu.yaml.dfu.KeyRenamer;
 import dev.by1337.plc.PlaceholderApplier;
@@ -9,8 +9,6 @@ import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class ConditionalHandler implements MenuEventHandler {
@@ -49,8 +47,8 @@ public class ConditionalHandler implements MenuEventHandler {
     }
 
     @Override
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        try (var enter = ctx.tracer.enter("if-do {", "} -> %s")){
+    public boolean test(PlayerContext ctx, PlaceholderApplier placeholders) {
+        try (var enter = ctx.tracer().enter("if-do {", "} -> %s")){
             if (req.test(ctx, placeholders)) {
                 doCmds.test(ctx, placeholders);
                 enter.result(true);

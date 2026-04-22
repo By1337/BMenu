@@ -52,7 +52,7 @@ public class MenuLoader implements Listener {
             fileWatcher = new FileWatcher(homeDir, this::onFileChange);
             fileWatcher.startWatching();
         }
-        lookupProviders = new RegistryShortcut<YamlCodec<? extends MenuConfig>>() {
+        lookupProviders = new RegistryShortcut<>() {
             @Override
             protected YamlCodec<? extends MenuConfig> find(String key) {
                 var v = menuCodecRegistry.get(key);
@@ -73,7 +73,7 @@ public class MenuLoader implements Listener {
                 return null;
             }
         };
-        lookupMenus = new RegistryShortcut<MenuConfig>() {
+        lookupMenus = new RegistryShortcut<>() {
             @Override
             protected MenuConfig find(String key) {
                 var v = menus.get(key);
@@ -198,8 +198,7 @@ public class MenuLoader implements Listener {
             }
         } else if (f.getName().endsWith(".yml") || f.getName().endsWith(".yaml")) {
             try {
-                MenuConfigDecoder decoder = new MenuConfigDecoder(f, this);
-                DataResult<? extends MenuConfig> res = decoder.decode();
+                DataResult<? extends MenuConfig> res = new MenuDecoder(this).decode(f);
                 if (res.hasError()) {
                     logger.error("Errors in {}\n{}", f.getPath(), res.error());
                 }
@@ -233,7 +232,7 @@ public class MenuLoader implements Listener {
         return lookupProviders.get(provider);
     }
 
-    public MenuConfig findMenuConfig(String name){
+    public MenuConfig findMenuConfig(String name) {
         return lookupMenus.get(name);
     }
 
@@ -252,7 +251,8 @@ public class MenuLoader implements Listener {
         lookupProviders.clear();
         lookupMenus.clear();
     }
-    void onReload(MenuSubLoader subLoader){
+
+    void onReload(MenuSubLoader subLoader) {
         lookupProviders.clear();
         lookupMenus.clear();
     }

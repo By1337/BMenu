@@ -3,6 +3,7 @@ package dev.by1337.bmenu.handler.input;
 import dev.by1337.bmenu.BMenu;
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
 import dev.by1337.plc.PlaceholderApplier;
@@ -30,8 +31,9 @@ public class PlayerNumberInput implements MenuEventHandler {
     }
 
     @Override
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
-        try (var enter = ctx.tracer.enter("input_chat {", "} -> %s")) {
+    public boolean test(PlayerContext ctx0, PlaceholderApplier placeholders) {
+        var ctx = (ExecuteContext) ctx0;
+        try (var enter = ctx.tracer().enter("input_chat {", "} -> %s")) {
             if (ctx.menu.loader().plugin() instanceof BMenu bMenu) {
                 enter.result(true);
                 var menu = ctx.menu;

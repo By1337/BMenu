@@ -1,11 +1,11 @@
 package dev.by1337.bmenu.requirement;
 
-import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.menu.Menu;
+import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.bmenu.util.function.LazyLoad;
 import dev.by1337.plc.PlaceholderApplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,11 +15,11 @@ public record StringsRequirement(Operation op, String s, String s1) implements R
 
 
     @Override
-    public boolean test(ExecuteContext ctx, PlaceholderApplier placeholders) {
+    public boolean test(@UnknownNullability PlayerContext ctx, PlaceholderApplier placeholders) {
         var left = placeholders.setPlaceholders(s);
         var right = placeholders.setPlaceholders(s1);
         var v = op.test.test(left, right);
-        ctx.tracer.log("if '%s %s %s' -> %s", left, op.name, right, v);
+        ctx.tracer().log("if '%s %s %s' -> %s", left, op.name, right, v);
         return v;
     }
 
