@@ -1,11 +1,9 @@
 package dev.by1337.bmenu.requirement;
 
-import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.bmenu.handler.BreakableConditionalHandler;
 import dev.by1337.bmenu.handler.ConditionalHandler;
 import dev.by1337.bmenu.handler.FirstMatchHandler;
-import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.requirement.legacy.RequirementsFactory;
 import dev.by1337.bmenu.yaml.codec.CodecSelector;
 import dev.by1337.bmenu.yaml.codec.YamlTester;
@@ -102,18 +100,31 @@ public interface Requirement {
                             .add(YamlTester.ifKey("oneOf"), YamlCodec.lazyLoad(() -> FirstMatchHandler.CODEC))
                             .add(YamlTester.ifKey("do"), YamlCodec.lazyLoad(() -> ConditionalHandler.CODEC))
                             .add(YamlTester.ifKey("type"), RequirementsFactory::readLegacyType)
-                            .add(YamlTester.ifKey("checks"), v -> v.asYamlMap().flatMap(map -> {
-                                boolean anyOf = Objects.equals(true, map.getRaw("anyOf"));
-                                if (anyOf) return oneOf().decode(map.get("checks"));
-                                return allOf().decode(map.get("checks"));
-                            }))
-                            .add(YamlTester.IF_LIST, v -> v.asList(codec).flatMap(l -> {
-                                if (allOf) {
-                                    return DataResult.success(allOf(l));
+                            .add(YamlTester.ifKey("checks"), new YamlCodec<Requirement>() {
+                                @Override
+                                public DataResult<Requirement> decode(YamlValue yamlValue) {
+                                    return Codec.readLegacyType(yamlValue);
                                 }
-                                return DataResult.success(oneOf(l));
-                            }))
+                            })
+                            .add(YamlTester.IF_LIST, new YamlCodec<Requirement>() {
+                                @Override
+                                public DataResult<Requirement> decode(YamlValue v) {
+                                    return v.asList(codec).flatMap(l -> {
+                                        if (allOf) {
+                                            return DataResult.success(allOf(l));
+                                        }
+                                        return DataResult.success(oneOf(l));
+                                    });
+                                }
+                            })
             );
+        }
+        public static DataResult<Requirement> readLegacyType(YamlValue v){
+            return v.asYamlMap().flatMap(map -> {
+                boolean anyOf = Objects.equals(true, map.getRaw("anyOf"));
+                if (anyOf) return oneOf().decode(map.get("checks"));
+                return allOf().decode(map.get("checks"));
+            });
         }
 
 

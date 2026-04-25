@@ -66,6 +66,8 @@ public class BMenu extends JavaPlugin {
             ResourceUtil.saveIfNotExist("menu/include-example/seller.yml", this);
             ResourceUtil.saveIfNotExist("menu/random-colors/rand-colors-menu.yml", this);
             ResourceUtil.saveIfNotExist("menu/admin/kick.yml", this);
+            ResourceUtil.saveIfNotExist("menu/select/theme_base.yml", this);
+            ResourceUtil.saveIfNotExist("menu/select/theme_selector.yml", this);
         }
         config = ResourceUtil.load("config.yml", this);
         loader = new MenuLoader(
@@ -75,7 +77,6 @@ public class BMenu extends JavaPlugin {
         );
         loader.codecRegistry().register("bmenu:default", MenuConfig.CODEC);
         loader.codecRegistry().register("bmenu:select", SelectMenuConfig.CODEC);
-        // writeSchemas(this); //todo пока не работает(
     }
 
     @Override
