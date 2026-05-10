@@ -40,6 +40,10 @@ public final class MenuMatrix {
         baseLayer = getMatrix(0);
         animationLayer = getMatrix(1);
     }
+    public void clearNativeLayers() {
+        Arrays.fill(baseLayer, null);
+        Arrays.fill(animationLayer, null);
+    }
 
     public void flushTo(SlotContent[] matrix) {
         Arrays.fill(matrix, null);

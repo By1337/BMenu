@@ -205,7 +205,7 @@ public class MenuCommands {
                                 m.open();
                             }
                         })
-                        )
+                )
                 .sub(new Command<ExecuteContext>("[BACK_OR_OPEN]")
                         .aliases("[back_or_open]")
                         .argument(new ArgumentString<>("menu"))
@@ -599,6 +599,35 @@ public class MenuCommands {
                             item.doClick(v.menu, v.menu.viewer(), MenuClickType.ANY_CLICK);
                         })
                 )
+        );
+        commands.sub(new Command<ExecuteContext>("[set_item_to_layer]")
+                        .aliases("[SET_ITEM_TO_LAYER]")
+                .executor(
+                        new ArgumentSlots<>("slots"),
+                        new ArgumentInt<>("layer"),
+                        new ArgumentString<>("item"),
+                        (ctx, slots, layer, itemID) -> {
+                            SlotContent[] src = ctx.menu.layers().getMatrix(layer + 2);
+                            SlotContent item;
+                            if ("-me".equals(itemID)) {
+                                item = ctx.item;
+                            } else {
+                                SlotFactory builder = ctx.menu.resolveSlotBuilder(itemID, ctx.menu);
+                                if (builder != null) {
+                                    item = builder.buildIfVisible(ctx.menu);
+                                } else {
+                                    item = SlotContent.ofMaterial(itemID);
+                                }
+                            }
+                            for (int slot : slots) {
+                                if (slot < 0 || slot >= src.length) {
+                                    throw new CommandError("слот {} за пределами меню!", slot);
+                                }
+                                src[slot] = item;
+                            }
+                        }
+                )
+
         );
 
 

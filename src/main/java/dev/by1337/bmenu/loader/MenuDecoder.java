@@ -65,6 +65,7 @@ public class MenuDecoder {
         loaded.put(file, result);
         var decoded = result.result();
         if (decoded != null) {
+            decoded.setLoader(loader);
             decoded.onDecode(ctx, file, this);
         }
         return decoded;

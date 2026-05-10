@@ -136,7 +136,7 @@ public abstract class AbstractMenu implements Menu {
         if (animator == null && config.animation() != null) {
             animator = config.animation().createAnimator();
         }
-        layers.clear();
+        layers.clearNativeLayers();
         onEvent(isReopen ? MenuEvents.ON_REOPEN : MenuEvents.ON_OPEN);
         if (animator != null && !animator.isEnd()) {
             animator.tick(layers.getAnimationLayer(), this);
