@@ -44,6 +44,8 @@ public abstract class AbstractMenu implements Menu {
     private static final Random rand = new Random();
     private static final DecimalFormat df = new DecimalFormat("#.##");
     private static final PlaceholderResolver<Menu> MENU_PLACEHOLDERS = Placeholders.<Menu>create()
+            .withParams("sys", System::getProperty)
+            //.withParams("env", System::getenv)
             .withContext("menu_id", m -> Objects.requireNonNullElse(m.config().id(), NamespacedKey.minecraft("unnamed")))
             .withContext("has_back_menu", m -> m.previousMenu() != null)
             .withContext("clicked_slot", Menu::lastClickedSlot)
