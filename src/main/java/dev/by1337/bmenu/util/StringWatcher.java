@@ -21,4 +21,7 @@ public class StringWatcher {
             onChange.accept(this.str = str);
         }
     }
+    public void doChange(){
+        onChange.accept(str);
+    }
 }

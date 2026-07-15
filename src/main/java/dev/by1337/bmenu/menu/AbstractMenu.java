@@ -4,14 +4,12 @@ import dev.by1337.bmenu.MenuEvents;
 import dev.by1337.bmenu.animation.Animator;
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.bmenu.inventory.BukkitInventory;
 import dev.by1337.bmenu.loader.MenuConfig;
 import dev.by1337.bmenu.loader.MenuLoader;
 import dev.by1337.bmenu.menu.command.MenuCommands;
 import dev.by1337.bmenu.placeholder.PlaceholderResolverList;
 import dev.by1337.bmenu.placeholder.SimplePlaceholders;
-import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.bmenu.slot.SlotContent;
 import dev.by1337.bmenu.slot.SlotFactory;
 import dev.by1337.bmenu.slot.component.MenuClickType;
@@ -146,6 +144,9 @@ public abstract class AbstractMenu implements Menu {
         if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventoryLike.getInventory())) {
             return;
         }
+        if (isReopen) {
+            title.doChange();
+        }
         generate0();
     }
 
@@ -260,7 +261,7 @@ public abstract class AbstractMenu implements Menu {
     public void onEvent(String event) {
         Commands commandRequirements = config.eventHandlers().get(event);
         if (commandRequirements != null) {
-            try (var ctx = ExecuteContext.of(this, event)){
+            try (var ctx = ExecuteContext.of(this, event)) {
                 commandRequirements.test(ctx, this);
             }
         }

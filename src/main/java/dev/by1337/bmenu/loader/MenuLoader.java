@@ -154,6 +154,15 @@ public class MenuLoader implements Listener {
         //  System.out.println("Tick " + (System.nanoTime() - nanos) / 1_000_000D + " ms");
     }
 
+    public @Nullable Menu getOpenedMenu(Player player){
+        if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu menu) {
+            if (menu.loader() == this) {
+                return menu;
+            }
+        }
+        return null;
+    }
+
     public void enable() {
         startTicker();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);

@@ -18,6 +18,8 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public interface Menu extends InventoryHolder, CommandRunner<ExecuteContext>, PlaceholderApplier, SlotBuilderSource {
 
     default void open() {
@@ -67,6 +69,12 @@ public interface Menu extends InventoryHolder, CommandRunner<ExecuteContext>, Pl
 
     @Nullable SlotContent lastClickedItem();
 
+    default @Nullable Object lastClickedItemPayload() {
+        SlotContent slot = lastClickedItem();
+        if (slot == null) return null;
+        return slot.getPayload();
+    }
+
     long lastClickTime();
 
     void addArgument(String key, String value);
@@ -106,5 +114,9 @@ public interface Menu extends InventoryHolder, CommandRunner<ExecuteContext>, Pl
         } else {
             matrix[slot] = item;
         }
+    }
+
+    default boolean isOpened() {
+        return Objects.equals(viewer().getOpenInventory().getTopInventory(), getInventory());
     }
 }
