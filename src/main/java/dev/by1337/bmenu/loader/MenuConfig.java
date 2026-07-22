@@ -57,7 +57,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
     private MenuLoader loader;
 
 
-    public void fill(Menu menu, SlotContent[] matrix) {
+    public void fill(Menu menu, SlotContent[] matrix, int offset) {
         int invSize = matrix.length;
 
         for (SlotFactory builder : items) {
@@ -65,6 +65,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
             if (slotContent == null) continue;
             var slots = builder.slots();
             for (int slot : slots) {
+                slot += offset;
                 if (slot < 0 || slot >= invSize) continue;
                 matrix[slot] = slotContent;
             }

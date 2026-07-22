@@ -17,7 +17,7 @@ import dev.by1337.bmenu.util.StringWatcher;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
 import dev.by1337.cmd.Command;
 import dev.by1337.core.util.text.MessageFormatter;
-import dev.by1337.core.util.text.minimessage.MiniMessage;
+import dev.by1337.core.util.text.minimessage.BMM;
 import dev.by1337.plc.PapiResolver;
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.Placeholders;
@@ -78,17 +78,17 @@ public abstract class AbstractMenu implements Menu {
     protected final SimplePlaceholders argsPlaceholders;
     private BukkitInventory inventoryLike;
     protected final StringWatcher title;
+    protected final @Nullable Locale locale;
 
     public AbstractMenu(MenuConfig config, Player viewer, @Nullable Menu previousMenu) {
+        locale = viewer.locale();
         argsPlaceholders = new SimplePlaceholders();
         resolvers = new PlaceholderResolverList();
         resolvers.addResolver(MENU_PLACEHOLDERS);
         resolvers.addResolver(argsPlaceholders);
         clickCooldown = config.clickCooldown();
         this.config = config;
-        title = new StringWatcher(config.title(), s -> {
-            inventoryLike.setTitle(MiniMessage.deserialize(s));
-        });
+        title = new StringWatcher(config.title(), s -> inventoryLike.setTitle(BMM.deserialize(s, locale)));
         loader = config.loader();
         this.viewer = viewer;
         layers = new MenuMatrix(menuSize(), this);
@@ -97,7 +97,7 @@ public abstract class AbstractMenu implements Menu {
         args.keySet().forEach(k -> argsPlaceholders.set(k, () -> args.get(k)));
     }
 
-    private int menuSize() {
+    protected int menuSize() {
         if (config.invType() == InventoryType.CHEST) return config.size();
         return config.invType().getDefaultSize();
     }
@@ -123,8 +123,8 @@ public abstract class AbstractMenu implements Menu {
         if (inventoryLike == null) {
             inventoryLike = new BukkitInventory(
                     this,
-                    config.size(),
-                    MiniMessage.deserialize(setPlaceholders(title.data())),
+                    menuSize(),
+                    BMM.deserialize(setPlaceholders(title.data()), locale),
                     config.invType()
             );
         }
@@ -184,11 +184,15 @@ public abstract class AbstractMenu implements Menu {
 
     protected void generate0() {
         Arrays.fill(layers.getBaseLayer(), null);
-        config.fill(this, layers.getBaseLayer());
+        config.fill(this, layers.getBaseLayer(), getItemOffsets());
         generate();
         onEvent(MenuEvents.ON_REFRESH);
         title.setData(setPlaceholders(config.title()));
         flush();
+    }
+
+    protected int getItemOffsets() {
+        return 0;
     }
 
     public void close() {
@@ -272,7 +276,6 @@ public abstract class AbstractMenu implements Menu {
     }
 
     @Override
-    @Deprecated
     public @NotNull Inventory getInventory() {
         return inventoryLike.getInventory();
     }

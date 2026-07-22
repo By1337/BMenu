@@ -424,7 +424,9 @@ public class MenuCommands {
                 .executor((v, args) -> {
                             int delay = (int) args.getOrThrow("delay", "Use: [delay] <delay> <command>");
                             ArgumentCommand.RunnableCommand<ExecuteContext> cmd = (ArgumentCommand.RunnableCommand<ExecuteContext>) args.getOrThrow("cmd", "Use: [delay] <delay> <command>");
-                            Bukkit.getScheduler().runTaskLater(v.menu.loader().plugin(), () -> cmd.run(v, s -> s), delay);
+                            Bukkit.getScheduler().runTaskLater(v.menu.loader().plugin(), () -> {
+                                cmd.run(v, s -> s);
+                            }, delay);
                         }
                 )
         );
