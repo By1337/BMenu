@@ -6,6 +6,7 @@ import dev.by1337.core.bridge.inventory.InventoryUtil;
 import dev.by1337.item.ItemModel;
 import dev.by1337.item.ItemStackBuilder;
 import dev.by1337.plc.PlaceholderApplier;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.util.concurrent.Executor;
@@ -18,10 +19,16 @@ public class BukkitItemRenderer implements ItemRenderer<Inventory> {
         v.setName("bmenu-item-renderer");
         return v;
     });
+    private static final ThreadLocal<Player> PLAYER_THREAD_LOCAL = new ThreadLocal<>();
 
     @Override
     public void render(Inventory ctx, int slot, ItemModel item, Menu menu, PlaceholderApplier placeholders) {
-        RENDERER_EXECUTOR.execute(() -> ctx.setItem(slot, ItemStackBuilder.build(item, placeholders, menu.viewer().locale())));
+        Player viewer = menu.viewer();
+        RENDERER_EXECUTOR.execute(() -> {
+            try (var ignored = setPlayer(viewer)) {
+                ctx.setItem(slot, ItemStackBuilder.build(item, placeholders, viewer.locale()));
+            }
+        });
     }
 
     @Override
@@ -31,5 +38,21 @@ public class BukkitItemRenderer implements ItemRenderer<Inventory> {
                 INV_UTIL.flushInv(menu.viewer());
             }
         });
+    }
+
+    public static Player getPlayer() {
+        return PLAYER_THREAD_LOCAL.get();
+    }
+
+    public static Scope setPlayer(Player player) {
+        var old = PLAYER_THREAD_LOCAL.get();
+        PLAYER_THREAD_LOCAL.set(player);
+        return () -> PLAYER_THREAD_LOCAL.set(old);
+    }
+
+    @FunctionalInterface
+    public interface Scope extends AutoCloseable {
+        @Override
+        void close();
     }
 }

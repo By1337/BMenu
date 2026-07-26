@@ -13,6 +13,7 @@ import dev.by1337.bmenu.placeholder.SimplePlaceholders;
 import dev.by1337.bmenu.slot.SlotContent;
 import dev.by1337.bmenu.slot.SlotFactory;
 import dev.by1337.bmenu.slot.component.MenuClickType;
+import dev.by1337.bmenu.slot.render.BukkitItemRenderer;
 import dev.by1337.bmenu.util.StringWatcher;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
 import dev.by1337.cmd.Command;
@@ -88,7 +89,11 @@ public abstract class AbstractMenu implements Menu {
         resolvers.addResolver(argsPlaceholders);
         clickCooldown = config.clickCooldown();
         this.config = config;
-        title = new StringWatcher(config.title(), s -> inventoryLike.setTitle(BMM.deserialize(s, locale)));
+        title = new StringWatcher(config.title(), s -> {
+            try (var ignored = BukkitItemRenderer.setPlayer(viewer)) {
+                inventoryLike.setTitle(BMM.deserialize(s, locale));
+            }
+        });
         loader = config.loader();
         this.viewer = viewer;
         layers = new MenuMatrix(menuSize(), this);
@@ -121,12 +126,14 @@ public abstract class AbstractMenu implements Menu {
             throw new IllegalStateException("Player is not online");
         }
         if (inventoryLike == null) {
-            inventoryLike = new BukkitInventory(
-                    this,
-                    menuSize(),
-                    BMM.deserialize(setPlaceholders(title.data()), locale),
-                    config.invType()
-            );
+            try (var ignored = BukkitItemRenderer.setPlayer(viewer)) {
+                inventoryLike = new BukkitInventory(
+                        this,
+                        menuSize(),
+                        BMM.deserialize(setPlaceholders(title.data()), locale),
+                        config.invType()
+                );
+            }
         }
         inventoryLike.clear();
         inventoryLike.show(viewer);
