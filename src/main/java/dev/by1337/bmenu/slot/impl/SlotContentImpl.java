@@ -78,7 +78,7 @@ public final class SlotContentImpl extends BaseSlotContent {
                 if (n != last){
                     last = n;
                     if (base != null){
-                        last = last.and(base);
+                        last = base.and(last);
                     }
                 }
             }
