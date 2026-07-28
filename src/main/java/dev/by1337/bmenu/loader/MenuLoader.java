@@ -1,6 +1,8 @@
 package dev.by1337.bmenu.loader;
 
 import dev.by1337.bmenu.io.FileWatcher;
+import dev.by1337.bmenu.loader.v2.MenuDecoder;
+import dev.by1337.bmenu.loader.v2.MenuDecoders;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.registry.RegistryLike;
 import dev.by1337.bmenu.registry.RegistryShortcut;
@@ -207,7 +209,7 @@ public class MenuLoader implements Listener {
             }
         } else if (f.getName().endsWith(".yml") || f.getName().endsWith(".yaml")) {
             try {
-                DataResult<? extends MenuConfig> res = new MenuDecoder(this).decode(f);
+                DataResult<? extends MenuConfig> res = MenuDecoders.factory().apply(this).decode(f);
                 if (res.hasError()) {
                     logger.error("Errors in {}\n{}", f.getPath(), res.error());
                 }

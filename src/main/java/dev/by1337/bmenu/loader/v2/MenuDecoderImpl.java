@@ -1,7 +1,9 @@
-package dev.by1337.bmenu.loader;
+package dev.by1337.bmenu.loader.v2;
 
 import dev.by1337.bmenu.factory.MenuFilePostprocessor;
 import dev.by1337.bmenu.factory.MenuFilePreprocessor;
+import dev.by1337.bmenu.loader.MenuConfig;
+import dev.by1337.bmenu.loader.MenuLoader;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.DataResult;
@@ -12,19 +14,19 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MenuDecoder {
+public class MenuDecoderImpl implements MenuDecoder {
 
     public final Map<File, DataResult<? extends MenuConfig>> loaded = new HashMap<>();
     public final MenuLoader loader;
     private PlaceholderApplier placeholders = s -> s;
 
-    public MenuDecoder(MenuLoader loader) {
+    public MenuDecoderImpl(MenuLoader loader) {
         this.loader = loader;
     }
 
     public DataResult<? extends MenuConfig> decode(File file) {
         try {
-            loadFile(file);
+            appendFile(file);
 
             DataResult<? extends MenuConfig> result = loaded.get(file);
 
@@ -52,10 +54,15 @@ public class MenuDecoder {
         return MenuFilePostprocessor.apply(placeholders.setPlaceholders(MenuFilePreprocessor.loadFile(file, loader)));
     }
 
-    public @Nullable MenuConfig loadFile(File file) {
+    public @Nullable MenuConfig appendFile(File file) {
         var old = loaded.get(file);
         if (old != null) return old.result();
         return loadFile(file, readYaml(file));
+    }
+
+    @Override
+    public MenuLoader loader() {
+        return loader;
     }
 
     public @Nullable MenuConfig loadFile(File file, YamlMap ctx) {

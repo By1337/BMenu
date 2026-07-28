@@ -5,6 +5,7 @@ import dev.by1337.bmenu.command.CommandList;
 import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.factory.FileUtil;
 import dev.by1337.bmenu.factory.MenuCodecs;
+import dev.by1337.bmenu.loader.v2.MenuDecoder;
 import dev.by1337.bmenu.menu.DefaultMenu;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.slot.SlotBuilderSource;
@@ -89,7 +90,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
     public void onDecode(YamlMap from,File fromFile, MenuDecoder decoder){
         List<File> supers = FileUtil.findFiles(fromFile, loader, from.get("extends").asList(YamlCodec.STRING, List.of()));
         for (File file : supers) {
-            decoder.loadFile(file);
+            decoder.appendFile(file);
         }
     }
 

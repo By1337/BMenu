@@ -1,5 +1,7 @@
 package dev.by1337.bmenu.loader;
 
+import dev.by1337.bmenu.loader.v2.MenuDecoder;
+import dev.by1337.bmenu.loader.v2.MenuDecoders;
 import dev.by1337.bmenu.registry.RegistryLike;
 import dev.by1337.yaml.codec.DataResult;
 import org.bukkit.plugin.Plugin;
@@ -48,7 +50,7 @@ public class MenuSubLoader {
             }
         } else if (f.getName().endsWith(".yml") || f.getName().endsWith(".yaml")) {
             try {
-                DataResult<? extends MenuConfig> res = new MenuDecoder(base).decode(f);
+                DataResult<? extends MenuConfig> res = MenuDecoders.factory().apply(base).decode(f);
                 if (res.hasError()) {
                     log.error("Errors in {}\n{}", f.getPath(), res.error());
                 }

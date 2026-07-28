@@ -5,7 +5,8 @@ import dev.by1337.bmenu.factory.FileUtil;
 import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.handler.trace.EventTracer;
 import dev.by1337.bmenu.loader.MenuConfig;
-import dev.by1337.bmenu.loader.MenuDecoder;
+import dev.by1337.bmenu.loader.v2.MenuDecoder;
+import dev.by1337.bmenu.loader.v2.MenuDecoders;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
@@ -85,8 +86,8 @@ public class SelectMenuConfig extends MenuConfig {
         for (Map.Entry<String, FileConf> entry : menus.entrySet()) {
             FileConf conf = entry.getValue();
             var path = conf.file;
-            var file = FileUtil.findFile(fromFile, decoder.loader, path);
-            var menuDecoder = new MenuDecoder(decoder.loader);
+            var file = FileUtil.findFile(fromFile, decoder.loader(), path);
+            var menuDecoder = MenuDecoders.factory().apply(decoder.loader());
 
             var replaces = conf.replaces;
             if (!replaces.isEmpty()) {
