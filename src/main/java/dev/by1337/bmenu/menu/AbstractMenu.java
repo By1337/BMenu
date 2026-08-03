@@ -151,6 +151,7 @@ public abstract class AbstractMenu implements Menu {
         if (!Objects.equals(viewer.getOpenInventory().getTopInventory(), inventoryLike.getInventory())) {
             return;
         }
+        loader.onMenuOpen(this, viewer);
         if (isReopen) {
             title.doChange();
         }

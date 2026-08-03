@@ -1,7 +1,6 @@
 package dev.by1337.bmenu.loader;
 
 import dev.by1337.bmenu.io.FileWatcher;
-import dev.by1337.bmenu.loader.v2.MenuDecoder;
 import dev.by1337.bmenu.loader.v2.MenuDecoders;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.registry.RegistryLike;
@@ -18,17 +17,17 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MenuLoader implements Listener {
     private final RegistryShortcut<YamlCodec<? extends MenuConfig>> lookupProviders;
@@ -41,6 +40,7 @@ public class MenuLoader implements Listener {
     private BukkitTask ticker;
     private @Nullable FileWatcher fileWatcher;
     private final Map<Plugin, MenuSubLoader> subLoaders = new IdentityHashMap<>();
+    private final Map<UUID, @Nullable Menu> openedMenus = new HashMap<>();
 
     public MenuLoader(File homeDir, Plugin plugin) {
         this(homeDir, plugin, false);
@@ -111,7 +111,7 @@ public class MenuLoader implements Listener {
 
         List<Pair<Player, String>> playerMenu = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu menu) {
+            if (player.getOpenInventory().getTopInventory().getHolder(false) instanceof Menu menu) {
                 if (menu.loader() == this) {
                     playerMenu.add(Pair.of(player, menu.config().id().asString()));
                 }
@@ -145,30 +145,23 @@ public class MenuLoader implements Listener {
     }
 
     private void tick() {
-        // long nanos = System.nanoTime();
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu menu) {
-                if (menu.loader() == this) {
-                    menu.tick();
-                }
+        openedMenus.forEach((key, menu) -> {
+            if (menu != null) {
+                menu.tick();
             }
         });
-        //  System.out.println("Tick " + (System.nanoTime() - nanos) / 1_000_000D + " ms");
     }
 
-    public @Nullable Menu getOpenedMenu(Player player){
-        if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu menu) {
-            if (menu.loader() == this) {
-                return menu;
-            }
-        }
-        return null;
+    public @Nullable Menu getOpenedMenu(Player player) {
+        return openedMenus.get(player.getUniqueId());
     }
 
     public void enable() {
         startTicker();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         menus.clear();
+        openedMenus.clear();
+        trackPlayer();
         loadMenus();
     }
 
@@ -176,7 +169,18 @@ public class MenuLoader implements Listener {
         closeAllOpenMenus();
         menus.clear();
         lookupMenus.clear();
+        openedMenus.clear();
+        trackPlayer();
         loadMenus();
+    }
+
+    private void trackPlayer() {
+        Bukkit.getOnlinePlayers().forEach(player -> openedMenus.put(player.getUniqueId(), null));
+    }
+
+    @ApiStatus.Internal
+    public void onMenuOpen(Menu menu, Player player) {
+        openedMenus.put(player.getUniqueId(), menu);
     }
 
     public void disable() {
@@ -185,6 +189,7 @@ public class MenuLoader implements Listener {
         lookupMenus.clear();
         ticker.cancel();
         HandlerList.unregisterAll(this);
+        openedMenus.clear();
         if (fileWatcher != null) {
             fileWatcher.stopWatching();
         }
@@ -195,11 +200,7 @@ public class MenuLoader implements Listener {
     }
 
     public void closeAllOpenMenus() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu m && m.loader() == this) {
-                player.closeInventory();
-            }
-        }
+        openedMenus.forEach((k, menu) -> {if (menu != null) menu.close();});
     }
 
     private void recursiveLoad(File f) {
@@ -269,26 +270,44 @@ public class MenuLoader implements Listener {
     }
 
     @EventHandler
-    public void onClick(InventoryClickEvent event) {
-        if (event.getInventory().getHolder() instanceof Menu menu && menu.loader() == this) {
-            event.setCancelled(true);
-            menu.onClick(event);
+    void onClick(InventoryClickEvent event) {
+        if (event.getWhoClicked() instanceof Player pl) {
+            var m = openedMenus.get(pl.getUniqueId());
+            if (m != null) {
+                event.setCancelled(true);
+                m.onClick(event);
+            }
         }
     }
 
     @EventHandler
-    public void onClick(InventoryDragEvent event) {
-        if (event.getInventory().getHolder() instanceof Menu menu && menu.loader() == this) {
-            event.setCancelled(true);
-            menu.onClick(event);
+    void onClick(InventoryDragEvent event) {
+        if (event.getWhoClicked() instanceof Player pl) {
+            var m = openedMenus.get(pl.getUniqueId());
+            if (m != null) {
+                event.setCancelled(true);
+                m.onClick(event);
+            }
         }
     }
 
     @EventHandler
-    public void onClose(InventoryCloseEvent event) {
-        if (event.getInventory().getHolder() instanceof Menu menu && menu.loader() == this) {
-            menu.onClose(event);
+    void onClose(InventoryCloseEvent event) {
+        if (event.getPlayer() instanceof Player p) {
+            var old = openedMenus.put(p.getUniqueId(), null);
+            if (old != null) old.onClose(event);
         }
+    }
+
+    @EventHandler
+    void onJoin(PlayerJoinEvent event) {
+        openedMenus.put(event.getPlayer().getUniqueId(), null);
+    }
+
+    @EventHandler
+    void onQuit(PlayerQuitEvent event) {
+        var key = event.getPlayer().getUniqueId();
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> openedMenus.remove(key), 0L);
     }
 
 
