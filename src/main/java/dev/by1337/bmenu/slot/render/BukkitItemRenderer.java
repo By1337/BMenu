@@ -6,6 +6,7 @@ import dev.by1337.core.bridge.inventory.InventoryUtil;
 import dev.by1337.item.ItemModel;
 import dev.by1337.item.ItemStackBuilder;
 import dev.by1337.plc.PlaceholderApplier;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
@@ -35,7 +36,7 @@ public class BukkitItemRenderer implements ItemRenderer<Inventory> {
     public void flush(Inventory ctx, Menu menu) {
         RENDERER_EXECUTOR.execute(() -> {
             if (menu.isOpened()) {
-                INV_UTIL.flushInv(menu.viewer());
+                Bukkit.getScheduler().runTask(menu.loader().plugin(), () -> INV_UTIL.flushInv(menu.viewer()));
             }
         });
     }
