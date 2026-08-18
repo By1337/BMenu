@@ -185,11 +185,11 @@ public class MenuLoader implements Listener {
 
     public void disable() {
         closeAllOpenMenus();
+        openedMenus.clear();
         menus.clear();
         lookupMenus.clear();
         ticker.cancel();
         HandlerList.unregisterAll(this);
-        openedMenus.clear();
         if (fileWatcher != null) {
             fileWatcher.stopWatching();
         }
@@ -200,7 +200,11 @@ public class MenuLoader implements Listener {
     }
 
     public void closeAllOpenMenus() {
-        openedMenus.forEach((k, menu) -> {if (menu != null) menu.close();});
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            if (player.getOpenInventory().getTopInventory().getHolder(false) instanceof Menu menu && menu.loader() == this) {
+                player.closeInventory();
+            }
+        });
     }
 
     private void recursiveLoad(File f) {
