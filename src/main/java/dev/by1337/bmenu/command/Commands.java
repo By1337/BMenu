@@ -8,6 +8,7 @@ import dev.by1337.bmenu.handler.ConditionalHandler;
 import dev.by1337.bmenu.handler.FirstMatchHandler;
 import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.bmenu.handler.input.PlayerNumberInput;
+import dev.by1337.bmenu.handler.input.PlayerStringInput;
 import dev.by1337.bmenu.yaml.dfu.BMenuDFU;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
@@ -68,6 +69,8 @@ public class Commands implements MenuEventHandler {
                     YamlValue cmdValue = map.get(cmd);
                     if (cmd.equals("input_chat")) {
                         tryDecode(cmdValue, PlayerNumberInput.CODEC, err, handlers::add);
+                    } else if (cmd.equals("input_chat_str")) {
+                        tryDecode(cmdValue, PlayerStringInput.CODEC, err, handlers::add);
                     } else if (cmdValue.isMap() && (
                             cmd.equals("open") ||
                                     cmd.equals("back") ||

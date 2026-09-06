@@ -241,6 +241,14 @@ items:
                 - '&cNan!'
           on_failed:
             - '&cNan'
+
+      - input_chat_str:
+          param: 'str_result'
+          on_pass:
+            - '&aString input: {str_result}'
+            - reopen: ''
+          on_failed:
+            - '&cInput cancelled'
       - close: ''
   on_view1:
     slot: 49
