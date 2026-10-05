@@ -15,7 +15,7 @@ public class ConditionalHandler implements MenuEventHandler {
     public static final YamlCodec<ConditionalHandler> CODEC = PipelineYamlCodecBuilder.of(ConditionalHandler::new)
             .field(Requirement.Codec.allOf(), "if", m -> m.req, (m, v) -> m.req = v)
             .field(Requirement.Codec.oneOf(), "if-one", m -> null, (m, v) -> m.req = v)
-            .field(Requirement.Codec.oneOf(), "if-all", m -> null, (m, v) -> m.req = v)
+            .field(Requirement.Codec.allOf(), "if-all", m -> null, (m, v) -> m.req = v)
             .field(Commands.CODEC, "do", m -> m.doCmds, (m, v) -> m.doCmds = v)
             .field(Commands.CODEC, "else", m -> m.elseCmds, (m, v) -> m.elseCmds = v)
             .build()
