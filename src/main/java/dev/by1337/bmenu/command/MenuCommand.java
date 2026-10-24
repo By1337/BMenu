@@ -1,6 +1,8 @@
 package dev.by1337.bmenu.command;
 
 import dev.by1337.bmenu.handler.MenuEventHandler;
+import dev.by1337.bmenu.menu.command.MenuTextCommands;
+import dev.by1337.edsl.command.LocalizedTextCommands;
 import dev.by1337.cmd.CompiledCommand;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
@@ -14,35 +16,40 @@ public class MenuCommand implements MenuEventHandler {
     private @Nullable CompiledCommand<ExecuteContext> compiled;
     private boolean canBeCompiled;
     private final boolean hasPlaceholders;
+    private final boolean deferred;
 
     public MenuCommand(String source) {
+        source = LocalizedTextCommands.preprocess(source);
         this.source = source;
         hasPlaceholders = source.contains("%") || source.contains("{");
-        canBeCompiled = !hasPlaceholders;
+        deferred = MenuTextCommands.defersPlaceholders(source);
+        canBeCompiled = !hasPlaceholders || deferred;
     }
 
     public boolean test(PlayerContext ctx0, PlaceholderApplier placeholders) {
         var ctx = (ExecuteContext) ctx0;
-        if (compiled != null) {
-            try (var ignored = ctx.tracer().timing("run: %s", source)) {
-                ctx.menu.executeCommand(ctx, compiled);
-            }
-        } else {
-            if (canBeCompiled) {
-                compiled = ctx.menu.compile(source);
-                canBeCompiled = false;
-                test(ctx, placeholders);
-            } else {
+        try (var scope = ctx.withPlaceholders(placeholders)) {
+            if (compiled != null) {
                 try (var ignored = ctx.tracer().timing("run: %s", source)) {
-                    if (hasPlaceholders) {
-                        ctx.menu.executeCommand(ctx, placeholders.setPlaceholders(source));
-                    } else {
-                        ctx.menu.executeCommand(ctx, source);
+                    ctx.menu.executeCommand(ctx, compiled);
+                }
+            } else {
+                if (canBeCompiled) {
+                    compiled = ctx.menu.compile(source);
+                    canBeCompiled = false;
+                    test(ctx, placeholders);
+                } else {
+                    try (var ignored = ctx.tracer().timing("run: %s", source)) {
+                        if (hasPlaceholders && !deferred) {
+                            ctx.menu.executeCommand(ctx, placeholders.setPlaceholders(source));
+                        } else {
+                            ctx.menu.executeCommand(ctx, source);
+                        }
                     }
                 }
             }
+            return true;
         }
-        return true;
     }
 
     public String source() {

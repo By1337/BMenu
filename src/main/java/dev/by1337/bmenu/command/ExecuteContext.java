@@ -1,6 +1,7 @@
 package dev.by1337.bmenu.command;
 
 import dev.by1337.bmenu.handler.trace.EventTracer;
+import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.slot.SlotContent;
 import org.bukkit.entity.Player;
@@ -17,6 +18,7 @@ public class ExecuteContext implements AutoCloseable, Closeable, PlayerContext {
     public @Nullable SlotContent item;
     public final EventTracer tracer;
     private @Nullable StringBuilder tracerLog;
+    private @Nullable PlaceholderApplier placeholders;
 
     private ExecuteContext(Menu menu, String cause) {
         this(menu, null, cause);
@@ -34,6 +36,21 @@ public class ExecuteContext implements AutoCloseable, Closeable, PlayerContext {
         } else {
             tracer = EventTracer.NOP;
         }
+    }
+
+    public PlaceholderApplier placeholders() {
+        return placeholders == null ? menu : placeholders;
+    }
+
+    public Scope withPlaceholders(PlaceholderApplier current) {
+        PlaceholderApplier previous = placeholders;
+        placeholders = current;
+        return () -> placeholders = previous;
+    }
+
+    @FunctionalInterface
+    public interface Scope extends AutoCloseable {
+        @Override void close();
     }
 
     public void flushTracer() {

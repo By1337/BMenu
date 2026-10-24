@@ -18,16 +18,11 @@ import dev.by1337.cmd.argument.ArgumentCommand;
 import dev.by1337.cmd.argument.ArgumentString;
 import dev.by1337.cmd.argument.ArgumentStrings;
 import dev.by1337.core.command.bcmd.CommandError;
-import dev.by1337.core.command.bcmd.argument.ArgumentComponents;
 import dev.by1337.core.command.bcmd.argument.ArgumentDouble;
 import dev.by1337.core.command.bcmd.argument.ArgumentInt;
 import dev.by1337.core.command.bcmd.argument.ArgumentSound;
-import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.YamlCodec;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
-import net.kyori.adventure.util.Ticks;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -51,6 +46,7 @@ public class MenuCommands {
                 .and(menuControl())
                 .and(slotCommands().map(c -> c.item))
                 .and(misc())
+                .and(MenuTextCommands.create())
 
         ;
     }
@@ -236,15 +232,6 @@ public class MenuCommands {
 
     private static Command<Void> voidOutput() {
         return new Command<Void>("root")
-                .sub(new Command<Void>("[BROADCAST]")
-                        .aliases("[broadcast]")
-                        .argument(new ArgumentComponents<>("msg"))
-                        .executor((v, args) -> {
-                                    Component msg = (Component) args.getOrDefault("msg", Component.empty());
-                                    Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(msg));
-                                }
-                        )
-                )
                 .sub(new Command<Void>("[CONSOLE]")
                         .aliases("[console]")
                         .argument(new ArgumentStrings<>("cmd"))
@@ -291,97 +278,7 @@ public class MenuCommands {
                                 }
                         )
                 )
-                .sub(new Command<Player>("[MESSAGE]")
-                        .aliases("[message]")
-                        .argument(new ArgumentComponents<>("msg"))
-                        .executor((v, args) -> {
-                                    v.sendMessage((Component) args.getOrDefault("msg", Component.empty()));
-                                }
-                        )
-                )
-                .sub(new Command<Player>("[ACTION_BAR]")
-                        .aliases("[action_bar]")
-                        .argument(new ArgumentComponents<>("msg"))
-                        .executor((v, args) -> {
-                                    Component msg = (Component) args.getOrDefault("msg", Component.empty());
-                                    v.sendActionBar(msg);
-                                }
-                        )
 
-                )
-                .sub(new Command<Player>("[ACTION_BAR_ALL]")
-                        .aliases("[action_bar_all]")
-                        .argument(new ArgumentComponents<>("msg"))
-                        .executor((v, args) -> {
-                                    Component msg = (Component) args.getOrDefault("msg", Component.empty());
-                                    Bukkit.getOnlinePlayers().forEach(player -> player.sendActionBar(msg));
-                                }
-                        )
-                )
-                .sub(new Command<Player>("[TITLE]")
-                        .aliases("[title]")
-                        .argument(new ArgumentString<>("msg"))
-                        .argument(new ArgumentInt<>("fadeIn"))
-                        .argument(new ArgumentInt<>("stay"))
-                        .argument(new ArgumentInt<>("fadeOut"))
-
-                        .executor((v, args) -> {
-                                    //todo хочу ArgumentComponent а тут \n
-                                    String msg = (String) args.getOrThrow("msg", "Use [TITLE] <\"Title\\nSubTitle\"> <?fadeIn> <?stay> <?fadeOut>");
-                                    int fadeIn = (int) args.getOrDefault("fadeIn", 10);
-                                    int stay = (int) args.getOrDefault("stay", 70);
-                                    int fadeOut = (int) args.getOrDefault("fadeOut", 20);
-
-                                    String[] arr = msg.split("\\\\n", 2);
-                                    v.showTitle(Title.title(
-                                            MiniMessage.deserialize(arr[0]),
-                                            arr.length == 2 ? MiniMessage.deserialize(arr[1]) : Component.empty(),
-                                            Title.Times.of(
-                                                    Ticks.duration(fadeIn),
-                                                    Ticks.duration(stay),
-                                                    Ticks.duration(fadeOut)
-                                            )
-                                    ));
-                                }
-                        )
-                )
-                .sub(new Command<Player>("[TITLE_ALL]")
-                        .aliases("[title_all]")
-                        .argument(new ArgumentString<>("msg"))
-                        .argument(new ArgumentInt<>("fadeIn"))
-                        .argument(new ArgumentInt<>("stay"))
-                        .argument(new ArgumentInt<>("fadeOut"))
-                        .executor((v, args) -> {
-                                    //todo хочу ArgumentComponent а тут \n
-                                    String msg = (String) args.getOrThrow("msg", "Use [TITLE_ALL] <\"Title\\nSubTitle\"> <?fadeIn> <?stay> <?fadeOut>");
-                                    int fadeIn = (int) args.getOrDefault("fadeIn", 10);
-                                    int stay = (int) args.getOrDefault("stay", 70);
-                                    int fadeOut = (int) args.getOrDefault("fadeOut", 20);
-
-                                    String[] arr = msg.split("\\\\n", 2);
-                                    Title title = Title.title(
-                                            MiniMessage.deserialize(arr[0]),
-                                            arr.length == 2 ? MiniMessage.deserialize(arr[1]) : Component.empty(),
-                                            Title.Times.of(
-                                                    Ticks.duration(fadeIn),
-                                                    Ticks.duration(stay),
-                                                    Ticks.duration(fadeOut)
-                                            )
-                                    );
-                                    Bukkit.getOnlinePlayers().forEach(player -> player.showTitle(title));
-                                }
-                        )
-
-                )
-                .sub(new Command<Player>("[BROADCAST]")
-                        .aliases("[broadcast]")
-                        .argument(new ArgumentComponents<>("msg"))
-                        .executor((v, args) -> {
-                                    Component msg = (Component) args.getOrDefault("msg", Component.empty());
-                                    Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(msg));
-                                }
-                        )
-                )
                 ;
     }
 

@@ -8,10 +8,20 @@ import java.util.List;
 
 public class AnimationUtil {
 
+    public static MaterialSlots readMaterialSlots(String input) {
+        String[] args = input.trim().split("\\s+", 2);
+        if (args.length != 2 || args[0].isEmpty() || args[1].isBlank()) {
+            throw new IllegalArgumentException("Expected <material-or-item> <slots>: " + input);
+        }
+        return new MaterialSlots(args[0], readSlots(args[1]));
+    }
+
+    public record MaterialSlots(String material, int[] slots) {}
+
     public static int[][] parsePairSlots(String input) {
         int[] src;
         int[] dest;
-        String[] args = input.split(" ");
+        String[] args = input.trim().split("\\s+");
         if (args[0].endsWith("++")) {
             int start = Integer.parseInt(args[0].substring(0, args[0].length() - 2));
             src = new int[]{start};
@@ -32,7 +42,7 @@ public class AnimationUtil {
     }
 
     public static int[] readSlots(String str) {
-        str = str.replace(" ", "");
+        str = str.replaceAll("\\s+", "");
         if (str.contains(",")) {
             List<Integer> result = new ArrayList<>();
             String[] slots = str.split(",");

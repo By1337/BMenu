@@ -10,8 +10,6 @@ import dev.by1337.item.ItemModel;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
 import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.yaml.codec.schema.SchemaType;
-import dev.by1337.yaml.codec.schema.SchemaTypes;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +23,7 @@ public class SlotVariant {
             .field(ClickMapComponent.CODEC, null, v -> v.clicks, (h, v) -> h.clicks = v)
             .field(OnTickComponent.CODEC, "on_tick", v -> v.ticker, (h, v) -> h.ticker = v)
             .integer("tick_speed", v -> v.tickSpeed, (h, v) -> h.tickSpeed = v)
-            .field(codec.schema(SchemaTypes.ANY).listOf(), "oneOf", v -> v.variants, (h, v) -> h.variants = v)
+            .field(codec.listOf(), "oneOf", v -> v.variants, (h, v) -> h.variants = v)
             .build()
     ).map(SlotVariant::postDecode, v -> v);
 
@@ -40,8 +38,8 @@ public class SlotVariant {
     }
 
     @ApiStatus.Internal
-    private SlotVariant postDecode(){
-        if (variants != null){
+    private SlotVariant postDecode() {
+        if (variants != null) {
             for (SlotVariant variant : variants) {
                 variant.itemModel = variant.itemModel.setDefaults(itemModel);
             }
@@ -49,7 +47,7 @@ public class SlotVariant {
         return this;
     }
 
-    private SlotVariant copy(){
+    private SlotVariant copy() {
         SlotVariant o = new SlotVariant();
         o.itemModel = itemModel;
         o.onViewComponent = onViewComponent;
@@ -60,7 +58,7 @@ public class SlotVariant {
         return o;
     }
 
-    public SlotVariant and(ItemModel itemModel){
+    public SlotVariant and(ItemModel itemModel) {
         var v = copy();
         v.itemModel = v.itemModel.and(itemModel);
         return v;
@@ -107,9 +105,10 @@ public class SlotVariant {
     public int tickSpeed() {
         return tickSpeed;
     }
-    public @Nullable SlotVariant getView(Menu menu, SlotContent slot){
+
+    public @Nullable SlotVariant getView(Menu menu, SlotContent slot) {
         if (onViewComponent != null && !onViewComponent.isVisible(menu, slot)) return null;
-        if (variants != null){
+        if (variants != null) {
             for (SlotVariant variant : variants) {
                 var v = variant.getView(menu, slot);
                 if (v != null) return v;

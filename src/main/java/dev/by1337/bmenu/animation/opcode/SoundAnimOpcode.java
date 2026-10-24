@@ -29,7 +29,7 @@ public class SoundAnimOpcode implements FrameOpcode {
 
     public SoundAnimOpcode(String ctx) {
         String string = ctx;
-        String[] args = string.split(" ");
+        String[] args = string.trim().split("\\s+");
         String snd = args[0];
         try {
             if (snd.contains(":")) {

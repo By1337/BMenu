@@ -18,17 +18,18 @@ public class SetIfEmptyAnimOpcode implements FrameOpcode {
     private final int[] slots;
 
     public SetIfEmptyAnimOpcode(String ctx) {
-        String[] args = ctx.split(" ");
-        item = args[0];
-        slots = AnimationUtil.readSlots(args[1]);
+        var args = AnimationUtil.readMaterialSlots(ctx);
+        item = args.material();
+        slots = args.slots();
     }
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        SlotFactory builder = menu.config().resolveSlotBuilder(menu.setPlaceholders(item), menu);
+        String resolved = menu.setPlaceholders(item);
+        SlotFactory builder = menu.resolveSlotBuilder(resolved, menu);
         if (builder == null) {
 
-            setIfEmpty(SlotContent.ofMaterial(menu.setPlaceholders(item)), matrix, slots);
+            setIfEmpty(SlotContent.ofMaterial(resolved), matrix, slots);
         } else {
             SlotContent slotContent1 = builder.buildIfVisible(menu);
             if (slotContent1 != null) {

@@ -20,6 +20,7 @@ import dev.by1337.cmd.Command;
 import dev.by1337.core.util.text.MessageFormatter;
 import dev.by1337.core.util.text.minimessage.BMM;
 import dev.by1337.plc.PapiResolver;
+import dev.by1337.bmenu.menu.command.MenuTextCommands;
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.Placeholders;
 import org.bukkit.NamespacedKey;
@@ -224,7 +225,7 @@ public abstract class AbstractMenu implements Menu {
     @Override
     public void runCommands(ExecuteContext ctx, List<String> commands) {
         for (String command : commands) {
-            executeCommand(ctx, setPlaceholders(command));
+            executeCommand(ctx, MenuTextCommands.defersPlaceholders(command) ? command : setPlaceholders(command));
         }
     }
 

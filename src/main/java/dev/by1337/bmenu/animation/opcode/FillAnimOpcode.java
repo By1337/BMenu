@@ -19,15 +19,16 @@ public class FillAnimOpcode implements FrameOpcode {
     private final String item;
 
     public FillAnimOpcode(String ctx) {
-        item = ctx;
+        item = ctx.trim();
     }
 
     @Override
     public void apply(SlotContent[] matrix, Menu menu, Animator animator) {
-        SlotFactory builder = menu.config().resolveSlotBuilder(menu.setPlaceholders(item), menu);
+        String resolved = menu.setPlaceholders(item);
+        SlotFactory builder = menu.resolveSlotBuilder(resolved, menu);
         SlotContent slotContent;
         if (builder == null) {
-            slotContent = SlotContent.ofMaterial(menu.setPlaceholders(item));
+            slotContent = SlotContent.ofMaterial(resolved);
         } else {
             slotContent = builder.buildIfVisible(menu);
         }
