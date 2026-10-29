@@ -6,6 +6,7 @@ import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.registry.RegistryLike;
 import dev.by1337.bmenu.registry.RegistryShortcut;
 import dev.by1337.core.util.misc.Pair;
+import dev.by1337.vault.BVaultApi;
 import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.Bukkit;
@@ -180,7 +181,13 @@ public class MenuLoader implements Listener {
 
     @ApiStatus.Internal
     public void onMenuOpen(Menu menu, Player player) {
-        openedMenus.put(player.getUniqueId(), menu);
+        UUID who = player.getUniqueId();
+        openedMenus.put(who, menu);
+        String menuId = Objects.toString(menu.getId(), "minecraft:unnamed");
+        BVaultApi.logger().pushLog(writer -> writer
+                .setString("type", "bmenu:open")
+                .setUUID("who", who)
+                .setString("menu", menuId));
     }
 
     public void disable() {
