@@ -58,7 +58,9 @@ public class Animator {
     }
 
     public static class AnimatorContext {
-        public static YamlCodec<AnimatorContext> CODEC = new CodecImpl();
+        public static final dev.by1337.yaml.decoder.YamlDecoder<AnimatorContext> DECODER = new CodecImpl().asDecoder();
+        @Deprecated
+        public static YamlCodec<AnimatorContext> CODEC = YamlCodec.of(DECODER);
         private final List<Frame> frames;
         private final Map<Integer, List<Frame>> framePosToFrames;
         private int maxTick;
@@ -92,34 +94,34 @@ public class Animator {
 
             @Override
             public DataResult<AnimatorContext> decode(YamlValue yamlValue) {
-               return yamlValue.decode(YAML_MAP_LIST).flatMap(list -> {
-                   List<Animator.Frame> frameList = new ArrayList<>();
-                   int lastPos = 0;
-                   StringBuilder error = new StringBuilder();
-                   for (YamlMap frame : list) {
-                       List<FrameOpcode> opcodes = frame.get("opcodes").decode(YAML_MAP_LIST, List.of()).mapValue(l -> {
-                           List<FrameOpcode> res1 = new ArrayList<>();
-                           for (YamlMap yamlMap : l) {
-                               DataResult<Map<String, FrameOpcode>> v = FrameOpcodes.FRAMES_CODEC.decode(YamlValue.wrap(yamlMap));
-                               if (v.hasError()){
-                                   error.append(v.error()).append("\n");
-                               }
-                               if (v.hasResult()){
-                                   res1.addAll(v.result().values());
-                               }
-                           }
-                           return res1;
-                       }).result();
-                       int pos = frame.get("tick").decode(INT, ++lastPos).getOrThrow();
-                       lastPos = pos;
-                       frameList.add(new Animator.Frame(pos, opcodes));
-                   }
-                   if (!error.isEmpty()){
-                       error.setLength(error.length() -1);
-                       return DataResult.error(error.toString()).partial(new AnimatorContext(frameList));
-                   }
-                   return DataResult.success(new AnimatorContext(frameList));
-               });
+                return yamlValue.decode(YAML_MAP_LIST).flatMap(list -> {
+                    List<Animator.Frame> frameList = new ArrayList<>();
+                    int lastPos = 0;
+                    StringBuilder error = new StringBuilder();
+                    for (YamlMap frame : list) {
+                        List<FrameOpcode> opcodes = frame.get("opcodes").decode(YAML_MAP_LIST, List.of()).mapValue(l -> {
+                            List<FrameOpcode> res1 = new ArrayList<>();
+                            for (YamlMap yamlMap : l) {
+                                DataResult<Map<String, FrameOpcode>> v = FrameOpcodes.FRAMES_CODEC.decode(YamlValue.wrap(yamlMap));
+                                if (v.hasError()) {
+                                    error.append(v.error()).append("\n");
+                                }
+                                if (v.hasResult()) {
+                                    res1.addAll(v.result().values());
+                                }
+                            }
+                            return res1;
+                        }).result();
+                        int pos = frame.get("tick").decode(INT, ++lastPos).getOrThrow();
+                        lastPos = pos;
+                        frameList.add(new Animator.Frame(pos, opcodes));
+                    }
+                    if (!error.isEmpty()) {
+                        error.setLength(error.length() - 1);
+                        return DataResult.error(error.toString()).partial(new AnimatorContext(frameList));
+                    }
+                    return DataResult.success(new AnimatorContext(frameList));
+                });
             }
 
             @Override

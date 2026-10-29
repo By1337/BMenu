@@ -18,7 +18,8 @@ import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
-import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.decoder.RecordYamlDecoder;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -47,10 +48,12 @@ public class SelectMenuConfig extends MenuConfig {
                 return null;
             })
             .and(PapiResolver.INSTANCE.map(v -> v));
-    public static final YamlCodec<SelectMenuConfig> CODEC = PipelineYamlCodecBuilder.of(SelectMenuConfig::new)
+    public static final YamlDecoder<SelectMenuConfig> DECODER = PipelineYamlCodecBuilder.of(SelectMenuConfig::new)
             .and(MenuConfig.RAW_CODEC)
-            .field(MenuSelector.CODEC, "selector", v -> v.selector, (m, v) -> m.selector = v)
-            .build();
+            .field(MenuSelector.DECODER, "selector", (m, v) -> m.selector = v)
+            .buildDecoder();
+    @Deprecated
+    public static final YamlCodec<SelectMenuConfig> CODEC = YamlCodec.of(DECODER);
 
     private final Map<String, MenuConfig> menus = new HashMap<>();
     private MenuSelector selector;
@@ -81,7 +84,7 @@ public class SelectMenuConfig extends MenuConfig {
 
     @Override
     public void onDecode(YamlMap from, File fromFile, MenuDecoder decoder) {
-        Map<String, FileConf> menus = from.get("menus").decode(YamlCodec.mapOf(YamlCodec.STRING, FileConf.CODEC)).result();
+        Map<String, FileConf> menus = from.get("menus").decode(YamlCodec.of(YamlDecoder.mapOf(YamlDecoder.STRING, FileConf.DECODER))).result();
         if (menus == null) return;
         for (Map.Entry<String, FileConf> entry : menus.entrySet()) {
             FileConf conf = entry.getValue();
@@ -107,11 +110,11 @@ public class SelectMenuConfig extends MenuConfig {
     }
 
     private static class FileConf {
-        public static final YamlCodec<FileConf> CODEC = RecordYamlCodecBuilder.mapOf(
+        public static final YamlDecoder<FileConf> DECODER = RecordYamlDecoder.mapOf(
                 FileConf::new,
-                YamlCodec.STRING.fieldOf("file", v -> v.file),
-                MenuCodecs.ARGS_CODEC.fieldOf("replaces", v -> v.replaces, Map.of())
-        ).whenPrimitive(YamlCodec.STRING.map(s -> new FileConf(s, Map.of()), v -> v.file));
+                YamlDecoder.STRING.fieldOf("file"),
+                MenuCodecs.ARGS_CODEC.asDecoder().fieldOf("replaces", Map.of())
+        ).whenPrimitive(YamlDecoder.STRING.map(s -> new FileConf(s, Map.of())));
         private final String file;
         private final Map<String, String> replaces;
 
@@ -122,33 +125,23 @@ public class SelectMenuConfig extends MenuConfig {
     }
 
     public interface MenuSelector {
-        YamlCodec<MenuSelector> CODEC = YamlCodec.recursive(self -> new YamlCodec<MenuSelector>() {
-            private final YamlCodec<Map<Requirement, MenuSelector>> map = YamlCodec.mapOf(Requirement.CODEC, self);
-
-            @Override
-            public DataResult<MenuSelector> decode(YamlValue yaml) {
-                if (yaml.isPrimitive()) {
-                    return yaml.decode(STRING)
-                            .map(s -> {
-                                var s1 = s.replace("#", ".");
-                                return (v, v1) -> s1;
-                            });
-                }
-                return yaml.decode(map).map(m -> (ctx, plc) -> {
-                    for (var entry : m.entrySet()) {
-                        if (entry.getKey().test(ctx, plc)) {
-                            return entry.getValue().select(ctx, plc);
-                        }
-                    }
-                    return null;
+        YamlDecoder<MenuSelector> DECODER = YamlDecoder.recursive(self -> (ctx, yaml) -> {
+            if (yaml.isPrimitive()) {
+                return YamlDecoder.STRING.decode(ctx, yaml).map(value -> {
+                    String id = value.replace("#", ".");
+                    return (player, placeholders) -> id;
                 });
             }
-
-            @Override
-            public YamlValue encode(MenuSelector menuSelector) {
-                return YamlValue.wrap("no impl encoder");
-            }
+            return YamlDecoder.mapOf(dev.by1337.bmenu.event.MenuEvents.REQUIREMENT_DECODER, self)
+                    .decode(ctx, yaml).map(map -> (player, placeholders) -> {
+                        for (var entry : map.entrySet()) {
+                            if (entry.getKey().test(player, placeholders)) return entry.getValue().select(player, placeholders);
+                        }
+                        return null;
+                    });
         });
+        @Deprecated
+        YamlCodec<MenuSelector> CODEC = YamlCodec.of(DECODER);
 
         String select(PlayerContext ctx, PlaceholderApplier placeholders);
     }

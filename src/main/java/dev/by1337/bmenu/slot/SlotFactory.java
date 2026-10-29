@@ -1,7 +1,7 @@
 package dev.by1337.bmenu.slot;
 
 import dev.by1337.bmenu.factory.MenuCodecs;
-import dev.by1337.bmenu.factory.fixer.ItemFixer;
+import dev.by1337.bmenu.compat.LegacyItemNormalizer;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.placeholder.SimplePlaceholders;
 import dev.by1337.bmenu.slot.impl.BaseSlotContent;
@@ -9,7 +9,8 @@ import dev.by1337.bmenu.slot.impl.SlotContentImpl;
 import dev.by1337.item.ItemModel;
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.yaml.YamlValue;
-import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
+import dev.by1337.yaml.decoder.PipelineYamlDecoder;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,9 +19,11 @@ import java.util.Map;
 
 public final class SlotFactory implements Comparable<SlotFactory> {
 
+    public static final YamlDecoder<SlotFactory> DECODER;
+    @Deprecated
     public static final YamlCodec<SlotFactory> CODEC;
     private Map<String, String> args;
-    private int[] slots = new int[]{-1};
+    private int[] slots = new int[]{ -1 };
     private SimplePlaceholders localArgs = new SimplePlaceholders();
     private SlotVariant variant;
     private int priority;
@@ -104,24 +107,20 @@ public final class SlotFactory implements Comparable<SlotFactory> {
     }
 
     static {
-        PipelineYamlCodecBuilder<SlotFactory> builder = PipelineYamlCodecBuilder.of(SlotFactory::new)
-                .field(MenuCodecs.ARGS_CODEC, "args", SlotFactory::args, SlotFactory::setArgs)
-                .field(SimplePlaceholders.CODEC, "local_args", SlotFactory::getLocalArgs, SlotFactory::setLocalArgs)
-                .integer("priority", SlotFactory::priority, SlotFactory::setPriority, 0)
-                .field(SlotVariant.CODEC, null, s -> s.variant, (f, s) -> f.variant = s)
-                .field(MenuCodecs.SLOTS_CODEC, "slot", SlotFactory::slots, SlotFactory::setSlots, new int[]{-1});
-
-        CODEC = builder
-                .build()
-                .preDecode(v -> {
-                    var res = v.asYamlMap();
-                    if (res.hasResult()) {
-                        var map = res.result();
-                        ItemFixer.fixItem(map);
-                        return YamlValue.wrap(map);
-                    }
-                    return v;
-                })
-        ;
+        var builder = PipelineYamlDecoder.of(SlotFactory::new)
+                .field(MenuCodecs.ARGS_CODEC.asDecoder(), "args", SlotFactory::setArgs)
+                .field(SimplePlaceholders.DECODER, "local_args", SlotFactory::setLocalArgs)
+                .field(YamlDecoder.INT, "priority", SlotFactory::setPriority, 0)
+                .field(SlotVariant.DECODER, null, (f, s) -> f.variant = s)
+                .field(MenuCodecs.SLOTS_CODEC.asDecoder(), "slot", SlotFactory::setSlots, new int[]{ -1 });
+        DECODER = builder.build().preDecode(v -> {
+            var res = v.asYamlMap();
+            if (res.hasResult()) {
+                LegacyItemNormalizer.fixItem(res.result());
+                return YamlValue.wrap(res.result());
+            }
+            return v;
+        });
+        CODEC = YamlCodec.of(DECODER);
     }
 }

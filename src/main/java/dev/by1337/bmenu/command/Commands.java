@@ -1,208 +1,71 @@
 package dev.by1337.bmenu.command;
 
-
-import dev.by1337.bmenu.command.argument.ArgumentParamsMap;
-import dev.by1337.bmenu.factory.MenuCodecs;
-import dev.by1337.bmenu.handler.BreakableConditionalHandler;
-import dev.by1337.bmenu.handler.ConditionalHandler;
-import dev.by1337.bmenu.handler.FirstMatchHandler;
+import dev.by1337.bmenu.compat.MenuEventDecoder;
+import dev.by1337.bmenu.event.MenuEventContext;
+import dev.by1337.bmenu.event.MenuEvents;
 import dev.by1337.bmenu.handler.MenuEventHandler;
-import dev.by1337.bmenu.handler.input.PlayerNumberInput;
-import dev.by1337.bmenu.handler.input.PlayerStringInput;
-import dev.by1337.bmenu.yaml.dfu.BMenuDFU;
+import dev.by1337.edsl.EventHandler;
+import dev.by1337.edsl.handle.ListHandler;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlValue;
-import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
-import dev.by1337.yaml.codec.schema.SchemaType;
-import dev.by1337.yaml.codec.schema.SchemaTypes;
-import org.jetbrains.annotations.NotNull;
+import dev.by1337.yaml.decoder.YamlDecoder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 
-
+/** Public BMenu API facade; event execution is owned by EventDSL. */
 public class Commands implements MenuEventHandler {
     public static final Commands EMPTY = new Commands(List.of());
+    public static final YamlDecoder<Commands> DECODER = (ctx, yaml) -> MenuEvents.DECODER.decode(ctx, yaml)
+            .map(handler -> new Commands(handler, yaml));
+    @Deprecated
+    public static final YamlCodec<Commands> CODEC = YamlCodec.of(DECODER);
 
-    public static final YamlCodec<Commands> CODEC = YamlCodec.<Commands>recursive(codec -> new YamlCodec<Commands>() {
-        private final YamlCodec<Map<String, YamlValue>> S2OBJET_MAP = YamlCodec.mapOf(STRING, YAML_VALUE);
-        private final YamlCodec<Map<String, String>> S2S_MAP = YamlCodec.mapOf(STRING, MenuCodecs.MULTI_LINE_STRING);
-
-        @Override
-        public DataResult<Commands> decode(YamlValue yaml) {
-            if (yaml.isPrimitive()) return STRING.decode(yaml).mapValue(s -> new Commands(List.of(fixCommand(s))));
-            if (yaml.isList()) {
-                return yaml.asList(codec).mapValue(Commands::fromCommandsList);
-            }
-            return S2OBJET_MAP.decode(yaml).flatMap(map -> {
-                List<MenuEventHandler> handlers = new ArrayList<>();
-                StringBuilder err = new StringBuilder();
-                if (map.containsKey("requirements")) {
-                    tryDecode(yaml, BreakableConditionalHandler.CODEC, err, handlers::add);
-                } else if (map.containsKey("oneOf")) {
-                    tryDecode(map.get("oneOf"), FirstMatchHandler.CODEC, err, handlers::add);
-                } else if (
-                        map.containsKey("do") ||
-                                map.containsKey("else")
-                ) {
-                    tryDecode(yaml, ConditionalHandler.CODEC, err, handlers::add);
-                }
-                boolean hasBreak = false;
-                StringBuilder buffer = new StringBuilder();
-                for (String cmd : map.keySet()) {
-                    if (
-                            cmd.startsWith("$") ||
-                                    cmd.equals("if") ||
-                                    cmd.equals("if-all") ||
-                                    cmd.equals("if-one") ||
-                                    cmd.equals("oneOf") ||
-                                    cmd.equals("requirements") ||
-                                    cmd.equals("commands") ||
-                                    cmd.equals("deny_commands") ||
-                                    cmd.equals("do") ||
-                                    cmd.equals("else")
-                    ) continue;
-
-                    YamlValue cmdValue = map.get(cmd);
-                    if (cmd.equals("input_chat")) {
-                        tryDecode(cmdValue, PlayerNumberInput.CODEC, err, handlers::add);
-                    } else if (cmd.equals("input_chat_str")) {
-                        tryDecode(cmdValue, PlayerStringInput.CODEC, err, handlers::add);
-                    } else if (cmdValue.isMap() && (
-                            cmd.equals("open") ||
-                                    cmd.equals("back") ||
-                                    cmd.equals("back_or_open")
-                    )) {
-                        buffer.append(cmd).append("_with_args ");
-                        var params = S2S_MAP.decode(cmdValue).getOrThrow();
-                        params.forEach((k, v) -> {
-                            buffer.append('"').append(ArgumentParamsMap.escape(k)).append("\"=\"")
-                                    .append(ArgumentParamsMap.escape(v.replace("\\n", "\n"))).append("\",");
-                        });
-                        if (!params.isEmpty()) {
-                            buffer.setLength(buffer.length() - 1);
-                        }
-                        var s = buffer.toString();
-                        if (s.equalsIgnoreCase("[break]")) {
-                            hasBreak = true;
-                            break;
-                        }
-                        handlers.add(new MenuCommand(buffer.toString()));
-                        buffer.setLength(0);
-                    } else {
-                        buffer.append("[").append(cmd).append("]");
-                        var value = map.get(cmd).decode(MULTI_LINE_STRING).getOrThrow();
-                        if (!value.isBlank()) {
-                            buffer.append(" ").append(value.replace("\n", "<br><reset>"));
-                        }
-                        var s = buffer.toString();
-                        if (s.equalsIgnoreCase("[break]")) {
-                            hasBreak = true;
-                            break;
-                        }
-                        handlers.add(new MenuCommand(buffer.toString()));
-                        buffer.setLength(0);
-                    }
-
-                }
-                var res = new Commands(handlers, hasBreak);
-                if (err.isEmpty()) return DataResult.success(res);
-                err.setLength(err.length() - 1);
-                return DataResult.error(err.toString()).partial(res);
-            });
-        }
-
-        private static <T> void tryDecode(YamlValue v, YamlCodec<T> codec, StringBuilder err, Consumer<T> c) {
-            var res = codec.decode(v);
-            if (res.hasError()) {
-                err.append(res.error()).append("\n");
-            }
-            if (res.hasResult()) {
-                c.accept(res.result());
-            }
-        }
-
-        @Override
-        public YamlValue encode(Commands commands) {
-            List<Object> list = new ArrayList<>();
-            for (MenuEventHandler command : commands.commands) {
-                list.add(command.encode().getRaw());
-            }
-            if (commands.hasBreak) {
-                list.add("[break]");
-            }
-            return YamlValue.wrap(list);
-        }
-
-        @Override
-        public @NotNull SchemaType schema() {
-            return SchemaTypes.ANY;
-        }
-
-        private String fixCommand(String input) {
-            if (input.startsWith("[")) return input;
-            return "[message] " + input.replace("\n", "<br><reset>");
-        }
-    }).preDecode(BMenuDFU.COMMANDS_KEY_RENAMER);
-
-    private final List<MenuEventHandler> commands;
+    private final List<EventHandler> handlers = new ArrayList<>();
+    private final List<Object> sources = new ArrayList<>();
     private boolean hasBreak;
 
-    public Commands(ConditionalHandler requirement) {
-        commands = new ArrayList<>();
-        commands.add(requirement);
+    private Commands(EventHandler handler, YamlValue source) {
+        if (!MenuEventDecoder.isEmpty(handler)) handlers.add(handler);
+        hasBreak = MenuEventDecoder.hasBreak(handler);
+        sources.add(source.getRaw());
     }
 
     public Commands(List<MenuEventHandler> commands, boolean hasBreak) {
-        this.commands = commands;
+        commands.forEach(this::addHandler);
         this.hasBreak = hasBreak;
     }
 
     public Commands(List<String> list) {
-        commands = new ArrayList<>();
-        for (String s : list) {
-            if (s.equalsIgnoreCase("[break]")) {
-                hasBreak = true;
-                break;
-            }
-            commands.add(new MenuCommand(s));
+        if (!list.isEmpty()) {
+            Commands decoded = DECODER.decode(YamlValue.wrap(list)).getOrThrow();
+            handlers.addAll(decoded.handlers);
+            sources.addAll(decoded.sources);
+            hasBreak = decoded.hasBreak;
         }
     }
 
     @Override
     public boolean test(PlayerContext ctx, PlaceholderApplier placeholders) {
-        try (var enter = ctx.tracer().enter("list [", "] -> %s")) {
-            boolean state = true;
-            var iterator = commands.iterator();
-            while (iterator.hasNext()) {
-                MenuEventHandler like = iterator.next();
-                if (!like.test(ctx, placeholders)) {
-                    state = false;
-                }
-                if (iterator.hasNext()) {
-                    ctx.tracer().log("");
-                }
-            }
-            enter.result(state);
-            return state;
-        }
+        return MenuEvents.test(this::handle, ctx, placeholders);
+    }
 
+    public boolean handle(dev.by1337.edsl.context.EventContext ctx) {
+        return new ListHandler(handlers).handle(ctx);
     }
 
     public static Commands fromCommandsList(List<Commands> list) {
-        List<MenuEventHandler> result = new ArrayList<>();
-        boolean hasBreak = false;
+        Commands result = new Commands(List.of());
         for (Commands commands : list) {
-            result.addAll(commands.commands);
-            //noinspection all
-            if (hasBreak = commands.isHasBreak()) {
+            result.handlers.addAll(commands.handlers);
+            result.sources.addAll(commands.sources);
+            if (commands.hasBreak) {
+                result.hasBreak = true;
                 break;
             }
         }
-        return new Commands(result, hasBreak);
+        return result;
     }
 
     public boolean isHasBreak() {
@@ -210,135 +73,26 @@ public class Commands implements MenuEventHandler {
     }
 
     public boolean isEmpty() {
-        return commands.isEmpty();
+        return handlers.isEmpty();
     }
 
     @Override
     public YamlValue encode() {
-        return CODEC.encode(this);
+        List<Object> values = new ArrayList<>();
+        for (Object source : sources) {
+            if (source instanceof List<?> list) values.addAll(list);
+            else values.add(source);
+        }
+        return YamlValue.wrap(values);
     }
 
     public void addHandler(MenuEventHandler handler) {
-        commands.add(handler);
+        handlers.add(MenuEvents.adapt(handler));
+        sources.add(handler.encode().getRaw());
     }
 
     @Override
     public String toString() {
-        return "Commands{" +
-                "commands=" + commands +
-                ", hasBreak=" + hasBreak +
-                '}';
+        return "Commands{" + sources + ", hasBreak=" + hasBreak + '}';
     }
-
 }
-//    public static final YamlCodec<Commands> CODEC = new YamlCodec<>() {
-//        private final YamlCodec<List<Commands>> COMMANDS = YamlCodec.lazyLoad(() -> thisCodec().listOf());
-//        private final YamlCodec<Map<String, YamlValue>> S2OBJET_MAP = YamlCodec.mapOf(STRING, YAML_VALUE);
-//
-//        @Override
-//        public DataResult<Commands> decode(YamlValue yaml) {
-//            if (yaml.isPrimitive()) return STRING.decode(yaml).mapValue(s -> new Commands(List.of(fixCommand(s))));
-//            if (yaml.isList()) {
-//                return COMMANDS.decode(yaml).mapValue(Commands::fromCommandsList);
-//            }
-//            return S2OBJET_MAP.decode(yaml).flatMap(map -> {
-//                if (map.containsKey("if")) {
-//                    StringBuilder err = new StringBuilder();
-//                    List<MenuEventHandler> handlers = new ArrayList<>();
-//                    var v = allOf(
-//                            ConditionalHandler::new,
-//                            map.get("if").decode(Requirement.CODEC),
-//                            YamlValue.wrap(map.get("do")).decode(CODEC, Commands.EMPTY),
-//                            YamlValue.wrap(map.get("else")).decode(CODEC, Commands.EMPTY)
-//                    ).mapValue(Commands::new);
-//                    if (v.hasError()) err.append(v.error()).append("\n");
-//                    if (v.hasResult()) handlers.add(v.result());
-//                    for (String s : map.keySet()) {
-//                        if (s.equals("if") || s.equals("else") || s.equals("do")) continue;
-//                        var data = CODEC.decode(map.get(s));
-//                        if (data.hasError()) err.append(data.error()).append("\n");
-//                        if (data.hasResult()) handlers.add(data.result());
-//                    }
-//                    if (err.isEmpty()) return DataResult.success(new Commands(handlers, false));
-//                    err.setLength(err.length() - 1);
-//                    return DataResult.error(err.toString()).partial(new Commands(handlers, false));
-//                } else {
-//                    List<String> commands = new ArrayList<>();
-//                    StringBuilder buffer = new StringBuilder();
-//                    for (String cmd : map.keySet()) {
-//                        buffer.append("[").append(cmd).append("]");
-//                        var value = map.get(cmd).decode(MULTI_LINE_STRING).getOrThrow();
-//                        if (!value.isBlank()) {
-//                            buffer.append(" ").append(value.replace("\n", "<br><reset>"));
-//                        }
-//                        commands.add(buffer.toString());
-//                        buffer.setLength(0);
-//                    }
-//                    return DataResult.success(new Commands(commands));
-//                }
-//            });
-//        }
-//
-//        private static YamlCodec<Commands> thisCodec() {
-//            return CODEC;
-//        }
-//
-//        private String fixCommand(String input) {
-//            if (input.startsWith("[")) return input;
-//            return "[message] " + input.replace("\n", "<br><reset>");
-//        }
-//
-//        @Override
-//        public YamlValue encode(Commands commands) {
-//            List<Object> out = new ArrayList<>();
-//            for (MenuEventHandler command : commands.commands) {
-//                if (command instanceof MenuCommand mc) {
-//                    out.add(mc.source());
-//                } else if (command instanceof ConditionalHandler r) {
-//                    Map<String, Object> map = new LinkedHashMap<>();
-//                    map.put("if", r.req().encode().getRaw());
-//                    if (!r.doCmds().isEmpty()) {
-//                        map.put("do", encode(r.elseCmds()).getRaw());
-//                    }
-//                    if (!r.elseCmds().isEmpty()) {
-//                        map.put("do", encode(r.doCmds()).getRaw());
-//                    }
-//                    out.add(map);
-//                }
-//            }
-//            return YamlValue.wrap(out);
-//        }
-//
-//        @Override
-//        public @NotNull SchemaType schema() {
-//            return SchemaTypes.ANY;
-//        }
-//    };
-
-//    @SuppressWarnings("unchecked")
-//    private static <T, T1, T2, R> DataResult<R> allOf(RecordYamlCodecBuilder.Function3<T, T1, T2, R> f, DataResult<T> r, DataResult<T1> r1, DataResult<T2> r2) {
-//        final T t;
-//        final T1 t1;
-//        final T2 t2;
-//        if (r.hasResult()) {
-//            t = r.result();
-//        } else {
-//            return (DataResult<R>) r;
-//        }
-//        if (r1.hasResult()) {
-//            t1 = r1.result();
-//        } else {
-//            return (DataResult<R>) r1;
-//        }
-//        if (r2.hasResult()) {
-//            t2 = r2.result();
-//        } else {
-//            return (DataResult<R>) r2;
-//        }
-//        try {
-//            R res = f.apply(t, t1, t2);
-//            return DataResult.success(res);
-//        } catch (Exception e) {
-//            return DataResult.error(e);
-//        }
-//    }

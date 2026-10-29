@@ -129,35 +129,21 @@
 
     <dependencies>
         <dependency>
-            <groupId>dev.by1337.edsl</groupId>
-            <artifactId>EventDSL</artifactId>
-            <version>1.8.4</version>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>dev.by1337.item</groupId>
-            <artifactId>ConfigurableItems</artifactId>
-            <version>1.8.3</version>
+            <groupId>dev.by1337.core</groupId>
+            <artifactId>BLibV2</artifactId>
+            <version>1.10.7</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>it.unimi.dsi</groupId>
             <artifactId>fastutil</artifactId>
             <version>8.5.15</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.destroystokyo.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.16.5-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.by1337.core</groupId>
-            <artifactId>BLibV2</artifactId>
-            <version>1.10.5</version>
             <scope>provided</scope>
         </dependency>
 

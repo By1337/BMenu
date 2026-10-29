@@ -7,19 +7,22 @@ import dev.by1337.bmenu.command.PlayerContext;
 import dev.by1337.bmenu.handler.MenuEventHandler;
 import dev.by1337.bmenu.util.math.FastExpressionParser;
 import dev.by1337.plc.PlaceholderApplier;
-import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.decoder.RecordYamlDecoder;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import dev.by1337.yaml.codec.YamlCodec;
 
 import java.text.DecimalFormat;
 
 public class PlayerNumberInput implements MenuEventHandler {
     private static final DecimalFormat df = new DecimalFormat("#.##");
-    public static final YamlCodec<PlayerNumberInput> CODEC = RecordYamlCodecBuilder.mapOf(
+    public static final YamlDecoder<PlayerNumberInput> DECODER = RecordYamlDecoder.mapOf(
             PlayerNumberInput::new,
-            YamlCodec.STRING.fieldOf("param", v -> v.param),
-            Commands.CODEC.fieldOf("on_pass", v -> v.on_pass),
-            Commands.CODEC.fieldOf("on_failed", v -> v.on_failed)
+            YamlDecoder.STRING.fieldOf("param"),
+            Commands.DECODER.fieldOf("on_pass"),
+            Commands.DECODER.fieldOf("on_failed")
     );
+    @Deprecated
+    public static final YamlCodec<PlayerNumberInput> CODEC = YamlCodec.of(DECODER);
     private final String param;
     private final Commands on_pass;
     private final Commands on_failed;
@@ -39,7 +42,7 @@ public class PlayerNumberInput implements MenuEventHandler {
                 var menu = ctx.menu;
                 bMenu.playerInputListener().register(ctx.menu.viewer().getUniqueId(), s -> {
                     try (ExecuteContext newCtx = ExecuteContext.of(menu);
-                         var on = newCtx.tracer.enter("input_chat(%s) {", s, "} -> %s")) {
+                        var on = newCtx.tracer.enter("input_chat(%s) {", s, "} -> %s")) {
                         on.result(false);
                         if (s == null) {
                             on_failed.test(newCtx, menu);

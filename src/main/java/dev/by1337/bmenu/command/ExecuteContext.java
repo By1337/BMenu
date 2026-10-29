@@ -1,6 +1,8 @@
 package dev.by1337.bmenu.command;
 
 import dev.by1337.bmenu.handler.trace.EventTracer;
+import dev.by1337.bmenu.event.MenuEventContext;
+import dev.by1337.edsl.context.EventContext;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.bmenu.menu.Menu;
 import dev.by1337.bmenu.slot.SlotContent;
@@ -19,6 +21,7 @@ public class ExecuteContext implements AutoCloseable, Closeable, PlayerContext {
     public final EventTracer tracer;
     private @Nullable StringBuilder tracerLog;
     private @Nullable PlaceholderApplier placeholders;
+    private @Nullable EventContext eventContext;
 
     private ExecuteContext(Menu menu, String cause) {
         this(menu, null, cause);
@@ -38,6 +41,14 @@ public class ExecuteContext implements AutoCloseable, Closeable, PlayerContext {
         }
     }
 
+    public EventContext eventContext() {
+        if (eventContext == null) {
+            eventContext = new MenuEventContext(this,
+                    text -> placeholders().setPlaceholders(text));
+        }
+        return eventContext;
+    }
+
     public PlaceholderApplier placeholders() {
         return placeholders == null ? menu : placeholders;
     }
@@ -50,7 +61,8 @@ public class ExecuteContext implements AutoCloseable, Closeable, PlayerContext {
 
     @FunctionalInterface
     public interface Scope extends AutoCloseable {
-        @Override void close();
+        @Override
+        void close();
     }
 
     public void flushTracer() {

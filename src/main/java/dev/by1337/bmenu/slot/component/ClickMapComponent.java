@@ -4,7 +4,8 @@ import dev.by1337.bmenu.command.Commands;
 import dev.by1337.bmenu.command.ExecuteContext;
 import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.plc.PlaceholderApplier;
-import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
+import dev.by1337.yaml.decoder.PipelineYamlDecoder;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -15,23 +16,15 @@ import java.util.function.Supplier;
 
 public record ClickMapComponent(Map<MenuClickType, Commands> map) {
     public static final ClickMapComponent EMPTY = new ClickMapComponent(Map.of());
-    public static final YamlCodec<ClickMapComponent> CODEC = make(() -> {
-        var builder = PipelineYamlCodecBuilder.of(() -> new EnumMap<MenuClickType, Commands>(MenuClickType.class));
+    public static final YamlDecoder<ClickMapComponent> DECODER = make(() -> {
+        var builder = PipelineYamlDecoder.of(() -> new EnumMap<MenuClickType, Commands>(MenuClickType.class));
         for (MenuClickType value : MenuClickType.values()) {
-            String key = value.getConfigKeyClick();
-            builder.field(Commands.CODEC, key,
-                    m -> m.get(value),
-                    (m, v) -> m.put(value, v)
-            );
+            builder.field(Commands.DECODER, value.getConfigKeyClick(), (m, v) -> m.put(value, v));
         }
-        return builder
-                .build()
-                .map(
-                        ClickMapComponent::new,
-                        map -> new EnumMap<>(map.map)
-                );
-
+        return builder.build().map(ClickMapComponent::new);
     });
+    @Deprecated
+    public static final YamlCodec<ClickMapComponent> CODEC = YamlCodec.of(DECODER);
 
     public void setClick(MenuClickType type, Commands click) {
         map.put(type, click);
@@ -44,7 +37,7 @@ public record ClickMapComponent(Map<MenuClickType, Commands> map) {
     public boolean doClick(MenuClickType type, ExecuteContext ctx, PlaceholderApplier placeholders) {
         Requirement handler = requireNonNullElseGet(map.get(type), () -> {
             ctx.tracer.log("-> on_click");
-           return map.get(MenuClickType.ANY_CLICK);
+            return map.get(MenuClickType.ANY_CLICK);
         });
         if (handler != null) {
             handler.test(ctx, placeholders);

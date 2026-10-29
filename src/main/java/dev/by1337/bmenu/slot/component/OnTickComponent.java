@@ -12,15 +12,14 @@ import java.util.List;
 
 public record OnTickComponent(Commands handler) {
     public static final OnTickComponent DEFAULT = new OnTickComponent(new Commands(List.of("[rebuild]")));
-    public static final YamlCodec<OnTickComponent> CODEC = Commands.CODEC.map(
-            OnTickComponent::new,
-            t -> t.handler
-    );
+    public static final dev.by1337.yaml.decoder.YamlDecoder<OnTickComponent> DECODER = Commands.DECODER.map(OnTickComponent::new);
+    @Deprecated
+    public static final YamlCodec<OnTickComponent> CODEC = YamlCodec.of(DECODER);
 
 
     public void tick(SlotContent slotContent, Menu menu) {
         var placeholder = menu.resolvers().and(slotContent).bind(menu);
-        try (ExecuteContext ctx = ExecuteContext.of(menu, slotContent, "on_tick")){
+        try (ExecuteContext ctx = ExecuteContext.of(menu, slotContent, "on_tick")) {
             handler.test(ctx, placeholder);
         }
     }

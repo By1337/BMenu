@@ -13,8 +13,10 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class SimplePlaceholders implements PlaceholderResolver<Menu> {
-    public static final YamlCodec<SimplePlaceholders> CODEC = MenuCodecs.ARGS_CODEC
-            .map(SimplePlaceholders::new, SimplePlaceholders::asStringMap);
+    public static final dev.by1337.yaml.decoder.YamlDecoder<SimplePlaceholders> DECODER = MenuCodecs.ARGS_CODEC.asDecoder()
+            .map(SimplePlaceholders::new);
+    @Deprecated
+    public static final YamlCodec<SimplePlaceholders> CODEC = YamlCodec.of(DECODER);
 
     private final HashMapLike<String, Supplier<Object>> map;
 

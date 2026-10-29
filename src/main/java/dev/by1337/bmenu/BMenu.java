@@ -57,10 +57,6 @@ public class BMenu extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        try {
-            Class.forName("com.by1337.themes.Booter").getMethod("bootMenus").invoke(null);
-        } catch (Exception ignored) {
-        }
         ResourceUtil.saveIfNotExist("reference.yml", this);
         if (!new File(getDataFolder(), "menu").exists()) {
             ResourceUtil.saveIfNotExist("menu/animation-54.yml", this);

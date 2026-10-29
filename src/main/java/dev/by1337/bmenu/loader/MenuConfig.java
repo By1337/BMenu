@@ -15,6 +15,8 @@ import dev.by1337.bmenu.yaml.CashedYamlMap;
 import dev.by1337.yaml.BukkitCodecs;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
+import dev.by1337.yaml.decoder.PipelineYamlDecoder;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
@@ -31,6 +33,8 @@ import java.util.*;
 public class MenuConfig implements SlotBuilderSource, Keyed {
     private static final int DEFAULT_CLICK_COOLDOWN = Integer.getInteger("bmenu.click.cooldown", 100);
     public static final PipelineYamlCodecBuilder<MenuConfig> RAW_CODEC;
+    public static final YamlDecoder<MenuConfig> DECODER;
+    @Deprecated
     public static final YamlCodec<MenuConfig> CODEC;
 
     protected MenuSupplier defaultMenuCreator = DefaultMenu::new;
@@ -87,7 +91,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
         return defaultMenuCreator.createMenu(this, viewer, previousMenu);
     }
 
-    public void onDecode(YamlMap from,File fromFile, MenuDecoder decoder){
+    public void onDecode(YamlMap from, File fromFile, MenuDecoder decoder) {
         List<File> supers = FileUtil.findFiles(fromFile, loader, from.get("extends").asList(YamlCodec.STRING, List.of()));
         for (File file : supers) {
             decoder.appendFile(file);
@@ -163,26 +167,27 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
     }
 
     static {
-        RAW_CODEC = PipelineYamlCodecBuilder.of(MenuConfig::new)
-                .string("title", m -> m.title, (m, v) -> m.title = v)
-                .field(MenuCodecs.NAMESPACED_KEY, "id", m -> m.id, (m, v) -> m.id = v)
-                .field(MenuCodecs.NAMESPACED_KEY, "provider", m -> m.provider, (m, v) -> m.provider = v)
-                .field(BukkitCodecs.inventory_type(), "type", m -> m.invType, (m, v) -> m.invType = v)
-                .integer("size", m -> m.size, (m, v) -> m.size = v)
-                .field(MenuCodecs.NAMESPACED_KEY.listOf().asSet(), "only-open-from", m -> m.onlyOpenFrom, (m, v) -> m.onlyOpenFrom.addAll(v))
-                .field(MenuCodecs.ARGS_CODEC, "args", m -> m.args, (m, v) -> m.args.putAll(v))
-                .field(YamlCodec.mapOf(YamlCodec.STRING, SlotFactory.CODEC), "items", m -> m.idToItems, (m, v) -> m.idToItems.putAll(v))
-                .field(Animator.AnimatorContext.CODEC, "animation", m -> m.animation, (m, v) -> m.animation = v)
-                .field(YamlCodec.mapOf(YamlCodec.STRING, Animator.AnimatorContext.CODEC), "animations", m -> m.animations, (m, v) -> m.animations.putAll(v))
-                .field(CommandList.CODEC, "commands-list", m -> m.commandList, (m, v) -> m.commandList = v)
-                .field(YamlCodec.mapOf(YamlCodec.STRING, Commands.CODEC), "menu-events", m -> m.eventHandlers, (m, v) -> m.eventHandlers.putAll(v))
-                .field(YamlCodec.LONG, "click_cooldown", m -> m.clickCooldown, (m, v) -> m.clickCooldown = v)
-                .field(YamlCodec.YAML_MAP, null, m -> null, (m, v) -> {
+        var fields = PipelineYamlDecoder.of(MenuConfig::new)
+                .field(YamlDecoder.STRING, "title", (m, v) -> m.title = v)
+                .field(MenuCodecs.NAMESPACED_KEY.asDecoder(), "id", (m, v) -> m.id = v)
+                .field(MenuCodecs.NAMESPACED_KEY.asDecoder(), "provider", (m, v) -> m.provider = v)
+                .field(BukkitCodecs.inventory_type().asDecoder(), "type", (m, v) -> m.invType = v)
+                .field(YamlDecoder.INT, "size", (m, v) -> m.size = v)
+                .field(MenuCodecs.NAMESPACED_KEY.asDecoder().listOf().map(list -> new HashSet<>(list)), "only-open-from", (m, v) -> m.onlyOpenFrom.addAll(v))
+                .field(MenuCodecs.ARGS_CODEC.asDecoder(), "args", (m, v) -> m.args.putAll(v))
+                .field(YamlDecoder.mapOf(YamlDecoder.STRING, SlotFactory.DECODER), "items", (m, v) -> m.idToItems.putAll(v))
+                .field(Animator.AnimatorContext.DECODER, "animation", (m, v) -> m.animation = v)
+                .field(YamlDecoder.mapOf(YamlDecoder.STRING, Animator.AnimatorContext.DECODER), "animations", (m, v) -> m.animations.putAll(v))
+                .field(CommandList.DECODER, "commands-list", (m, v) -> m.commandList = v)
+                .field(YamlDecoder.mapOf(YamlDecoder.STRING, Commands.DECODER), "menu-events", (m, v) -> m.eventHandlers.putAll(v))
+                .field(YamlDecoder.LONG, "click_cooldown", (m, v) -> m.clickCooldown = v)
+                .field(YamlDecoder.YAML_MAP, null, (m, v) -> {
                     m.yaml = v;
                     m.cachedYaml = new CashedYamlMap(v);
-                })
-        ;
-        CODEC = RAW_CODEC.build();
+                });
+        RAW_CODEC = PipelineYamlCodecBuilder.of(MenuConfig::new).and(fields);
+        DECODER = RAW_CODEC.buildDecoder();
+        CODEC = YamlCodec.of(DECODER);
     }
 
     public YamlCodec<? extends MenuConfig> codec() {
@@ -200,7 +205,7 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
             }
 
             // noinspection all
-            Files.writeString(toFolder.resolve(name + ".yml"), ((YamlCodec) codec()).encode(this).asYamlMap().result().saveToString());
+            Files.writeString(toFolder.resolve(name + ".yml"), yaml.saveToString());
 
             int x = 0;
             for (MenuConfig superMenu : supers) {

@@ -8,7 +8,8 @@ import dev.by1337.bmenu.slot.component.OnTickComponent;
 import dev.by1337.bmenu.slot.component.OnViewComponent;
 import dev.by1337.item.ItemModel;
 import dev.by1337.plc.PlaceholderApplier;
-import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
+import dev.by1337.yaml.decoder.PipelineYamlDecoder;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -17,15 +18,17 @@ import java.util.List;
 
 public class SlotVariant {
 
-    public static final YamlCodec<SlotVariant> CODEC = YamlCodec.<SlotVariant>recursive(codec -> PipelineYamlCodecBuilder.of(SlotVariant::new)
-            .field(ItemModel.CODEC, null, v -> v.itemModel, (h, v) -> h.itemModel = v)
-            .field(OnViewComponent.CODEC, "on_view", v -> v.onViewComponent, (h, v) -> h.onViewComponent = v)
-            .field(ClickMapComponent.CODEC, null, v -> v.clicks, (h, v) -> h.clicks = v)
-            .field(OnTickComponent.CODEC, "on_tick", v -> v.ticker, (h, v) -> h.ticker = v)
-            .integer("tick_speed", v -> v.tickSpeed, (h, v) -> h.tickSpeed = v)
-            .field(codec.listOf(), "oneOf", v -> v.variants, (h, v) -> h.variants = v)
+    public static final YamlDecoder<SlotVariant> DECODER = YamlDecoder.<SlotVariant>recursive(self -> PipelineYamlDecoder.of(SlotVariant::new)
+            .field(ItemModel.DECODER, null, (h, v) -> h.itemModel = v)
+            .field(OnViewComponent.DECODER, "on_view", (h, v) -> h.onViewComponent = v)
+            .field(ClickMapComponent.DECODER, null, (h, v) -> h.clicks = v)
+            .field(OnTickComponent.DECODER, "on_tick", (h, v) -> h.ticker = v)
+            .field(YamlDecoder.INT, "tick_speed", (h, v) -> h.tickSpeed = v)
+            .field(self.listOf().whenMap(YamlDecoder.mapOf(YamlDecoder.STRING, self).map(m -> new java.util.ArrayList<>(m.values()))), "oneOf", (h, v) -> h.variants = v)
             .build()
-    ).map(SlotVariant::postDecode, v -> v);
+    ).map(SlotVariant::postDecode);
+    @Deprecated
+    public static final YamlCodec<SlotVariant> CODEC = YamlCodec.of(DECODER);
 
     private ItemModel itemModel = ItemModel.AIR;
     private @Nullable OnViewComponent onViewComponent;

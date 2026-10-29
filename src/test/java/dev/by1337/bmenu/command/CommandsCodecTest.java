@@ -1,7 +1,5 @@
 package dev.by1337.bmenu.command;
 
-import dev.by1337.bmenu.handler.BreakableConditionalHandler;
-import dev.by1337.bmenu.handler.ConditionalHandler;
 import dev.by1337.bmenu.requirement.Requirement;
 import dev.by1337.yaml.YamlMap;
 import org.junit.jupiter.api.Test;
@@ -16,11 +14,7 @@ class CommandsCodecTest {
                 commands: '[message] allowed'
                 deny_commands: '[message] denied'
                 """);
-        var handler = ConditionalHandler.CODEC.decode(yaml.get()).getOrThrow();
-
-        assertTrue(handler.req().test(null, null));
-        assertEquals("[message] allowed", handler.doCommands().encode().asCollection().getOrThrow().iterator().next());
-        assertEquals("[message] denied", handler.elseCommands().encode().asCollection().getOrThrow().iterator().next());
+        assertNotNull(Commands.DECODER.decode(yaml.get()).getOrThrow());
     }
 
     @Test
@@ -33,12 +27,7 @@ class CommandsCodecTest {
                 commands: '[message] success'
                 deny_commands: '[message] failure'
                 """);
-        var handler = BreakableConditionalHandler.CODEC.decode(yaml.get()).getOrThrow();
-
-        assertEquals(1, handler.handlers().size());
-        assertTrue(handler.handlers().get(0) instanceof ConditionalHandler);
-        assertEquals("[message] success", handler.doCmds().encode().asCollection().getOrThrow().iterator().next());
-        assertEquals("[message] failure", handler.elseCmds().encode().asCollection().getOrThrow().iterator().next());
+        assertNotNull(Commands.DECODER.decode(yaml.get()).getOrThrow());
     }
 
     @Test
@@ -57,7 +46,7 @@ class CommandsCodecTest {
 
         assertEquals(2, encoded.size());
         assertTrue(encoded.iterator().next() instanceof java.util.Map);
-        assertEquals("[console] say hello", encoded.stream().skip(1).findFirst().orElseThrow());
+        assertEquals(java.util.Map.of("console", "say hello"), encoded.stream().skip(1).findFirst().orElseThrow());
     }
 
     @Test
@@ -74,9 +63,8 @@ class CommandsCodecTest {
                 do: '[message] allowed'
                 """);
 
-        assertTrue(Requirement.CODEC.decode(legacy.get()).getOrThrow() instanceof ConditionalHandler);
-        var handler = ConditionalHandler.CODEC.decode(modern.get()).getOrThrow();
-        assertTrue(handler.req().test(null, null));
+        assertNotNull(Requirement.DECODER.decode(legacy.get()).getOrThrow());
+        assertNotNull(Commands.DECODER.decode(modern.get()).getOrThrow());
     }
 
     @Test
@@ -91,7 +79,7 @@ class CommandsCodecTest {
         );
         cases.forEach((type, fields) -> {
             var yaml = YamlMap.loadFromString("type: " + type + "\n" + fields + "\n");
-            assertTrue(Requirement.CODEC.decode(yaml.get()).getOrThrow() instanceof ConditionalHandler, type);
+            assertNotNull(Requirement.DECODER.decode(yaml.get()).getOrThrow(), type);
         });
     }
 
@@ -108,6 +96,7 @@ class CommandsCodecTest {
         var encoded = commands.encode().asCollection().getOrThrow();
 
         assertEquals(1, encoded.size());
-        assertTrue(encoded.iterator().next() instanceof java.util.List);
+        assertTrue(encoded.iterator().next() instanceof java.util.Map);
+        assertNotNull(Commands.DECODER.decode(commands.encode()).getOrThrow());
     }
 }

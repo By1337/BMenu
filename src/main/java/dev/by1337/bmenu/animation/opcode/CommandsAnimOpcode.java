@@ -12,8 +12,9 @@ import dev.by1337.yaml.codec.YamlCodec;
 import org.jetbrains.annotations.Nullable;
 
 public class CommandsAnimOpcode implements FrameOpcode {
-    public static final YamlCodec<CommandsAnimOpcode> CODEC = Commands.CODEC
-            .map(CommandsAnimOpcode::new, v -> v.commands);
+    public static final dev.by1337.yaml.decoder.YamlDecoder<CommandsAnimOpcode> DECODER = Commands.DECODER.map(CommandsAnimOpcode::new);
+    @Deprecated
+    public static final YamlCodec<CommandsAnimOpcode> CODEC = YamlCodec.of(DECODER);
 
     private final Commands commands;
 

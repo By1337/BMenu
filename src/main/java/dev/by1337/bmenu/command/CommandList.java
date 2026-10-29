@@ -1,6 +1,7 @@
 package dev.by1337.bmenu.command;
 
-import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.decoder.RecordYamlDecoder;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import dev.by1337.yaml.codec.YamlCodec;
 import dev.by1337.bmenu.factory.MenuCodecs;
 import dev.by1337.bmenu.random.WeightedItem;
@@ -13,8 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 public class CommandList {
-    public static final YamlCodec<CommandList> CODEC =
-            YamlCodec.mapOf(YamlCodec.STRING, WeightedCommands.CODEC).map(CommandList::new, c -> c.commandByName);
+    public static final YamlDecoder<CommandList> DECODER = YamlDecoder.mapOf(YamlDecoder.STRING, WeightedCommands.DECODER).map(CommandList::new);
+    @Deprecated
+    public static final YamlCodec<CommandList> CODEC = YamlCodec.of(DECODER);
     private final List<WeightedCommands> commands;
     private final Map<String, WeightedCommands> commandByName;
     private WeightedItemSelector<Commands> randSelector;
@@ -52,11 +54,13 @@ public class CommandList {
     }
 
     public static class WeightedCommands implements WeightedItem<Commands> {
-        public static final YamlCodec<WeightedCommands> CODEC = RecordYamlCodecBuilder.mapOf(
+        public static final YamlDecoder<WeightedCommands> DECODER = RecordYamlDecoder.mapOf(
                 WeightedCommands::new,
-                YamlCodec.DOUBLE.fieldOf("weight", WeightedCommands::weight, 1D),
-                Commands.CODEC.fieldOf("commands", WeightedCommands::commands, Commands.EMPTY)
+                YamlDecoder.DOUBLE.fieldOf("weight", 1D),
+                Commands.DECODER.fieldOf("commands", Commands.EMPTY)
         );
+        @Deprecated
+        public static final YamlCodec<WeightedCommands> CODEC = YamlCodec.of(DECODER);
         private static final WeightedCommands EMPTY = new WeightedCommands(0D, null);
         private final double weight;
         private final Commands commands;

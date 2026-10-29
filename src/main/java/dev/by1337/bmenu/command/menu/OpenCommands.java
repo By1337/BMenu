@@ -5,7 +5,8 @@ import dev.by1337.cmd.Command;
 import dev.by1337.core.command.bcmd.CommandWrapper;
 import dev.by1337.core.command.bcmd.requires.RequiresPermission;
 import dev.by1337.yaml.YamlMap;
-import dev.by1337.yaml.codec.RecordYamlCodecBuilder;
+import dev.by1337.yaml.decoder.RecordYamlDecoder;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import dev.by1337.yaml.codec.YamlCodec;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -25,17 +26,17 @@ public class OpenCommands {
         this.loader = loader1;
         openCommands = new ArrayList<>();
         Map<String, OpenCommandConfig> commands = config.get("open_commands")
-                .decode(YamlCodec.mapOf(YamlCodec.STRING, OpenCommandConfig.CODEC), Map.of()).getOrThrow();
+                .decode(YamlCodec.of(YamlDecoder.mapOf(YamlDecoder.STRING, OpenCommandConfig.DECODER)), Map.of()).getOrThrow();
         for (String cmd : commands.keySet()) {
             OpenCommandConfig cfg = commands.get(cmd);
             List<Argument<CommandSender, ?>> arguments = new ArrayList<>();
-           if (cfg.suggestions != null){
-               for (String name : cfg.suggestions.keySet()) {
-                   YamlMap data = cfg.suggestions.get(name);
-                   CommandArgumentType argumentType = data.get("type").decode(CommandArgumentType.CODEC).getOrThrow();
-                   arguments.add(argumentType.creator().create(data, name));
-               }
-           }
+            if (cfg.suggestions != null) {
+                for (String name : cfg.suggestions.keySet()) {
+                    YamlMap data = cfg.suggestions.get(name);
+                    CommandArgumentType argumentType = data.get("type").decode(CommandArgumentType.CODEC).getOrThrow();
+                    arguments.add(argumentType.creator().create(data, name));
+                }
+            }
             OpenCommand openCommand = new OpenCommand(cmd, cfg.menu, arguments, loader.plugin());
             openCommand.setAliases(cfg.aliases);
             openCommand.setPermission(cfg.permission);
@@ -60,24 +61,27 @@ public class OpenCommands {
     }
 
     public record OpenCommandConfig(
-            String menu,
-            List<String> aliases,
-            @Nullable String permission,
-            @Nullable Map<String, YamlMap> suggestions
-    ) {
-        public static final YamlCodec<OpenCommandConfig> CODEC = RecordYamlCodecBuilder.mapOf(
+        String menu,
+        List<String> aliases,
+        @Nullable String permission,
+        @Nullable Map<String, YamlMap> suggestions) {
+        public static final YamlDecoder<OpenCommandConfig> DECODER = RecordYamlDecoder.mapOf(
                 OpenCommandConfig::new,
-                YamlCodec.STRING.fieldOf("menu", OpenCommandConfig::menu),
-                YamlCodec.STRINGS.fieldOf("aliases", OpenCommandConfig::aliases, List.of()),
-                YamlCodec.STRING.fieldOf("permission", OpenCommandConfig::permission),
-                YamlCodec.STRING_TO_YAML_MAP
-                        .fieldOf("tab-completer", OpenCommandConfig::suggestions)
-                );
+                YamlDecoder.STRING.fieldOf("menu"),
+                YamlDecoder.STRINGS.fieldOf("aliases", List.of()),
+                YamlDecoder.STRING.fieldOf("permission"),
+                YamlDecoder.mapOf(YamlDecoder.STRING, YamlDecoder.YAML_MAP)
+                        .fieldOf("tab-completer")
+        );
+
+        @Deprecated
+        public static final YamlCodec<OpenCommandConfig> CODEC = YamlCodec.of(DECODER);
 
         public OpenCommandConfig {
             Objects.requireNonNull(menu, "menu is null");
         }
     }
+
     public class OpenCommand extends Command<CommandSender> {
         private final String menuId;
         private final CommandWrapper wrapper;
