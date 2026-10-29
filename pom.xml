@@ -7,6 +7,7 @@
 
     <properties>
         <java.version>16</java.version>
+        <bpatch.version>1.0.0</bpatch.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -41,6 +42,28 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>dev.by1337.bpatch</groupId>
+                <artifactId>bpatch-maven-plugin</artifactId>
+                <version>${bpatch.version}</version>
+                <executions>
+                    <execution>
+                        <id>pack-legacy-bmenu</id>
+                        <goals>
+                            <goal>pack</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jars>
+                        <jar>
+                            <artifact>org.by1337.bmenu:BMenu:1.7+legacy</artifact>
+                            <output>bridges/BMenu-1.7+legacy.jar</output>
+                            <compression>STORED</compression>
+                        </jar>
+                    </jars>
                 </configuration>
             </plugin>
             <plugin>

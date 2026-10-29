@@ -2,6 +2,7 @@ package dev.by1337.bmenu;
 
 
 import dev.by1337.bmenu.command.ExecuteContext;
+import dev.by1337.bmenu.legacy.BMenuBridge;
 import dev.by1337.bmenu.command.argument.ArgumentMenuConfig;
 import dev.by1337.bmenu.command.menu.OpenCommands;
 import dev.by1337.bmenu.hook.BungeeCordMessageSender;
@@ -17,9 +18,7 @@ import dev.by1337.core.command.bcmd.CommandError;
 import dev.by1337.core.command.bcmd.CommandWrapper;
 import dev.by1337.core.command.bcmd.argument.ArgumentPlayers;
 import dev.by1337.core.command.bcmd.requires.RequiresPermission;
-import dev.by1337.core.util.RepositoryUtil;
 import dev.by1337.core.util.io.ResourceUtil;
-import dev.by1337.core.util.reflect.ClasspathUtil;
 import dev.by1337.core.util.text.minimessage.MiniMessage;
 import dev.by1337.item.ItemModel;
 import dev.by1337.yaml.YamlMap;
@@ -47,9 +46,8 @@ public class BMenu extends JavaPlugin {
     private PlayerInputListener playerInputListener;
 
     public BMenu() {
-        Path libraries = getDataFolder().toPath().resolve(".libraries");
         try {
-            ClasspathUtil.addUrl(this, RepositoryUtil.download(RepositoryUtil.BDEV_REPO, "org.by1337.bmenu:BMenu:1.7+legacy", libraries));
+            BMenuBridge.bootstrap(this);
         } catch (Exception e) {
             log.warn("Failed to load legacy bmenu", e);
         }
@@ -244,14 +242,14 @@ public class BMenu extends JavaPlugin {
         return cmd;
     }
 
-//    public static void writeSchemas(Plugin plugin) {
-//        Plugin bMenu = Bukkit.getPluginManager().getPlugin("BMenu");
-//        String bMenuVersion = bMenu == null ? plugin.getDescription().getVersion() : bMenu.getDescription().getVersion();
-//        SchemaHolder.addSchema(plugin.getDataFolder(), "bmenu-schema-v" + bMenuVersion + ".json", "menu/**/*.yml", MenuCodec.schema(), "BMenu menu schema");
-//    }
-//
-//    public MenuLoader getMenuLoader() {
-//        return loader;
-//    }
+    //    public static void writeSchemas(Plugin plugin) {
+    //        Plugin bMenu = Bukkit.getPluginManager().getPlugin("BMenu");
+    //        String bMenuVersion = bMenu == null ? plugin.getDescription().getVersion() : bMenu.getDescription().getVersion();
+    //        SchemaHolder.addSchema(plugin.getDataFolder(), "bmenu-schema-v" + bMenuVersion + ".json", "menu/**/*.yml", MenuCodec.schema(), "BMenu menu schema");
+    //    }
+    //
+    //    public MenuLoader getMenuLoader() {
+    //        return loader;
+    //    }
 
 }
