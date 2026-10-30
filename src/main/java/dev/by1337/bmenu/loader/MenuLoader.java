@@ -9,6 +9,7 @@ import dev.by1337.core.util.misc.Pair;
 import dev.by1337.vault.BVaultApi;
 import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -31,7 +32,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class MenuLoader implements Listener {
-    private final RegistryShortcut<YamlCodec<? extends MenuConfig>> lookupProviders;
+    private final RegistryShortcut<MenuCodecRegistry.Registration> lookupProviders;
     private final RegistryShortcut<MenuConfig> lookupMenus;
     private final MenuCodecRegistry menuCodecRegistry = new MenuCodecRegistry();
     private final RegistryLike<MenuConfig> menus = new RegistryLike<>();
@@ -57,21 +58,21 @@ public class MenuLoader implements Listener {
         }
         lookupProviders = new RegistryShortcut<>() {
             @Override
-            protected YamlCodec<? extends MenuConfig> find(String key) {
-                var v = menuCodecRegistry.get(key);
+            protected MenuCodecRegistry.Registration find(String key) {
+                var v = menuCodecRegistry.getRegistration(key);
                 if (v != null) return v;
                 for (MenuSubLoader value : subLoaders.values()) {
-                    if (((v = value.menuCodecRegistry.get(key)) != null)) return v;
+                    if (((v = value.menuCodecRegistry.getRegistration(key)) != null)) return v;
                 }
                 return null;
             }
 
             @Override
-            protected YamlCodec<? extends MenuConfig> find(NamespacedKey key) {
-                var v = menuCodecRegistry.get(key);
+            protected MenuCodecRegistry.Registration find(NamespacedKey key) {
+                var v = menuCodecRegistry.getRegistration(key);
                 if (v != null) return v;
                 for (MenuSubLoader value : subLoaders.values()) {
-                    if (((v = value.menuCodecRegistry.get(key)) != null)) return v;
+                    if (((v = value.menuCodecRegistry.getRegistration(key)) != null)) return v;
                 }
                 return null;
             }
@@ -251,8 +252,15 @@ public class MenuLoader implements Listener {
         return cfg.create(viewer, previousMenu);
     }
 
+    public @Nullable YamlDecoder<? extends MenuConfig> findMenuDecoder(String provider) {
+        var entry = lookupProviders.get(provider);
+        return entry == null ? null : entry.decoder;
+    }
+
+    @Deprecated
     public YamlCodec<? extends MenuConfig> findMenuCodec(String provider) {
-        return lookupProviders.get(provider);
+        var entry = lookupProviders.get(provider);
+        return entry == null ? null : entry.codec();
     }
 
     public MenuConfig findMenuConfig(String name) {

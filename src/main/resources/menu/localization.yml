@@ -1,0 +1,99 @@
+# Открыть: /bm open example:localization
+# Для проверки смените язык Minecraft, закройте меню и откройте его командой заново.
+# Запасной язык для title/name/lore и сообщений задаёт Themes.defaultLocale.
+# Сообщения используют карты локалей с тем же запасным языком.
+id: example:localization
+provider: default
+type: chest
+size: 27
+title:
+  ru_RU: '&8Пример локализации'
+  en_US: '&8Localization demo'
+
+items:
+  background:
+    material: gray_stained_glass_pane
+    name: ' '
+    slot: '0-3,5-10,12,14,16-21,23-26'
+
+  info:
+    material: book
+    slot: 4
+    name-ru_RU: '&bПример локализации'
+    name-en_US: '&bLocalization demo'
+    lore-ru_RU:
+      - '&7Смените язык Minecraft на русский'
+      - '&7или английский, затем закройте'
+      - '&7и откройте меню командой заново.'
+    lore-en_US:
+      - '&7Change your Minecraft language'
+      - '&7to Russian or English, then close'
+      - '&7and open this menu again.'
+
+  chat:
+    material: paper
+    slot: 11
+    name-ru_RU: '&aСообщение в чат'
+    name-en_US: '&aChat message'
+    lore-ru_RU:
+      - '&7Значение: &f%player_name%'
+      - '&eНажмите для сообщения на вашем языке.'
+    lore-en_US:
+      - '&7Value: &f%player_name%'
+      - '&eClick to send a localized message.'
+    on_click:
+      - message:
+          ru_RU: '&aПривет! Значение плейсхолдера: &f%player_name%'
+          en_US: '&aHello! Placeholder value: &f%player_name%'
+
+  action-bar:
+    material: clock
+    slot: 13
+    name-ru_RU: '&eСтрока над панелью предметов'
+    name-en_US: '&eAction bar'
+    lore-ru_RU:
+      - '&7Текст на вашем языке над хотбаром.'
+      - '&eНажмите, чтобы увидеть его.'
+    lore-en_US:
+      - '&7Localized text above your hotbar.'
+      - '&eClick to show it.'
+    on_click:
+      - action_bar:
+          ru_RU: '&eЛокализованный action bar: &f%player_name%'
+          en_US: '&eLocalized action bar: &f%player_name%'
+
+  title:
+    material: name_tag
+    slot: 15
+    name-ru_RU: '&dЗаголовок и подзаголовок'
+    name-en_US: '&dTitle and subtitle'
+    lore-ru_RU:
+      - '&7У каждого языка свой заголовок.'
+      - '&7Следующая строка — подзаголовок.'
+      - '&eНажмите, чтобы увидеть оба.'
+    lore-en_US:
+      - '&7Each locale has its own title.'
+      - '&7The next line becomes the subtitle.'
+      - '&eClick to show both.'
+    on_click:
+      - title:
+          ru_RU: |-
+            &dПривет, игрок!
+            &7Значение: &f%player_name%
+            10 70 20
+          en_US: |-
+            &dHello, player!
+            &7Value: &f%player_name%
+            10 70 20
+
+  close:
+    material: barrier
+    slot: 22
+    name-ru_RU: '&cЗакрыть'
+    name-en_US: '&cClose'
+    lore-ru_RU:
+      - '&7Нажмите, чтобы закрыть меню.'
+    lore-en_US:
+      - '&7Click to close this menu.'
+    on_click:
+      - close: ''

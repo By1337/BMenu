@@ -23,6 +23,8 @@ import dev.by1337.plc.PapiResolver;
 import dev.by1337.bmenu.menu.command.MenuTextCommands;
 import dev.by1337.plc.PlaceholderResolver;
 import dev.by1337.plc.Placeholders;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -79,6 +81,7 @@ public abstract class AbstractMenu implements Menu {
     private final PlaceholderResolverList resolvers;
     protected final SimplePlaceholders argsPlaceholders;
     private BukkitInventory inventoryLike;
+    private Component sentTitle;
     protected final StringWatcher title;
     protected final @Nullable Locale locale;
 
@@ -90,11 +93,7 @@ public abstract class AbstractMenu implements Menu {
         resolvers.addResolver(argsPlaceholders);
         clickCooldown = config.clickCooldown();
         this.config = config;
-        title = new StringWatcher(config.title(), s -> {
-            try (var ignored = BukkitItemRenderer.setPlayer(viewer)) {
-                inventoryLike.setTitle(BMM.deserialize(s, locale));
-            }
-        });
+        title = new StringWatcher(null, s -> updateTitle());
         loader = config.loader();
         this.viewer = viewer;
         layers = new MenuMatrix(menuSize(), this);
@@ -128,12 +127,14 @@ public abstract class AbstractMenu implements Menu {
         }
         if (inventoryLike == null) {
             try (var ignored = BukkitItemRenderer.setPlayer(viewer)) {
+                Component initialTitle = renderTitle();
                 inventoryLike = new BukkitInventory(
                         this,
                         menuSize(),
-                        BMM.deserialize(setPlaceholders(title.data()), locale),
+                        initialTitle,
                         config.invType()
                 );
+                sentTitle = initialTitle;
             }
         }
         inventoryLike.clear();
@@ -153,9 +154,6 @@ public abstract class AbstractMenu implements Menu {
             return;
         }
         loader.onMenuOpen(this, viewer);
-        if (isReopen) {
-            title.doChange();
-        }
         generate0();
     }
 
@@ -196,7 +194,7 @@ public abstract class AbstractMenu implements Menu {
         config.fill(this, layers.getBaseLayer(), getItemOffsets());
         generate();
         onEvent(MenuEvents.ON_REFRESH);
-        title.setData(setPlaceholders(config.title()));
+        updateTitle();
         flush();
     }
 
@@ -267,6 +265,26 @@ public abstract class AbstractMenu implements Menu {
         return layers.getItemInSlot(slot);
     }
 
+    private void updateTitle() {
+        if (inventoryLike == null) return;
+        try (var ignored = BukkitItemRenderer.setPlayer(viewer)) {
+            Component current = renderTitle();
+            if (Objects.equals(sentTitle, current)) return;
+            inventoryLike.setTitle(current);
+            sentTitle = current;
+        }
+    }
+
+    private Component renderTitle() {
+        String override = title.data();
+        if (override != null) return BMM.deserialize(setPlaceholders(override), locale);
+        var text = config.titleText(locale);
+        if (text == null) return Component.empty();
+        var component = text.asComponent(viewer, this);
+        return locale == null ? component : GlobalTranslator.render(component, locale);
+    }
+
+    /** Overrides the configured title; null restores the configured text. */
     public void setTitle(String title) {
         this.title.setData(title);
     }

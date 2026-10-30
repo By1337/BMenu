@@ -147,19 +147,31 @@ class MenuTextCommandsTest {
             try {
                 Commands.DECODER.decode(YamlValue.wrap(List.of(
                         Map.of("title", Map.of("en_US", "New title\nNew subtitle")),
-                        Map.of("title", "\"Legacy\\nSubtitle\" 1 2 3"))))
+                        Map.of("title", "\"Legacy\\nSubtitle\" 1 2 3"),
+                        Map.of("title", Map.of("en_US", "Separate\nSubtitle\n3\n4\n5")),
+                        Map.of("title", Map.of("en_US", "Combined\nSubtitle\n6 7 8")))))
                         .getOrThrow().test(context, text -> text);
             } finally {
                 field.set(null, previous);
             }
         }
         assertEquals("1.16.5", dev.by1337.core.ServerVersion.CURRENT_ID);
-        assertEquals(2, titles.size());
+        assertEquals(4, titles.size());
         assertEquals(Component.text("New title"), titles.get(0).title());
         assertEquals(Component.text("New subtitle"), titles.get(0).subtitle());
         assertEquals(Component.text("Legacy"), titles.get(1).title());
         assertEquals(Component.text("Subtitle"), titles.get(1).subtitle());
         assertEquals(java.time.Duration.ofMillis(50), titles.get(1).times().fadeIn());
+        assertEquals(Component.text("Separate"), titles.get(2).title());
+        assertEquals(Component.text("Subtitle"), titles.get(2).subtitle());
+        assertEquals(java.time.Duration.ofMillis(150), titles.get(2).times().fadeIn());
+        assertEquals(java.time.Duration.ofMillis(200), titles.get(2).times().stay());
+        assertEquals(java.time.Duration.ofMillis(250), titles.get(2).times().fadeOut());
+        assertEquals(Component.text("Combined"), titles.get(3).title());
+        assertEquals(Component.text("Subtitle"), titles.get(3).subtitle());
+        assertEquals(java.time.Duration.ofMillis(300), titles.get(3).times().fadeIn());
+        assertEquals(java.time.Duration.ofMillis(350), titles.get(3).times().stay());
+        assertEquals(java.time.Duration.ofMillis(400), titles.get(3).times().fadeOut());
     }
 
     @Test

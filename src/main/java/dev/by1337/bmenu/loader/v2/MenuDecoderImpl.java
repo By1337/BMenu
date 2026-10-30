@@ -7,7 +7,7 @@ import dev.by1337.bmenu.loader.MenuLoader;
 import dev.by1337.plc.PlaceholderApplier;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.DataResult;
-import dev.by1337.yaml.codec.YamlCodec;
+import dev.by1337.yaml.decoder.YamlDecoder;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -80,9 +80,9 @@ public class MenuDecoderImpl implements MenuDecoder {
 
     public DataResult<? extends MenuConfig> decode(YamlMap ctx) {
         String provider = ctx.get("provider").asString("bmenu:default");
-        YamlCodec<? extends MenuConfig> codec = loader.findMenuCodec(provider);
-        if (codec == null) return DataResult.error("unknown provider " + provider);
-        return codec.decode(ctx);
+        YamlDecoder<? extends MenuConfig> decoder = loader.findMenuDecoder(provider);
+        if (decoder == null) return DataResult.error("unknown provider " + provider);
+        return decoder.decode(ctx.get());
     }
 
     public void setPlaceholders(PlaceholderApplier placeholders) {

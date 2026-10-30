@@ -12,6 +12,11 @@ import dev.by1337.bmenu.slot.SlotBuilderSource;
 import dev.by1337.bmenu.slot.SlotContent;
 import dev.by1337.bmenu.slot.SlotFactory;
 import dev.by1337.bmenu.yaml.CashedYamlMap;
+import dev.by1337.edsl.Themes;
+import dev.by1337.edsl.text.RawTextComponentLike;
+import dev.by1337.edsl.util.ByLocaleSelector;
+import dev.by1337.edsl.util.Locales;
+import dev.by1337.yaml.codec.DataResult;
 import dev.by1337.yaml.BukkitCodecs;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
@@ -32,6 +37,8 @@ import java.util.*;
 
 public class MenuConfig implements SlotBuilderSource, Keyed {
     private static final int DEFAULT_CLICK_COOLDOWN = Integer.getInteger("bmenu.click.cooldown", 100);
+    public static final PipelineYamlDecoder<MenuConfig> RAW_DECODER;
+    @Deprecated
     public static final PipelineYamlCodecBuilder<MenuConfig> RAW_CODEC;
     public static final YamlDecoder<MenuConfig> DECODER;
     @Deprecated
@@ -50,6 +57,8 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
     protected YamlMap yaml;
     protected CashedYamlMap cachedYaml;
     protected String title;
+    private RawTextComponentLike rawTitle;
+    private ByLocaleSelector<RawTextComponentLike> localizedTitles;
     protected List<SlotFactory> items;
     protected @Nullable Animator.AnimatorContext animation;
     protected final Map<String, Animator.AnimatorContext> animations = new HashMap<>();
@@ -77,14 +86,16 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
         }
     }
 
-    public static YamlCodec<MenuConfig> createCodecFor(MenuSupplier t) {
-        return MenuConfig.CODEC.map(
-                v -> {
-                    v.setDefaultMenuCreator(t);
-                    return v;
-                },
-                v -> v
-        );
+    public static YamlDecoder<MenuConfig> createDecoderFor(MenuSupplier supplier) {
+        return DECODER.map(config -> {
+            config.setDefaultMenuCreator(supplier);
+            return config;
+        });
+    }
+
+    @Deprecated
+    public static YamlCodec<MenuConfig> createCodecFor(MenuSupplier supplier) {
+        return YamlCodec.of(createDecoderFor(supplier));
     }
 
     public Menu create(Player viewer, @Nullable Menu previousMenu) {
@@ -168,7 +179,11 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
 
     static {
         var fields = PipelineYamlDecoder.of(MenuConfig::new)
-                .field(YamlDecoder.STRING, "title", (m, v) -> m.title = v)
+                .field(titleDecoder(), "title", (m, v) -> {
+                    m.localizedTitles = v.variants;
+                    m.rawTitle = v.fallback;
+                    m.title = v.fallback.source();
+                })
                 .field(MenuCodecs.NAMESPACED_KEY.asDecoder(), "id", (m, v) -> m.id = v)
                 .field(MenuCodecs.NAMESPACED_KEY.asDecoder(), "provider", (m, v) -> m.provider = v)
                 .field(BukkitCodecs.inventory_type().asDecoder(), "type", (m, v) -> m.invType = v)
@@ -185,11 +200,34 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
                     m.yaml = v;
                     m.cachedYaml = new CashedYamlMap(v);
                 });
-        RAW_CODEC = PipelineYamlCodecBuilder.of(MenuConfig::new).and(fields);
-        DECODER = RAW_CODEC.buildDecoder();
+        RAW_DECODER = fields;
+        DECODER = RAW_DECODER.build();
+        RAW_CODEC = PipelineYamlCodecBuilder.of(MenuConfig::new).and(RAW_DECODER);
         CODEC = YamlCodec.of(DECODER);
     }
 
+    private record MenuTitle(RawTextComponentLike fallback, ByLocaleSelector<RawTextComponentLike> variants) {
+    }
+
+    private static YamlDecoder<MenuTitle> titleDecoder() {
+        var localized = YamlDecoder.mapOf(YamlDecoder.STRING, RawTextComponentLike.DECODER).flatMap(values -> {
+            if (values.isEmpty()) return DataResult.<MenuTitle>error("Empty locale map for menu title");
+            Map<Locale, RawTextComponentLike> variants = new LinkedHashMap<>();
+            for (var entry : values.entrySet()) {
+                var locale = Locales.parse(entry.getKey());
+                if (variants.putIfAbsent(locale, entry.getValue()) != null)
+                    return DataResult.<MenuTitle>error("Duplicate locale for menu title: " + locale);
+            }
+            var defaults = new ByLocaleSelector<>(variants.values().iterator().next());
+            variants.forEach(defaults::add);
+            var selector = new ByLocaleSelector<>(defaults.select(Themes.defaultLocale));
+            variants.forEach(selector::add);
+            return DataResult.success(new MenuTitle(defaults.select(Themes.defaultLocale), selector));
+        });
+        return RawTextComponentLike.DECODER.map(value -> new MenuTitle(value, null)).whenMap(localized);
+    }
+
+    @Deprecated
     public YamlCodec<? extends MenuConfig> codec() {
         return CODEC;
     }
@@ -266,6 +304,18 @@ public class MenuConfig implements SlotBuilderSource, Keyed {
 
     public String title() {
         return title;
+    }
+
+    public String title(Locale locale) {
+        var text = titleText(locale);
+        return text == null ? null : text.source();
+    }
+
+    public @Nullable RawTextComponentLike titleText(Locale locale) {
+        String current = title();
+        if (rawTitle == null || !Objects.equals(rawTitle.source(), current))
+            return current == null ? null : new RawTextComponentLike(current);
+        return localizedTitles == null ? rawTitle : localizedTitles.select(locale);
     }
 
     public List<SlotFactory> items() {

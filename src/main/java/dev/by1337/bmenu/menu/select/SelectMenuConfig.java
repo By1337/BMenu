@@ -17,7 +17,7 @@ import dev.by1337.plc.Placeholders;
 import dev.by1337.yaml.YamlMap;
 import dev.by1337.yaml.YamlValue;
 import dev.by1337.yaml.codec.DataResult;
-import dev.by1337.yaml.codec.PipelineYamlCodecBuilder;
+import dev.by1337.yaml.decoder.PipelineYamlDecoder;
 import dev.by1337.yaml.decoder.RecordYamlDecoder;
 import dev.by1337.yaml.decoder.YamlDecoder;
 import dev.by1337.yaml.codec.YamlCodec;
@@ -48,10 +48,10 @@ public class SelectMenuConfig extends MenuConfig {
                 return null;
             })
             .and(PapiResolver.INSTANCE.map(v -> v));
-    public static final YamlDecoder<SelectMenuConfig> DECODER = PipelineYamlCodecBuilder.of(SelectMenuConfig::new)
-            .and(MenuConfig.RAW_CODEC)
+    public static final YamlDecoder<SelectMenuConfig> DECODER = PipelineYamlDecoder.of(SelectMenuConfig::new)
+            .and(MenuConfig.RAW_DECODER)
             .field(MenuSelector.DECODER, "selector", (m, v) -> m.selector = v)
-            .buildDecoder();
+            .build();
     @Deprecated
     public static final YamlCodec<SelectMenuConfig> CODEC = YamlCodec.of(DECODER);
 

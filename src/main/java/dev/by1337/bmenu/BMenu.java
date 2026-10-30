@@ -2,11 +2,11 @@ package dev.by1337.bmenu;
 
 
 import dev.by1337.bmenu.command.ExecuteContext;
-import dev.by1337.bmenu.legacy.BMenuBridge;
 import dev.by1337.bmenu.command.argument.ArgumentMenuConfig;
 import dev.by1337.bmenu.command.menu.OpenCommands;
 import dev.by1337.bmenu.hook.BungeeCordMessageSender;
 import dev.by1337.bmenu.hook.Metrics;
+import dev.by1337.bmenu.legacy.BMenuBridge;
 import dev.by1337.bmenu.listener.PlayerInputListener;
 import dev.by1337.bmenu.loader.MenuConfig;
 import dev.by1337.bmenu.loader.MenuLoader;
@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 public class BMenu extends JavaPlugin {
@@ -56,25 +55,25 @@ public class BMenu extends JavaPlugin {
     @Override
     public void onLoad() {
         ResourceUtil.saveIfNotExist("reference.yml", this);
-        if (!new File(getDataFolder(), "menu").exists()) {
-            ResourceUtil.saveIfNotExist("menu/animation-54.yml", this);
-            ResourceUtil.saveIfNotExist("menu/example-seller.yml", this);
-            //   ResourceUtil.saveIfNotExist("menu-shem.yml", this);
-            ResourceUtil.saveIfNotExist("menu/include-example/confirm.yml", this);
-            ResourceUtil.saveIfNotExist("menu/include-example/seller.yml", this);
-            ResourceUtil.saveIfNotExist("menu/random-colors/rand-colors-menu.yml", this);
-            ResourceUtil.saveIfNotExist("menu/admin/kick.yml", this);
-            ResourceUtil.saveIfNotExist("menu/select/theme_base.yml", this);
-            ResourceUtil.saveIfNotExist("menu/select/theme_selector.yml", this);
-        }
+        ResourceUtil.resourceStream(this,
+                "menu/animation-54.yml",
+                "menu/example-seller.yml",
+                "menu/include-example/confirm.yml",
+                "menu/include-example/seller.yml",
+                "menu/random-colors/rand-colors-menu.yml",
+                "menu/admin/kick.yml",
+                "menu/select/theme_base.yml",
+                "menu/select/theme_selector.yml",
+                "menu/localization.yml"
+        ).storeToNotExistFolder(new File(getDataFolder(), "menu"), s -> s.substring("menu/".length()));
         config = ResourceUtil.load("config.yml", this);
         loader = new MenuLoader(
                 new File(getDataFolder(), "menu"),
                 this,
                 config.get("hot-reload").asBool(false)
         );
-        loader.codecRegistry().register("bmenu:default", MenuConfig.CODEC);
-        loader.codecRegistry().register("bmenu:select", SelectMenuConfig.CODEC);
+        loader.codecRegistry().register("bmenu:default", MenuConfig.DECODER);
+        loader.codecRegistry().register("bmenu:select", SelectMenuConfig.DECODER);
     }
 
     @Override
@@ -106,6 +105,10 @@ public class BMenu extends JavaPlugin {
 
     public static MenuLoader menuLoader() {
         return loader;
+    }
+
+    public static File homeDir() {
+        return loader.homeDir();
     }
 
     private Command<CommandSender> createCommand() {
