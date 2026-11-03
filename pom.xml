@@ -99,6 +99,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.4</version>
                 <configuration>
+                    <systemPropertyVariables>
+                        <bmenu.generatedConfigs>${project.build.directory}/generated-configs</bmenu.generatedConfigs>
+                    </systemPropertyVariables>
                     <!-- Keep the 1.16 API on the compiler path; use EventDSL's parser API only in tests. -->
                     <classpathDependencyExcludes>
                         <classpathDependencyExclude>net.kyori:adventure-api</classpathDependencyExclude>
@@ -112,6 +115,97 @@
                         </additionalClasspathDependency>
                     </additionalClasspathDependencies>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-localized-configs</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <macrodef name="localized-configs">
+                                    <attribute name="locale"/>
+                                    <attribute name="exclude-locale"/>
+                                    <sequential>
+                                        <copy todir="${project.build.directory}/generated-configs/@{locale}"
+                                              overwrite="true" encoding="UTF-8" outputencoding="UTF-8">
+                                            <fileset dir="${project.basedir}/src/main/config-templates"/>
+                                            <filterchain>
+                                                <linecontainsregexp negate="true">
+                                                    <regexp pattern=" # @locale:@{exclude-locale}$"/>
+                                                </linecontainsregexp>
+                                                <tokenfilter>
+                                                    <replaceregex pattern=" # @locale:@{locale}$" replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </copy>
+                                    </sequential>
+                                </macrodef>
+                                <!-- Recreate both generated directories on every build. -->
+                                <delete dir="${project.build.directory}/generated-configs"/>
+                                <localized-configs locale="ru" exclude-locale="en"/>
+                                <localized-configs locale="en" exclude-locale="ru"/>
+                                <fail message="Unknown or malformed locale marker in generated configs">
+                                    <condition>
+                                        <resourcecount when="greater" count="0">
+                                            <restrict>
+                                                <fileset dir="${project.build.directory}/generated-configs"/>
+                                                <containsregexp expression="@locale:"/>
+                                            </restrict>
+                                        </resourcecount>
+                                    </condition>
+                                </fail>
+                                <!-- Keep the unclassified artifact and test classpath compatible with the RU defaults. -->
+                                <copy todir="${project.build.outputDirectory}" overwrite="true">
+                                    <fileset dir="${project.build.directory}/generated-configs/ru"/>
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>package-localized-jars</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <macrodef name="localized-jar">
+                                    <attribute name="locale"/>
+                                    <sequential>
+                                        <zip destfile="${project.build.directory}/${project.build.finalName}-@{locale}.jar"
+                                             duplicate="fail" keepcompression="true">
+                                            <zipfileset src="${project.build.directory}/${project.build.finalName}.jar">
+                                                <patternset>
+                                                    <excludesfile name="${project.build.directory}/localized-config-paths.txt"/>
+                                                </patternset>
+                                            </zipfileset>
+                                            <fileset dir="${project.build.directory}/generated-configs/@{locale}"/>
+                                        </zip>
+                                    </sequential>
+                                </macrodef>
+                                <pathconvert property="localized.config.paths" pathsep="${line.separator}">
+                                    <fileset dir="${project.basedir}/src/main/config-templates"/>
+                                    <map from="${project.basedir}/src/main/config-templates/" to=""/>
+                                </pathconvert>
+                                <echo file="${project.build.directory}/localized-config-paths.txt"
+                                      encoding="UTF-8">${localized.config.paths}</echo>
+                                <localized-jar locale="ru"/>
+                                <localized-jar locale="en"/>
+                                <attachartifact file="${project.build.directory}/${project.build.finalName}-ru.jar"
+                                                classifier="ru" type="jar"/>
+                                <attachartifact file="${project.build.directory}/${project.build.finalName}-en.jar"
+                                                classifier="en" type="jar"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <resources>
@@ -160,7 +254,7 @@
         <dependency>
             <groupId>dev.by1337.core</groupId>
             <artifactId>BLibV2</artifactId>
-            <version>1.10.7</version>
+            <version>1.10.12</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

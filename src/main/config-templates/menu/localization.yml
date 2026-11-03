@@ -1,7 +1,11 @@
-# Открыть: /bm open example:localization
-# Для проверки смените язык Minecraft, закройте меню и откройте его командой заново.
-# Запасной язык для title/name/lore и сообщений задаёт Themes.defaultLocale.
-# Сообщения используют карты локалей с тем же запасным языком.
+# Открыть: /bm open example:localization # @locale:ru
+# Open: /bm open example:localization # @locale:en
+# Для проверки смените язык Minecraft, закройте меню и откройте его командой заново. # @locale:ru
+# To test, change your Minecraft language, close the menu and open it again with the command. # @locale:en
+# Запасной язык для title/name/lore и сообщений задаёт Themes.defaultLocale. # @locale:ru
+# Themes.defaultLocale defines the fallback language for title/name/lore and messages. # @locale:en
+# Сообщения используют карты локалей с тем же запасным языком. # @locale:ru
+# Messages use locale maps with the same fallback language. # @locale:en
 id: example:localization
 provider: default
 type: chest

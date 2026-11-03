@@ -1,0 +1,81 @@
+id: example:kick
+provider: default
+type: chest
+size: 27
+title: '&7Кикнуть игрока ${PLAYER}' # @locale:ru
+title: '&7Kick ${PLAYER}' # @locale:en
+
+args:
+  PLAYER: 'null'
+
+menu-events:
+  on_open: &on_open
+    requirements:
+      - check: '${PLAYER} != null'
+        deny_commands:
+          - '[message] &cВы должны указать игрока!' # @locale:ru
+          - '[message] &cYou must specify a player!' # @locale:en
+          - '[close]'
+  on_reopen: *on_open
+
+items:
+  gui-lime:
+    material: lime_stained_glass_pane
+    name: ''
+    static: true
+
+  kick-1:
+    material: barrier
+    name: '&cКикнуть игрока ${PLAYER} по причине 1.1' # @locale:ru
+    name: '&cKick ${PLAYER} for rule 1.1' # @locale:en
+    slot: 11
+    on_click:
+      commands:
+        - '[console] kick ${PLAYER} 1.1'
+        - '[message] &aИгрок ${PLAYER} был кикнут по причине 1.1' # @locale:ru
+        - '[message] &aPlayer ${PLAYER} was kicked for rule 1.1' # @locale:en
+        - '[close]'
+  kick-2:
+    material: barrier
+    name: '&cКикнуть игрока ${PLAYER} по причине 1.2' # @locale:ru
+    name: '&cKick ${PLAYER} for rule 1.2' # @locale:en
+    slot: 13
+    on_click:
+      commands:
+        - '[console] kick ${PLAYER} 1.2'
+        - '[message] &aИгрок ${PLAYER} был кикнут по причине 1.2' # @locale:ru
+        - '[message] &aPlayer ${PLAYER} was kicked for rule 1.2' # @locale:en
+        - '[close]'
+  kick-3:
+    material: barrier
+    name: '&cКикнуть игрока ${PLAYER} по причине 1.3' # @locale:ru
+    name: '&cKick ${PLAYER} for rule 1.3' # @locale:en
+    slot: 15
+    on_click:
+      commands:
+        - '[console] kick ${PLAYER} 1.3'
+        - '[message] &aИгрок ${PLAYER} был кикнут по причине 1.3' # @locale:ru
+        - '[message] &aPlayer ${PLAYER} was kicked for rule 1.3' # @locale:en
+        - '[close]'
+
+animation:
+  - opcodes:
+      - set: gui-lime 0,1
+  - opcodes:
+      - copy: 0 2,3
+  - opcodes:
+      - copy: 0 4,5
+  - opcodes:
+      - copy: 0 6,7
+  - opcodes:
+      - copy: 0 8,17
+  - opcodes:
+      - copy: 0 26,25
+  - opcodes:
+      - copy: 0 24,23
+  - opcodes:
+      - copy: 0 22,21
+  - opcodes:
+      - copy: 0 20,19
+  - opcodes:
+      - copy: 0 18,9

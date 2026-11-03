@@ -1,0 +1,445 @@
+---
+# плейсхолдеры меню {menu_id}, {has_back_menu}, {clicked_slot} # @locale:ru
+# Menu placeholders {menu_id}, {has_back_menu}, {clicked_slot} # @locale:en
+
+extends:
+  # путь относительно текущей папки # @locale:ru
+  # path relative to the current directory # @locale:en
+  - ./file.yml
+  # путь относительно папки на уровень выше # @locale:ru
+  # path relative to the parent directory # @locale:en
+  - ../file.yml
+  # путь относительно корневой папки с меню # @locale:ru
+  # path relative to the menu root directory # @locale:en
+  - /file.yml
+
+include: [
+  "./file.yml",
+  "../file.yml",
+  "/file.yml",
+]
+
+click_cooldown: 100
+# разрешены символы [a-z0-9._-] # @locale:ru
+# allowed characters [a-z0-9._-] # @locale:en
+id: <namespace>:<id>
+# по умолчанию bmenu:default # @locale:ru
+# defaults to bmenu:default # @locale:en
+provider: <namespace>:<id>
+type: chest
+size: 27
+# или строка: title: '&7Menu title' # @locale:ru
+# or a string: title: '&7Menu title' # @locale:en
+title:
+  ru_RU: '&7Заголовок меню'
+  en_US: '&7Menu title'
+# Fallback: Themes.defaultLocale, затем первый перевод. Обычные name/lore задают свой fallback. # @locale:ru
+# Fallback: Themes.defaultLocale, then the first translation. Plain name/lore define their own fallback. # @locale:en
+args:
+  VALUE: '42'
+
+---
+clicks:
+  on_click:
+    # также: '[message] &aСообщение' или просто '&aСообщение' # @locale:ru
+    # also: '[message] &aMessage' or just '&aMessage' # @locale:en
+    - message: '&aСообщение' # @locale:ru
+    - message: '&aMessage' # @locale:en
+    # условие # @locale:ru
+    # condition # @locale:en
+    - if: '100 == 100'
+      # условие верно # @locale:ru
+      # condition is true # @locale:en
+      do:
+        - message: 'Условие выполнено' # @locale:ru
+        - message: 'Condition passed' # @locale:en
+      # условие ложно # @locale:ru
+      # condition is false # @locale:en
+      else:
+        - message: 'Условие не выполнено' # @locale:ru
+        - message: 'Condition failed' # @locale:en
+    - if: '%vault_eco_balance% > 1000'
+      do:
+        console: 'eco take %player_name% 1000'
+    - if: '99 == 99'
+      do:
+        # можно указывать if внутри других if # @locale:ru
+        # if blocks can be nested # @locale:en
+        if: '88 == 88'
+        do: 'Вложенный if' # @locale:ru
+        do: 'Nested if' # @locale:en
+  on_left_click:
+    # oneOf команды, это команды которые останавливаются на первом успешном if # @locale:ru
+    # oneOf commands stop at the first successful if # @locale:en
+    - oneOf:
+        - if: '%vault_eco_balance% < 1000'
+          do: 'У Вас не достаточно монет!' # @locale:ru
+          do: 'You do not have enough coins!' # @locale:en
+        - if: '%player_name% == _By1337_'
+          do: 'Привет, _By1337_!' # @locale:ru
+          do: 'Hello, _By1337_!' # @locale:en
+        # просто do без условия # @locale:ru
+        # do without a condition # @locale:en
+        - do:
+            - 'Баланс не меньше 1000 монет' # @locale:ru
+            - 'Balance is at least 1000 coins' # @locale:en
+  # результат условия определяет видимость # @locale:ru
+  # the condition result determines visibility # @locale:en
+  on_view:
+    - if: '%vault_eco_balance% > 1000'
+      else: 'Ты слишком бедный, чтобы видеть этот предмет(' # @locale:ru
+      else: 'You do not have enough money to see this item' # @locale:en
+  on_right_click:
+    # можно объединить несколько условий # @locale:ru
+    # combine multiple conditions # @locale:en
+    - if-all:
+        - '%vault_eco_balance% > 1000'
+        - '%player_name% == _By1337_'
+      do: 'Все условия верны' # @locale:ru
+      do: 'All conditions passed' # @locale:en
+    - if-one:
+        - '%vault_eco_balance% > 1000'
+        - '100 < -1'
+      do: 'Как минимум одно условие верно!' # @locale:ru
+      do: 'At least one condition passed!' # @locale:en
+  on_middle_click:
+    # команды для каждого игрока # @locale:ru
+    # commands for every player # @locale:en
+    - all_players:
+        message: '&7Привет, %player_name%!' # @locale:ru
+        message: '&7Hello, %player_name%!' # @locale:en
+    # игроки в радиусе 10 блоков # @locale:ru
+    # players within 10 blocks # @locale:en
+    - nearby-10:
+        action_bar: '&eРядом с вами открыли меню' # @locale:ru
+        action_bar: '&eSomeone nearby opened a menu' # @locale:en
+    # один случайный вариант с указанным весом # @locale:ru
+    # one random option using the specified weights # @locale:en
+    - weights:
+        '1': {message: 'Редкий вариант'} # @locale:ru
+        '1': {message: 'Rare option'} # @locale:en
+        '3': {message: 'Частый вариант'} # @locale:ru
+        '3': {message: 'Common option'} # @locale:en
+# Старые commands/deny_commands/requirements и [break] поддерживаются для совместимости. # @locale:ru
+# Legacy commands/deny_commands/requirements and [break] are supported for compatibility. # @locale:en
+---
+
+# [run] <имя набора> # @locale:ru
+# [run] <command-set> # @locale:en
+# Или выполнять рандомно # @locale:ru
+# Or run a random set # @locale:en
+# [run_rand]
+commands-list:
+  example-1:
+    # вес для run_rand, по умолчанию 1 # @locale:ru
+    # weight for run_rand, defaults to 1 # @locale:en
+    weight: 1.0
+    # примеры команд в clicks # @locale:ru
+    # see click commands for examples # @locale:en
+    commands:
+      - '&7Это команда из example-1' # @locale:ru
+      - '&7This is a command from example-1' # @locale:en
+  example-2:
+    weight: 1.0
+    # примеры команд в clicks # @locale:ru
+    # see click commands for examples # @locale:en
+    commands:
+      - '&7Это команда из example-2' # @locale:ru
+      - '&7This is a command from example-2' # @locale:en
+
+# Меню ивенты # @locale:ru
+# Menu events # @locale:en
+menu-events:
+  # примеры команд в clicks # @locale:ru
+  # see click commands for examples # @locale:en
+  on_open:
+    - 'Меню открыто!' # @locale:ru
+    - 'Menu opened!' # @locale:en
+  # примеры команд в clicks # @locale:ru
+  # see click commands for examples # @locale:en
+  on_reopen:
+    - 'Меню открыто заново!' # @locale:ru
+    - 'Menu reopened!' # @locale:en
+  # примеры команд в clicks # @locale:ru
+  # see click commands for examples # @locale:en
+  on_close:
+    - 'Меню закрыто!' # @locale:ru
+    - 'Menu closed!' # @locale:en
+
+
+items:
+  itemID:
+    # также все параметры из https://github.com/By1337/ConfigurableItems/blob/master/src/main/resources/cfg_items/reference.yml # @locale:ru
+    # also supports all settings from https://github.com/By1337/ConfigurableItems/blob/master/src/main/resources/cfg_items/reference.yml # @locale:en
+    # Без slot предмет доступен для установки командами; также slot: 10 или [10, '12-20']. # @locale:ru
+    # Without slot, the item can be placed by commands; also accepts slot: 10 or [10, '12-20']. # @locale:en
+    slot: '10-15,20-25'
+    material: paper
+    name-ru_RU: '&aПредмет'
+    name-en_US: '&aItem'
+    lore-ru_RU:
+      - '&7Значение: {VALUE}'
+    lore-en_US:
+      - '&7Value: {VALUE}'
+    # Обычные name/lore необязательны. Без них fallback берётся по Themes.defaultLocale. # @locale:ru
+    # Plain name/lore are optional. Without them, the fallback is selected using Themes.defaultLocale. # @locale:en
+    # или плейсхолдер # @locale:ru
+    # or a placeholder # @locale:en
+    amount: 1
+    # выбирает один из вариантов ниже, проверяет условия сверху вниз. # @locale:ru
+    # selects one of the variants below, checking conditions from top to bottom. # @locale:en
+    oneOf:
+      - material: diamond
+        # здесь нельзя указывать local_args, priority, slot, on_tick, tick_speed, oneOf # @locale:ru
+        # local_args, priority, slot, on_tick, tick_speed and oneOf cannot be used here # @locale:en
+        on_view: '100 == 100'
+      - material: gold_block
+
+    # Константы предмета: {PARAM_1}. # @locale:ru
+    # Item constants: {PARAM_1}. # @locale:en
+    args:
+      PARAM_1: 'value'
+      PARAM_2: 'value'
+      PARAM_3: 'value'
+    # как args но только эти параметры можно менять через '[set_local] <name> <value>'. # @locale:ru
+    # like args, but these parameters can only be changed with '[set_local] <name> <value>'. # @locale:en
+    local_args:
+      lParam_1: 'value'
+      lParam_2: 'value'
+      lParam_3: 'value'
+    # on_view: '100 > 10' или список условий (все должны быть верны). # @locale:ru
+    # on_view: '100 > 10' or a list of conditions (all must pass). # @locale:en
+    on_view:
+      if: 'has menu.example'
+      else:
+        message: '&cНет доступа' # @locale:ru
+        message: '&cAccess denied' # @locale:en
+    # обработка клика # @locale:ru
+    # click handler # @locale:en
+    on_left_click:
+      - if: '100 == 100'
+        do:
+          - message: '&aНажато' # @locale:ru
+          - message: '&aClicked' # @locale:en
+    # интервал on_tick в тиках # @locale:ru
+    # on_tick interval in ticks # @locale:en
+    tick_speed: 20
+    on_tick:
+      - if: '{tick} % 3 == 0'
+        do: '[message] tick!'
+        else: '[update]'
+
+---
+# Все команды # @locale:ru
+# All commands # @locale:en
+# Аргумент в начале которого ? не обязательный. # @locale:ru
+# An argument prefixed with ? is optional. # @locale:en
+# Формы: message: 'текст', '[message] текст' или просто 'текст'. # @locale:ru
+# Forms: message: 'text', '[message] text' or just 'text'. # @locale:en
+# Без аргументов: close: '' или '[close]'. # @locale:ru
+# Without arguments: close: '' or '[close]'. # @locale:en
+commands:
+  ### Сообщения и вывод # @locale:ru
+  ### Messages and output # @locale:en
+  - '&7Просто сообщение' # @locale:ru
+  - '&7A plain message' # @locale:en
+  # aliases: messages # @locale:ru
+  # aliases: messages # @locale:en
+  - message: '&7Сообщение' # @locale:ru
+  - message: '&7Message' # @locale:en
+  # карты локалей также работают у broadcast/bc/message_all, action_bar(_all), title(_all) # @locale:ru
+  # locale maps also work with broadcast/bc/message_all, action_bar(_all) and title(_all) # @locale:en
+  - message:
+      ru_RU: '&aПривет, %player_name%!'
+      en_US: '&aHello, %player_name%!'
+  # Локаль получателя → совпадающий язык → Themes.defaultLocale; без перевода вывод пропускается. # @locale:ru
+  # Recipient locale -> matching language -> Themes.defaultLocale; output is skipped if no translation is available. # @locale:en
+  - message: |-
+      &aПервая строка # @locale:ru
+      &aFirst line # @locale:en
+      &7Вторая строка # @locale:ru
+      &7Second line # @locale:en
+  - action_bar: '&eСообщение над хотбаром' # @locale:ru
+  - action_bar: '&eMessage above the hotbar' # @locale:en
+  - action_bar_all: '&eВсем игрокам' # @locale:ru
+  - action_bar_all: '&eTo all players' # @locale:en
+  # aliases: bc, message_all # @locale:ru
+  # aliases: bc, message_all # @locale:en
+  - broadcast: '&aСообщение всем' # @locale:ru
+  - broadcast: '&aMessage to everyone' # @locale:en
+  # старый формат; тайминги необязательны # @locale:ru
+  # legacy format; timings are optional # @locale:en
+  - title: '"Title\nSubtitle" 10 70 20'
+  - title:
+      ru_RU: |-
+        &dПривет, игрок!
+        &7Имя: %player_name%
+        10
+        70
+        20
+      en_US: |-
+        &dHello, player!
+        &7Name: %player_name%
+        10 70 20
+  # Первые две строки — title/subtitle, затем fadeIn stay fadeOut в тиках (можно плейсхолдеры). # @locale:ru
+  # The first two lines are title/subtitle, followed by fadeIn stay fadeOut in ticks (placeholders are supported). # @locale:en
+  # Без таймингов: 10 70 20. title_all поддерживает те же формы для всех игроков. # @locale:ru
+  # Default timings: 10 70 20. title_all supports the same forms for all players. # @locale:en
+  - title_all: '"Title\nSubtitle" 10 70 20'
+  # переопределяет title из конфига # @locale:ru
+  # overrides the configured title # @locale:en
+  - set_title: '&7Заголовок окна меню' # @locale:ru
+  - set_title: '&7Menu window title' # @locale:en
+  - sound: '<sound> <?volume> <?pitch>'
+  ### Выполнение команд # @locale:ru
+  ### Running commands # @locale:en
+  # выполнить команду от имени сервера # @locale:ru
+  # run a command as the console # @locale:en
+  - console: 'op %player_name%'
+  # выполнить команду от имени игрока # @locale:ru
+  # run a command as the player # @locale:en
+  - player: 'msg _By1337_ привет?' # @locale:ru
+  - player: 'msg _By1337_ hello?' # @locale:en
+  # Отправит сообщение от имени игрока, если в начале будет / то будет как команда # @locale:ru
+  # send a chat message as the player; a leading / runs it as a command # @locale:en
+  - chat: '/rtp'
+  ### Навигация по меню # @locale:ru
+  ### Menu navigation # @locale:en
+  # В commands вы можете передать список команд которые необходимо выполнить в открывающейся менюшке # @locale:ru
+  # Use commands to pass a list of commands to run in the menu being opened # @locale:en
+  # Синтаксис [open] menu ["[message] сообщение из открытого меню", "[что-то] некст команда"] # @locale:ru
+  # Syntax [open] menu ["[message] message from the opened menu", "[something] next command"] # @locale:en
+  - open: '<menu:id> <?commands>'
+  # параметры передаются в args открываемого меню # @locale:ru
+  # parameters are passed into args of the menu being opened # @locale:en
+  - open:
+      menu: example:shop
+      VALUE: '42'
+  # параметры предыдущего меню # @locale:ru
+  # parameters for the previous menu # @locale:en
+  - back: {VALUE: '42'}
+  - back_or_open: {menu: 'example:shop', VALUE: '42'}
+  # повторно открыть текущее меню # @locale:ru
+  # reopen the current menu # @locale:en
+  - reopen: ''
+  # закроет меню # @locale:ru
+  # close the menu # @locale:en
+  - close: ''
+  # вернутся в прошлое меню # @locale:ru
+  # return to the previous menu # @locale:en
+  - back: '<?commands>'
+  # вернутся в прошлое меню если есть # @locale:ru
+  # return to the previous menu if available # @locale:en
+  - back_or_close: '<?commands>'
+  # вернутся в <menu:id> если было открыто ранее # @locale:ru
+  # return to <menu:id> if it was opened previously # @locale:en
+  - back_to_or_close: '<menu:id> <?commands>'
+  # вернутся в <menu:id> если было открыто иначе открыть <menu:id> # @locale:ru
+  # return to <menu:id> if it was opened previously, otherwise open <menu:id> # @locale:en
+  - back_or_open: '<menu:id> <?commands>'
+  ### Экономика и сервер # @locale:ru
+  ### Economy and server # @locale:en
+  # подключает игрока к серверу # @locale:ru
+  # connect the player to a server # @locale:en
+  - connect: '<server>'
+  # выдать монеты # @locale:ru
+  # give money # @locale:en
+  - givemoney: '<count>'
+  # снять монеты # @locale:ru
+  # take money # @locale:en
+  - takemoney: '<count>'
+  ### Управление предметами # @locale:ru
+  ### Item operations # @locale:en
+  # обновить содержимое меню # @locale:ru
+  # refresh the menu contents # @locale:en
+  - refresh: ''
+  # пересобрать текущий предмет # @locale:ru
+  # rebuild the current item # @locale:en
+  - rebuild: ''
+  # пересобрать предметы в слотах # @locale:ru
+  # rebuild the items in the slots # @locale:en
+  - rebuild_slots: '<slots>'
+  # item: ID предмета, материал или -me # @locale:ru
+  # item: item ID, material or -me # @locale:en
+  - set_item_to_layer: '<slots> <layer> <item>'
+  # <slots> - указывается как '10' или '0-10' или '0-10,30-40,50' # @locale:ru
+  # <slots> - accepts '10' or '0-10' or '0-10,30-40,50' # @locale:en
+  # обновляет предмет выполнивший эту команду # @locale:ru
+  # update the item that ran this command # @locale:en
+  - update: ''
+  # обновляет предметы в слотах # @locale:ru
+  # update the items in the slots # @locale:en
+  - update_slots: '<slots>'
+  # удаляет предмет выполнивший эту команду # @locale:ru
+  # remove the item that ran this command # @locale:en
+  - die: ''
+  # удаляет предметы в слотах # @locale:ru
+  # remove the items in the slots # @locale:en
+  - die_slots: '<slots>'
+  - layer: '<layer> set <item> <slots>'
+  - layer: '<layer> remove <slots>'
+  - layer: '<layer> move <layer2> <from> <to>'
+  - layer: '<layer> copy <layer2> <from> <to>'
+  - layer: '<layer> clear'
+  # симулирует клик по предмету в слоте # @locale:ru
+  # simulate a click on the item in a slot # @locale:en
+  - simulate: 'click slot'
+  ### Анимации # @locale:ru
+  ### Animations # @locale:en
+  # устанавливает анимацию из animations # @locale:ru
+  # set an animation from animations # @locale:en
+  - set_animation: '<animation>'
+  # принудительно вызывает тик анимации # @locale:ru
+  # advance the animation by one tick # @locale:en
+  - animation_tick: ''
+  # моментально завершает анимацию # @locale:ru
+  # finish the animation immediately # @locale:en
+  - animation_force_end: ''
+  ### Параметры меню # @locale:ru
+  ### Menu parameters # @locale:en
+  # меняет значения в args # @locale:ru
+  # change values in args # @locale:en
+  - set_param: '<arg> <value>'
+  # копирует args из предмета в args меню # @locale:ru
+  # copy item args into menu args # @locale:en
+  - import_params: '<item>'
+  ### Параметры предмета # @locale:ru
+  ### Item parameters # @locale:en
+  # меняет параметры предмета из local_args # @locale:ru
+  # change item parameters in local_args # @locale:en
+  - set_local: <name> <value>
+  ### Выполнение команд меню # @locale:ru
+  ### Running menu command sets # @locale:en
+  # выполняет список команд из commands-list # @locale:ru
+  # run a command set from commands-list # @locale:en
+  - run: '<id>'
+  # выполняет случайных список команд из commands-list # @locale:ru
+  # run a random command set from commands-list # @locale:en
+  - run_rand: ''
+  # выполнить команду с задержкой например [delay] 20 [message] &aЭто сообщение отправилось спустя 1 секунду! # @locale:ru
+  # run a delayed command, for example [delay] 20 [message] &aThis message was sent after 1 second! # @locale:en
+  - delay: '<delay> <cmd>'
+  ### Ввод в чат # @locale:ru
+  ### Chat input # @locale:en
+  # число или математическое выражение → args.VALUE # @locale:ru
+  # number or mathematical expression -> args.VALUE # @locale:en
+  - input_chat:
+      param: VALUE
+      on_pass: {message: 'Введено: {VALUE}'} # @locale:ru
+      on_pass: {message: 'Entered: {VALUE}'} # @locale:en
+      on_failed: {message: '&cНекорректный ввод'} # @locale:ru
+      on_failed: {message: '&cInvalid input'} # @locale:en
+  # строка → args.TEXT # @locale:ru
+  # string -> args.TEXT # @locale:en
+  - input_chat_str:
+      param: TEXT
+      on_pass: {message: 'Введено: {TEXT}'} # @locale:ru
+      on_pass: {message: 'Entered: {TEXT}'} # @locale:en
+      on_failed: {message: '&cВвод отменён'} # @locale:ru
+      on_failed: {message: '&cInput cancelled'} # @locale:en
+  ### Контекст # @locale:ru
+  ### Context # @locale:en
+  - up: ''
+  - down: ''
+  - import_from_down: ''
+

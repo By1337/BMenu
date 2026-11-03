@@ -1,0 +1,70 @@
+extends: [ ]
+type: chest
+size: 54
+only-open-from: [ ]
+args: { }
+
+items:
+  gui-green:
+    material: green_stained_glass_pane
+    name: ''
+    static: true
+    slot:
+      - '0-8'
+      - '9'
+      - '18'
+      - '27'
+      - '36'
+      - '45-53'
+      - '44'
+      - '35'
+      - '26'
+      - '17'
+  gui-lime:
+    material: lime_stained_glass_pane
+    name: ''
+    static: true
+
+animation:
+  - tick: 0
+    opcodes:
+      - set: gui-lime 4
+  - tick: 1
+    opcodes:
+      - copy: 4 3-5
+  - tick: 2
+    opcodes:
+      - copy: 4 2-6
+  - tick: 3
+    opcodes:
+      - copy: 4 1-7
+  - tick: 4
+    opcodes:
+      - copy: 4 0-8
+  - tick: 5
+    opcodes:
+      - copy: 4 9,17
+  - tick: 6
+    opcodes:
+      - copy: 4 18,26
+  - tick: 7
+    opcodes:
+      - copy: 4 27,35
+  - tick: 8
+    opcodes:
+      - copy: 4 36,44
+  - tick: 9
+    opcodes:
+      - copy: 4 45,53
+  - tick: 10
+    opcodes:
+      - copy: 4 46,52
+  - tick: 11
+    opcodes:
+      - copy: 4 47,51
+  - tick: 12
+    opcodes:
+      - copy: 4 48,50
+  - tick: 13
+    opcodes:
+      - copy: 4 49

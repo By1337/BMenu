@@ -1,0 +1,58 @@
+# автоматически перезагружать конфиги при изменениях # @locale:ru
+# automatically reload configurations when files change # @locale:en
+hot-reload: false
+
+# Здесь можете назначить команды для открытия меню # @locale:ru
+# Define commands that open menus here # @locale:en
+open_commands:
+  bmenu_seller:
+    aliases:
+      - bseller
+    menu: example:seller
+    # не обязательный параметр # @locale:ru
+    # optional setting # @locale:en
+    permission: ~
+  bmenu_kick:
+    menu: example:kick
+    tab-completer:
+      PLAYER:
+        type: player
+        exx: [ ]
+
+# все виды аргуметов # @locale:ru
+# Available argument types # @locale:en
+tab-completer:
+  PLAYER:
+    # ник игрока # @locale:ru
+    # player name # @locale:en
+    type: player
+  INT:
+    # число # @locale:ru
+    # integer # @locale:en
+    type: int
+  BOOL:
+    # true/false
+    type: bool
+  CHOICE:
+    # список на выбор # @locale:ru
+    # choice list # @locale:en
+    type: choice
+    # при вводе команды будет выведен этот список # @locale:ru
+    # suggest these values when typing the command # @locale:en
+    items:
+      - 'hub'
+      - 'shop'
+      - 'что-то' # @locale:ru
+      - 'something' # @locale:en
+  DOUBLE:
+    # число с плавающей точкой # @locale:ru
+    # floating-point number # @locale:en
+    type: double
+  LONG:
+    # большое число # @locale:ru
+    # long integer # @locale:en
+    type: long
+  STRING:
+    # любая строка # @locale:ru
+    # any string # @locale:en
+    type: string

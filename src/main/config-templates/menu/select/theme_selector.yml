@@ -1,0 +1,39 @@
+id: theme:example
+provider: bmenu:select
+
+menus:
+  night:
+    # путь до файла # @locale:ru
+    # file path # @locale:en
+    # - ./file.yml # путь относительно текущей папки # @locale:ru
+    # - ./file.yml # path relative to the current directory # @locale:en
+    #- ../file.yml # путь относительно папки на уровень выше # @locale:ru
+    #- ../file.yml # path relative to the parent directory # @locale:en
+    #- /file.yml # путь относительно корневой папки с меню # @locale:ru
+    #- /file.yml # path relative to the menu root directory # @locale:en
+    file: './theme_base.yml'
+    # Как args, но заменяется во всём файле разом при загрузке меню. # @locale:ru
+    # Like args, but substituted throughout the file when the menu loads. # @locale:en
+    replaces:
+      'COLOR1': 'gray'
+      'GUI': 'black_stained_glass_pane'
+  light:
+    file: './theme_base.yml'
+    replaces:
+      'COLOR1': 'white'
+      'GUI': 'white_stained_glass_pane'
+
+# "условие": '<меню>' # @locale:ru
+# "condition": '<menu>' # @locale:en
+selector:
+  # Условия выполняются сверху вниз. # @locale:ru
+  # Conditions are checked from top to bottom. # @locale:en
+  '{rand_bool} == true': light
+  '{rand_bool} == false': night
+  # все # заменяются на '.' так как bukkit запрещает '.' в ключах # @locale:ru
+  # all # characters are replaced with '.' because Bukkit does not allow '.' in keys # @locale:en
+  'has theme#night': night
+  # true как значение по умолчанию # @locale:ru
+  # true is the default option # @locale:en
+  true: light
+

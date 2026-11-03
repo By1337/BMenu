@@ -1,0 +1,665 @@
+#
+# Указатели # @locale:ru
+# Anchors and merges # @locale:en
+# ДЛЯ ПОНИМАНИЯ ПРОИСХОДЯЩЕГО НЕОБХОДИМО ЗНАТЬ ЧТО ТАКОЕ УКАЗАТЕЛИ В YAML # @locale:ru
+# UNDERSTANDING THIS SECTION REQUIRES FAMILIARITY WITH YAML ANCHORS AND ALIASES # @locale:en
+# Если вы не знаете что такое указатели то погуглите про них # @locale:ru
+# Read about YAML anchors and aliases first if you are unfamiliar with them # @locale:en
+#
+# Помимо обычного указателя << было добавлено два новых # @locale:ru
+# Two custom merge operators were added alongside the standard << merge key # @locale:en
+# <<+ - объединяющий указатель и <<* заменяющий указатель # @locale:ru
+# <<+ merges values and <<* overrides values # @locale:en
+# Пример использования объединяющего указателя # @locale:ru
+# Example of a merging operator # @locale:en
+# defaults:
+#  item: &item
+#    args:
+#      PARAM_1: param1
+#      PARAM_2: param2
+#  result:
+#    args:
+#      PARAM_3: param3
+#      PARAM_4: param4
+#    <<+: *item
+# В результате будет # @locale:ru
+# Result # @locale:en
+# result:
+#  args:
+#    PARAM_3: param3
+#    PARAM_4: param4
+#    PARAM_1: param1
+#    PARAM_2: param2
+# Если бы мы использовали простой указатель то он бы ничего не сделал так как args уже определён в result # @locale:ru
+# The standard merge key would do nothing here because args is already defined in result # @locale:en
+#
+# <<* - заменяющий указатель работает аналогично указателю <<+ только он заменят значения на значения из указателя если они уже объявлены # @locale:ru
+# The <<* override operator works like <<+, but replaces values that are already defined # @locale:en
+# Пример использования заменяющего указателя # @locale:ru
+# Example of an overriding operator # @locale:en
+# defaults:
+#  item: &item
+#    args:
+#      PARAM_1: param1
+#      PARAM_2: param2
+#  result:
+#    args:
+#      PARAM_1: custom_value
+#    <<+: *item
+# В результате будет # @locale:ru
+# Result # @locale:en
+# result:
+#  args:
+#    PARAM_1: param1
+#    PARAM_2: param2
+#
+# здесь PARAM_1 был заменён на значение из указателя # @locale:ru
+# PARAM_1 was replaced with the value from the anchor # @locale:en
+
+
+## Терминология # @locale:ru
+## Terminology # @locale:en
+# Иерархия открытых меню # @locale:ru
+# Open menu hierarchy # @locale:en
+# При открытии одного меню из другого создаётся цепочка, называемая иерархией меню # @locale:ru
+# Opening one menu from another creates a chain called the menu hierarchy # @locale:en
+# Иерархия существует до тех пор, пока последнее открытое меню остаётся открытым # @locale:ru
+# The hierarchy exists while the most recently opened menu remains open # @locale:en
+# Меню не знает, какое меню находится выше по иерархии, но знает, какое было до него # @locale:ru
+# A menu knows its previous menu, but does not know the menu opened after it # @locale:en
+# Пример: # @locale:ru
+# Example: # @locale:en
+# Есть меню A, B, C # @locale:ru
+# There are menus A, B and C # @locale:en
+# Пользователь открывает меню A # @locale:ru
+# The player opens menu A # @locale:en
+# Иерархия: A # @locale:ru
+# Hierarchy: A # @locale:en
+# Из меню A пользователь открывает меню B # @locale:ru
+# The player opens menu B from menu A # @locale:en
+# Иерархия: A -> B # @locale:ru
+# Hierarchy: A -> B # @locale:en
+# Затем из меню B пользователь открывает меню C # @locale:ru
+# The player then opens menu C from menu B # @locale:en
+# Иерархия: A -> B -> C # @locale:ru
+# Hierarchy: A -> B -> C # @locale:en
+# В этом примере образовалась цепочка из трёх меню # @locale:ru
+# This example creates a chain of three menus # @locale:en
+# Меню B знает, что до него было меню A, но не знает, что после него меню C # @locale:ru
+# Menu B knows that its previous menu was A, but does not know about C # @locale:en
+# Если пользователь воспользуется командой [back], он вернётся в предыдущее меню, а текущее меню закроется # @locale:ru
+# The [back] command returns the player to the previous menu and closes the current one # @locale:en
+# Иерархия: A -> B # @locale:ru
+# Hierarchy: A -> B # @locale:en
+
+
+# Должны импортироваться все настройки указанных файлов, включая их extends # @locale:ru
+# All settings from these files are imported, including their extends # @locale:en
+# Циклические зависимости не должны влиять на работу системы и считаются допустимыми # @locale:ru
+# Circular dependencies are allowed and must not prevent loading # @locale:en
+## Терминология # @locale:ru
+## Terminology # @locale:en
+# указанные здесь меню это родительские меню # @locale:ru
+# the menus listed here are parent menus # @locale:en
+# текущее меню это наследник # @locale:ru
+# the current menu is a child menu # @locale:en
+extends:
+  # путь относительно текущей папки # @locale:ru
+  # path relative to the current directory # @locale:en
+  - ./file.yml
+  # путь относительно папки на уровень выше # @locale:ru
+  # path relative to the parent directory # @locale:en
+  - ../file.yml
+  # путь относительно корневой папки с меню # @locale:ru
+  # path relative to the menu root directory # @locale:en
+  - /file.yml
+
+
+# Объединяет файлы в один. # @locale:ru
+# Combines files into one. # @locale:en
+# Используйте это для импорта указателей. # @locale:ru
+# Use this to import anchors. # @locale:en
+# Объединение файлов происходит до чтения yaml, если вы объедините две менюшки то меню точно поломается, # @locale:ru
+# Files are combined before YAML parsing. Combining two complete menus will break the configuration. # @locale:en
+# Для объединения менюшек используйте extends. # @locale:ru
+# Use extends to combine menus. # @locale:en
+# Повторю этот параметр просто склеивает вда файла в один. # @locale:ru
+# This setting simply concatenates files. # @locale:en
+# УКАЗЫВАТЕ ФАЙЛЫ ТОЛЬКО В ТАКОМ ФОРМАТЕ include: [] # @locale:ru
+# ONLY USE THIS FORMAT FOR FILES: include: [] # @locale:en
+# Также запрещено добавлять комментарии в блок include # @locale:ru
+# Do not add comments inside the include block # @locale:en
+# Всегда оборачивайте значения в кавычки. # @locale:ru
+# Always quote values. # @locale:en
+include: [
+  "./file.yml",
+  "../file.yml",
+  "/file.yml",
+]
+
+#Кд на клики в меню, по умолчанию 100мс # @locale:ru
+#Menu click cooldown, defaults to 100 ms # @locale:en
+click_cooldown: 100
+
+# здесь вы можете объявлять наборы команд # @locale:ru
+# Define command sets here # @locale:en
+# после вы можете их выполнять используя команду # @locale:ru
+# Then run them with this command # @locale:en
+# [run] <имя набора> # @locale:ru
+# [run] <command-set> # @locale:en
+# Или выполнять рандомно # @locale:ru
+# Or run a random set # @locale:en
+# [run_rand]
+commands-list:
+  example-1:
+    # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND] # @locale:ru
+    # Optional weight used when choosing a random command set with [RUN_RAND] # @locale:en
+    weight: 1.0
+    commands:
+      - '[message] &7Это команда из example-1' # @locale:ru
+      - '[message] &7This is a command from example-1' # @locale:en
+  example-2:
+    weight: 1.0
+    commands:
+      - '[message] &7Это команда из example-1' # @locale:ru
+      - '[message] &7This is a command from example-1' # @locale:en
+
+# Меню ивенты # @locale:ru
+# Menu events # @locale:en
+menu-events:
+  # когда меню открывается # @locale:ru
+  # when the menu opens # @locale:en
+  on_open:
+    # здесь можно указать условия # @locale:ru
+    # conditions can be specified here # @locale:en
+    requirements:
+      - check: 'str == str'
+        # во всех проверках тоже можно указывать команды # @locale:ru
+        # commands can also be specified in all condition checks # @locale:en
+        deny_commands: [ ]
+    deny_commands: [ ]
+    commands:
+      - '[message] Меню открыто!' # @locale:ru
+      - '[message] Menu opened!' # @locale:en
+  # когда меню пере-открывается, когда используется команда [BACK] # @locale:ru
+  # when the menu reopens, including when [BACK] is used # @locale:en
+  on_reopen:
+    deny_commands: [ ]
+    commands:
+      - '[message] Меню открыто заново!' # @locale:ru
+      - '[message] Menu reopened!' # @locale:en
+  # когда меню закрывается # @locale:ru
+  # when the menu closes # @locale:en
+  on_close:
+    deny_commands: [ ]
+    commands:
+      - '[message] Меню закрыто!' # @locale:ru
+      - '[message] Menu closed!' # @locale:en
+
+
+# Если namespace не указан, должно использоваться имя плагина, который загрузил это меню # @locale:ru
+# If namespace is omitted, use the name of the plugin that loaded this menu # @locale:en
+# При использовании команд [open] или аналогичных без указания конкретного namespace, # @locale:ru
+# When using [open] or similar commands without an explicit namespace, # @locale:en
+# menu loader должен сначала искать меню в своём окружении # @locale:ru
+# the menu loader must first search its own environment # @locale:en
+# В случае неоднозначных вызовов должна быть выведена ошибка # @locale:ru
+# Ambiguous references must produce an error # @locale:en
+# Один menu loader не может получить доступ к другому, если это явно не указано в реализации # @locale:ru
+# One menu loader cannot access another unless explicitly allowed by the implementation # @locale:en
+# id может быть не указан, в этом случае menu loader не сможет найти это меню. Это может быть полезно при использовании зависимостей в extends # @locale:ru
+# Without an id, the menu loader cannot look up this menu. This can be useful for extends dependencies # @locale:en
+## Терминология # @locale:ru
+## Terminology # @locale:en
+# меню без id называется безымянным # @locale:ru
+# a menu without an id is called an unnamed menu # @locale:en
+id: <namespace>:<id>
+# Если namespace не указан, должно использоваться имя плагина, который загрузил это меню # @locale:ru
+# If namespace is omitted, use the name of the plugin that loaded this menu # @locale:en
+# Все конфликты и неоднозначные указания реализаций должны быть выявлены на этапе загрузки menu loader # @locale:ru
+# All conflicts and ambiguous provider references must be detected when the menu loader loads # @locale:en
+# Один menu loader не может получить доступ к реализациям другого, если это явно не указано в реализации # @locale:ru
+# One menu loader cannot access another loader's providers unless explicitly allowed # @locale:en
+# Исключение составляют реализации по умолчанию, предоставляемые API # @locale:ru
+# Default providers supplied by the API are an exception # @locale:en
+# provider может быть не указан, тогда это меню нельзя будет открыть # @locale:ru
+# If provider is omitted, the menu cannot be opened # @locale:en
+provider: <namespace>:<id>
+type: chest
+size: 27
+title: '&7Menu title'
+
+# Указывает из каких меню может быть открыто это меню # @locale:ru
+# Specifies which menus can open this menu # @locale:en
+# Этот параметр наследуется из родительских меню # @locale:ru
+# This setting is inherited from parent menus # @locale:en
+# Все наследники указанного здесь меню также имеют право открывать это меню # @locale:ru
+# All children of the menus listed here can also open this menu # @locale:en
+only-open-from:
+  - <namespace>:<id>
+
+# глобальные переменные меню # @locale:ru
+# Global menu variables # @locale:en
+# могут быть использованы в любом месте в этом меню # @locale:ru
+# Can be used anywhere in this menu # @locale:en
+# Все родительские меню также могут использовать эти переменные. # @locale:ru
+# All parent menus can also use these variables. # @locale:en
+# Все наследники этого меню могут использовать эти переменные # @locale:ru
+# All child menus can use these variables # @locale:en
+# Этот параметр наследуется # @locale:ru
+# This setting is inherited # @locale:en
+# синтаксис использования {PARAM_1} # @locale:ru
+# Usage syntax: {PARAM_1} # @locale:en
+# могут быть изменены командой [set_param] # @locale:ru
+# Can be changed with [set_param] # @locale:en
+# Эти параметры не статичны и уникальны для каждого открытого меню, а также они существуют пока это меню открыто или находится в иерархии открытых меню # @locale:ru
+# These parameters are unique to each open menu and exist while it is open or remains in the menu hierarchy # @locale:en
+args:
+  PARAM_1: 'value'
+  PARAM_2: 'value'
+  PARAM_3: 'value'
+
+# блок с дефолтными значениями # @locale:ru
+# Default values block # @locale:en
+# он может назваться как угодно # @locale:ru
+# The block can have any name # @locale:en
+# этот блок не наследуется # @locale:ru
+# This block is not inherited # @locale:en
+# здесь он приведён в качестве примера как можно использовать указатели и переменные которые можно объявить в предмете # @locale:ru
+# This example shows how to use anchors and item variables # @locale:en
+defaults:
+  on_left_click_logic: &on_left_click_logic
+    requirements:
+      - check: '%vault_eco_balance_fixed% >= {PRICE}'
+    deny_commands: '[message] &cУ Вас не достаточно баланса!' # @locale:ru
+    deny_commands: '[message] &cYou do not have enough money!' # @locale:en
+    commands:
+      - console: 'eco take %player_name% {PRICE}'
+      - console: 'give %player_name% {MATERIAL} {AMOUNT}'
+      - message: '&aВы успешно купили {NAME} в количестве {AMOUNT}' # @locale:ru
+      - message: '&aYou bought {AMOUNT} x {NAME}' # @locale:en
+
+
+items:
+  # наследники могут использовать объявленные здесь предметы в анимациях, # @locale:ru
+  # Child menus can use the items defined here in animations. # @locale:en
+  # Например если в этом меню и в родительском меню будут предметы с именем item-1 то это меню будет использовать свой item-1, а родительское свой item-1. # @locale:ru
+  # If this menu and a parent both define item-1, each menu uses its own item-1. # @locale:en
+  itemID:
+    # или basehead-<value> или плейсхолдер # @locale:ru
+    # or basehead-<value> or a placeholder # @locale:en
+    material: <material>
+    name: "Имя предмета" # @locale:ru
+    name: "Item name" # @locale:en
+    # или плейсхолдер # @locale:ru
+    # or a placeholder # @locale:en
+    amount: 1
+    # описание # @locale:ru
+    # lore # @locale:en
+    lore: [ ]
+    # все флаги https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/inventory/ItemFlag.html # @locale:ru
+    # all flags https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/inventory/ItemFlag.html # @locale:en
+    item_flags: [ ]
+    # включает все флаги # @locale:ru
+    # enable all flags # @locale:en
+    all_flags: true
+    potion_effects:
+      glowing: 10 10
+      slow_falling: <duration> <amplifier>
+    # для зелий и кожаной брони # @locale:ru
+    # for potions and leather armor # @locale:en
+    color: '#rrggbb'
+    enchantments:
+      protection: 1
+    unbreakable: true
+    model_data: 0
+    damage: 10
+    priority: 0
+    # Если этот предмет визуально никогда не меняется — то есть # @locale:ru
+    # If this item never changes visually, meaning # @locale:en
+    # в имени, описании (lore), материале и количестве нет плейсхолдеров # @locale:ru
+    # there are no placeholders in its name, lore, material or amount # @locale:en
+    # (за исключением плейсхолдеров самого предмета), # @locale:ru
+    # (except for the item's own placeholders), # @locale:en
+    # то вы можете указать `static: true`, чтобы снизить нагрузку плагина на сервер. # @locale:ru
+    # you can set `static: true` to reduce server load. # @locale:en
+    # Однако плагин и сам способен определить, является ли предмет статичным. # @locale:ru
+    # The plugin can also detect static items automatically. # @locale:en
+    static: true
+    # слоты могут быть не указаны # @locale:ru
+    # Slots are optional # @locale:en
+    # если указать слоты то этот предмет установится при инициализации меню # @locale:ru
+    # If slots are specified, this item is placed when the menu initializes # @locale:en
+    slot: 10
+    # slot:
+    #   - '10'
+    #   - '11'
+    #   - '12-20'
+    # slot: 10-15,20-25,53
+
+    # аналог переменных меню, но только эти переменные видны только этому предмету # @locale:ru
+    # Like menu variables, but visible only to this item # @locale:en
+    # Также эти переменные константные. # @locale:ru
+    # These variables are constants. # @locale:en
+    # Использовать аналогично {PARAM_1} # @locale:ru
+    # Use as follows: {PARAM_1} # @locale:en
+    args:
+      PARAM_1: 'value'
+      PARAM_2: 'value'
+      PARAM_3: 'value'
+    # Условия видимости предмета # @locale:ru
+    # Item visibility conditions # @locale:en
+    # on_view: '100 > 100' # в одну строку # @locale:ru
+    # on_view: '100 > 100' # on a single line # @locale:en
+    on_view:
+      # если в type перед проверкой поставить ! то проверка будет работать на оборот # @locale:ru
+      # Prefix a condition type with ! to invert the check # @locale:en
+      # например type: '!has permission' такая проверка сработает если игрок не имеет пермишена # @locale:ru
+      # For example, type: '!has permission' passes if the player does not have the permission # @locale:en
+      requirements:
+        - check: '100 + 100 * 100 == 15'
+          commands: [ ]
+          deny_commands: [ ]
+        - check: '100.5 + 100.5 == 201'
+        # если у игрока есть пермишен # @locale:ru
+        # if the player has the permission # @locale:en
+        - check: 'has super.permission'
+        # если у игрока нет пермишена # @locale:ru
+        # if the player does not have the permission # @locale:en
+        - check: '!has super.permission'
+        # строка содержит # @locale:ru
+        # string contains # @locale:en
+        - check: 'string has str'
+        # строка не содержит # @locale:ru
+        # string does not contain # @locale:en
+        - check: 'string !has str'
+        # строка содержит без учёта регистра # @locale:ru
+        # string contains, ignoring case # @locale:en
+        - check: 'string HAS str'
+        # строка не содержит без учёта регистра # @locale:ru
+        # string does not contain, ignoring case # @locale:en
+        - check: 'string !HAS str'
+        # строка равна # @locale:ru
+        # strings are equal # @locale:en
+        - check: 'string == string'
+        # строка не равна # @locale:ru
+        # strings are not equal # @locale:en
+        - check: 'string != string'
+        # условие что игрок находится в радиусе 100 блоков от координат 10 10 10 в мире world # @locale:ru
+        # check whether the player is within 100 blocks of 10 10 10 in world # @locale:en
+        - check: 'nearby world 10 10 10 100'
+          commands:
+            - '[message] string != string'
+            # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд # @locale:ru
+            # Only available in conditions; stops further condition checks and command execution # @locale:en
+            - '[break]'
+            # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена # @locale:ru
+            # [CLOSE] will not run because [BREAK] occurs above # @locale:en
+            - '[close]'
+      # Здесь можно выполнить команды в зависимости от результатов условий # @locale:ru
+      # Run commands based on the condition results here # @locale:en
+      # если хотя бы одно из условий окажется ложным # @locale:ru
+      # if at least one condition fails # @locale:en
+      deny_commands: [ ]
+    # обработка клика # @locale:ru
+    # click handler # @locale:en
+    on_left_click:
+      # requirements: 'str == str' # можно в одну строку # @locale:ru
+      # requirements: 'str == str' # can be written on a single line # @locale:en
+      # здесь можно указать условия # @locale:ru
+      # conditions can be specified here # @locale:en
+      requirements:
+        - check: 'str == str'
+      # Здесь можно указываются команды в зависимости от результатов проверки # @locale:ru
+      # Specify commands based on the check results here # @locale:en
+      deny_commands: [ ]
+      commands: []
+
+    # как часто будет вызываться on_tick в тиках. # @locale:ru
+    # on_tick interval in ticks. # @locale:en
+    tick_speed: 20
+    # Это аналогично блоку on_click но on_tick вызывается автоматически каждые tick_speed тиков сервера. # @locale:ru
+    # Like on_click, but runs automatically every tick_speed server ticks. # @locale:en
+    on_tick:
+      requirements:
+        - check: '{tick} % 3 == 0'
+          commands: '[message] tick!'
+      deny_commands: '[update]'
+      commands:
+        - sound: sound 1 1
+
+  example:
+    args:
+      MATERIAL: STONE
+      PRICE: 10
+      AMOUNT: 64
+      NAME: 'камень' # @locale:ru
+      NAME: 'stone' # @locale:en
+    material: '{MATERIAL}'
+    amount: '{AMOUNT}'
+    name: '&7{NAME} x{AMOUNT}'
+    lore:
+      - '&r '
+      - '&r &7Нажмите лкм' # @locale:ru
+      - '&r &7Left-click' # @locale:en
+      - '&r &7чтобы купить {NAME} в количестве {AMOUNT}' # @locale:ru
+      - '&r &7to buy {AMOUNT} x {NAME}' # @locale:en
+      - '&r '
+    on_left_click:
+      <<: *on_left_click_logic
+
+
+# Все виды кликов # @locale:ru
+# All click types # @locale:en
+# on_left_click
+# on_right_click
+# on_shift_left_click
+# on_shift_right_click
+# on_middle_click
+# on_drop_click
+# on_click - любой не назначенный клик # @locale:ru
+# on_click - any click without a dedicated handler # @locale:en
+# on_number_key_0_click
+# on_number_key_1_click
+# on_number_key_2_click
+# on_number_key_3_click
+# on_number_key_4_click
+# on_number_key_5_click
+# on_number_key_6_click
+# on_number_key_7_click
+# on_number_key_8_click
+# on_swap_offhand_click
+# on_control_drop_click
+
+
+# Вы можете использовать предметы, добавленные в родительские меню. # @locale:ru
+# You can use items defined in parent menus. # @locale:en
+# Однако взаимодействовать с предметами, уже находящимися в меню, нельзя. # @locale:ru
+# However, you cannot interact with items already placed in the menu. # @locale:en
+# Меню состоит из двух слоёв: # @locale:ru
+# The menu consists of two layers: # @locale:en
+# - **Первый слой**: включает предметы, добавленные при открытии меню (те, что указаны в параметре `items` и привязаны к определённым слотам), а также предметы, установленные плагином. # @locale:ru
+# - **First layer**: items placed when the menu opens (defined in `items` with slots), plus items placed by the plugin. # @locale:en
+# - **Второй слой**: это слой анимации, где находятся предметы, добавленные анимацией. # @locale:ru
+# - **Second layer**: the animation layer, containing items placed by animations. # @locale:en
+#
+# Анимация может взаимодействовать только с элементами своего слоя, однако она может перекрывать предметы первого слоя. # @locale:ru
+# Animations can only modify items in their own layer, but can cover items in the first layer. # @locale:en
+animation:
+  # на каком тике анимации следует применить этот фрейм, если не указать, то будет на один больше, чем предыдущий # @locale:ru
+  # animation tick for this frame; defaults to the previous frame tick plus one # @locale:en
+  - tick: 0
+    opcodes:
+      # устанавливает предмет во все слоты меню # @locale:ru
+      # place the item in every menu slot # @locale:en
+      - fill: itemID
+      # устанавливает предмет в указанный слот # @locale:ru
+      # place the item in the specified slot # @locale:en
+      - set: itemID 13
+      # устанавливает предмет в указанные слоты # @locale:ru
+      # place the item in the specified slots # @locale:en
+      - set: itemID 10-20
+      # удаляет предметы в указанных слотах # @locale:ru
+      # remove items from the specified slots # @locale:en
+      - set: AIR 10-20
+      # устанавливает предмет только в пустые слоты # @locale:ru
+      # place the item only in empty slots # @locale:en
+      - set-if-empty: AIR 10-20
+      # аналогично set: AIR 10-20 # @locale:ru
+      # same as set: AIR 10-20 # @locale:en
+      - remove: 10-20
+      # удаляет предмет из слоя анимации если на основном слое есть предмет # @locale:ru
+      # remove the item from the animation layer if the base layer contains an item # @locale:en
+      - remove-if-not-empty: 10-20
+      # перемещает предмет из слота 13 в слот 14, в слот 13 устанавливается AIR # @locale:ru
+      # move the item from slot 13 to slot 14, leaving AIR in slot 13 # @locale:en
+      - move: 13 14
+      # перемещает предметы из слотов 10-15 в слоты 20-25 # @locale:ru
+      # move items from slots 10-15 to slots 20-25 # @locale:en
+      - move: 10-15 20-25
+      # перемещает предмет из слота 13 в слот 14 # @locale:ru
+      # move the item from slot 13 to slot 14 # @locale:en
+      - move: 13++
+      # перемещает предмет из слота 13 в слот 14 # @locale:ru
+      # move the item from slot 13 to slot 14 # @locale:en
+      - move: 13++
+      # перемещает предметы из слотов 13 и 17 в слоты 15 и 20 # @locale:ru
+      # move items from slots 13 and 17 to slots 15 and 20 # @locale:en
+      - move: 13,17 15,20
+      # меняет местами предметы в слотах 10 и 11 # @locale:ru
+      # swap items in slots 10 and 11 # @locale:en
+      - swap: 10 11
+      # меняет местами предметы в слотах 10 и 11 # @locale:ru
+      # swap items in slots 10 and 11 # @locale:en
+      - swap: 10++
+      # меняет местами предметы в слотах 10 и 9 # @locale:ru
+      # swap items in slots 10 and 9 # @locale:en
+      - swap: 10--
+      # меняет местами предметы в слотах 10-15 и 20-25 # @locale:ru
+      # swap items in slots 10-15 and 20-25 # @locale:en
+      - swap: 10-15 20-25
+      # копирует предмет из слота 10 в слот 11 # @locale:ru
+      # copy the item from slot 10 to slot 11 # @locale:en
+      - copy: 10 11
+      # копирует предмет из слота 10 в слот 11 # @locale:ru
+      # copy the item from slot 10 to slot 11 # @locale:en
+      - copy: 10++
+      # копирует предмет из слота 10 в слот 9 # @locale:ru
+      # copy the item from slot 10 to slot 9 # @locale:en
+      - copy: 10--
+      # копирует предметы из слотов 10-15 в слоты 20-25 # @locale:ru
+      # copy items from slots 10-15 to slots 20-25 # @locale:en
+      - copy: 10-15 20-25
+      # копирует предметы из основного слоя на слой анимации # @locale:ru
+      # copy items from the base layer to the animation layer # @locale:en
+      - copy-from-base: 10-15 20-25
+      # переходит к указанному тику, позволяет зациклить анимацию # @locale:ru
+      # jump to the specified tick; can be used to loop the animation # @locale:en
+      - goto: 13
+      - sound: ui.button.click  1.0 1.0
+      # выполняет команды # @locale:ru
+      # run commands # @locale:en
+      - commands:
+          - '[MESSAGE] msg'
+      # устанавливает title меню # @locale:ru
+      # set the menu title # @locale:en
+      - title: title
+      # скопирует предметы из основного слоя на слой анимации # @locale:ru
+      # copy items from the base layer to the animation layer # @locale:en
+      - copy-from-base: 10-10 10-10
+      # установит предмет в слот только если слот пустой # @locale:ru
+      # place the item only if the slot is empty # @locale:en
+      - set-if-empty: item 10-10
+# Алиасы к опкодам # @locale:ru
+# Opcode aliases # @locale:en
+# set -> st
+# remove -> rm
+# move -> mv
+# swap -> sw
+# copy -> cl
+# goto -> gt
+# sound -> snd
+# commands -> cmd
+# title -> ttl
+# fill -> fl
+# remove-if-not-empty -> rne
+# set-if-empty -> sie
+# copy-from-base -> cfb
+# copy-from-base -> cfb
+# set-if-empty -> sie
+animations:
+  default:
+    - tick: 0
+      opcodes: [ ]
+  other:
+    - tick: 0
+      opcodes: [ ]
+
+# Все команды # @locale:ru
+# All commands # @locale:en
+# [console] <cmd>
+# [player] <cmd>
+# [chat] <msg> - отправит сообщение от имени игрока, также можно выполнить команду # @locale:ru
+# [chat] <msg> - send a chat message as the player; can also run a command # @locale:en
+# [sound] <sound> <?volume> <?pitch>
+# [close]
+# здесь команды открытия меню # @locale:ru
+# Menu opening commands # @locale:en
+# В commands вы можете передать список команд которые необходимо выполнить в открывающейся менюшке # @locale:ru
+# Use commands to pass a list of commands to run in the menu being opened # @locale:en
+# Синтаксис [open] menu ["[message] сообщение из открытого меню", "[что-то] некст команда"] # @locale:ru
+# Syntax [open] menu ["[message] message from the opened menu", "[something] next command"] # @locale:en
+# [back_or_close] <?commands>
+# [back_to_or_close] <id> <?commands>
+# [back] <?commands>
+# [open] <id> <?commands>
+# [back_or_open] <id> <?commands>
+# [rebuild_slots] <slots> - пересоздаёт предметы в указанных слотах. # @locale:ru
+# [rebuild_slots] <slots> - rebuild items in the specified slots. # @locale:en
+# [copy_from_previous_menu] <slots from> <slots to> - скопирует предметы из предыдущего меню. # @locale:ru
+# [copy_from_previous_menu] <slots from> <slots to> - copy items from the previous menu. # @locale:en
+# [set_title] <title> - меняет заголовок меню. # @locale:ru
+# [set_title] <title> - change the menu title. # @locale:en
+# [rebuild] - пересоздаёт предмет выполнивший эту команду # @locale:ru
+# [rebuild] - rebuild the item that ran this command # @locale:en
+# [update] - обновляет предмет выполнивший эту команду # @locale:ru
+# [update] - update the item that ran this command # @locale:en
+# [update_slots] <slots> - обновляет предметы в указанных слотах # @locale:ru
+# [update_slots] <slots> - update the items in the specified slots # @locale:en
+# [die] - удаляет предмет выполнивший эту команду # @locale:ru
+# [die] - remove the item that ran this command # @locale:en
+# [die_slots] <slots> - удаляет предметы из указанных слотов # @locale:ru
+# [die_slots] <slots> - remove the items from the specified slots # @locale:en
+# [reopen] - полностью заново открывает текущее меню # @locale:ru
+# [reopen] - reopen the current menu from scratch # @locale:en
+# [refresh] - Обновляет все предметы в меню и синхронизирует инвентарь с клиентом # @locale:ru
+# [refresh] - Refresh all menu items and synchronize the inventory with the client # @locale:en
+# [message] <msg>
+# [set_param] <param> <value>
+# [import_params] <item>
+# Команды ниже выполняют команды из блока commands-list # @locale:ru
+# The commands below run command sets from commands-list # @locale:en
+# [run] <имя набора> # @locale:ru
+# [run] <command-set> # @locale:en
+# [run_rand]
+# [connect] <server> - подключает игрока к серверу # @locale:ru
+# [connect] <server> - connect the player to a server # @locale:en
+# [set_animation] <animation> - устанавливает анимацию из блока animations # @locale:ru
+# [set_animation] <animation> - set an animation from animations # @locale:en
+# [animation_tick] - принудительно вызывает тик анимации # @locale:ru
+# [animation_tick] - advance the animation by one tick # @locale:en
+# [animation_force_end] - моментально завершает анимацию # @locale:ru
+# [animation_force_end] - finish the animation immediately # @locale:en
+#
+# [givemoney] <count> - выдать деньги # @locale:ru
+# [givemoney] <count> - give money # @locale:en
+# [takemoney] <count> - забрать деньги # @locale:ru
+# [takemoney] <count> - take money # @locale:en
+# [delay] <delay> <cmd> - выполнить команду с задержкой например [DELAY] 20 [MESSAGE] &aЭто сообщение отправилось спустя 1 секунду! # @locale:ru
+# [delay] <delay> <cmd> - run a delayed command, for example [DELAY] 20 [MESSAGE] &aThis message was sent after 1 second! # @locale:en
+#
+# [title_all] <"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>
+# [title] <"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>
+# [action_bar_all] <msg>
+# [action_bar] <msg>
+# [broadcast] <msg>

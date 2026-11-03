@@ -1,0 +1,42 @@
+id: example:prem-seller-confirm
+provider: default
+type: chest
+size: 27
+title: '&7Подтверждение покупки' # @locale:ru
+title: '&7Confirm purchase' # @locale:en
+
+only-open-from:
+  - example:prem-seller
+
+items:
+  confirm:
+    material: lime_stained_glass_pane
+    name: '&aПодтвердить' # @locale:ru
+    name: '&aConfirm' # @locale:en
+    slot:
+      - '0-3'
+      - '9-12'
+      - '18-21'
+    on_click:
+      # симулируем клик по слоту 13 # @locale:ru
+      # simulate a click on slot 13 # @locale:en
+      commands: "[simulate] click 13"
+  reject:
+    material: red_stained_glass_pane
+    name: '&cОтменить' # @locale:ru
+    name: '&cCancel' # @locale:en
+    static: true
+    slot:
+      - '5-8'
+      - '14-17'
+      - '23-26'
+    on_click:
+      commands:
+        - '[back]'
+  gui:
+    material: black_stained_glass_pane
+    name: ''
+    static: true
+    slot:
+      - 4
+      - 22

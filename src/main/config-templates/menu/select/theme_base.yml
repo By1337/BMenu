@@ -1,0 +1,26 @@
+# так как это меню будет открываться через theme_selector.yml меню, id не указываем # @locale:ru
+# no id is needed because this menu is opened through theme_selector.yml # @locale:en
+provider: default
+type: chest
+size: 27
+title: "<{COLOR1}>Пример меню" # @locale:ru
+title: "<{COLOR1}>Example menu" # @locale:en
+items:
+  a:
+    slot: 13
+    name: "<{COLOR1}>Кнопка" # @locale:ru
+    name: "<{COLOR1}>Button" # @locale:en
+    lore:
+      - "<{COLOR1}>Нажми чтобы" # @locale:ru
+      - "<{COLOR1}>Click to" # @locale:en
+      - "<{COLOR1}>сменить цвет на случайный" # @locale:ru
+      - "<{COLOR1}>pick a random color" # @locale:en
+    material: diamond
+    on_click:
+      - '<{COLOR1}>Сменил!' # @locale:ru
+      - '<{COLOR1}>Changed!' # @locale:en
+      - open: 'theme:example'
+  b:
+    slot: 0-12,14-26
+    name: ''
+    material: '{GUI}'

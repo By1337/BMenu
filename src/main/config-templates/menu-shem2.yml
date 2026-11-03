@@ -1,0 +1,463 @@
+extends:
+  # путь относительно текущей папки # @locale:ru
+  # path relative to the current directory # @locale:en
+  - ./file.yml
+  # путь относительно папки на уровень выше # @locale:ru
+  # path relative to the parent directory # @locale:en
+  - ../file.yml
+  # путь относительно корневой папки с меню # @locale:ru
+  # path relative to the menu root directory # @locale:en
+  - /file.yml
+
+include: [
+  "./file.yml",
+  "../file.yml",
+  "/file.yml",
+]
+modern_commands: &modern_commands
+  - if: '100 == 100'
+    do: 'do'
+    else: "else"
+  - console: 'say okak'
+
+  - if: '{rand_bool} == true'
+    do:
+      if: '{rand_bool} == true'
+      do:
+        if: '{rand_bool} == true'
+        do: '<gold>4'
+        else: '<black>3'
+      else: '<green>2'
+    else: '<red>1'
+
+  - oneOf:
+      - if: '%bcases_keys_count_of_type_default% < 1'
+        do: '&cУ Вас не достаточно ключей!' # @locale:ru
+        do: '&cYou do not have enough keys!' # @locale:en
+      - if: '{playing} == true'
+        do:
+          - '[MESSAGE] &cКто-то уже открывает этот кейс!' # @locale:ru
+          - '[MESSAGE] &cSomeone is already opening this crate!' # @locale:en
+          - '[CLOSE]'
+      - do:
+          - '[TAKE_KEY] default'
+          - '[PLAY] $random default'
+          - '[CLOSE]'
+
+legacy_commands: &legacy_commands
+  commands: *modern_commands
+  deny_commands: *modern_commands
+  requirements:
+    - check: '100 + 100 * 100 == 15'
+      commands: *modern_commands
+      deny_commands: *modern_commands
+    - check: '100.5 + 100.5 == 201'
+    # если у игрока есть пермишен # @locale:ru
+    # if the player has the permission # @locale:en
+    - check: 'has super.permission'
+    # если у игрока нет пермишена # @locale:ru
+    # if the player does not have the permission # @locale:en
+    - check: '!has super.permission'
+    # строка содержит # @locale:ru
+    # string contains # @locale:en
+    - check: 'string has str'
+    # строка не содержит # @locale:ru
+    # string does not contain # @locale:en
+    - check: 'string !has str'
+    # строка содержит без учёта регистра # @locale:ru
+    # string contains, ignoring case # @locale:en
+    - check: 'string HAS str'
+    # строка не содержит без учёта регистра # @locale:ru
+    # string does not contain, ignoring case # @locale:en
+    - check: 'string !HAS str'
+    # строка равна # @locale:ru
+    # strings are equal # @locale:en
+    - check: 'string == string'
+    # строка не равна # @locale:ru
+    # strings are not equal # @locale:en
+    - check: 'string != string'
+    # условие что игрок находится в радиусе 100 блоков от координат 10 10 10 в мире world # @locale:ru
+    # check whether the player is within 100 blocks of 10 10 10 in world # @locale:en
+    - check: 'nearby world 10 10 10 100'
+      commands:
+        - '[message] string != string'
+        # Эта команда доступна только в условиях, она прерывает проверку следующих условий и выполнение следующих команд # @locale:ru
+        # Only available in conditions; stops further condition checks and command execution # @locale:en
+        - '[break]'
+        # Так как выше команда [BREAK] команда [CLOSE] не будет выполнена # @locale:ru
+        # [CLOSE] will not run because [BREAK] occurs above # @locale:en
+        - '[close]'
+
+
+click_cooldown: 100
+
+commands-list:
+  example-1:
+    # Необязательный параметр. Это вес этого набора он будет использоваться если вызвать случайные команды через [RUN_RAND] # @locale:ru
+    # Optional weight used when choosing a random command set with [RUN_RAND] # @locale:en
+    weight: 1.0
+    # | *legacy_commands
+    commands: *modern_commands
+  example-2:
+    weight: 1.0
+    # | *legacy_commands
+    commands: *modern_commands
+
+menu-events:
+  # | *legacy_commands
+  on_open: *modern_commands
+  # | *legacy_commands
+  on_reopen: *modern_commands
+  # | *legacy_commands
+  on_close: *modern_commands
+
+id: <namespace>:<id>
+
+provider: <namespace>:<id>
+type: chest
+size: 27
+title: '&7Menu title'
+only-open-from:
+  - <namespace>:<id>
+args:
+  PARAM_1: 'value'
+  PARAM_2: 'value'
+  PARAM_3: 'value'
+
+items:
+  itemID: &self
+    lore:
+      - lore
+    name: name
+    amount: 10
+    damage: 20
+    # or basehead-<value> or player-<name/uuid>
+    material: stone
+    # noinspection all
+    model_data: 10
+    # noinspection all
+    # 1.21.4+
+    model_data:
+      floats: [ ]
+      flags: [ ]
+      strings: [ ]
+      colors: [ ]
+    # https://jd.papermc.io/paper/org/bukkit/potion/PotionType.html
+    potion: strong_slowness
+    # https://jd.papermc.io/paper/org/bukkit/potion/PotionEffectType.html
+    potion_contents:
+      type: duration amplifier
+      night_vision: 240 1
+    # or #rrggbb (alpha available 1.19.4+, ignored in lower versions)
+    color: '#aarrggbb'
+    # https://jd.papermc.io/paper/org/bukkit/enchantments/Enchantment.html
+    enchantments:
+      enchantment: lvl
+      infinity: 0
+    unbreakable: true
+    container:
+      slot: { }
+      0:
+        material: stone
+      # noinspection all
+      1: *self
+    # https://jd.papermc.io/paper/org/bukkit/inventory/ItemFlag.html
+    item_flags:
+      - hide_additional_tooltip
+    all_flags: true
+    # 1.19.4+
+    trim:
+      # https://jd.papermc.io/paper/org/bukkit/inventory/meta/trim/TrimMaterial.html
+      material: iron
+      # https://jd.papermc.io/paper/org/bukkit/inventory/meta/trim/TrimPattern.html
+      pattern: coast
+    # 1.20.6+
+    hide_tooltip: true
+    # 1.20.6+
+    enchantment_glint_override: true
+    # 1-99 1.20.6+
+    max_stack_size: 99
+    # 1.21.3+
+    glider: true
+    # 1.21.3+
+    tooltip_style: minecraft:idk
+    attributes:
+      - name: example
+        # https://jd.papermc.io/paper/org/bukkit/attribute/Attribute.html
+        attribute: 'max_health'
+        amount: 2.0
+        # add_number, add_scalar, multiply_scalar_1 # https://jd.papermc.io/paper/org/bukkit/attribute/AttributeModifier.Operation.html
+        operation: add_number
+        # https://jd.papermc.io/paper/org/bukkit/inventory/EquipmentSlot.html
+        slot: body
+    priority: 0
+    # noinspection all
+    slot: 10
+    # noinspection all
+    slot:
+      - '10'
+      - '11'
+      - '12-20'
+    # noinspection all
+    slot: 10-15,20-25,53
+    local_args:
+      example: 'value'
+    args:
+      PARAM_1: 'value'
+      PARAM_2: 'value'
+      PARAM_3: 'value'
+    on_view:  *legacy_commands
+    on_left_click: *legacy_commands
+    on_right_click: *modern_commands
+    on_shift_left_click: *modern_commands
+    on_shift_right_click: *modern_commands
+    on_middle_click: *modern_commands
+    on_drop_click: *modern_commands
+    on_click: *modern_commands
+    on_number_key_0_click: *modern_commands
+    on_number_key_1_click: *modern_commands
+    on_number_key_2_click: *modern_commands
+    on_number_key_3_click: *modern_commands
+    on_number_key_4_click: *modern_commands
+    on_number_key_5_click: *modern_commands
+    on_number_key_6_click: *modern_commands
+    on_number_key_7_click: *modern_commands
+    on_number_key_8_click: *modern_commands
+    on_swap_offhand_click: *modern_commands
+    on_control_drop_click: *modern_commands
+    tick_speed: 20
+    on_tick: *modern_commands
+    oneOf:
+      - material: diamond
+      - material: gold_block
+      - *self
+
+
+# Анимация может взаимодействовать только с элементами своего слоя, однако она может перекрывать предметы первого слоя. # @locale:ru
+# Animations can only modify items in their own layer, but can cover items in the first layer. # @locale:en
+# на каком тике анимации следует применить этот фрейм, если не указать, то будет на один больше, чем предыдущий # @locale:ru
+# animation tick for this frame; defaults to the previous frame tick plus one # @locale:en
+animation: &anim
+  - tick: 0
+    opcodes:
+      # устанавливает предмет во все слоты меню # @locale:ru
+      # place the item in every menu slot # @locale:en
+      - fill: itemID
+      # устанавливает предмет в указанный слот # @locale:ru
+      # place the item in the specified slot # @locale:en
+      - set: itemID 13
+      # устанавливает предмет в указанные слоты # @locale:ru
+      # place the item in the specified slots # @locale:en
+      - set: itemID 10-20
+      # удаляет предметы в указанных слотах # @locale:ru
+      # remove items from the specified slots # @locale:en
+      - set: AIR 10-20
+      # устанавливает предмет только в пустые слоты # @locale:ru
+      # place the item only in empty slots # @locale:en
+      - set-if-empty: AIR 10-20
+      # аналогично set: AIR 10-20 # @locale:ru
+      # same as set: AIR 10-20 # @locale:en
+      - remove: 10-20
+      # удаляет предмет из слоя анимации если на основном слое есть предмет # @locale:ru
+      # remove the item from the animation layer if the base layer contains an item # @locale:en
+      - remove-if-not-empty: 10-20
+      # перемещает предмет из слота 13 в слот 14, в слот 13 устанавливается AIR # @locale:ru
+      # move the item from slot 13 to slot 14, leaving AIR in slot 13 # @locale:en
+      - move: 13 14
+      # перемещает предметы из слотов 10-15 в слоты 20-25 # @locale:ru
+      # move items from slots 10-15 to slots 20-25 # @locale:en
+      - move: 10-15 20-25
+      # перемещает предмет из слота 13 в слот 14 # @locale:ru
+      # move the item from slot 13 to slot 14 # @locale:en
+      - move: 13++
+      # перемещает предмет из слота 13 в слот 14 # @locale:ru
+      # move the item from slot 13 to slot 14 # @locale:en
+      - move: 13++
+      # перемещает предметы из слотов 13 и 17 в слоты 15 и 20 # @locale:ru
+      # move items from slots 13 and 17 to slots 15 and 20 # @locale:en
+      - move: 13,17 15,20
+      # меняет местами предметы в слотах 10 и 11 # @locale:ru
+      # swap items in slots 10 and 11 # @locale:en
+      - swap: 10 11
+      # меняет местами предметы в слотах 10 и 11 # @locale:ru
+      # swap items in slots 10 and 11 # @locale:en
+      - swap: 10++
+      # меняет местами предметы в слотах 10 и 9 # @locale:ru
+      # swap items in slots 10 and 9 # @locale:en
+      - swap: 10--
+      # меняет местами предметы в слотах 10-15 и 20-25 # @locale:ru
+      # swap items in slots 10-15 and 20-25 # @locale:en
+      - swap: 10-15 20-25
+      # копирует предмет из слота 10 в слот 11 # @locale:ru
+      # copy the item from slot 10 to slot 11 # @locale:en
+      - copy: 10 11
+      # копирует предмет из слота 10 в слот 11 # @locale:ru
+      # copy the item from slot 10 to slot 11 # @locale:en
+      - copy: 10++
+      # копирует предмет из слота 10 в слот 9 # @locale:ru
+      # copy the item from slot 10 to slot 9 # @locale:en
+      - copy: 10--
+      # копирует предметы из слотов 10-15 в слоты 20-25 # @locale:ru
+      # copy items from slots 10-15 to slots 20-25 # @locale:en
+      - copy: 10-15 20-25
+      # копирует предметы из основного слоя на слой анимации # @locale:ru
+      # copy items from the base layer to the animation layer # @locale:en
+      - copy-from-base: 10-15 20-25
+      # переходит к указанному тику, позволяет зациклить анимацию # @locale:ru
+      # jump to the specified tick; can be used to loop the animation # @locale:en
+      - goto: 13
+      - sound: ui.button.click  1.0 1.0
+      - commands: *modern_commands
+      # устанавливает title меню # @locale:ru
+      # set the menu title # @locale:en
+      - title: title
+      # скопирует предметы из основного слоя на слой анимации # @locale:ru
+      # copy items from the base layer to the animation layer # @locale:en
+      - copy-from-base: 10-10 10-10
+      # установит предмет в слот только если слот пустой # @locale:ru
+      # place the item only if the slot is empty # @locale:en
+      - set-if-empty: item 10-10
+# Алиасы к опкодам # @locale:ru
+# Opcode aliases # @locale:en
+# set -> st
+# remove -> rm
+# move -> mv
+# swap -> sw
+# copy -> cl
+# goto -> gt
+# sound -> snd
+# commands -> cmd
+# title -> ttl
+# fill -> fl
+# remove-if-not-empty -> rne
+# set-if-empty -> sie
+# copy-from-base -> cfb
+# copy-from-base -> cfb
+# set-if-empty -> sie
+animations:
+  default: *anim
+  other: *anim
+
+# rebuild_slots copy_from_previous_menu rebuild reopen refresh
+# Все команды # @locale:ru
+# All commands # @locale:en
+# Аргумент в начале которого ? не обязательный # @locale:ru
+# An argument prefixed with ? is optional # @locale:en
+# Команды могут быть записаны так # @locale:ru
+# Commands can be written as follows # @locale:en
+# message: '&aMsg'
+# '[message] &aMsg'
+# Если команда без аргументов то пишется так close: '' или '[close]' # @locale:ru
+# Commands without arguments can be written as close: '' or '[close]' # @locale:en
+commands:
+  ### Сообщения и вывод # @locale:ru
+  ### Messages and output # @locale:en
+  - '&7Просто сообщение' # @locale:ru
+  - '&7A plain message' # @locale:en
+  - message: '&7Тоже сообщение' # @locale:ru
+  - message: '&7Another message' # @locale:en
+  # воспроизведёт звук # @locale:ru
+  # play a sound # @locale:en
+  - sound: <sound> <?volume> <?pitch>
+  - title_all: '<"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>'
+  - set_title: '&7Title'
+  - title: '<"Title\nSubTitle"> <?fadeIn> <?stay> <?fadeOut>'
+  - action_bar_all: '<msg>'
+  - action_bar: '<msg>'
+  - broadcast: '<msg>'
+  ### Выполнение команд # @locale:ru
+  ### Running commands # @locale:en
+  # выполнить команду от имени сервера # @locale:ru
+  # run a command as the console # @locale:en
+  - console: 'op %player_name%'
+  # выполнить команду от имени игрока # @locale:ru
+  # run a command as the player # @locale:en
+  - player: 'msg _By1337_ привет?' # @locale:ru
+  - player: 'msg _By1337_ hello?' # @locale:en
+  # Отправит сообщение от имени игрока, если в начале будет / то будет как команда # @locale:ru
+  # send a chat message as the player; a leading / runs it as a command # @locale:en
+  - chat: '/rtp'
+  ### Навигация по меню # @locale:ru
+  ### Menu navigation # @locale:en
+  # В commands вы можете передать список команд которые необходимо выполнить в открывающейся менюшке # @locale:ru
+  # Use commands to pass a list of commands to run in the menu being opened # @locale:en
+  # Синтаксис [open] menu ["[message] сообщение из открытого меню", "[что-то] некст команда"] # @locale:ru
+  # Syntax [open] menu ["[message] message from the opened menu", "[something] next command"] # @locale:en
+  - open: '<menu:id> <?commands>'
+  # закроет меню # @locale:ru
+  # close the menu # @locale:en
+  - close: ''
+  # вернутся в прошлое меню # @locale:ru
+  # return to the previous menu # @locale:en
+  - back: '<?commands>'
+  # вернутся в прошлое меню если есть # @locale:ru
+  # return to the previous menu if available # @locale:en
+  - back_or_close: '<?commands>'
+  # вернутся в <menu:id> если было открыто ранее # @locale:ru
+  # return to <menu:id> if it was opened previously # @locale:en
+  - back_to_or_close: '<menu:id> <?commands>'
+  # вернутся в <menu:id> если было открыто иначе открыть <menu:id> # @locale:ru
+  # return to <menu:id> if it was opened previously, otherwise open <menu:id> # @locale:en
+  - back_or_open: '<menu:id> <?commands>'
+  ### Экономика и сервер # @locale:ru
+  ### Economy and server # @locale:en
+  # подключает игрока к серверу # @locale:ru
+  # connect the player to a server # @locale:en
+  - connect: '<server>'
+  # выдать монеты # @locale:ru
+  # give money # @locale:en
+  - givemoney: '<count>'
+  # снять монеты # @locale:ru
+  # take money # @locale:en
+  - takemoney: '<count>'
+  ### Управление предметами # @locale:ru
+  ### Item operations # @locale:en
+  # <slots> - указывается как '10' или '0-10' или '0-10,30-40,50' # @locale:ru
+  # <slots> - accepts '10' or '0-10' or '0-10,30-40,50' # @locale:en
+  # обновляет предмет выполнивший эту команду # @locale:ru
+  # update the item that ran this command # @locale:en
+  - update: ''
+  # обновляет предметы в слотах # @locale:ru
+  # update the items in the slots # @locale:en
+  - update_slots: '<slots>'
+  # удаляет предмет выполнивший эту команду # @locale:ru
+  # remove the item that ran this command # @locale:en
+  - die: ''
+  # удаляет предметы в слотах # @locale:ru
+  # remove the items in the slots # @locale:en
+  - die_slots: '<slots>'
+  - layer: '<layer> set <item> <slots>'
+  - layer: '<layer> remove <slots>'
+  - layer: '<layer> move <layer2> <from> <to>'
+  - layer: '<layer> copy <layer2> <from> <to>'
+  - layer: '<layer> clear'
+  ### Анимации # @locale:ru
+  ### Animations # @locale:en
+  # устанавливает анимацию из animations # @locale:ru
+  # set an animation from animations # @locale:en
+  - set_animation: '<animation>'
+  # принудительно вызывает тик анимации # @locale:ru
+  # advance the animation by one tick # @locale:en
+  - animation_tick: ''
+  # моментально завершает анимацию # @locale:ru
+  # finish the animation immediately # @locale:en
+  - animation_force_end: ''
+  ### Аргументы меню # @locale:ru
+  ### Menu arguments # @locale:en
+  # меняет значения в args # @locale:ru
+  # change values in args # @locale:en
+  - set_param: '<arg> <value>'
+  # копирует args из предмета в args меню # @locale:ru
+  # copy item args into menu args # @locale:en
+  - import_params: '<item>'
+  ### Выполнение команд меню # @locale:ru
+  ### Running menu command sets # @locale:en
+  # выполняет список команд из commands-list # @locale:ru
+  # run a command set from commands-list # @locale:en
+  - run: '<id>'
+  # выполняет случайных список команд из commands-list # @locale:ru
+  # run a random command set from commands-list # @locale:en
+  - run_rand: ''
+  # выполнить команду с задержкой например [delay] 20 [message] &aЭто сообщение отправилось спустя 1 секунду! # @locale:ru
+  # run a delayed command, for example [delay] 20 [message] &aThis message was sent after 1 second! # @locale:en
+  - delay: '<delay> <cmd>'

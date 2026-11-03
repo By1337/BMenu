@@ -1,0 +1,87 @@
+id: example:prem-seller
+provider: default
+type: chest
+size: 45
+title: '&7Премиальный селлер' # @locale:ru
+title: '&7Premium shop' # @locale:en
+
+items-defaults:
+  item2: &item
+    oneOf:
+      - material: '{MATERIAL}'
+        name: '{NAME}'
+        lore:
+          - '&r '
+          - '&r &7Нажмите лкм' # @locale:ru
+          - '&r &7Left-click' # @locale:en
+          - '&r &7чтобы купить {NAME}&7 за {PRICE_FORMAT} монет' # @locale:ru
+          - '&r &7to buy {NAME}&7 for {PRICE_FORMAT} coins' # @locale:en
+          - '&r '
+        on_view: '{menu_id} == example:prem-seller'
+        on_click:
+          - if: '%vault_eco_balance_fixed% >= {PRICE}'
+            do:
+              - open: 'example:prem-seller-confirm'
+              # команды ниже будут выполняться в открывшемся меню. # @locale:ru
+              # the commands below run in the newly opened menu. # @locale:en
+              - up: ''
+              # устанавливаем текущий предмет в слот 13 # @locale:ru
+              # place the current item in slot 13 # @locale:en
+              - layer: '0 set -me 13'
+              # обновим этот предмет чтобы ещё раз on_view проверить # @locale:ru
+              # update this item to check on_view again # @locale:en
+              - update: ''
+            else: '&cУ Вас не достаточно баланса!' # @locale:ru
+            else: '&cYou do not have enough money!' # @locale:en
+
+      - material: '{MATERIAL}'
+        name: '{NAME}'
+        on_click:
+          - if: '%vault_eco_balance_fixed% >= {PRICE}'
+            do:
+              - takemoney: '{PRICE}'
+              - console: 'give %player_name% {MATERIAL} {AMOUNT}'
+              - '&aВы успешно купили {NAME}' # @locale:ru
+              - '&aYou bought {NAME}' # @locale:en
+              - back: ''
+            else: '&cУ Вас не достаточно баланса!' # @locale:ru
+            else: '&cYou do not have enough money!' # @locale:en
+
+items:
+  gui-lime:
+    material: lime_stained_glass_pane
+    name: ''
+    slot: 0-8,9,18,27,26,36-44,35,17
+
+  totem:
+    args:
+      MATERIAL: totem_of_undying
+      PRICE: 10000
+      PRICE_FORMAT: '10,000'
+      AMOUNT: 1
+      NAME: '&6Тотем' # @locale:ru
+      NAME: '&6Totem of Undying' # @locale:en
+    <<+: *item
+    slot: 21
+
+  elytra:
+    args:
+      MATERIAL: elytra
+      PRICE_FORMAT: '20,000'
+      PRICE: 20000
+      AMOUNT: 1
+      NAME: '&6Элитры' # @locale:ru
+      NAME: '&6Elytra' # @locale:en
+    <<+: *item
+    slot: 23
+
+  creeper:
+    args:
+      MATERIAL: creeper_spawn_egg
+      PRICE_FORMAT: '15,000'
+      PRICE: 15000
+      AMOUNT: 1
+      NAME: '&6Яйцо призыва крипера' # @locale:ru
+      NAME: '&6Creeper Spawn Egg' # @locale:en
+    <<+: *item
+    slot: 22
